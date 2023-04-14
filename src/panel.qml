@@ -8,11 +8,13 @@ Window {
     y: kimpanel.pos.y
     width: 640
     height: 40
-    visible: true
+    visible: kimpanel.showPreedit || kimpanel.showAux || kimpanel.showLookupTable
     title: qsTr("Hello World")
 
     Flow {
         Repeater{
+            visible: kimpanel.showLookupTable
+
             model: kimpanel.lookupTable
             delegate: Row {
                 Text {

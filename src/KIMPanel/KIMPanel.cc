@@ -26,7 +26,10 @@ KIMPanel::KIMPanel(QObject *parent)
     , inputmethodIface_(new org::kde::kimpanel::inputmethod(INPUTMETHOD_BUS_SERVICE, INPUTMETHOD_BUS_PATH, bus_, this))
     , kimpanelAdaptor_(new KIMPanelAdaptor(this))
     , kimpanel2Adaptor_(new KIMPanel2Adaptor(this))
-    , enable_(false) {
+    , enable_(false)
+    , showAux_(false)
+    , showLookupTable_(false)
+    , showPreedit_(false) {
     bus_.registerService(BUS_SERVICE);
 
     if (!bus_.registerObject(BUS_PATH, this)) {
@@ -89,15 +92,21 @@ void KIMPanel::onRemoveProperty(const QString &prop) {
 }
 
 void KIMPanel::onShowAux(bool toshow) {
-    Q_UNUSED(toshow);
+    qInfo() << "onShowAux" << toshow;
+    showAux_ = toshow;
+    emit showAuxChanged(showAux_);
 }
 
 void KIMPanel::onShowLookupTable(bool toshow) {
-    Q_UNUSED(toshow);
+    qInfo() << "onShowLookupTable" << toshow;
+    showLookupTable_ = toshow;
+    emit showLookupTableChanged(showLookupTable_);
 }
 
 void KIMPanel::onShowPreedit(bool toshow) {
-    Q_UNUSED(toshow);
+    qInfo() << "onShowPreedit" << toshow;
+    showPreedit_ = toshow;
+    emit showPreeditChanged(showPreedit_);
 }
 
 void KIMPanel::onUpdateAux(const QString &text, const QString &attr) {
