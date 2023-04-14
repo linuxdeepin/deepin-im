@@ -17,6 +17,7 @@ class KIMPanel : public QObject {
     Q_PROPERTY(bool enable MEMBER enable_ NOTIFY enableChanged)
 
     // lookup table
+    Q_PROPERTY(QPoint pos MEMBER pos_ NOTIFY posChanged)
     Q_PROPERTY(QVariantList lookupTable MEMBER lookupTable_ NOTIFY lookupTableChanged)
     Q_PROPERTY(bool hasPrev MEMBER hasPrev_ NOTIFY lookupTableChanged)
     Q_PROPERTY(bool hasNext MEMBER hasNext_ NOTIFY lookupTableChanged)
@@ -28,6 +29,7 @@ public:
 
 signals: // properties signal
     void enableChanged(bool enable);
+    void posChanged(const QPoint &pos);
     void lookupTableChanged();
 
 private slots:
@@ -53,6 +55,8 @@ private slots:
     void onUpdateSpotLocation(int x, int y);
 
     // impanel2
+    void onSetSpotRect(qint32 x, qint32 y, qint32 w, qint32 h);
+    void onSetRelativeSpotRect(qint32 x, qint32 y, qint32 w, qint32 h, double scale);
     void onSetLookupTable(const QStringList &label,
                           const QStringList &text,
                           const QStringList &attr,
@@ -71,6 +75,7 @@ private:
 private: // properties
     bool enable_;
 
+    QPoint pos_ ;
     QVariantList lookupTable_;
     bool hasPrev_;
     bool hasNext_;

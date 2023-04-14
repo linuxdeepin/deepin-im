@@ -3,6 +3,7 @@
 #include <QDBusConnection>
 #include <QDBusError>
 #include <QDebug>
+#include <QTransform>
 
 #include "KIMPanelAdaptor.h"
 #include "KIMPanel2Adaptor.h"
@@ -16,13 +17,16 @@ static const QString INPUTMETHOD_BUS_SERVICE = QStringLiteral("org.kde.kimpanel.
 static const QString INPUTMETHOD_BUS_PATH = QStringLiteral("/kimpanel");
 static const QString INPUTMETHOD_BUS_INTERFACE = QStringLiteral("org.kde.kimpanel.inputmethod");
 
+static const QVariantMap EMPTY_AUX{{"text", ""}, {"attr", ""}};
+
 KIMPanel::KIMPanel(QObject *parent)
     : QObject(parent)
     , bus_(QDBusConnection::sessionBus())
     , watcher_(new QDBusServiceWatcher(INPUTMETHOD_BUS_SERVICE, bus_, QDBusServiceWatcher::WatchForOwnerChange, this))
     , inputmethodIface_(new org::kde::kimpanel::inputmethod(INPUTMETHOD_BUS_SERVICE, INPUTMETHOD_BUS_PATH, bus_, this))
     , kimpanelAdaptor_(new KIMPanelAdaptor(this))
-    , kimpanel2Adaptor_(new KIMPanel2Adaptor(this)) {
+    , kimpanel2Adaptor_(new KIMPanel2Adaptor(this))
+    , enable_(false) {
     bus_.registerService(BUS_SERVICE);
 
     if (!bus_.registerObject(BUS_PATH, this)) {
@@ -47,6 +51,8 @@ KIMPanel::KIMPanel(QObject *parent)
     connect(inputmethodIface_, &inputmethod::UpdateProperty, this, &KIMPanel::onUpdateProperty);
     connect(inputmethodIface_, &inputmethod::UpdateSpotLocation, this, &KIMPanel::onUpdateSpotLocation);
 
+    connect(kimpanel2Adaptor_, &KIMPanel2Adaptor::setSpotRect, this, &KIMPanel::onSetSpotRect);
+    connect(kimpanel2Adaptor_, &KIMPanel2Adaptor::setRelativeSpotRect, this, &KIMPanel::onSetRelativeSpotRect);
     connect(kimpanel2Adaptor_, &KIMPanel2Adaptor::setLookupTable, this, &KIMPanel::onSetLookupTable);
 }
 
@@ -129,8 +135,7 @@ void KIMPanel::onUpdateProperty(const QString &prop) {
 }
 
 void KIMPanel::onUpdateSpotLocation(int x, int y) {
-    Q_UNUSED(x);
-    Q_UNUSED(y);
+    qInfo() << "onUpdateSpotLocation" << QPoint(x, y);
 }
 
 void KIMPanel::onSetLookupTable(const QStringList &label,
@@ -157,4 +162,21 @@ void KIMPanel::onSetLookupTable(const QStringList &label,
     lookupTable_.swap(list);
 
     emit lookupTableChanged();
+}
+
+void KIMPanel::onSetSpotRect(qint32 x, qint32 y, qint32 w, qint32 h) {
+    QPoint ori(x + w, y + h);
+    QTransform trans;
+    trans /= 1.25;
+    pos_ = trans.map(ori);
+
+    emit posChanged(pos_);
+}
+
+void KIMPanel::onSetRelativeSpotRect(qint32 x, qint32 y, qint32 w, qint32 h, double scale) {
+    Q_UNUSED(x);
+    Q_UNUSED(y);
+    Q_UNUSED(w);
+    Q_UNUSED(h);
+    Q_UNUSED(scale);
 }

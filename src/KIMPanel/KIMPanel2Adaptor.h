@@ -23,6 +23,8 @@ public slots:
                         qint32 layout);
 
 signals:
+    void setSpotRect(qint32 x, qint32 y, qint32 w, qint32 h);
+    void setRelativeSpotRect(qint32 x, qint32 y, qint32 w, qint32 h, double scale);
     void setLookupTable(const QStringList &label,
                         const QStringList &text,
                         const QStringList &attr,

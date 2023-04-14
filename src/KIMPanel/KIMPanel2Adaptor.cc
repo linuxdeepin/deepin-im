@@ -5,25 +5,15 @@ KIMPanel2Adaptor::KIMPanel2Adaptor(QObject *parent)
 }
 
 void KIMPanel2Adaptor::SetSpotRect(qint32 x, qint32 y, qint32 w, qint32 h) {
-    Q_UNUSED(x);
-    Q_UNUSED(y);
-    Q_UNUSED(w);
-    Q_UNUSED(h);
+    emit setSpotRect(x, y, w, h);
 }
 
 void KIMPanel2Adaptor::SetRelativeSpotRect(qint32 x, qint32 y, qint32 w, qint32 h) {
-    Q_UNUSED(x);
-    Q_UNUSED(y);
-    Q_UNUSED(w);
-    Q_UNUSED(h);
+    emit setRelativeSpotRect(x, y, w, h, 1);
 }
 
 void KIMPanel2Adaptor::SetRelativeSpotRectV2(qint32 x, qint32 y, qint32 w, qint32 h, double scale) {
-    Q_UNUSED(x);
-    Q_UNUSED(y);
-    Q_UNUSED(w);
-    Q_UNUSED(h);
-    Q_UNUSED(scale);
+    emit setRelativeSpotRect(x, y, w, h, scale);
 }
 
 void KIMPanel2Adaptor::SetLookupTable(const QStringList &label,
