@@ -11,36 +11,49 @@ Window {
     visible: kimpanel.showPreedit || kimpanel.showAux || kimpanel.showLookupTable
     title: qsTr("Hello World")
 
-    Flow {
+    Column {
         id: container
 
         Row {
-            visible: kimpanel.showAux
+            visible: kimpanel.showPreedit
 
             Text {
-                text: kimpanel.aux.text
+                text: kimpanel.preedit.text
             }
             Text {
-                text: kimpanel.aux.attr
+                text: kimpanel.preedit.attr
             }
         }
 
-        Repeater{
-            visible: kimpanel.showLookupTable
+        Row {
+            Row {
+                visible: kimpanel.showAux
 
-            model: kimpanel.lookupTable
-            delegate: Row {
                 Text {
-                    id: label
-                    text: modelData.label
+                    text: kimpanel.aux.text
                 }
                 Text {
-                    id: text
-                    text: modelData.text
+                    text: kimpanel.aux.attr
                 }
-                Text {
-                    id: attr
-                    text: modelData.attr
+            }
+
+            Repeater{
+                visible: kimpanel.showLookupTable
+
+                model: kimpanel.lookupTable
+                delegate: Row {
+                    Text {
+                        id: label
+                        text: modelData.label
+                    }
+                    Text {
+                        id: text
+                        text: modelData.text
+                    }
+                    Text {
+                        id: attr
+                        text: modelData.attr
+                    }
                 }
             }
         }

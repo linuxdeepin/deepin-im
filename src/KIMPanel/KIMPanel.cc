@@ -17,7 +17,7 @@ static const QString INPUTMETHOD_BUS_SERVICE = QStringLiteral("org.kde.kimpanel.
 static const QString INPUTMETHOD_BUS_PATH = QStringLiteral("/kimpanel");
 static const QString INPUTMETHOD_BUS_INTERFACE = QStringLiteral("org.kde.kimpanel.inputmethod");
 
-static const QVariantMap EMPTY_AUX{{"text", ""}, {"attr", ""}};
+static const QVariantMap EMPTY_ELEMENT{{"text", ""}, {"attr", ""}};
 
 KIMPanel::KIMPanel(QObject *parent)
     : QObject(parent)
@@ -30,7 +30,8 @@ KIMPanel::KIMPanel(QObject *parent)
     , showAux_(false)
     , showLookupTable_(false)
     , showPreedit_(false)
-    , aux_(EMPTY_AUX) {
+    , aux_(EMPTY_ELEMENT)
+    , preedit_(EMPTY_ELEMENT) {
     bus_.registerService(BUS_SERVICE);
 
     if (!bus_.registerObject(BUS_PATH, this)) {
@@ -136,8 +137,8 @@ void KIMPanel::onUpdatePreeditCaret(int pos) {
 }
 
 void KIMPanel::onUpdatePreeditText(const QString &text, const QString &attr) {
-    Q_UNUSED(text);
-    Q_UNUSED(attr);
+    preedit_ = QVariantMap{{"text", text}, {"attr", attr}};
+    emit preeditChanged(preedit_);
 }
 
 void KIMPanel::onUpdateProperty(const QString &prop) {
