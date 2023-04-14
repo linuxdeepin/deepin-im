@@ -29,7 +29,8 @@ KIMPanel::KIMPanel(QObject *parent)
     , enable_(false)
     , showAux_(false)
     , showLookupTable_(false)
-    , showPreedit_(false) {
+    , showPreedit_(false)
+    , aux_(EMPTY_AUX) {
     bus_.registerService(BUS_SERVICE);
 
     if (!bus_.registerObject(BUS_PATH, this)) {
@@ -110,8 +111,8 @@ void KIMPanel::onShowPreedit(bool toshow) {
 }
 
 void KIMPanel::onUpdateAux(const QString &text, const QString &attr) {
-    Q_UNUSED(text);
-    Q_UNUSED(attr);
+    aux_ = QVariantMap{{"text", text}, {"attr", attr}};
+    emit auxChanged(aux_);
 }
 
 void KIMPanel::onUpdateLookupTable(const QStringList &labels,

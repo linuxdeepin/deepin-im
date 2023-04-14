@@ -12,6 +12,17 @@ Window {
     title: qsTr("Hello World")
 
     Flow {
+        Row {
+            visible: kimpanel.showAux
+
+            Text {
+                text: kimpanel.aux.text
+            }
+            Text {
+                text: kimpanel.aux.attr
+            }
+        }
+
         Repeater{
             visible: kimpanel.showLookupTable
 

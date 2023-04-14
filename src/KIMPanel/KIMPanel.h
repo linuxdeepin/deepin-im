@@ -18,6 +18,7 @@ class KIMPanel : public QObject {
     Q_PROPERTY(bool showAux MEMBER showAux_ NOTIFY showAuxChanged)
     Q_PROPERTY(bool showLookupTable MEMBER showLookupTable_ NOTIFY showLookupTableChanged)
     Q_PROPERTY(bool showPreedit MEMBER showPreedit_ NOTIFY showPreeditChanged)
+    Q_PROPERTY(QVariantMap aux MEMBER aux_ NOTIFY auxChanged)
 
     // lookup table
     Q_PROPERTY(QPoint pos MEMBER pos_ NOTIFY posChanged)
@@ -35,6 +36,7 @@ signals: // properties signal
     void showAuxChanged(bool showAux);
     void showLookupTableChanged(bool showLookupTable);
     void showPreeditChanged(bool showPreedit);
+    void auxChanged(const QVariantMap &aux);
 
     void posChanged(const QPoint &pos);
     void lookupTableChanged();
@@ -84,6 +86,7 @@ private: // properties
     bool showAux_;
     bool showLookupTable_;
     bool showPreedit_;
+    QVariantMap aux_;
 
     QPoint pos_ ;
     QVariantList lookupTable_;
