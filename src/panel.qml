@@ -8,22 +8,11 @@ Window {
     y: kimpanel.pos.y
     width: container.width
     height: container.height
-    visible: kimpanel.showPreedit || kimpanel.showAux || kimpanel.showLookupTable
+    visible: kimpanel.showAux || kimpanel.showPreedit || kimpanel.showLookupTable
     title: qsTr("Hello World")
 
     Column {
         id: container
-
-        Row {
-            visible: kimpanel.showPreedit
-
-            Text {
-                text: kimpanel.preedit.text
-            }
-            Text {
-                text: kimpanel.preedit.attr
-            }
-        }
 
         Row {
             Row {
@@ -37,6 +26,19 @@ Window {
                 }
             }
 
+            Row {
+                visible: kimpanel.showPreedit
+
+                Text {
+                    text: kimpanel.preedit.text
+                }
+                Text {
+                    text: kimpanel.preedit.attr
+                }
+            }
+        }
+
+        Row {
             Repeater{
                 visible: kimpanel.showLookupTable
 
