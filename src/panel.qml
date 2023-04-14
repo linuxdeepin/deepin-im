@@ -6,12 +6,14 @@ Window {
 
     x: kimpanel.pos.x
     y: kimpanel.pos.y
-    width: 640
-    height: 40
+    width: container.width
+    height: container.height
     visible: kimpanel.showPreedit || kimpanel.showAux || kimpanel.showLookupTable
     title: qsTr("Hello World")
 
     Flow {
+        id: container
+
         Row {
             visible: kimpanel.showAux
 
