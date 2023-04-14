@@ -30,7 +30,7 @@ Window {
                 visible: kimpanel.showPreedit
 
                 Text {
-                    text: kimpanel.preedit.text
+                    text: kimpanel.preedit.text.slice(0, kimpanel.preeditCaretPos) + "|" + kimpanel.preedit.text.slice(kimpanel.preeditCaretPos)
                 }
                 Text {
                     text: kimpanel.preedit.attr

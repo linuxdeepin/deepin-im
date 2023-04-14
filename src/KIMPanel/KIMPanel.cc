@@ -133,7 +133,8 @@ void KIMPanel::onUpdateLookupTableCursor(int pos) {
 }
 
 void KIMPanel::onUpdatePreeditCaret(int pos) {
-    Q_UNUSED(pos);
+    preeditCaretPos_ = pos;
+    emit preeditCaretPosChanged(preeditCaretPos_);
 }
 
 void KIMPanel::onUpdatePreeditText(const QString &text, const QString &attr) {
