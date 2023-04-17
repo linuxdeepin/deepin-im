@@ -122,8 +122,11 @@ void KIMPanel::onRegisterProperties(const QStringList &prop) {
     emit propertiesChanged(properties_);
 }
 
-void KIMPanel::onRemoveProperty(const QString &prop) {
-    Q_UNUSED(prop);
+void KIMPanel::onRemoveProperty(const QString &key) {
+    properties_.erase(std::remove_if(properties_.begin(), properties_.end(), [key](const QVariant &p) {
+        return p.toMap()["key"] == key;
+    }));
+    emit propertiesChanged(properties_);
 }
 
 void KIMPanel::onShowAux(bool toshow) {
@@ -176,7 +179,13 @@ void KIMPanel::onUpdatePreeditText(const QString &text, const QString &attr) {
 }
 
 void KIMPanel::onUpdateProperty(const QString &prop) {
-    Q_UNUSED(prop);
+    auto property = parseProperty(prop);
+    std::replace_if(
+        properties_.begin(),
+        properties_.end(),
+        [key = property["key"]](const QVariant &p) { return p.toMap()["key"] == key; },
+        property);
+    emit propertiesChanged(properties_);
 }
 
 void KIMPanel::onUpdateSpotLocation(int x, int y) {

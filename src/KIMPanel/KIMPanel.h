@@ -58,7 +58,7 @@ private slots:
     void onExecDialog(const QString &prop);
     void onExecMenu(const QStringList &actions);
     void onRegisterProperties(const QStringList &prop);
-    void onRemoveProperty(const QString &prop);
+    void onRemoveProperty(const QString &key);
     void onShowAux(bool toshow);
     void onShowLookupTable(bool toshow);
     void onShowPreedit(bool toshow);
