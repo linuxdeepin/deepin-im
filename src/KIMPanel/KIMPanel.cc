@@ -61,6 +61,10 @@ KIMPanel::KIMPanel(QObject *parent)
     connect(kimpanel2Adaptor_, &KIMPanel2Adaptor::setLookupTable, this, &KIMPanel::onSetLookupTable);
 }
 
+void KIMPanel::menuTriggered(const QString &name) {
+    emit kimpanelAdaptor_->TriggerProperty(name);
+}
+
 void KIMPanel::onServiceOwnerChanged([[maybe_unused]] const QString &service,
                                      [[maybe_unused]] const QString &oldOwner,
                                      const QString &newOwner) {
@@ -86,7 +90,20 @@ void KIMPanel::onExecMenu(const QStringList &actions) {
 }
 
 void KIMPanel::onRegisterProperties(const QStringList &prop) {
-    Q_UNUSED(prop);
+    QVariantList props;
+    props.reserve(prop.length());
+    for (const auto &p : prop) {
+        auto pList = p.split(':');
+        props << QVariantMap{
+            {"name", QString(pList[0])},
+            {"shortText", QString(pList[1])},
+            {"iconName", QString(pList[2])},
+            {"longText", QString(pList[3])},
+            {"type", QString(pList[4])},
+        };
+    }
+    properties_ = props;
+    emit propertiesChanged(properties_);
 }
 
 void KIMPanel::onRemoveProperty(const QString &prop) {

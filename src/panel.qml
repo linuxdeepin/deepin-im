@@ -1,5 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Window 2.15
+import QtQml.Models 2.15
+import Qt.labs.platform 1.1
 
 Window {
     flags: Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
@@ -56,6 +58,32 @@ Window {
                         id: attr
                         text: modelData.attr
                     }
+                }
+            }
+        }
+    }
+
+    SystemTrayIcon {
+        visible: kimpanel.properties.length != 0
+        icon.name: kimpanel.properties.length != 0 ? kimpanel.properties[0].iconName : ""
+
+        menu: Menu {
+            id: contextMenu
+
+            Instantiator {
+                model: kimpanel.properties
+
+                delegate: MenuItem {
+                    text: modelData.shortText
+                    icon.name: modelData.iconName
+                    onTriggered: kimpanel.menuTriggered(modelData.name)
+                }
+
+                onObjectAdded: function(index, object) {
+                    contextMenu.insertItem(index, object)
+                }
+                onObjectRemoved: function(index, object) {
+                    contextMenu.removeItem(object)
                 }
             }
         }

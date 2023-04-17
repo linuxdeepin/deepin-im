@@ -15,6 +15,7 @@ class KIMPanel : public QObject {
     Q_OBJECT
 
     Q_PROPERTY(bool enable MEMBER enable_ NOTIFY enableChanged)
+    Q_PROPERTY(QVariantList properties MEMBER properties_ NOTIFY propertiesChanged)
     Q_PROPERTY(bool showAux MEMBER showAux_ NOTIFY showAuxChanged)
     Q_PROPERTY(bool showLookupTable MEMBER showLookupTable_ NOTIFY showLookupTableChanged)
     Q_PROPERTY(bool showPreedit MEMBER showPreedit_ NOTIFY showPreeditChanged)
@@ -33,8 +34,12 @@ class KIMPanel : public QObject {
 public:
     explicit KIMPanel(QObject *parent = nullptr);
 
+public:
+    Q_INVOKABLE void menuTriggered(const QString &name);
+
 signals: // properties signal
     void enableChanged(bool enable);
+    void propertiesChanged(const QVariantList &properties);
     void showAuxChanged(bool showAux);
     void showLookupTableChanged(bool showLookupTable);
     void showPreeditChanged(bool showPreedit);
@@ -87,6 +92,7 @@ private:
 
 private: // properties
     bool enable_;
+    QVariantList properties_;
     bool showAux_;
     bool showLookupTable_;
     bool showPreedit_;
