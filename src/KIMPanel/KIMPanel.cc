@@ -207,11 +207,11 @@ void KIMPanel::onSetLookupTable(const QStringList &label,
     QVariantList list;
     list.reserve(label.size());
     for (int i = 0; i < label.size(); i++) {
-        list << QVariant{QVariantMap{
+        list << QVariantMap{
             {"label", label[i]},
             {"text", text[i]},
             {"attr", attr[i]},
-        }};
+        };
     }
     lookupTable_.swap(list);
 
