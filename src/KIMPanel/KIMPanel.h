@@ -36,6 +36,8 @@ public:
 
 public:
     Q_INVOKABLE void menuTriggered(const QString &name);
+    Q_INVOKABLE void reloadTriggered();
+    Q_INVOKABLE void configureTriggered();
 
 signals: // properties signal
     void enableChanged(bool enable);

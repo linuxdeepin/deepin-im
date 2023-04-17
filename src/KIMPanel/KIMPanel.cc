@@ -65,6 +65,14 @@ void KIMPanel::menuTriggered(const QString &name) {
     emit kimpanelAdaptor_->TriggerProperty(name);
 }
 
+void KIMPanel::reloadTriggered() {
+    emit kimpanelAdaptor_->ReloadConfig();
+}
+
+void KIMPanel::configureTriggered() {
+    emit kimpanelAdaptor_->Configure();
+}
+
 void KIMPanel::onServiceOwnerChanged([[maybe_unused]] const QString &service,
                                      [[maybe_unused]] const QString &oldOwner,
                                      const QString &newOwner) {

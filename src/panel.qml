@@ -86,6 +86,18 @@ Window {
                     contextMenu.removeItem(object)
                 }
             }
+
+            MenuSeparator {}
+
+            MenuItem {
+                text: qsTr("Reload Configuration")
+                onTriggered: kimpanel.reloadTriggered()
+            }
+
+            MenuItem {
+                text: qsTr("Settings")
+                onTriggered: kimpanel.configureTriggered()
+            }
         }
     }
 }
