@@ -65,7 +65,7 @@ Window {
 
     SystemTrayIcon {
         visible: kimpanel.properties.length != 0
-        icon.name: kimpanel.properties.length != 0 ? kimpanel.properties[0].iconName : ""
+        icon.name: kimpanel.properties.length != 0 ? kimpanel.properties[0].icon : ""
 
         menu: Menu {
             id: contextMenu
@@ -74,9 +74,9 @@ Window {
                 model: kimpanel.properties
 
                 delegate: MenuItem {
-                    text: modelData.shortText
-                    icon.name: modelData.iconName
-                    onTriggered: kimpanel.menuTriggered(modelData.name)
+                    text: modelData.label
+                    icon.name: modelData.icon
+                    onTriggered: kimpanel.menuTriggered(modelData.key)
                 }
 
                 onObjectAdded: function(index, object) {

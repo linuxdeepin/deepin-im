@@ -19,6 +19,17 @@ static const QString INPUTMETHOD_BUS_INTERFACE = QStringLiteral("org.kde.kimpane
 
 static const QVariantMap EMPTY_ELEMENT{{"text", ""}, {"attr", ""}};
 
+static QVariantMap parseProperty(const QString &str) {
+    const auto prop = str.split(':');
+    return QVariantMap{
+        {"key", prop[0]},
+        {"label", prop[1]},
+        {"icon", prop[2]},
+        {"text", prop[3]},
+        {"hints", prop[4].split(',')},
+    };
+}
+
 KIMPanel::KIMPanel(QObject *parent)
     : QObject(parent)
     , bus_(QDBusConnection::sessionBus())
@@ -104,14 +115,7 @@ void KIMPanel::onRegisterProperties(const QStringList &prop) {
     QVariantList props;
     props.reserve(prop.length());
     for (const auto &p : prop) {
-        auto pList = p.split(':');
-        props << QVariantMap{
-            {"name", QString(pList[0])},
-            {"shortText", QString(pList[1])},
-            {"iconName", QString(pList[2])},
-            {"longText", QString(pList[3])},
-            {"type", QString(pList[4])},
-        };
+        props << parseProperty(p);
     }
     properties_ = props;
     emit propertiesChanged(properties_);
