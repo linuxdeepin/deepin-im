@@ -59,6 +59,9 @@ KIMPanel::KIMPanel(QObject *parent)
     connect(kimpanel2Adaptor_, &KIMPanel2Adaptor::setSpotRect, this, &KIMPanel::onSetSpotRect);
     connect(kimpanel2Adaptor_, &KIMPanel2Adaptor::setRelativeSpotRect, this, &KIMPanel::onSetRelativeSpotRect);
     connect(kimpanel2Adaptor_, &KIMPanel2Adaptor::setLookupTable, this, &KIMPanel::onSetLookupTable);
+
+    emit kimpanelAdaptor_->PanelCreated();
+    emit kimpanel2Adaptor_->PanelCreated2();
 }
 
 void KIMPanel::menuTriggered(const QString &name) {
