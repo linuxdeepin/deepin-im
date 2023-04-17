@@ -11,7 +11,7 @@ Window {
     width: container.width
     height: container.height
     visible: kimpanel.showAux || kimpanel.showPreedit || kimpanel.showLookupTable
-    title: qsTr("Hello World")
+    title: qsTr("DIM panel")
 
     Column {
         id: container
