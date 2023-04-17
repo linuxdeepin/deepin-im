@@ -92,6 +92,7 @@ void KIMPanel::onServiceOwnerChanged([[maybe_unused]] const QString &service,
                                      const QString &newOwner) {
     if (newOwner.isEmpty()) {
         // TODO:
+        onRegisterProperties({});
         return;
     }
 
