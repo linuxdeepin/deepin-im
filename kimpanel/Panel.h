@@ -1,17 +1,17 @@
-#ifndef KIMPANEL_H
-#define KIMPANEL_H
+#ifndef PANEL_H
+#define PANEL_H
 
 #include <QObject>
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusServiceWatcher>
 
-#include "KimpanelInputmethod.h"
+#include "ImpanelInputmethod.h"
 
-class KIMPanelAdaptor;
-class KIMPanel2Adaptor;
+class ImpanelAdaptor;
+class Impanel2Adaptor;
 
-class KIMPanel : public QObject {
+class Panel : public QObject {
     Q_OBJECT
 
     Q_PROPERTY(bool enable MEMBER enable_ NOTIFY enableChanged)
@@ -32,7 +32,7 @@ class KIMPanel : public QObject {
     Q_PROPERTY(qint32 layout MEMBER layout_ NOTIFY lookupTableChanged)
 
 public:
-    explicit KIMPanel(QObject *parent = nullptr);
+    explicit Panel(QObject *parent = nullptr);
 
 public:
     Q_INVOKABLE void menuTriggered(const QString &key);
@@ -52,7 +52,7 @@ signals: // properties signal
     void posChanged(const QPoint &pos);
     void lookupTableChanged();
 
-private slots:
+private slots: // impanel methods
     void onServiceOwnerChanged(const QString &service, const QString &oldOwner, const QString &newOwner);
     void onEnable(bool enable);
     void onExecDialog(const QString &prop);
@@ -74,23 +74,24 @@ private slots:
     void onUpdateProperty(const QString &prop);
     void onUpdateSpotLocation(int x, int y);
 
-    // impanel2
-    void onSetSpotRect(qint32 x, qint32 y, qint32 w, qint32 h);
-    void onSetRelativeSpotRect(qint32 x, qint32 y, qint32 w, qint32 h, double scale);
-    void onSetLookupTable(const QStringList &label,
-                          const QStringList &text,
-                          const QStringList &attr,
-                          bool hasPrev,
-                          bool hasNext,
-                          qint32 cursor,
-                          qint32 layout);
+public: // impanel2 signal callbacks
+    void SetSpotRect(qint32 x, qint32 y, qint32 w, qint32 h);
+    void SetRelativeSpotRect(qint32 x, qint32 y, qint32 w, qint32 h);
+    void SetRelativeSpotRectV2(qint32 x, qint32 y, qint32 w, qint32 h, double scale);
+    void SetLookupTable(const QStringList &label,
+                        const QStringList &text,
+                        const QStringList &attr,
+                        bool hasPrev,
+                        bool hasNext,
+                        qint32 cursor,
+                        qint32 layout);
 
 private:
     QDBusConnection bus_;
     QDBusServiceWatcher *watcher_;
+    ImpanelAdaptor *kimpanelAdaptor_;
+    Impanel2Adaptor *kimpanel2Adaptor_;
     org::kde::kimpanel::inputmethod *inputmethodIface_;
-    KIMPanelAdaptor *kimpanelAdaptor_;
-    KIMPanel2Adaptor *kimpanel2Adaptor_;
 
 private: // properties
     bool enable_;
@@ -102,7 +103,7 @@ private: // properties
     QVariantMap preedit_;
     int preeditCaretPos_;
 
-    QPoint pos_ ;
+    QPoint pos_;
     QVariantList lookupTable_;
     bool hasPrev_;
     bool hasNext_;
@@ -110,4 +111,4 @@ private: // properties
     qint32 layout_;
 };
 
-#endif // !KIMPANEL_H
+#endif // !PANEL_H
