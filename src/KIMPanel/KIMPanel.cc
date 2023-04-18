@@ -4,6 +4,8 @@
 #include <QDBusError>
 #include <QDebug>
 #include <QTransform>
+#include <QGuiApplication>
+#include <QScreen>
 
 #include "KIMPanelAdaptor.h"
 #include "KIMPanel2Adaptor.h"
@@ -28,6 +30,30 @@ static QVariantMap parseProperty(const QString &str) {
         {"text", prop[3]},
         {"hints", prop[4].split(',')},
     };
+}
+
+static QPoint mapPosition(const QPoint &p) {
+    auto screens = QGuiApplication::screens();
+    for (auto *screen : screens) {
+        auto geo = screen->geometry();
+        auto ratio = screen->devicePixelRatio();
+
+        QTransform logiToPhysTrans;
+        logiToPhysTrans *= ratio;
+        QRect physGeo = logiToPhysTrans.mapRect(geo);
+
+        if (physGeo.contains(p)) {
+            QTransform phisTologiTrans;
+            phisTologiTrans /= ratio;
+            QPoint logiPoint = phisTologiTrans.map(p);
+            logiPoint.rx() += geo.x();
+            logiPoint.ry() += geo.y();
+
+            return logiPoint;
+        }
+    }
+
+    return p;
 }
 
 KIMPanel::KIMPanel(QObject *parent)
@@ -220,9 +246,7 @@ void KIMPanel::onSetLookupTable(const QStringList &label,
 
 void KIMPanel::onSetSpotRect(qint32 x, qint32 y, qint32 w, qint32 h) {
     QPoint ori(x + w, y + h);
-    QTransform trans;
-    trans /= 1.25;
-    pos_ = trans.map(ori);
+    pos_ = mapPosition(ori);
 
     emit posChanged(pos_);
 }
