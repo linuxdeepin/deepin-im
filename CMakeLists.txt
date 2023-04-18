@@ -16,5 +16,5 @@ add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Quick Widgets DBus)
 find_package(Qt5Gui ${REQUIRED_QT5_VERSION} REQUIRED Private)
 
-add_subdirectory(src)
+add_subdirectory(kimpanel)
 add_subdirectory(qtfrontend)
