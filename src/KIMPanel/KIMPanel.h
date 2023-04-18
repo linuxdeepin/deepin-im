@@ -35,7 +35,7 @@ public:
     explicit KIMPanel(QObject *parent = nullptr);
 
 public:
-    Q_INVOKABLE void menuTriggered(const QString &name);
+    Q_INVOKABLE void menuTriggered(const QString &key);
     Q_INVOKABLE void reloadTriggered();
     Q_INVOKABLE void configureTriggered();
 
