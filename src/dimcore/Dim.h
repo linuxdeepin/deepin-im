@@ -2,17 +2,11 @@
 #define DIM_H
 
 #include <QObject>
-#include <QDBusObjectPath>
 
 class Dim : public QObject {
-    Q_OBJECT
-
 public:
     Dim(QObject *parent = nullptr);
-    ~Dim() = default;
-
-public:
-    QDBusObjectPath CreateInputContext();
+    ~Dim();
 };
 
 #endif // !DIM_H
