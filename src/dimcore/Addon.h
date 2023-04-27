@@ -14,4 +14,9 @@ private:
     Dim *dim_;
 };
 
+#define DIM_ADDON_FACTORY(name)                                                                                        \
+    extern "C" {                                                                                                       \
+    Addon *create(Dim *dim) { return new name(dim); }                                                                  \
+    }
+
 #endif // !ADDON_H

@@ -1,9 +1,15 @@
 set(DIMCORE_SOURCES
   Dim.cc
+  Addon.cc
+  # InputMethod.cc
+  # InputMethodAddon.cc
 )
 
 set(DIMCORE_HEADERS
   Dim.h
+  Addon.h
+  InputMethodAddon.h
+  InputMethodEntry.h
 )
 
 add_library(dimcore SHARED
