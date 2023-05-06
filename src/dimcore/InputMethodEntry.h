@@ -13,7 +13,7 @@ public:
                      const QString &description,
                      const QString &label,
                      const QString &iconName);
-    
+
     const QString &uniqueName () const;
     const QString &name () const;
     const QString &description () const;

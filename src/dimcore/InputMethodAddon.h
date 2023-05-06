@@ -8,6 +8,7 @@
 
 class InputMethodAddon : public Addon {
 public:
+    explicit InputMethodAddon(Dim *dim);
     virtual QList<InputMethodEntry> getInputMethods() = 0;
 };
 

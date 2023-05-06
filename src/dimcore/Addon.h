@@ -5,7 +5,7 @@ class Dim;
 
 class Addon {
 public:
-    Addon(Dim *dim);
+    explicit Addon(Dim *dim);
     ~Addon();
 
     Dim *dim();
