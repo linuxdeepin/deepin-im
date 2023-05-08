@@ -44,6 +44,12 @@ void Dim::loadAddons() {
 void Dim::loadAddon(const QString &infoFile) {
     QSettings settings(infoFile, QSettings::Format::IniFormat);
     settings.beginGroup("Addons");
+    if (!settings.contains("Name") || !settings.contains("Type") || !settings.contains("Category") ||
+        !settings.contains("Library")) {
+        qWarning() << "Addon info file" << infoFile << "is invalid";
+        return;
+    }
+
     QString name = settings.value("Name").toString();
     QString type = settings.value("Type").toString();
     QString category = settings.value("Category").toString();
