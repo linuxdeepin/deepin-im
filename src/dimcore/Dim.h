@@ -3,10 +3,12 @@
 
 #include <QObject>
 #include <QMap>
+#include <QSet>
 
 #include <memory>
 
 class InputContext;
+class Addon;
 
 class Dim : public QObject {
 public:
@@ -18,6 +20,10 @@ public:
 
 private:
     QMap<uint32_t, InputContext *> inputContexts_;
+    QSet<Addon *> addons_;
+
+    void loadAddons();
+    void loadAddon(const QString &infoFile);
 };
 
 #endif // !DIM_H

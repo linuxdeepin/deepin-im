@@ -19,4 +19,6 @@ private:
     Addon *create(Dim *dim) { return new name(dim); }                                                                  \
     }
 
+typedef Addon *addonCreate(Dim *);
+
 #endif // !ADDON_H
