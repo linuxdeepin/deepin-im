@@ -7,6 +7,8 @@
 #include "InputMethodEntry.h"
 
 class InputMethodAddon : public Addon {
+    Q_OBJECT
+
 public:
     explicit InputMethodAddon(Dim *dim);
     virtual ~InputMethodAddon();

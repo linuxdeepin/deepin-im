@@ -80,7 +80,7 @@ void Dim::loadAddon(const QString &infoFile) {
     Addon *addon = create(this);
 
     if (category == "InputMethod") {
-        auto *imAddon = dynamic_cast<InputMethodAddon *>(addon);
+        auto *imAddon = qobject_cast<InputMethodAddon *>(addon);
         if (!imAddon) {
             qWarning() << "Addon" << name << "is not an InputMethodAddon";
             delete addon;

@@ -1,9 +1,13 @@
 #ifndef ADDON_H
 #define ADDON_H
 
+#include <QObject>
+
 class Dim;
 
-class Addon {
+class Addon : public QObject {
+    Q_OBJECT
+
 public:
     explicit Addon(Dim *dim);
     virtual ~Addon();
