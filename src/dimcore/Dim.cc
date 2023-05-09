@@ -8,6 +8,7 @@
 #include <QPluginLoader>
 
 #include "InputContext.h"
+#include "InputMethodAddon.h"
 #include "config.h"
 #include "Addon.h"
 
@@ -45,14 +46,12 @@ void Dim::loadAddons() {
 void Dim::loadAddon(const QString &infoFile) {
     QSettings settings(infoFile, QSettings::Format::IniFormat);
     settings.beginGroup("Addon");
-    if (!settings.contains("Name") || !settings.contains("Type") || !settings.contains("Category") ||
-        !settings.contains("Library")) {
+    if (!settings.contains("Name") || !settings.contains("Category") || !settings.contains("Library")) {
         qWarning() << "Addon info file" << infoFile << "is invalid";
         return;
     }
 
     QString name = settings.value("Name").toString();
-    QString type = settings.value("Type").toString();
     QString category = settings.value("Category").toString();
     QString library = settings.value("Library").toString();
     settings.endGroup();
@@ -79,5 +78,14 @@ void Dim::loadAddon(const QString &infoFile) {
 
     auto create = reinterpret_cast<addonCreate *>(createFn);
     Addon *addon = create(this);
-    addons_.insert(addon);
+
+    if (category == "InputMethod") {
+        auto *imAddon = dynamic_cast<InputMethodAddon *>(addon);
+        if (!imAddon) {
+            qWarning() << "Addon" << name << "is not an InputMethodAddon";
+            delete addon;
+            return;
+        }
+        inputMethodAddons_.insert(imAddon);
+    }
 }

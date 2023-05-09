@@ -8,6 +8,7 @@
 #include <memory>
 
 class InputContext;
+class InputMethodAddon;
 class Addon;
 
 class Dim : public QObject {
@@ -20,7 +21,7 @@ public:
 
 private:
     QMap<uint32_t, InputContext *> inputContexts_;
-    QSet<Addon *> addons_;
+    QSet<InputMethodAddon *> inputMethodAddons_;
 
     void loadAddons();
     void loadAddon(const QString &infoFile);
