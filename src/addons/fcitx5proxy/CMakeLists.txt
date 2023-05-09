@@ -16,3 +16,7 @@ install(TARGETS fcitx5proxy
   LIBRARY DESTINATION ${DIM_ADDON_DIR}
 )
 
+install(FILES fcitx5proxy.conf
+  DESTINATION ${DIM_ADDON_INFO_DIR}
+)
+

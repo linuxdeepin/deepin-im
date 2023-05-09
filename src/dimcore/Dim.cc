@@ -30,6 +30,7 @@ uint32_t Dim::newInputContext() {
 
 void Dim::loadAddons() {
     QDir dir(DIM_ADDON_INFO_DIR);
+    qInfo() << "addon info dir" << dir.absolutePath();
     auto addonInfoFiles = dir.entryInfoList(QDir::Filter::Files | QDir::Filter::Readable);
     for (const auto &addonInfoFile : addonInfoFiles) {
         QString filename = addonInfoFile.fileName();
@@ -43,7 +44,7 @@ void Dim::loadAddons() {
 
 void Dim::loadAddon(const QString &infoFile) {
     QSettings settings(infoFile, QSettings::Format::IniFormat);
-    settings.beginGroup("Addons");
+    settings.beginGroup("Addon");
     if (!settings.contains("Name") || !settings.contains("Type") || !settings.contains("Category") ||
         !settings.contains("Library")) {
         qWarning() << "Addon info file" << infoFile << "is invalid";
