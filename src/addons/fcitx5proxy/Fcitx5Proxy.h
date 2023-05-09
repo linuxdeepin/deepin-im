@@ -6,7 +6,7 @@
 class Fcitx5Proxy : public InputMethodAddon {
 public:
     Fcitx5Proxy(Dim *dim);
-    ~Fcitx5Proxy();
+    virtual ~Fcitx5Proxy();
 
     QList<InputMethodEntry> getInputMethods() override;
 };
