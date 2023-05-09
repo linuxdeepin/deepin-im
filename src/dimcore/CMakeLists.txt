@@ -1,6 +1,3 @@
-set(DIM_DATA_DIR ${CMAKE_INSTALL_FULL_DATAROOTDIR}/dim)
-set(DIM_ADDON_DIR ${CMAKE_INSTALL_FULL_LIBDIR}/dim)
-
 configure_file(
   config.h.in
   config.h
@@ -10,7 +7,7 @@ set(DIMCORE_SOURCES
   Dim.cc
   Addon.cc
   InputContext.cc
-  # InputMethodAddon.cc
+  InputMethodAddon.cc
 )
 
 set(DIMCORE_HEADERS

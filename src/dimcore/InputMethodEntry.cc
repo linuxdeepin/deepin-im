@@ -17,6 +17,9 @@ InputMethodEntry::InputMethodEntry(const QString &uniqueName,
     : d(new InputMethodEntryPrivate{uniqueName, name, description, label, iconName}) {
 }
 
+InputMethodEntry::~InputMethodEntry() {
+}
+
 const QString &InputMethodEntry::uniqueName() const {
     return d->uniqueName;
 }

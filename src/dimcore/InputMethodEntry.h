@@ -14,11 +14,12 @@ public:
                      const QString &label,
                      const QString &iconName);
 
-    const QString &uniqueName () const;
-    const QString &name () const;
-    const QString &description () const;
-    const QString &label () const;
-    const QString &iconName () const;
+    const QString &uniqueName() const;
+    const QString &name() const;
+    const QString &description() const;
+    const QString &label() const;
+    const QString &iconName() const;
+    ~InputMethodEntry();
 
 private:
     std::unique_ptr<InputMethodEntryPrivate> d;
