@@ -1,6 +1,8 @@
 set(FCITX5PROXY_SOURCES
   Fcitx5Proxy.h
   Fcitx5Proxy.cc
+  DBusProvider.h
+  DBusProvider.cc
 )
 
 add_library(fcitx5proxy MODULE
@@ -10,6 +12,7 @@ add_library(fcitx5proxy MODULE
 target_link_libraries(fcitx5proxy PRIVATE
   dimcore
   Qt5::Core
+  Fcitx5Qt5::DBusAddons
 )
 
 install(TARGETS fcitx5proxy
