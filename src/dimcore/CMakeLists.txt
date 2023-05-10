@@ -23,10 +23,6 @@ add_library(dimcore SHARED
   ${DIMCORE_HEADERS}
 )
 
-target_include_directories(dimcore PRIVATE
-  ${CMAKE_CURRENT_BINARY_DIR}
-)
-
 target_link_libraries(dimcore PRIVATE
   Qt5::Core
   Qt5::Quick
