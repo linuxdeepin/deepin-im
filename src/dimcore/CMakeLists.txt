@@ -8,6 +8,7 @@ set(DIMCORE_SOURCES
   Addon.cc
   InputContext.cc
   InputMethodAddon.cc
+  InputMethodEntry.cc
 )
 
 set(DIMCORE_HEADERS

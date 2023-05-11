@@ -8,6 +8,8 @@
 
 #include "config.h"
 
+DIM_ADDON_FACTORY(Keyboard)
+
 struct Variant {
     QString name;
     QString shortDescription;
