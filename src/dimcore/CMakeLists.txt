@@ -6,6 +6,7 @@ configure_file(
 set(DIMCORE_SOURCES
   Dim.cc
   Addon.cc
+  FrontendAddon.cc
   InputContext.cc
   InputMethodAddon.cc
   InputMethodEntry.cc
@@ -14,6 +15,7 @@ set(DIMCORE_SOURCES
 set(DIMCORE_HEADERS
   Dim.h
   Addon.h
+  FrontendAddon.h
   InputContext.h
   InputMethodAddon.h
   InputMethodEntry.h
