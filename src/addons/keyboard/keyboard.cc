@@ -39,54 +39,51 @@ Keyboard::~Keyboard() {
 }
 
 QList<InputMethodEntry> Keyboard::getInputMethods() {
-    return {};
+    return keyboards_;
 }
 
-static QList<QString> parseLanguageList(const QDomElement &languageListEle) {
-    QList<QString> languageList;
-    for (auto language = languageListEle.firstChildElement("iso639Id"); !language.isNull();
-         language = language.nextSiblingElement("iso639Id")) {
-        auto languageName = language.text();
-        languageList.append(languageName);
+// static QList<QString> parseLanguageList(const QDomElement &languageListEle) {
+//     QList<QString> languageList;
+//     for (auto language = languageListEle.firstChildElement("iso639Id"); !language.isNull();
+//          language = language.nextSiblingElement("iso639Id")) {
+//         auto languageName = language.text();
+//         languageList.append(languageName);
+//     }
+
+//     return languageList;
+// }
+
+void Keyboard::parseLayoutList(const QDomElement &layoutListEle) {
+    for (auto layoutEle = layoutListEle.firstChildElement("layout"); !layoutEle.isNull();
+         layoutEle = layoutEle.nextSiblingElement("layout")) {
+        auto configItemEle = layoutEle.firstChildElement("configItem");
+
+        QString name = configItemEle.firstChildElement("name").text();
+        QString shortDescription = configItemEle.firstChildElement("shortDescription").text();
+        QString description = configItemEle.firstChildElement("description").text();
+        // QString languageList = parseLanguageList(configItemEle.firstChildElement("languageList"));
+
+        keyboards_.append({QString("keyboard-%1").arg(name), name, shortDescription, description, ""});
+
+        parseVariantList(name, layoutEle.firstChildElement("variantList"));
     }
-
-    return languageList;
 }
 
-static QList<Variant> parseVariantList(const QDomElement &variantListEle) {
+void Keyboard::parseVariantList(const QString &layoutName, const QDomElement &variantListEle) {
     QList<Variant> list;
     for (auto variantEle = variantListEle.firstChildElement("variant"); !variantEle.isNull();
          variantEle = variantEle.nextSiblingElement("variant")) {
         auto configItemEle = variantEle.firstChildElement("configItem");
 
-        Variant variant;
-        variant.name = configItemEle.firstChildElement("name").text();
-        variant.shortDescription = configItemEle.firstChildElement("shortDescription").text();
-        variant.description = configItemEle.firstChildElement("description").text();
-        variant.languageList = parseLanguageList(configItemEle.firstChildElement("languageList"));
-        list.append(variant);
+        QString name = configItemEle.firstChildElement("name").text();
+        QString shortDescription = configItemEle.firstChildElement("shortDescription").text();
+        QString description = configItemEle.firstChildElement("description").text();
+        // QString languageList = parseLanguageList(configItemEle.firstChildElement("languageList"));
+
+        QString fullname = layoutName + "_" + name;
+
+        keyboards_.append({QString("keyboard-%1").arg(fullname), fullname, shortDescription, description, ""});
     }
-
-    return list;
-}
-
-static QList<Layout> parseLayoutList(const QDomElement &layoutListEle) {
-    QList<Layout> list;
-    for (auto layoutEle = layoutListEle.firstChildElement("layout"); !layoutEle.isNull();
-         layoutEle = layoutEle.nextSiblingElement("layout")) {
-        auto configItemEle = layoutEle.firstChildElement("configItem");
-
-        Layout layout;
-        layout.name = configItemEle.firstChildElement("name").text();
-        layout.shortDescription = configItemEle.firstChildElement("shortDescription").text();
-        layout.description = configItemEle.firstChildElement("description").text();
-        layout.languageList = parseLanguageList(configItemEle.firstChildElement("languageList"));
-        layout.variantList = parseVariantList(layoutEle.firstChildElement("variantList"));
-
-        list.append(layout);
-    }
-
-    return list;
 }
 
 void Keyboard::parseRule(const QString &file) {
@@ -99,5 +96,5 @@ void Keyboard::parseRule(const QString &file) {
     xmlReader.setContent(&xmlFile);
     auto layoutListEle = xmlReader.documentElement().firstChildElement("layoutList");
 
-    QList<Layout> layouts = parseLayoutList(layoutListEle);
+    parseLayoutList(layoutListEle);
 }

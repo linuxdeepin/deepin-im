@@ -5,6 +5,8 @@
 
 struct xkb_context;
 
+class QDomElement;
+
 class Keyboard : public InputMethodAddon {
 public:
     Keyboard(Dim *dim);
@@ -14,8 +16,11 @@ public:
 
 private:
     xkb_context *ctx_;
+    QList<InputMethodEntry> keyboards_;
 
     void parseRule(const QString &file);
+    void parseLayoutList(const QDomElement &layoutListEle);
+    void parseVariantList(const QString &layoutName, const QDomElement &variantListEle);
 };
 
 #endif // !KEYBOARD_H

@@ -22,7 +22,7 @@ public:
     ~InputMethodEntry();
 
 private:
-    std::unique_ptr<InputMethodEntryPrivate> d;
+    std::shared_ptr<InputMethodEntryPrivate> d;
 };
 
 #endif // !INPUTMETHOD_H
