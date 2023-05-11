@@ -81,11 +81,13 @@ void Dim::loadAddon(const QString &infoFile) {
 
     if (category == "InputMethod") {
         auto *imAddon = qobject_cast<InputMethodAddon *>(addon);
-        if (!imAddon) {
-            qWarning() << "Addon" << name << "is not an InputMethodAddon";
-            delete addon;
-            return;
-        }
         inputMethodAddons_.insert(imAddon);
+    } else if (category == "Frontend") {
+        auto *frontend = qobject_cast<FrontendAddon *>(addon);
+        frontends_.insert(frontend);
+    } else {
+        qWarning() << "Addon" << name << "has an invalid category" << category;
+        delete addon;
+        return;
     }
 }

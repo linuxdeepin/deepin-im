@@ -9,6 +9,7 @@
 
 class InputContext;
 class InputMethodAddon;
+class FrontendAddon;
 class Addon;
 
 class Dim : public QObject {
@@ -22,6 +23,7 @@ public:
 private:
     QMap<uint32_t, InputContext *> inputContexts_;
     QSet<InputMethodAddon *> inputMethodAddons_;
+    QSet<FrontendAddon *> frontends_;
 
     void loadAddons();
     void loadAddon(const QString &infoFile);
