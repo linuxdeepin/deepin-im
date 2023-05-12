@@ -9,6 +9,7 @@
 
 #include "InputContext.h"
 #include "InputMethodAddon.h"
+#include "FrontendAddon.h"
 #include "config.h"
 #include "Addon.h"
 
