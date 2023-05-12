@@ -2,6 +2,7 @@
 
 class InputMethodEntryPrivate {
 public:
+    const InputMethodAddon *addon;
     const QString &uniqueName;
     const QString &name;
     const QString &description;
@@ -9,12 +10,13 @@ public:
     const QString &iconName;
 };
 
-InputMethodEntry::InputMethodEntry(const QString &uniqueName,
+InputMethodEntry::InputMethodEntry(const InputMethodAddon *addon,
+                                   const QString &uniqueName,
                                    const QString &name,
                                    const QString &description,
                                    const QString &label,
                                    const QString &iconName)
-    : d(new InputMethodEntryPrivate{uniqueName, name, description, label, iconName}) {
+    : d(new InputMethodEntryPrivate{addon, uniqueName, name, description, label, iconName}) {
 }
 
 InputMethodEntry::~InputMethodEntry() {

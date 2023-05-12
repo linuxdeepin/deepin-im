@@ -5,21 +5,24 @@
 
 #include <memory>
 
+class InputMethodAddon;
+
 class InputMethodEntryPrivate;
 class InputMethodEntry {
 public:
-    InputMethodEntry(const QString &uniqueName,
+    InputMethodEntry(const InputMethodAddon *addon,
+                     const QString &uniqueName,
                      const QString &name,
                      const QString &description,
                      const QString &label,
                      const QString &iconName);
+    ~InputMethodEntry();
 
     const QString &uniqueName() const;
     const QString &name() const;
     const QString &description() const;
     const QString &label() const;
     const QString &iconName() const;
-    ~InputMethodEntry();
 
 private:
     std::shared_ptr<InputMethodEntryPrivate> d;

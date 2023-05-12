@@ -65,7 +65,7 @@ void Keyboard::parseLayoutList(const QDomElement &layoutListEle) {
         QString description = configItemEle.firstChildElement("description").text();
         // QString languageList = parseLanguageList(configItemEle.firstChildElement("languageList"));
 
-        keyboards_.append({QString("keyboard-%1").arg(name), name, shortDescription, description, ""});
+        keyboards_.append({this, QString("keyboard-%1").arg(name), name, shortDescription, description, ""});
 
         parseVariantList(name, layoutEle.firstChildElement("variantList"));
     }
@@ -84,7 +84,7 @@ void Keyboard::parseVariantList(const QString &layoutName, const QDomElement &va
 
         QString fullname = layoutName + "_" + name;
 
-        keyboards_.append({QString("keyboard-%1").arg(fullname), fullname, shortDescription, description, ""});
+        keyboards_.append({this, QString("keyboard-%1").arg(fullname), fullname, shortDescription, description, ""});
     }
 }
 

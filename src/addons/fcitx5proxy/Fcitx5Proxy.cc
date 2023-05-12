@@ -27,8 +27,7 @@ Fcitx5Proxy::~Fcitx5Proxy() {
 }
 
 QList<InputMethodEntry> Fcitx5Proxy::getInputMethods() {
-    QList<InputMethodEntry> ret;
-    return ret;
+    return inputMethods_;
 }
 
 void Fcitx5Proxy::updateInputMethods() {
@@ -40,7 +39,7 @@ void Fcitx5Proxy::updateInputMethods() {
 
         QList<InputMethodEntry> inputMethods;
         for (auto &im : ims.value()) {
-            inputMethods.append(InputMethodEntry(im.uniqueName(), im.name(), im.nativeName(), im.label(), im.icon()));
+            inputMethods.append({this, im.uniqueName(), im.name(), im.nativeName(), im.label(), im.icon()});
         }
 
         inputMethods_.swap(inputMethods);
