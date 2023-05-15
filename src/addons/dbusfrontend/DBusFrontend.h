@@ -5,9 +5,12 @@
 
 #include <dimcore/FrontendAddon.h>
 
-class PortalAdaptor;
+class InputmethodAdaptor;
+class InputContextBus;
 
 class DBusFrontend : public FrontendAddon {
+    Q_OBJECT
+
 public:
     explicit DBusFrontend(Dim *dim);
     ~DBusFrontend() override;
@@ -16,7 +19,8 @@ public slots:
     QDBusObjectPath CreateInputContext();
 
 private:
-    PortalAdaptor *adaptor_;
+    InputmethodAdaptor *adaptor_;
+    QMap<uint32_t, InputContextBus *> inputContextBuses_;
 };
 
 #endif // !DBUSFRONTEND_H
