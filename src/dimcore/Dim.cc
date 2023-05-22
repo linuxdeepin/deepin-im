@@ -92,3 +92,8 @@ void Dim::loadAddon(const QString &infoFile) {
         return;
     }
 }
+
+bool Dim::postEvent(Event &event) {
+    Q_UNUSED(event);
+    return false;
+}

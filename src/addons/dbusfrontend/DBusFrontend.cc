@@ -5,7 +5,7 @@
 #include <dimcore/Dim.h>
 
 #include "InputmethodAdaptor.h"
-#include "InputContextBus.h"
+#include "InputContext1.h"
 
 DIM_ADDON_FACTORY(DBusFrontend)
 
@@ -22,11 +22,10 @@ DBusFrontend::~DBusFrontend() {
 }
 
 QDBusObjectPath DBusFrontend::CreateInputContext() {
-    uint32_t id = dim()->newInputContext();
-
-    auto *icbus = new InputContextBus(id, this);
+    auto *icbus = new InputContext1(this);
+    auto id = icbus->id();
     inputContextBuses_.insert(id, icbus);
-    connect(icbus, &InputContextBus::destroyed, this, [this, id]() { inputContextBuses_.remove(id); });
+    connect(icbus, &InputContext1::destroyed, this, [this, id]() { inputContextBuses_.remove(id); });
 
     return QDBusObjectPath(inputcontextPath.arg(id));
 }

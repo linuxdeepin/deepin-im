@@ -6,7 +6,7 @@
 #include <dimcore/FrontendAddon.h>
 
 class InputmethodAdaptor;
-class InputContextBus;
+class InputContext1;
 
 class DBusFrontend : public FrontendAddon {
     Q_OBJECT
@@ -20,7 +20,7 @@ public slots:
 
 private:
     InputmethodAdaptor *adaptor_;
-    QMap<uint32_t, InputContextBus *> inputContextBuses_;
+    QMap<uint32_t, InputContext1 *> inputContextBuses_;
 };
 
 #endif // !DBUSFRONTEND_H

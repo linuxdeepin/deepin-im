@@ -16,3 +16,8 @@ void InputContext::focusIn() {
 void InputContext::focusOut() {
     emit unFocused();
 }
+
+void InputContext::keyEvent(KeyEvent &event) {
+    Q_UNUSED(event);
+    // dim()->postEvent(event);
+}

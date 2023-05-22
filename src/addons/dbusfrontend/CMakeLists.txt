@@ -6,12 +6,12 @@
 set(DBUSFRONTEND_SOURCES
   DBusFrontend.h
   DBusFrontend.cc
-  InputContextBus.h
-  InputContextBus.cc
+  InputContext1.h
+  InputContext1.cc
 )
 
 qt5_add_dbus_adaptor(DBUSFRONTEND_SOURCES inputmethod.xml DBusFrontend.h DBusFrontend InputmethodAdaptor)
-qt5_add_dbus_adaptor(DBUSFRONTEND_SOURCES inputcontext.xml InputContextBus.h InputContextBus InputcontextAdaptor)
+qt5_add_dbus_adaptor(DBUSFRONTEND_SOURCES inputcontext.xml InputContext1.h InputContext1 InputcontextAdaptor)
 
 add_library(dbusfrontend MODULE
   ${DBUSFRONTEND_SOURCES}

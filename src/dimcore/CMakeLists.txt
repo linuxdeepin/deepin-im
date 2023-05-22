@@ -10,6 +10,7 @@ set(DIMCORE_SOURCES
   InputContext.cc
   InputMethodAddon.cc
   InputMethodEntry.cc
+  Events.cc
 )
 
 set(DIMCORE_HEADERS
@@ -19,6 +20,7 @@ set(DIMCORE_HEADERS
   InputContext.h
   InputMethodAddon.h
   InputMethodEntry.h
+  Events.h
 )
 
 add_library(dimcore SHARED

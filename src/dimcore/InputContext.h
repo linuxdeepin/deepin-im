@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "ObjectId.h"
+#include "Events.h"
 
 class InputContext : public QObject, public ObjectId<InputContext> {
     Q_OBJECT
@@ -15,6 +16,7 @@ public:
     void destroy();
     void focusIn();
     void focusOut();
+    void keyEvent(KeyEvent &event);
 
 signals:
     void focused();

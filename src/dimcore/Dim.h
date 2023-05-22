@@ -11,6 +11,7 @@ class InputContext;
 class InputMethodAddon;
 class FrontendAddon;
 class Addon;
+class Event;
 
 class Dim : public QObject {
 public:
@@ -19,6 +20,8 @@ public:
 
     uint32_t newInputContext();
     InputContext *getInputContext(uint32_t id) { return inputContexts_.value(id); }
+
+    bool postEvent(Event &event);
 
 private:
     QMap<uint32_t, InputContext *> inputContexts_;
