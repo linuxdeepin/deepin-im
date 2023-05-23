@@ -7,8 +7,8 @@
 
 static const QString inputcontextPath = "/org/freedesktop/portal/inputmethod/%1";
 
-InputContext1::InputContext1(QObject *parent)
-    : InputContext(parent)
+InputContext1::InputContext1(Dim *dim, QObject *parent)
+    : InputContext(dim, parent)
     , adaptor_(new InputcontextAdaptor(this))
     , path_(inputcontextPath.arg(id())) {
     QDBusConnection::sessionBus().registerObject(path_, this);

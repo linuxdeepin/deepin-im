@@ -5,11 +5,13 @@
 #include "ObjectId.h"
 #include "Events.h"
 
+class Dim;
+
 class InputContext : public QObject, public ObjectId<InputContext> {
     Q_OBJECT
 
 public:
-    InputContext(QObject *parent = nullptr);
+    InputContext(Dim *dim, QObject *parent = nullptr);
     ~InputContext() = default;
 
 public:
@@ -21,6 +23,9 @@ public:
 signals:
     void focused();
     void unFocused();
+
+private:
+    Dim *dim_;
 };
 
 #endif // !INPUTCONTEXT_H

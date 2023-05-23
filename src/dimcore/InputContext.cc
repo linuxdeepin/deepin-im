@@ -1,8 +1,11 @@
 #include "InputContext.h"
 
-InputContext::InputContext(QObject *parent)
+#include "Dim.h"
+
+InputContext::InputContext(Dim *dim, QObject *parent)
     : QObject(parent)
-    , ObjectId() {
+    , ObjectId()
+    , dim_(dim) {
 }
 
 void InputContext::destroy() {
@@ -18,6 +21,5 @@ void InputContext::focusOut() {
 }
 
 void InputContext::keyEvent(KeyEvent &event) {
-    Q_UNUSED(event);
-    // dim()->postEvent(event);
+    dim_->postEvent(event);
 }

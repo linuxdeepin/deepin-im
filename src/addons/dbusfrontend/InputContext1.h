@@ -3,13 +3,14 @@
 
 #include "dimcore/InputContext.h"
 
+class Dim;
 class InputcontextAdaptor;
 
 class InputContext1 : public InputContext {
     Q_OBJECT
 
 public:
-    InputContext1(QObject *parent = nullptr);
+    InputContext1(Dim *dim, QObject *parent = nullptr);
     ~InputContext1() override;
 
     const QString path() { return path_; }
