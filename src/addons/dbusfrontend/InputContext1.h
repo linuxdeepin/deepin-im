@@ -12,6 +12,8 @@ public:
     InputContext1(QObject *parent = nullptr);
     ~InputContext1() override;
 
+    const QString path() { return path_; }
+
 public slots:
     void FocusIn();
     void FocusOut();
@@ -20,6 +22,7 @@ public slots:
 
 private:
     InputcontextAdaptor *adaptor_;
+    QString path_;
 };
 
 #endif // !INPUTCONTEXT1_H

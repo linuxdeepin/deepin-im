@@ -5,10 +5,13 @@
 #include "InputcontextAdaptor.h"
 #include "dimcore/Events.h"
 
+static const QString inputcontextPath = "/org/freedesktop/portal/inputmethod/%1";
+
 InputContext1::InputContext1(QObject *parent)
     : InputContext(parent)
-    , adaptor_(new InputcontextAdaptor(this)) {
-    QDBusConnection::sessionBus().registerObject(QString("/org/freedesktop/portal/inputcontext/%1").arg(id()), this);
+    , adaptor_(new InputcontextAdaptor(this))
+    , path_(inputcontextPath.arg(id())) {
+    QDBusConnection::sessionBus().registerObject(path_, this);
 }
 
 InputContext1::~InputContext1() {

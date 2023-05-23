@@ -9,8 +9,6 @@
 
 DIM_ADDON_FACTORY(DBusFrontend)
 
-static QString inputcontextPath = "/org/freedesktop/portal/inputmethod/%1";
-
 DBusFrontend::DBusFrontend(Dim *dim)
     : FrontendAddon(dim)
     , adaptor_(new InputmethodAdaptor(this)) {
@@ -27,5 +25,5 @@ QDBusObjectPath DBusFrontend::CreateInputContext() {
     inputContextBuses_.insert(id, icbus);
     connect(icbus, &InputContext1::destroyed, this, [this, id]() { inputContextBuses_.remove(id); });
 
-    return QDBusObjectPath(inputcontextPath.arg(id));
+    return QDBusObjectPath(icbus->path());
 }
