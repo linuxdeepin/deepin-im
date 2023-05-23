@@ -12,7 +12,6 @@ public:
     Event(EventType type);
     ~Event() = default;
 
-private:
     EventType type;
 };
 
