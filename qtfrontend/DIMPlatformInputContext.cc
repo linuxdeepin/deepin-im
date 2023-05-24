@@ -24,6 +24,12 @@ bool DIMPlatformInputContext::isValid() const {
 void DIMPlatformInputContext::setFocusObject(QObject *object) {
     if (focusObject_) {
         focusObject_->removeEventFilter(this);
+        focusObject_ = nullptr;
+    }
+    if (ic_) {
+        ic_->Destroy();
+        delete ic_;
+        ic_ = nullptr;
     }
 
     if (!object) {
