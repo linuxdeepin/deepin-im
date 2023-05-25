@@ -4,10 +4,8 @@
 #include <qpa/qplatforminputcontext.h>
 #include <QPointer>
 
-#include "InputmethodIface.h"
-#include "InputcontextIface.h"
-
 class QDBusPendingCallWatcher;
+class InputContextProxy;
 
 class DIMPlatformInputContext : public QPlatformInputContext {
     Q_OBJECT
@@ -17,6 +15,7 @@ public:
     ~DIMPlatformInputContext() = default;
 
     bool isValid() const override;
+    void update(Qt::InputMethodQueries queries) override;
     void setFocusObject(QObject *object) override;
     void showInputPanel() override;
     void hideInputPanel() override;
@@ -25,12 +24,10 @@ public:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
-    org::deepin::dim::portal::inputmethod *im_;
-    org::deepin::dim::portal::inputcontext *ic_;
+    InputContextProxy *proxy_;
     QPointer<QObject> focusObject_;
 
 private slots:
-    void createIcFinished(QDBusPendingCallWatcher *);
 };
 
 #endif // !DIMPLATFORMINPUTCONTEXT_H

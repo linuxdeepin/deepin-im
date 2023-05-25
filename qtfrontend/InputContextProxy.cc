@@ -1,0 +1,70 @@
+#include "InputContextProxy.h"
+
+static const QString DIM_SERVICE = "org.deepin.dim";
+static const QString DIM_IM_PATH = "/org/freedesktop/portal/inputmethod";
+static const QString DIM_IC_PATH = "/org/freedesktop/portal/inputmethod/%d";
+
+InputContextProxy::InputContextProxy(QObject *parent)
+    : QObject(parent)
+    , bus_(QDBusConnection::connectToBus(QDBusConnection::BusType::SessionBus, "dim"))
+    , watcher_(DIM_SERVICE, bus_, QDBusServiceWatcher::WatchModeFlag::WatchForOwnerChange, this)
+    , im_(new org::deepin::dim::portal::inputmethod(DIM_SERVICE, DIM_IM_PATH, QDBusConnection::sessionBus(), this))
+    , ic_(nullptr) {
+    connect(&watcher_, &QDBusServiceWatcher::serviceOwnerChanged, this, &InputContextProxy::onServiceOwnerChanged);
+}
+
+void InputContextProxy::onServiceOwnerChanged() {
+    if (!im_->isValid()) {
+        return;
+    }
+
+    if (ic_) {
+        if (ic_->isValid()) {
+            return;
+        }
+
+        delete ic_;
+        ic_ = nullptr;
+    }
+
+    QDBusPendingReply<QDBusObjectPath> penddingReply = im_->CreateInputContext();
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(penddingReply, this);
+    QObject::connect(watcher, &QDBusPendingCallWatcher::finished, this, &InputContextProxy::createIcFinished);
+}
+
+void InputContextProxy::createIcFinished(QDBusPendingCallWatcher *watcher) {
+    watcher->deleteLater();
+
+    QDBusPendingReply<QDBusObjectPath> reply = *watcher;
+    if (reply.isError()) {
+        qDebug() << "CreateInputContext error:" << reply.error().message();
+        return;
+    }
+
+    QDBusObjectPath path = reply.value();
+    ic_ = new org::deepin::dim::portal::inputcontext(DIM_SERVICE, path.path(), bus_, this);
+}
+
+void InputContextProxy::focusIn() {
+    if (!ic_ || !ic_->isValid()) {
+        return;
+    }
+
+    ic_->FocusIn();
+}
+
+void InputContextProxy::focusOut() {
+    if (!ic_ || !ic_->isValid()) {
+        return;
+    }
+
+    ic_->FocusOut();
+}
+
+void InputContextProxy::processKeyEvent(uint keyval, uint keycode, uint state, bool isRelease, uint time) {
+    if (!ic_ || !ic_->isValid()) {
+        return;
+    }
+
+    ic_->ProcessKeyEvent(keyval, keycode, state, isRelease, time);
+}
