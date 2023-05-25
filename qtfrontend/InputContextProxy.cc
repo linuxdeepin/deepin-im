@@ -11,9 +11,11 @@ InputContextProxy::InputContextProxy(QObject *parent)
     , im_(new org::deepin::dim::portal::inputmethod(DIM_SERVICE, DIM_IM_PATH, QDBusConnection::sessionBus(), this))
     , ic_(nullptr) {
     connect(&watcher_, &QDBusServiceWatcher::serviceOwnerChanged, this, &InputContextProxy::onServiceOwnerChanged);
+    onServiceOwnerChanged();
 }
 
 void InputContextProxy::onServiceOwnerChanged() {
+    qDebug() << "onServiceOwnerChanged";
     if (!im_->isValid()) {
         return;
     }
