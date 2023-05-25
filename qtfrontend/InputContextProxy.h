@@ -23,7 +23,7 @@ private:
     org::deepin::dim::portal::inputcontext *ic_;
 
 private slots:
-    void onServiceOwnerChanged();
+    void serviceAvailableChanged();
     void createIcFinished(QDBusPendingCallWatcher *watcher);
 };
 

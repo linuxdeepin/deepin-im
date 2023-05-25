@@ -10,28 +10,30 @@ InputContextProxy::InputContextProxy(QObject *parent)
     , watcher_(DIM_SERVICE, bus_, QDBusServiceWatcher::WatchModeFlag::WatchForOwnerChange, this)
     , im_(new org::deepin::dim::portal::inputmethod(DIM_SERVICE, DIM_IM_PATH, QDBusConnection::sessionBus(), this))
     , ic_(nullptr) {
-    connect(&watcher_, &QDBusServiceWatcher::serviceOwnerChanged, this, &InputContextProxy::onServiceOwnerChanged);
-    onServiceOwnerChanged();
+    connect(&watcher_, &QDBusServiceWatcher::serviceOwnerChanged, this, &InputContextProxy::serviceAvailableChanged);
+    serviceAvailableChanged();
 }
 
-void InputContextProxy::onServiceOwnerChanged() {
-    qDebug() << "onServiceOwnerChanged";
-    if (!im_->isValid()) {
-        return;
-    }
-
-    if (ic_) {
-        if (ic_->isValid()) {
+void InputContextProxy::serviceAvailableChanged() {
+    QTimer::singleShot(100, this, [this]() {
+        qDebug() << "onServiceOwnerChanged";
+        if (!im_->isValid()) {
             return;
         }
 
-        delete ic_;
-        ic_ = nullptr;
-    }
+        if (ic_) {
+            if (ic_->isValid()) {
+                return;
+            }
 
-    QDBusPendingReply<QDBusObjectPath> penddingReply = im_->CreateInputContext();
-    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(penddingReply, this);
-    QObject::connect(watcher, &QDBusPendingCallWatcher::finished, this, &InputContextProxy::createIcFinished);
+            delete ic_;
+            ic_ = nullptr;
+        }
+
+        QDBusPendingReply<QDBusObjectPath> penddingReply = im_->CreateInputContext();
+        QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(penddingReply, this);
+        QObject::connect(watcher, &QDBusPendingCallWatcher::finished, this, &InputContextProxy::createIcFinished);
+    });
 }
 
 void InputContextProxy::createIcFinished(QDBusPendingCallWatcher *watcher) {
