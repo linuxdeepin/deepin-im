@@ -22,10 +22,6 @@ void InputContextProxy::serviceAvailableChanged() {
         }
 
         if (ic_) {
-            if (ic_->isValid()) {
-                return;
-            }
-
             delete ic_;
             ic_ = nullptr;
         }
