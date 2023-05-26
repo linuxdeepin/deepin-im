@@ -15,7 +15,6 @@ public:
     ~DIMPlatformInputContext() = default;
 
     bool isValid() const override;
-    void update(Qt::InputMethodQueries queries) override;
     void setFocusObject(QObject *object) override;
     void showInputPanel() override;
     void hideInputPanel() override;

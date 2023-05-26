@@ -22,15 +22,6 @@ bool DIMPlatformInputContext::isValid() const {
     return true;
 }
 
-void DIMPlatformInputContext::update(Qt::InputMethodQueries queries) {
-    QInputMethodQueryEvent qe(queries);
-    QGuiApplication::sendEvent(focusObject_, &qe);
-
-    if (!qe.value(Qt::ImEnabled).toBool()) {
-        return;
-    }
-}
-
 void DIMPlatformInputContext::setFocusObject(QObject *object) {
     qDebug() << "setFocusObject";
     if (focusObject_ == object) {
@@ -56,6 +47,7 @@ void DIMPlatformInputContext::setFocusObject(QObject *object) {
 
     focusObject_ = object;
     focusObject_->installEventFilter(this);
+    proxy_->focusIn();
 }
 
 void DIMPlatformInputContext::showInputPanel() {
@@ -76,14 +68,11 @@ bool DIMPlatformInputContext::eventFilter(QObject *object, QEvent *event) {
         return false;
     }
 
-    if (event->type() != QEvent::KeyPress || event->type() != QEvent::KeyRelease) {
+    if (event->type() != QEvent::KeyPress && event->type() != QEvent::KeyRelease) {
         return false;
     }
 
     QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-    if (keyEvent->key() != Qt::Key_Return) {
-        return false;
-    }
 
     uint keyval = keyEvent->nativeVirtualKey();
     uint keycode = keyEvent->nativeScanCode();
