@@ -17,7 +17,7 @@ InputContextProxy::InputContextProxy(QObject *parent)
 void InputContextProxy::serviceAvailableChanged() {
     QTimer::singleShot(100, this, [this]() {
         qDebug() << "onServiceOwnerChanged";
-        if (!im_->isValid()) {
+        if (!bus_.interface()->isServiceRegistered(DIM_SERVICE)) {
             return;
         }
 
@@ -46,7 +46,7 @@ void InputContextProxy::createIcFinished(QDBusPendingCallWatcher *watcher) {
 }
 
 void InputContextProxy::focusIn() {
-    if (!ic_ || !ic_->isValid()) {
+    if (!ic_) {
         return;
     }
 
@@ -54,7 +54,7 @@ void InputContextProxy::focusIn() {
 }
 
 void InputContextProxy::focusOut() {
-    if (!ic_ || !ic_->isValid()) {
+    if (!ic_) {
         return;
     }
 
@@ -62,7 +62,7 @@ void InputContextProxy::focusOut() {
 }
 
 void InputContextProxy::processKeyEvent(uint keyval, uint keycode, uint state, bool isRelease, uint time) {
-    if (!ic_ || !ic_->isValid()) {
+    if (!ic_) {
         return;
     }
 
