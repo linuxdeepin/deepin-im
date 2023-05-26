@@ -29,10 +29,10 @@ void DIMPlatformInputContext::setFocusObject(QObject *object) {
     }
 
     if (focusObject_) {
+        proxy_->focusOut();
         focusObject_->removeEventFilter(this);
         focusObject_ = nullptr;
     }
-    proxy_->focusOut();
 
     if (!object) {
         return;
