@@ -15,6 +15,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 
+find_package(ECM 1.4.0 REQUIRED)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Quick Widgets Xml DBus)
 find_package(Qt5Gui ${REQUIRED_QT5_VERSION} REQUIRED Private)
 find_package(Fcitx5Qt5DBusAddons REQUIRED)
