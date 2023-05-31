@@ -7,7 +7,7 @@ class FrontendAddon : public Addon {
     Q_OBJECT
 
 public:
-    explicit FrontendAddon(Dim *dim);
+    explicit FrontendAddon(Dim *dim, const QString &key);
 };
 
 #endif // !FRONTENDADDON_H

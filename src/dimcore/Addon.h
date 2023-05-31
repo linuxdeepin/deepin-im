@@ -9,13 +9,15 @@ class Addon : public QObject {
     Q_OBJECT
 
 public:
-    explicit Addon(Dim *dim);
+    explicit Addon(Dim *dim, const QString &key);
     virtual ~Addon();
 
-    Dim *dim();
+    Dim *dim() const;
+    const QString &key() const;
 
 private:
     Dim *dim_;
+    QString key_;
 };
 
 #define DIM_ADDON_FACTORY(name)                                                                                        \

@@ -23,3 +23,7 @@ void InputContext::focusOut() {
 void InputContext::keyEvent(KeyEvent &event) {
     dim_->postEvent(event);
 }
+
+InputMethodEntry *InputContext::currentIM() {
+    return current_im_;
+}

@@ -10,7 +10,7 @@
 DIM_ADDON_FACTORY(DBusFrontend)
 
 DBusFrontend::DBusFrontend(Dim *dim)
-    : FrontendAddon(dim)
+    : FrontendAddon(dim, "dbusfrontend")
     , adaptor_(new InputmethodAdaptor(this)) {
     QDBusConnection::sessionBus().registerService("org.deepin.dim");
     QDBusConnection::sessionBus().registerObject("/org/freedesktop/portal/inputmethod", this);

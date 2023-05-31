@@ -1,11 +1,12 @@
 #include "Events.h"
 
-Event::Event(EventType type)
-    : type(type) {
+Event::Event(EventType type, InputContext *ic)
+    : type(type)
+    , ic(ic) {
 }
 
-KeyEvent::KeyEvent(uint32_t keyval, uint32_t keycode, uint32_t state, bool isRelease, uint32_t time)
-    : Event(EventType::Key)
+KeyEvent::KeyEvent(InputContext *ic, uint32_t keyval, uint32_t keycode, uint32_t state, bool isRelease, uint32_t time)
+    : Event(EventType::Key, ic)
     , keyval(keyval)
     , keycode(keycode)
     , state(state)

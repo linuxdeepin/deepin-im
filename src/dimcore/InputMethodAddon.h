@@ -10,7 +10,7 @@ class InputMethodAddon : public Addon {
     Q_OBJECT
 
 public:
-    explicit InputMethodAddon(Dim *dim);
+    explicit InputMethodAddon(Dim *dim, const QString &key);
     virtual ~InputMethodAddon();
 
     virtual QList<InputMethodEntry> getInputMethods() = 0;

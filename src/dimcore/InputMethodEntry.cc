@@ -1,5 +1,7 @@
 #include "InputMethodEntry.h"
 
+#include "InputMethodAddon.h"
+
 class InputMethodEntryPrivate {
 public:
     QString addon;
@@ -44,4 +46,8 @@ const QString &InputMethodEntry::label() const {
 
 const QString &InputMethodEntry::iconName() const {
     return d->iconName;
+}
+
+void InputMethodEntry::processKeyEvent(KeyEvent &event) {
+    Q_UNUSED(event);
 }

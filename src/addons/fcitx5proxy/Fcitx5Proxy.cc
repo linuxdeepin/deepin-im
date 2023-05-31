@@ -5,7 +5,7 @@
 DIM_ADDON_FACTORY(Fcitx5Proxy);
 
 Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
-    : InputMethodAddon(dim)
+    : InputMethodAddon(dim, "fcitx5proxy")
     , dbusProvider_(new DBusProvider(this))
     , available_(dbusProvider_->available()) {
     connect(dbusProvider_, &DBusProvider::availabilityChanged, this, [this](bool available) {
@@ -39,7 +39,7 @@ void Fcitx5Proxy::updateInputMethods() {
 
         QList<InputMethodEntry> inputMethods;
         for (auto &im : ims.value()) {
-            inputMethods.append({this, im.uniqueName(), im.name(), im.nativeName(), im.label(), im.icon()});
+            inputMethods.append({key(), im.uniqueName(), im.name(), im.nativeName(), im.label(), im.icon()});
         }
 
         inputMethods_.swap(inputMethods);

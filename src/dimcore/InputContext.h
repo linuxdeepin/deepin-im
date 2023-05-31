@@ -6,6 +6,7 @@
 #include "Events.h"
 
 class Dim;
+class InputMethodEntry;
 
 class InputContext : public QObject, public ObjectId<InputContext> {
     Q_OBJECT
@@ -20,12 +21,15 @@ public:
     void focusOut();
     void keyEvent(KeyEvent &event);
 
+    InputMethodEntry *currentIM();
+
 signals:
     void focused();
     void unFocused();
 
 private:
     Dim *dim_;
+    InputMethodEntry *current_im_;
 };
 
 #endif // !INPUTCONTEXT_H

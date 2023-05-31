@@ -82,7 +82,7 @@ void Dim::loadAddon(const QString &infoFile) {
 
     if (category == "InputMethod") {
         auto *imAddon = qobject_cast<InputMethodAddon *>(addon);
-        inputMethodAddons_.insert(imAddon);
+        inputMethodAddons_.insert(imAddon->key(), imAddon);
     } else if (category == "Frontend") {
         auto *frontend = qobject_cast<FrontendAddon *>(addon);
         frontends_.insert(frontend);
@@ -94,6 +94,17 @@ void Dim::loadAddon(const QString &infoFile) {
 }
 
 bool Dim::postEvent(Event &event) {
-    Q_UNUSED(event);
+    switch (event.type) {
+    case EventType::Key:
+        postKeyEvent(reinterpret_cast<KeyEvent &>(event));
+        break;
+    }
+
     return false;
+}
+
+void Dim::postKeyEvent(KeyEvent &event) {
+    // TODO: check shortcuts (switch im etc.)
+
+    event.ic->currentIM()->processKeyEvent(event);
 }

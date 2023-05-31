@@ -6,8 +6,9 @@
 #include <memory>
 
 class InputMethodAddon;
-
 class InputMethodEntryPrivate;
+class KeyEvent;
+
 class InputMethodEntry {
 public:
     InputMethodEntry(const QString &addon,
@@ -24,6 +25,8 @@ public:
     const QString &description() const;
     const QString &label() const;
     const QString &iconName() const;
+
+    void processKeyEvent(KeyEvent &event);
 
 private:
     std::shared_ptr<InputMethodEntryPrivate> d;

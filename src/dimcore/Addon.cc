@@ -1,12 +1,17 @@
 #include "Addon.h"
 
-Addon::Addon(Dim *dim)
-    : dim_(dim) {
+Addon::Addon(Dim *dim, const QString &key)
+    : dim_(dim)
+    , key_(key) {
 }
 
 Addon::~Addon() {
 }
 
-Dim *Addon::dim() {
+Dim *Addon::dim() const {
     return dim_;
+}
+
+const QString &Addon::key() const {
+    return key_;
 }

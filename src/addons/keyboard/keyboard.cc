@@ -26,7 +26,7 @@ struct Layout {
 };
 
 Keyboard::Keyboard(Dim *dim)
-    : InputMethodAddon(dim)
+    : InputMethodAddon(dim, "keyboard")
     , ctx_(xkb_context_new(XKB_CONTEXT_NO_FLAGS)) {
     if (!ctx_) {
         throw std::runtime_error("Failed to create xkb context");
@@ -65,7 +65,7 @@ void Keyboard::parseLayoutList(const QDomElement &layoutListEle) {
         QString description = configItemEle.firstChildElement("description").text();
         // QString languageList = parseLanguageList(configItemEle.firstChildElement("languageList"));
 
-        keyboards_.append({this, QString("keyboard-%1").arg(name), name, shortDescription, description, ""});
+        keyboards_.append({key(), QString("keyboard-%1").arg(name), name, shortDescription, description, ""});
 
         parseVariantList(name, layoutEle.firstChildElement("variantList"));
     }
@@ -84,7 +84,7 @@ void Keyboard::parseVariantList(const QString &layoutName, const QDomElement &va
 
         QString fullname = layoutName + "_" + name;
 
-        keyboards_.append({this, QString("keyboard-%1").arg(fullname), fullname, shortDescription, description, ""});
+        keyboards_.append({key(), QString("keyboard-%1").arg(fullname), fullname, shortDescription, description, ""});
     }
 }
 

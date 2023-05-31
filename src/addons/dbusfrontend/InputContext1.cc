@@ -28,6 +28,6 @@ void InputContext1::Destroy() {
 }
 
 void InputContext1::ProcessKeyEvent(uint32_t keyval, uint32_t keycode, uint32_t state, bool isRelease, uint32_t time) {
-    KeyEvent e(keyval, keycode, state, isRelease, time);
+    KeyEvent e(this, keyval, keycode, state, isRelease, time);
     keyEvent(e);
 }

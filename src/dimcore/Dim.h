@@ -12,6 +12,7 @@ class InputMethodAddon;
 class FrontendAddon;
 class Addon;
 class Event;
+class KeyEvent;
 
 class Dim : public QObject {
 public:
@@ -25,11 +26,12 @@ public:
 
 private:
     QMap<uint32_t, InputContext *> inputContexts_;
-    QSet<InputMethodAddon *> inputMethodAddons_;
+    QMap<QString, InputMethodAddon *> inputMethodAddons_;
     QSet<FrontendAddon *> frontends_;
 
     void loadAddons();
     void loadAddon(const QString &infoFile);
+    void postKeyEvent(KeyEvent &event);
 };
 
 #endif // !DIM_H
