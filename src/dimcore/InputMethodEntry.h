@@ -10,7 +10,7 @@ class InputMethodAddon;
 class InputMethodEntryPrivate;
 class InputMethodEntry {
 public:
-    InputMethodEntry(const InputMethodAddon *addon,
+    InputMethodEntry(const QString &addon,
                      const QString &uniqueName,
                      const QString &name,
                      const QString &description,
@@ -18,6 +18,7 @@ public:
                      const QString &iconName);
     ~InputMethodEntry();
 
+    const QString &addon() const;
     const QString &uniqueName() const;
     const QString &name() const;
     const QString &description() const;
