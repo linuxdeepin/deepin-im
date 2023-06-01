@@ -21,13 +21,12 @@ Dim::Dim(QObject *parent)
 Dim::~Dim() {
 }
 
-uint32_t Dim::newInputContext() {
-    auto *ctx = new InputContext(this);
-    inputContexts_.insert(ctx->id(), ctx);
+void Dim::inputContextCreated(InputContext *ic) {
+    inputContexts_.insert(ic->id(), ic);
 
-    connect(ctx, &InputContext::destroyed, this, [this, ctx]() { inputContexts_.remove(ctx->id()); });
-
-    return ctx->id();
+    connect(ic, &InputContext::destroyed, this, [this, id = ic->id()]() { inputContexts_.remove(id); });
+    connect(ic, &InputContext::focused, this, []() {});
+    connect(ic, &InputContext::unFocused, this, []() {});
 }
 
 void Dim::loadAddons() {
@@ -131,7 +130,6 @@ void Dim::postKeyEvent(KeyEvent &event) {
         return;
     }
     const auto &im = i.value();
-
 
     const auto &addonKey = im.addon();
     auto j = inputMethodAddons_.find(addonKey);

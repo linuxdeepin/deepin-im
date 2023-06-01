@@ -20,7 +20,7 @@ public:
     Dim(QObject *parent = nullptr);
     ~Dim();
 
-    uint32_t newInputContext();
+    void inputContextCreated(InputContext *ic);
     InputContext *getInputContext(uint32_t id) { return inputContexts_.value(id); }
 
     const QMap<QString, InputMethodEntry> &ims() const;

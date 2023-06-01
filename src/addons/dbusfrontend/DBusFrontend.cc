@@ -21,9 +21,6 @@ DBusFrontend::~DBusFrontend() {
 
 QDBusObjectPath DBusFrontend::CreateInputContext() {
     auto *icbus = new InputContext1(dim(), this);
-    auto id = icbus->id();
-    inputContextBuses_.insert(id, icbus);
-    connect(icbus, &InputContext1::destroyed, this, [this, id]() { inputContextBuses_.remove(id); });
 
     return QDBusObjectPath(icbus->path());
 }

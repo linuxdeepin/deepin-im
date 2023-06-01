@@ -18,13 +18,15 @@ InputContext1::~InputContext1() {
 }
 
 void InputContext1::FocusIn() {
+    focusIn();
 }
 
 void InputContext1::FocusOut() {
+    focusOut();
 }
 
 void InputContext1::Destroy() {
-    deleteLater();
+    destroy();
 }
 
 void InputContext1::ProcessKeyEvent(uint32_t keyval, uint32_t keycode, uint32_t state, bool isRelease, uint32_t time) {

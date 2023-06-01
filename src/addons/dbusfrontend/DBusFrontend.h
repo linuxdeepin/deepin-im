@@ -20,7 +20,6 @@ public slots:
 
 private:
     InputmethodAdaptor *adaptor_;
-    QMap<uint32_t, InputContext1 *> inputContextBuses_;
 };
 
 #endif // !DBUSFRONTEND_H
