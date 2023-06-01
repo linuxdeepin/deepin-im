@@ -26,8 +26,6 @@ public:
     const QString &label() const;
     const QString &iconName() const;
 
-    void processKeyEvent(KeyEvent &event);
-
 private:
     std::shared_ptr<InputMethodEntryPrivate> d;
 };
