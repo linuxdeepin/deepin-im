@@ -82,6 +82,7 @@ void Dim::loadAddon(const QString &infoFile) {
 
     if (category == "InputMethod") {
         auto *imAddon = qobject_cast<InputMethodAddon *>(addon);
+        initInputMethodAddon(imAddon);
         inputMethodAddons_.insert(imAddon->key(), imAddon);
     } else if (category == "Frontend") {
         auto *frontend = qobject_cast<FrontendAddon *>(addon);
@@ -90,6 +91,13 @@ void Dim::loadAddon(const QString &infoFile) {
         qWarning() << "Addon" << name << "has an invalid category" << category;
         delete addon;
         return;
+    }
+}
+
+void Dim::initInputMethodAddon(InputMethodAddon *addon) {
+    // ims_.append(addon->getInputMethods());
+    for (auto &i : addon->getInputMethods()) {
+        ims_.insert(i.uniqueName(), std::move(i));
     }
 }
 
@@ -103,8 +111,35 @@ bool Dim::postEvent(Event &event) {
     return false;
 }
 
+const QMap<QString, InputMethodEntry> &Dim::ims() const {
+    return ims_;
+}
+
+const QList<QString> &Dim::enabledIMs() const {
+    return enabledIMs_;
+}
+
 void Dim::postKeyEvent(KeyEvent &event) {
     // TODO: check shortcuts (switch im etc.)
 
-    event.ic->currentIM()->processKeyEvent(event);
+    const auto &inputState = event.ic->inputState();
+
+    const QString &currentIMKey = inputState.currentIM();
+    auto i = ims_.find(currentIMKey);
+    if (i == ims_.end()) {
+        // TODO:
+        return;
+    }
+    const auto &im = i.value();
+
+
+    const auto &addonKey = im.addon();
+    auto j = inputMethodAddons_.find(addonKey);
+    if (j == inputMethodAddons_.end()) {
+        // TODO:
+        return;
+    }
+    auto *addon = j.value();
+
+    addon->keyEvent(im, event);
 }

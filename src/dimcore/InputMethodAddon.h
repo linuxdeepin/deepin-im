@@ -14,6 +14,7 @@ public:
     virtual ~InputMethodAddon();
 
     virtual QList<InputMethodEntry> getInputMethods() = 0;
+    virtual void keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) = 0;
 };
 
 #endif // !INPUTMETHODADDON_H

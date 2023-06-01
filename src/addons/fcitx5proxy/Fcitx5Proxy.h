@@ -11,6 +11,7 @@ public:
     virtual ~Fcitx5Proxy();
 
     QList<InputMethodEntry> getInputMethods() override;
+    void keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) override;
 
 private:
     DBusProvider *dbusProvider_;

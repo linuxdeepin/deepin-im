@@ -30,6 +30,11 @@ QList<InputMethodEntry> Fcitx5Proxy::getInputMethods() {
     return inputMethods_;
 }
 
+void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) {
+    Q_UNUSED(entry);
+    Q_UNUSED(keyEvent);
+}
+
 void Fcitx5Proxy::updateInputMethods() {
     auto call = dbusProvider_->controller()->AvailableInputMethods();
     auto watcher = new QDBusPendingCallWatcher(call, this);

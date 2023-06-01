@@ -10,6 +10,7 @@ set(DIMCORE_SOURCES
   InputContext.cc
   InputMethodAddon.cc
   InputMethodEntry.cc
+  InputState.cc
   Events.cc
 )
 
@@ -20,6 +21,7 @@ set(DIMCORE_HEADERS
   InputContext.h
   InputMethodAddon.h
   InputMethodEntry.h
+  InputState.h
   Events.h
 )
 

@@ -4,8 +4,9 @@
 #include <QObject>
 #include <QMap>
 #include <QSet>
+#include <QList>
 
-#include <memory>
+#include "InputMethodEntry.h"
 
 class InputContext;
 class InputMethodAddon;
@@ -22,6 +23,9 @@ public:
     uint32_t newInputContext();
     InputContext *getInputContext(uint32_t id) { return inputContexts_.value(id); }
 
+    const QMap<QString, InputMethodEntry> &ims() const;
+    const QList<QString> &enabledIMs() const;
+
     bool postEvent(Event &event);
 
 private:
@@ -29,8 +33,12 @@ private:
     QMap<QString, InputMethodAddon *> inputMethodAddons_;
     QSet<FrontendAddon *> frontends_;
 
+    QMap<QString, InputMethodEntry> ims_;
+    QList<QString> enabledIMs_;
+
     void loadAddons();
     void loadAddon(const QString &infoFile);
+    void initInputMethodAddon(InputMethodAddon *addon);
     void postKeyEvent(KeyEvent &event);
 };
 

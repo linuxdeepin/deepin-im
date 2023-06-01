@@ -44,6 +44,11 @@ QList<InputMethodEntry> Keyboard::getInputMethods() {
     return keyboards_;
 }
 
+void Keyboard::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) {
+    Q_UNUSED(entry);
+    Q_UNUSED(keyEvent);
+}
+
 // static QList<QString> parseLanguageList(const QDomElement &languageListEle) {
 //     QList<QString> languageList;
 //     for (auto language = languageListEle.firstChildElement("iso639Id"); !language.isNull();

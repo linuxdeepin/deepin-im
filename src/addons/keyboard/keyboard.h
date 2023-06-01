@@ -13,6 +13,7 @@ public:
     ~Keyboard();
 
     QList<InputMethodEntry> getInputMethods() override;
+    void keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) override;
 
 private:
     xkb_context *ctx_;

@@ -2,11 +2,12 @@
 #define INPUTCONTEXT_H
 
 #include <QObject>
+
 #include "ObjectId.h"
 #include "Events.h"
+#include "InputState.h"
 
 class Dim;
-class InputMethodEntry;
 
 class InputContext : public QObject, public ObjectId<InputContext> {
     Q_OBJECT
@@ -21,7 +22,7 @@ public:
     void focusOut();
     void keyEvent(KeyEvent &event);
 
-    InputMethodEntry *currentIM();
+    const InputState &inputState() const;
 
 signals:
     void focused();
@@ -29,7 +30,7 @@ signals:
 
 private:
     Dim *dim_;
-    InputMethodEntry *current_im_;
+    InputState inputState_;
 };
 
 #endif // !INPUTCONTEXT_H

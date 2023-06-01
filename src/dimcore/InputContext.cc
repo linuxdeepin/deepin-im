@@ -5,7 +5,8 @@
 InputContext::InputContext(Dim *dim, QObject *parent)
     : QObject(parent)
     , ObjectId()
-    , dim_(dim) {
+    , dim_(dim)
+    , inputState_(dim) {
 }
 
 void InputContext::destroy() {
@@ -24,6 +25,6 @@ void InputContext::keyEvent(KeyEvent &event) {
     dim_->postEvent(event);
 }
 
-InputMethodEntry *InputContext::currentIM() {
-    return current_im_;
+const InputState &InputContext::inputState() const {
+    return inputState_;
 }
