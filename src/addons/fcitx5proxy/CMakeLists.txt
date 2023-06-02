@@ -12,6 +12,7 @@ add_library(fcitx5proxy MODULE
 target_link_libraries(fcitx5proxy PRIVATE
   dimcore
   Qt5::Core
+  Qt5::DBus
   Fcitx5Qt5::DBusAddons
 )
 

@@ -1,14 +1,15 @@
 #ifndef DBUSFRONTEND_H
 #define DBUSFRONTEND_H
 
-#include <QDBusObjectPath>
-
 #include <dimcore/FrontendAddon.h>
+
+#include <QDBusObjectPath>
 
 class InputmethodAdaptor;
 class InputContext1;
 
-class DBusFrontend : public FrontendAddon {
+class DBusFrontend : public FrontendAddon
+{
     Q_OBJECT
 
 public:

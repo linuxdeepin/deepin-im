@@ -8,26 +8,51 @@
 
 DBusProvider::DBusProvider(QObject *parent)
     : QObject(parent)
-    , m_watcher(new FcitxQtWatcher(QDBusConnection::sessionBus(), this))
+    , watcher_(new FcitxQtWatcher(QDBusConnection::sessionBus(), this))
 {
     registerFcitxQtDBusTypes();
-    connect(m_watcher, &FcitxQtWatcher::availabilityChanged, this,
+    connect(watcher_,
+            &FcitxQtWatcher::availabilityChanged,
+            this,
             &DBusProvider::fcitxAvailabilityChanged);
-    m_watcher->watch();
+    watcher_->watch();
 }
 
-DBusProvider::~DBusProvider() { m_watcher->unwatch(); }
+DBusProvider::~DBusProvider()
+{
+    watcher_->unwatch();
+}
 
-void DBusProvider::fcitxAvailabilityChanged(bool avail) {
-    delete m_controller;
-    m_controller = nullptr;
-
-    if (avail) {
-        m_controller =
-            new FcitxQtControllerProxy(m_watcher->serviceName(), "/controller",
-                                       m_watcher->connection(), this);
-        m_controller->setTimeout(3000);
+void DBusProvider::fcitxAvailabilityChanged(bool avail)
+{
+    if (controller_) {
+        delete controller_;
+        controller_ = nullptr;
     }
 
-    emit availabilityChanged(m_controller);
+    if (imProxy_) {
+        delete imProxy_;
+        imProxy_ = nullptr;
+    }
+
+    if (avail) {
+        const auto connection = watcher_->connection();
+        const auto service = watcher_->serviceName();
+
+        controller_ = new FcitxQtControllerProxy(service, "/controller", connection, this);
+        controller_->setTimeout(3000);
+
+        auto owner = connection.interface()->serviceOwner(service);
+        if (!owner.isValid()) {
+            return;
+        }
+
+        imProxy_ =
+            new FcitxQtInputMethodProxy(owner,
+                                        QStringLiteral("/org/freedesktop/portal/inputmethod"),
+                                        connection,
+                                        this);
+    }
+
+    emit availabilityChanged(controller_);
 }

@@ -6,7 +6,8 @@
 class Dim;
 class InputcontextAdaptor;
 
-class InputContext1 : public InputContext {
+class InputContext1 : public InputContext
+{
     Q_OBJECT
 
 public:
@@ -19,7 +20,8 @@ public slots:
     void FocusIn();
     void FocusOut();
     void Destroy();
-    void ProcessKeyEvent(uint32_t keyval, uint32_t keycode, uint32_t state, bool isRelease, uint32_t time);
+    void ProcessKeyEvent(
+        uint32_t keyval, uint32_t keycode, uint32_t state, bool isRelease, uint32_t time);
 
 private:
     InputcontextAdaptor *adaptor_;

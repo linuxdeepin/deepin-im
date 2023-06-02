@@ -2,19 +2,24 @@
 
 static const QString DIM_SERVICE = "org.deepin.dim";
 static const QString DIM_IM_PATH = "/org/freedesktop/portal/inputmethod";
-static const QString DIM_IC_PATH = "/org/freedesktop/portal/inputmethod/%d";
 
 InputContextProxy::InputContextProxy(QObject *parent)
     : QObject(parent)
     , bus_(QDBusConnection::connectToBus(QDBusConnection::BusType::SessionBus, "dim"))
     , watcher_(DIM_SERVICE, bus_, QDBusServiceWatcher::WatchModeFlag::WatchForOwnerChange, this)
-    , im_(new org::deepin::dim::portal::inputmethod(DIM_SERVICE, DIM_IM_PATH, QDBusConnection::sessionBus(), this))
-    , ic_(nullptr) {
-    connect(&watcher_, &QDBusServiceWatcher::serviceOwnerChanged, this, &InputContextProxy::serviceAvailableChanged);
+    , im_(new org::deepin::dim::portal::inputmethod(
+              DIM_SERVICE, DIM_IM_PATH, QDBusConnection::sessionBus(), this))
+    , ic_(nullptr)
+{
+    connect(&watcher_,
+            &QDBusServiceWatcher::serviceOwnerChanged,
+            this,
+            &InputContextProxy::serviceAvailableChanged);
     checkServiceAndCreateIC();
 }
 
-void InputContextProxy::checkServiceAndCreateIC() {
+void InputContextProxy::checkServiceAndCreateIC()
+{
     if (!bus_.interface()->isServiceRegistered(DIM_SERVICE)) {
         return;
     }
@@ -26,15 +31,20 @@ void InputContextProxy::checkServiceAndCreateIC() {
 
     QDBusPendingReply<QDBusObjectPath> penddingReply = im_->CreateInputContext();
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(penddingReply, this);
-    QObject::connect(watcher, &QDBusPendingCallWatcher::finished, this, &InputContextProxy::createIcFinished);
+    QObject::connect(watcher,
+                     &QDBusPendingCallWatcher::finished,
+                     this,
+                     &InputContextProxy::createIcFinished);
 }
 
-void InputContextProxy::serviceAvailableChanged() {
+void InputContextProxy::serviceAvailableChanged()
+{
     qDebug() << "onServiceOwnerChanged";
     QTimer::singleShot(100, this, &InputContextProxy::checkServiceAndCreateIC);
 }
 
-void InputContextProxy::createIcFinished(QDBusPendingCallWatcher *watcher) {
+void InputContextProxy::createIcFinished(QDBusPendingCallWatcher *watcher)
+{
     watcher->deleteLater();
 
     QDBusPendingReply<QDBusObjectPath> reply = *watcher;
@@ -47,7 +57,8 @@ void InputContextProxy::createIcFinished(QDBusPendingCallWatcher *watcher) {
     ic_ = new org::deepin::dim::portal::inputcontext(DIM_SERVICE, path.path(), bus_, this);
 }
 
-void InputContextProxy::focusIn() {
+void InputContextProxy::focusIn()
+{
     if (!ic_) {
         return;
     }
@@ -55,7 +66,8 @@ void InputContextProxy::focusIn() {
     ic_->FocusIn();
 }
 
-void InputContextProxy::focusOut() {
+void InputContextProxy::focusOut()
+{
     if (!ic_) {
         return;
     }
@@ -63,7 +75,9 @@ void InputContextProxy::focusOut() {
     ic_->FocusOut();
 }
 
-void InputContextProxy::processKeyEvent(uint keyval, uint keycode, uint state, bool isRelease, uint time) {
+void InputContextProxy::processKeyEvent(
+        uint keyval, uint keycode, uint state, bool isRelease, uint time)
+{
     if (!ic_) {
         return;
     }

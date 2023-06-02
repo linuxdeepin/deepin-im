@@ -7,46 +7,73 @@ DIM_ADDON_FACTORY(Fcitx5Proxy);
 Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
     : InputMethodAddon(dim, "fcitx5proxy")
     , dbusProvider_(new DBusProvider(this))
-    , available_(dbusProvider_->available()) {
+    , available_(dbusProvider_->available())
+{
     connect(dbusProvider_, &DBusProvider::availabilityChanged, this, [this](bool available) {
         if (available_ != available) {
             available_ = available;
 
-            if (available_) {
-                updateInputMethods();
-            } else {
-                inputMethods_.clear();
-            }
+            available_ ? updateInputMethods() : inputMethods_.clear();
         }
     });
 
     updateInputMethods();
 }
 
-Fcitx5Proxy::~Fcitx5Proxy() {
-}
+Fcitx5Proxy::~Fcitx5Proxy() { }
 
-QList<InputMethodEntry> Fcitx5Proxy::getInputMethods() {
+QList<InputMethodEntry> Fcitx5Proxy::getInputMethods()
+{
     return inputMethods_;
 }
 
-void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) {
+QDBusPendingReply<QDBusObjectPath, QByteArray>
+Fcitx5Proxy::createFcitxInputContext(const QString &app)
+{
+    FcitxQtStringKeyValueList list;
+    FcitxQtStringKeyValue arg;
+
+    arg.setKey("program");
+    arg.setValue(app);
+
+    FcitxQtStringKeyValue arg2;
+    arg2.setKey("display");
+    arg2.setValue("x11:");
+    list << arg2;
+
+    auto result = dbusProvider_->imProxy()->CreateInputContext(list);
+    if (!result.isError()) {
+        qWarning() << "failed to create fcitx input context";
+        return QDBusPendingReply{};
+    }
+
+    return result;
+}
+
+void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent)
+{
     Q_UNUSED(entry);
     Q_UNUSED(keyEvent);
 }
 
-void Fcitx5Proxy::updateInputMethods() {
+void Fcitx5Proxy::updateInputMethods()
+{
     auto call = dbusProvider_->controller()->AvailableInputMethods();
     auto watcher = new QDBusPendingCallWatcher(call, this);
-    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher *watcher) {
-        QDBusPendingReply<FcitxQtInputMethodEntryList> ims = *watcher;
-        watcher->deleteLater();
+    connect(
+        watcher,
+        &QDBusPendingCallWatcher::finished,
+        this,
+        [this](QDBusPendingCallWatcher *watcher) {
+            QDBusPendingReply<FcitxQtInputMethodEntryList> ims = *watcher;
+            watcher->deleteLater();
 
-        QList<InputMethodEntry> inputMethods;
-        for (auto &im : ims.value()) {
-            inputMethods.append({key(), im.uniqueName(), im.name(), im.nativeName(), im.label(), im.icon()});
-        }
+            QList<InputMethodEntry> inputMethods;
+            for (auto &im : ims.value()) {
+                inputMethods.append(
+                    { key(), im.uniqueName(), im.name(), im.nativeName(), im.label(), im.icon() });
+            }
 
-        inputMethods_.swap(inputMethods);
-    });
+            inputMethods_.swap(inputMethods);
+        });
 }

@@ -1,28 +1,30 @@
 #include "DIMPlatformInputContext.h"
 
-#include <QEvent>
-#include <QKeyEvent>
-#include <QGuiApplication>
+#include "InputContextProxy.h"
+
 #include <QDBusConnection>
 #include <QDebug>
-
-#include "InputContextProxy.h"
+#include <QEvent>
+#include <QGuiApplication>
+#include <QKeyEvent>
 
 static const QString DIM_SERVICE = "org.deepin.dim";
 static const QString DIM_IM_PATH = "/org/freedesktop/portal/inputmethod";
-static const QString DIM_IC_PATH = "/org/freedesktop/portal/inputmethod/%d";
 
 DIMPlatformInputContext::DIMPlatformInputContext()
     : QPlatformInputContext()
     , proxy_(new InputContextProxy(this))
-    , focusObject_(nullptr) {
+    , focusObject_(nullptr)
+{
 }
 
-bool DIMPlatformInputContext::isValid() const {
+bool DIMPlatformInputContext::isValid() const
+{
     return true;
 }
 
-void DIMPlatformInputContext::setFocusObject(QObject *object) {
+void DIMPlatformInputContext::setFocusObject(QObject *object)
+{
     qDebug() << "setFocusObject";
     if (focusObject_ == object) {
         return;
@@ -50,20 +52,24 @@ void DIMPlatformInputContext::setFocusObject(QObject *object) {
     proxy_->focusIn();
 }
 
-void DIMPlatformInputContext::showInputPanel() {
+void DIMPlatformInputContext::showInputPanel()
+{
     qDebug() << "showInputPanel";
 }
 
-void DIMPlatformInputContext::hideInputPanel() {
+void DIMPlatformInputContext::hideInputPanel()
+{
     qDebug() << "hideInputPanel";
 }
 
-bool DIMPlatformInputContext::isInputPanelVisible() const {
+bool DIMPlatformInputContext::isInputPanelVisible() const
+{
     qDebug() << "isInputPanelVisible";
     return true;
 }
 
-bool DIMPlatformInputContext::eventFilter(QObject *object, QEvent *event) {
+bool DIMPlatformInputContext::eventFilter(QObject *object, QEvent *event)
+{
     if (object != focusObject_) {
         return false;
     }

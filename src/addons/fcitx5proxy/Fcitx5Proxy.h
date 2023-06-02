@@ -3,15 +3,22 @@
 
 #include <dimcore/InputMethodAddon.h>
 
+#include <QDBusObjectPath>
+#include <QDBusPendingReply>
+
 class DBusProvider;
 
-class Fcitx5Proxy : public InputMethodAddon {
+class Fcitx5Proxy : public InputMethodAddon
+{
 public:
     Fcitx5Proxy(Dim *dim);
     virtual ~Fcitx5Proxy();
 
     QList<InputMethodEntry> getInputMethods() override;
     void keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) override;
+
+private:
+    QDBusPendingReply<QDBusObjectPath, QByteArray> createFcitxInputContext(const QString &app);
 
 private:
     DBusProvider *dbusProvider_;

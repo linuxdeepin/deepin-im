@@ -7,21 +7,27 @@
 #ifndef DBUSPROVIDER_H
 #define DBUSPROVIDER_H
 
-#include <QObject>
 #include <fcitxqtcontrollerproxy.h>
+#include <fcitxqtinputmethodproxy.h>
 #include <fcitxqtwatcher.h>
+
+#include <QObject>
 
 using namespace fcitx;
 
-class DBusProvider : public QObject {
+class DBusProvider : public QObject
+{
     Q_OBJECT
 
 public:
     DBusProvider(QObject *parent = nullptr);
     ~DBusProvider();
 
-    bool available() const { return m_controller != nullptr; }
-    FcitxQtControllerProxy *controller() { return m_controller; }
+    inline bool available() const { return controller_ != nullptr; }
+
+    inline FcitxQtControllerProxy *controller() { return controller_; }
+
+    inline FcitxQtInputMethodProxy *imProxy() { return imProxy_; }
 
 signals:
     void availabilityChanged(bool avail);
@@ -30,8 +36,9 @@ private slots:
     void fcitxAvailabilityChanged(bool avail);
 
 private:
-    FcitxQtWatcher *m_watcher;
-    FcitxQtControllerProxy *m_controller = nullptr;
+    FcitxQtWatcher *watcher_;
+    FcitxQtControllerProxy *controller_ = nullptr;
+    FcitxQtInputMethodProxy *imProxy_ = nullptr;
 };
 
 #endif
