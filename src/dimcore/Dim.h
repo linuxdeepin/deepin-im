@@ -30,6 +30,7 @@ public:
 
 private:
     QMap<uint32_t, InputContext *> inputContexts_;
+    uint32_t focusedIC_;
     QMap<QString, InputMethodAddon *> inputMethodAddons_;
     QSet<FrontendAddon *> frontends_;
 

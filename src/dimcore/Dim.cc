@@ -1,35 +1,44 @@
 #include "Dim.h"
 
-#include <dlfcn.h>
-
-#include <QDir>
-#include <QSettings>
-#include <QDebug>
-#include <QPluginLoader>
-
+#include "Addon.h"
+#include "FrontendAddon.h"
 #include "InputContext.h"
 #include "InputMethodAddon.h"
-#include "FrontendAddon.h"
 #include "config.h"
-#include "Addon.h"
+
+#include <QDebug>
+#include <QDir>
+#include <QPluginLoader>
+#include <QSettings>
+
+#include <dlfcn.h>
 
 Dim::Dim(QObject *parent)
-    : QObject(parent) {
+    : QObject(parent)
+    , focusedIC_(0)
+{
     loadAddons();
 }
 
-Dim::~Dim() {
-}
+Dim::~Dim() { }
 
-void Dim::inputContextCreated(InputContext *ic) {
+void Dim::inputContextCreated(InputContext *ic)
+{
     inputContexts_.insert(ic->id(), ic);
 
-    connect(ic, &InputContext::destroyed, this, [this, id = ic->id()]() { inputContexts_.remove(id); });
-    connect(ic, &InputContext::focused, this, []() {});
-    connect(ic, &InputContext::unFocused, this, []() {});
+    connect(ic, &InputContext::destroyed, this, [this, id = ic->id()]() {
+        inputContexts_.remove(id);
+    });
+    connect(ic, &InputContext::focused, this, [this, id = ic->id()]() {
+        focusedIC_ = id;
+    });
+    connect(ic, &InputContext::unFocused, this, [this]() {
+        focusedIC_ = 0;
+    });
 }
 
-void Dim::loadAddons() {
+void Dim::loadAddons()
+{
     QDir dir(DIM_ADDON_INFO_DIR);
     qInfo() << "addon info dir" << dir.absolutePath();
     auto addonInfoFiles = dir.entryInfoList(QDir::Filter::Files | QDir::Filter::Readable);
@@ -43,10 +52,12 @@ void Dim::loadAddons() {
     }
 }
 
-void Dim::loadAddon(const QString &infoFile) {
+void Dim::loadAddon(const QString &infoFile)
+{
     QSettings settings(infoFile, QSettings::Format::IniFormat);
     settings.beginGroup("Addon");
-    if (!settings.contains("Name") || !settings.contains("Category") || !settings.contains("Library")) {
+    if (!settings.contains("Name") || !settings.contains("Category")
+        || !settings.contains("Library")) {
         qWarning() << "Addon info file" << infoFile << "is invalid";
         return;
     }
@@ -93,14 +104,16 @@ void Dim::loadAddon(const QString &infoFile) {
     }
 }
 
-void Dim::initInputMethodAddon(InputMethodAddon *addon) {
+void Dim::initInputMethodAddon(InputMethodAddon *addon)
+{
     // ims_.append(addon->getInputMethods());
     for (auto &i : addon->getInputMethods()) {
         ims_.insert(i.uniqueName(), std::move(i));
     }
 }
 
-bool Dim::postEvent(Event &event) {
+bool Dim::postEvent(Event &event)
+{
     switch (event.type) {
     case EventType::Key:
         postKeyEvent(reinterpret_cast<KeyEvent &>(event));
@@ -110,15 +123,18 @@ bool Dim::postEvent(Event &event) {
     return false;
 }
 
-const QMap<QString, InputMethodEntry> &Dim::ims() const {
+const QMap<QString, InputMethodEntry> &Dim::ims() const
+{
     return ims_;
 }
 
-const QList<QString> &Dim::enabledIMs() const {
+const QList<QString> &Dim::enabledIMs() const
+{
     return enabledIMs_;
 }
 
-void Dim::postKeyEvent(KeyEvent &event) {
+void Dim::postKeyEvent(KeyEvent &event)
+{
     // TODO: check shortcuts (switch im etc.)
 
     const auto &inputState = event.ic->inputState();
