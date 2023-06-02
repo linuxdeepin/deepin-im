@@ -6,25 +6,32 @@ InputContext::InputContext(Dim *dim, QObject *parent)
     : QObject(parent)
     , ObjectId()
     , dim_(dim)
-    , inputState_(dim) {
+    , inputState_(dim)
+{
+    dim_->inputContextCreated(this);
 }
 
-void InputContext::destroy() {
+void InputContext::destroy()
+{
     deleteLater();
 }
 
-void InputContext::focusIn() {
+void InputContext::focusIn()
+{
     emit focused();
 }
 
-void InputContext::focusOut() {
+void InputContext::focusOut()
+{
     emit unFocused();
 }
 
-void InputContext::keyEvent(KeyEvent &event) {
+void InputContext::keyEvent(KeyEvent &event)
+{
     dim_->postEvent(event);
 }
 
-const InputState &InputContext::inputState() const {
+const InputState &InputContext::inputState() const
+{
     return inputState_;
 }
