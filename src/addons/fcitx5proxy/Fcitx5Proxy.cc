@@ -2,6 +2,8 @@
 
 #include "DBusProvider.h"
 
+using namespace org::deepin::dim;
+
 DIM_ADDON_FACTORY(Fcitx5Proxy);
 
 Fcitx5Proxy::Fcitx5Proxy(Dim *dim)

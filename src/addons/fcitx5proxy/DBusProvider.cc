@@ -6,6 +6,8 @@
 
 #include "DBusProvider.h"
 
+using namespace org::deepin::dim;
+
 DBusProvider::DBusProvider(QObject *parent)
     : QObject(parent)
     , watcher_(new FcitxQtWatcher(QDBusConnection::sessionBus(), this))

@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    Dim dim;
+    org::deepin::dim::Dim dim;
 
     return a.exec();
 }

@@ -6,6 +6,11 @@
 #include <QDBusObjectPath>
 
 class InputmethodAdaptor;
+
+namespace org {
+namespace deepin {
+namespace dim {
+
 class InputContext1;
 
 class DBusFrontend : public FrontendAddon
@@ -22,5 +27,9 @@ public slots:
 private:
     InputmethodAdaptor *adaptor_;
 };
+
+} // namespace dim
+} // namespace deepin
+} // namespace org
 
 #endif // !DBUSFRONTEND_H

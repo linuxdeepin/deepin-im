@@ -6,6 +6,10 @@
 
 #include <QList>
 
+namespace org {
+namespace deepin {
+namespace dim {
+
 class InputMethodAddon : public Addon
 {
     Q_OBJECT
@@ -20,5 +24,9 @@ public:
 Q_SIGNALS:
     void createInputContext(const QString &appName);
 };
+
+} // namespace dim
+} // namespace deepin
+} // namespace org
 
 #endif // !INPUTMETHODADDON_H

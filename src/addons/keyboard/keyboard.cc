@@ -1,23 +1,27 @@
 #include "keyboard.h"
 
+#include "config.h"
+
 #include <xkbcommon/xkbcommon.h>
 
 #include <QDir>
 #include <QDomDocument>
 #include <QList>
 
-#include "config.h"
+using namespace org::deepin::dim;
 
 DIM_ADDON_FACTORY(Keyboard)
 
-struct Variant {
+struct Variant
+{
     QString name;
     QString shortDescription;
     QString description;
     QList<QString> languageList;
 };
 
-struct Layout {
+struct Layout
+{
     QString name;
     QString shortDescription;
     QString description;
@@ -27,7 +31,8 @@ struct Layout {
 
 Keyboard::Keyboard(Dim *dim)
     : InputMethodAddon(dim, "keyboard")
-    , ctx_(xkb_context_new(XKB_CONTEXT_NO_FLAGS)) {
+    , ctx_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
+{
     if (!ctx_) {
         throw std::runtime_error("Failed to create xkb context");
     }
@@ -37,14 +42,15 @@ Keyboard::Keyboard(Dim *dim)
     QString extraRules = dir.absoluteFilePath(QString("%1.extras.xml").arg(DEFAULT_XKB_RULES));
 }
 
-Keyboard::~Keyboard() {
-}
+Keyboard::~Keyboard() { }
 
-QList<InputMethodEntry> Keyboard::getInputMethods() {
+QList<InputMethodEntry> Keyboard::getInputMethods()
+{
     return keyboards_;
 }
 
-void Keyboard::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) {
+void Keyboard::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent)
+{
     Q_UNUSED(entry);
     Q_UNUSED(keyEvent);
 }
@@ -60,7 +66,8 @@ void Keyboard::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) {
 //     return languageList;
 // }
 
-void Keyboard::parseLayoutList(const QDomElement &layoutListEle) {
+void Keyboard::parseLayoutList(const QDomElement &layoutListEle)
+{
     for (auto layoutEle = layoutListEle.firstChildElement("layout"); !layoutEle.isNull();
          layoutEle = layoutEle.nextSiblingElement("layout")) {
         auto configItemEle = layoutEle.firstChildElement("configItem");
@@ -68,15 +75,18 @@ void Keyboard::parseLayoutList(const QDomElement &layoutListEle) {
         QString name = configItemEle.firstChildElement("name").text();
         QString shortDescription = configItemEle.firstChildElement("shortDescription").text();
         QString description = configItemEle.firstChildElement("description").text();
-        // QString languageList = parseLanguageList(configItemEle.firstChildElement("languageList"));
+        // QString languageList =
+        // parseLanguageList(configItemEle.firstChildElement("languageList"));
 
-        keyboards_.append({key(), QString("keyboard-%1").arg(name), name, shortDescription, description, ""});
+        keyboards_.append(
+            { key(), QString("keyboard-%1").arg(name), name, shortDescription, description, "" });
 
         parseVariantList(name, layoutEle.firstChildElement("variantList"));
     }
 }
 
-void Keyboard::parseVariantList(const QString &layoutName, const QDomElement &variantListEle) {
+void Keyboard::parseVariantList(const QString &layoutName, const QDomElement &variantListEle)
+{
     QList<Variant> list;
     for (auto variantEle = variantListEle.firstChildElement("variant"); !variantEle.isNull();
          variantEle = variantEle.nextSiblingElement("variant")) {
@@ -85,15 +95,22 @@ void Keyboard::parseVariantList(const QString &layoutName, const QDomElement &va
         QString name = configItemEle.firstChildElement("name").text();
         QString shortDescription = configItemEle.firstChildElement("shortDescription").text();
         QString description = configItemEle.firstChildElement("description").text();
-        // QString languageList = parseLanguageList(configItemEle.firstChildElement("languageList"));
+        // QString languageList =
+        // parseLanguageList(configItemEle.firstChildElement("languageList"));
 
         QString fullname = layoutName + "_" + name;
 
-        keyboards_.append({key(), QString("keyboard-%1").arg(fullname), fullname, shortDescription, description, ""});
+        keyboards_.append({ key(),
+                            QString("keyboard-%1").arg(fullname),
+                            fullname,
+                            shortDescription,
+                            description,
+                            "" });
     }
 }
 
-void Keyboard::parseRule(const QString &file) {
+void Keyboard::parseRule(const QString &file)
+{
     QFile xmlFile(file);
     if (!xmlFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;

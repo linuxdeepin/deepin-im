@@ -3,11 +3,16 @@
 
 #include <QString>
 
+namespace org {
+namespace deepin {
+namespace dim {
+
 class Dim;
 class InputMethodAddon;
 class InputMethodEntry;
 
-class InputState {
+class InputState
+{
 public:
     InputState(Dim *dim);
 
@@ -17,5 +22,9 @@ private:
     Dim *dim_;
     QString current_im_;
 };
+
+} // namespace dim
+} // namespace deepin
+} // namespace org
 
 #endif // !INPUTSTATE_H

@@ -3,11 +3,20 @@
 
 #include "Addon.h"
 
-class FrontendAddon : public Addon {
+namespace org {
+namespace deepin {
+namespace dim {
+
+class FrontendAddon : public Addon
+{
     Q_OBJECT
 
 public:
     explicit FrontendAddon(Dim *dim, const QString &key);
 };
+
+} // namespace dim
+} // namespace deepin
+} // namespace org
 
 #endif // !FRONTENDADDON_H

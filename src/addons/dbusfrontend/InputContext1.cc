@@ -5,6 +5,8 @@
 
 #include <QDBusConnection>
 
+using namespace org::deepin::dim;
+
 static const QString inputcontextPath = "/org/freedesktop/portal/inputcontext/%1";
 
 InputContext1::InputContext1(Dim *dim, QObject *parent)

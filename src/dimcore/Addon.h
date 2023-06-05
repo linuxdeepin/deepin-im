@@ -3,9 +3,14 @@
 
 #include <QObject>
 
+namespace org {
+namespace deepin {
+namespace dim {
+
 class Dim;
 
-class Addon : public QObject {
+class Addon : public QObject
+{
     Q_OBJECT
 
 public:
@@ -20,11 +25,18 @@ private:
     QString key_;
 };
 
-#define DIM_ADDON_FACTORY(name)                                                                                        \
-    extern "C" {                                                                                                       \
-    Addon *create(Dim *dim) { return new name(dim); }                                                                  \
+#define DIM_ADDON_FACTORY(name) \
+    extern "C" {                \
+    Addon *create(Dim *dim)     \
+    {                           \
+        return new name(dim);   \
+    }                           \
     }
 
 typedef Addon *addonCreate(Dim *);
+
+} // namespace dim
+} // namespace deepin
+} // namespace org
 
 #endif // !ADDON_H

@@ -2,6 +2,8 @@
 
 #include "Dim.h"
 
+using namespace org::deepin::dim;
+
 InputContext::InputContext(Dim *dim, QObject *parent)
     : QObject(parent)
     , ObjectId()

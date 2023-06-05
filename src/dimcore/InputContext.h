@@ -1,15 +1,20 @@
 #ifndef INPUTCONTEXT_H
 #define INPUTCONTEXT_H
 
-#include <QObject>
-
-#include "ObjectId.h"
 #include "Events.h"
 #include "InputState.h"
+#include "ObjectId.h"
+
+#include <QObject>
+
+namespace org {
+namespace deepin {
+namespace dim {
 
 class Dim;
 
-class InputContext : public QObject, public ObjectId<InputContext> {
+class InputContext : public QObject, public ObjectId<InputContext>
+{
     Q_OBJECT
 
 public:
@@ -32,5 +37,9 @@ private:
     Dim *dim_;
     InputState inputState_;
 };
+
+} // namespace dim
+} // namespace deepin
+} // namespace org
 
 #endif // !INPUTCONTEXT_H

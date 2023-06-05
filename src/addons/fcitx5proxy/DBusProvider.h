@@ -15,6 +15,9 @@
 
 using namespace fcitx;
 
+namespace org {
+namespace deepin {
+namespace dim {
 class DBusProvider : public QObject
 {
     Q_OBJECT
@@ -40,5 +43,9 @@ private:
     FcitxQtControllerProxy *controller_ = nullptr;
     FcitxQtInputMethodProxy *imProxy_ = nullptr;
 };
+
+} // namespace dim
+} // namespace deepin
+} // namespace org
 
 #endif

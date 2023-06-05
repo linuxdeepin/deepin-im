@@ -13,6 +13,8 @@
 
 #include <dlfcn.h>
 
+using namespace org::deepin::dim;
+
 Dim::Dim(QObject *parent)
     : QObject(parent)
     , focusedIC_(0)

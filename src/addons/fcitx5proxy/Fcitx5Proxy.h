@@ -6,6 +6,10 @@
 #include <QDBusObjectPath>
 #include <QDBusPendingReply>
 
+namespace org {
+namespace deepin {
+namespace dim {
+
 class DBusProvider;
 
 class Fcitx5Proxy : public InputMethodAddon
@@ -28,5 +32,9 @@ private:
 
     void updateInputMethods();
 };
+
+} // namespace dim
+} // namespace deepin
+} // namespace org
 
 #endif // !FCITX5PROXY_H

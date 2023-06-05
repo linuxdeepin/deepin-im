@@ -1,12 +1,16 @@
 #ifndef DIM_H
 #define DIM_H
 
-#include <QObject>
-#include <QMap>
-#include <QSet>
-#include <QList>
-
 #include "InputMethodEntry.h"
+
+#include <QList>
+#include <QMap>
+#include <QObject>
+#include <QSet>
+
+namespace org {
+namespace deepin {
+namespace dim {
 
 class InputContext;
 class InputMethodAddon;
@@ -15,12 +19,14 @@ class Addon;
 class Event;
 class KeyEvent;
 
-class Dim : public QObject {
+class Dim : public QObject
+{
 public:
     Dim(QObject *parent = nullptr);
     ~Dim();
 
     void inputContextCreated(InputContext *ic);
+
     InputContext *getInputContext(uint32_t id) { return inputContexts_.value(id); }
 
     const QMap<QString, InputMethodEntry> &ims() const;
@@ -42,5 +48,11 @@ private:
     void initInputMethodAddon(InputMethodAddon *addon);
     void postKeyEvent(KeyEvent &event);
 };
+
+} // namespace dim
+
+} // namespace deepin
+
+} // namespace org
 
 #endif // !DIM_H

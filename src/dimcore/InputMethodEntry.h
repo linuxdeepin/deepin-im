@@ -5,11 +5,17 @@
 
 #include <memory>
 
-class InputMethodAddon;
 class InputMethodEntryPrivate;
+
+namespace org {
+namespace deepin {
+namespace dim {
+
+class InputMethodAddon;
 class KeyEvent;
 
-class InputMethodEntry {
+class InputMethodEntry
+{
 public:
     InputMethodEntry(const QString &addon,
                      const QString &uniqueName,
@@ -29,5 +35,9 @@ public:
 private:
     std::shared_ptr<InputMethodEntryPrivate> d;
 };
+
+} // namespace dim
+} // namespace deepin
+} // namespace org
 
 #endif // !INPUTMETHOD_H

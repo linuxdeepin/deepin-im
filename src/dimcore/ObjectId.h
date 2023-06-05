@@ -3,11 +3,13 @@
 
 #include <stdint.h>
 
-template <typename T>
-class ObjectId {
+template<typename T>
+class ObjectId
+{
 public:
     ObjectId()
-        : id_(created_) {
+        : id_(created_)
+    {
         created_++;
     }
 
@@ -18,7 +20,7 @@ private:
     const uint32_t id_;
 };
 
-template <typename T>
-uint32_t ObjectId<T>::created_{1};
+template<typename T>
+uint32_t ObjectId<T>::created_{ 1 };
 
 #endif // !OBJECTID_H

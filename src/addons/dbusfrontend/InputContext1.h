@@ -3,8 +3,13 @@
 
 #include "dimcore/InputContext.h"
 
-class Dim;
 class InputcontextAdaptor;
+
+namespace org {
+namespace deepin {
+namespace dim {
+
+class Dim;
 
 class InputContext1 : public InputContext
 {
@@ -27,5 +32,9 @@ private:
     InputcontextAdaptor *adaptor_;
     QString path_;
 };
+
+} // namespace dim
+} // namespace deepin
+} // namespace org
 
 #endif // !INPUTCONTEXT1_H

@@ -7,6 +7,8 @@
 
 #include <QDBusConnection>
 
+using namespace org::deepin::dim;
+
 DIM_ADDON_FACTORY(DBusFrontend)
 
 DBusFrontend::DBusFrontend(Dim *dim)

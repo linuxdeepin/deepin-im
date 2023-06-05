@@ -1,5 +1,7 @@
 #include "Events.h"
 
+using namespace org::deepin::dim;
+
 Event::Event(EventType type, InputContext *ic)
     : type(type)
     , ic(ic) {

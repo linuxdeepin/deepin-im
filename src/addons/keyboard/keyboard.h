@@ -7,7 +7,12 @@ struct xkb_context;
 
 class QDomElement;
 
-class Keyboard : public InputMethodAddon {
+namespace org {
+namespace deepin {
+namespace dim {
+
+class Keyboard : public InputMethodAddon
+{
 public:
     Keyboard(Dim *dim);
     ~Keyboard();
@@ -23,5 +28,9 @@ private:
     void parseLayoutList(const QDomElement &layoutListEle);
     void parseVariantList(const QString &layoutName, const QDomElement &variantListEle);
 };
+
+} // namespace dim
+} // namespace deepin
+} // namespace org
 
 #endif // !KEYBOARD_H

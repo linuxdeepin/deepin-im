@@ -10,8 +10,8 @@ set(DBUSFRONTEND_SOURCES
   InputContext1.cc
 )
 
-qt5_add_dbus_adaptor(DBUSFRONTEND_SOURCES ${CMAKE_SOURCE_DIR}/misc/inputmethod.xml DBusFrontend.h DBusFrontend InputmethodAdaptor)
-qt5_add_dbus_adaptor(DBUSFRONTEND_SOURCES ${CMAKE_SOURCE_DIR}/misc/inputcontext.xml InputContext1.h InputContext1 InputcontextAdaptor)
+qt5_add_dbus_adaptor(DBUSFRONTEND_SOURCES ${CMAKE_SOURCE_DIR}/misc/inputmethod.xml DBusFrontend.h org::deepin::dim::DBusFrontend InputmethodAdaptor)
+qt5_add_dbus_adaptor(DBUSFRONTEND_SOURCES ${CMAKE_SOURCE_DIR}/misc/inputcontext.xml InputContext1.h org::deepin::dim::InputContext1 InputcontextAdaptor)
 
 add_library(dbusfrontend MODULE
   ${DBUSFRONTEND_SOURCES}

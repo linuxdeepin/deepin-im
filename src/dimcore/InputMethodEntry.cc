@@ -10,6 +10,8 @@ public:
     QString iconName;
 };
 
+using namespace org::deepin::dim;
+
 InputMethodEntry::InputMethodEntry(const QString &addon,
                                    const QString &uniqueName,
                                    const QString &name,
