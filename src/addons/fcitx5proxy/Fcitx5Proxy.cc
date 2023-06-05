@@ -17,6 +17,11 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
         }
     });
 
+    connect(qobject_cast<InputMethodAddon *>(this),
+            &InputMethodAddon::createInputContext,
+            this,
+            &Fcitx5Proxy::createFcitxInputContext);
+
     updateInputMethods();
 }
 

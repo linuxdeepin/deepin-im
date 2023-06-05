@@ -35,6 +35,12 @@ void Dim::inputContextCreated(InputContext *ic)
     connect(ic, &InputContext::unFocused, this, [this]() {
         focusedIC_ = 0;
     });
+
+    auto it = inputMethodAddons_.find(QStringLiteral("fcitx5proxy"));
+    if (it != inputMethodAddons_.end()) {
+        // TODO: it must be replaced by actual app name
+        Q_EMIT it.value()->createInputContext(QString());
+    }
 }
 
 void Dim::loadAddons()

@@ -17,7 +17,7 @@ public:
     QList<InputMethodEntry> getInputMethods() override;
     void keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) override;
 
-private:
+private Q_SLOTS:
     QDBusPendingReply<QDBusObjectPath, QByteArray> createFcitxInputContext(const QString &app);
 
 private:
