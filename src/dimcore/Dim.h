@@ -25,8 +25,6 @@ public:
     Dim(QObject *parent = nullptr);
     ~Dim();
 
-    void inputContextCreated(InputContext *ic);
-
     InputContext *getInputContext(uint32_t id) { return inputContexts_.value(id); }
 
     const QMap<QString, InputMethodEntry> &ims() const;
@@ -46,6 +44,7 @@ private:
     void loadAddons();
     void loadAddon(const QString &infoFile);
     void initInputMethodAddon(InputMethodAddon *addon);
+    void postInputContextCreated(Event &event);
     void postKeyEvent(KeyEvent &event);
 };
 

@@ -24,33 +24,6 @@ Dim::Dim(QObject *parent)
 
 Dim::~Dim() { }
 
-void Dim::inputContextCreated(InputContext *ic)
-{
-    inputContexts_.insert(ic->id(), ic);
-
-    auto it = inputMethodAddons_.find(QStringLiteral("fcitx5proxy"));
-    if (it == inputMethodAddons_.end()) {
-        qDebug() << "failed to find fcitx5proxy";
-        return;
-    }
-
-    // TODO: it must be replaced by actual app name
-    Q_EMIT it.value()->createInputContext(QString());
-
-    connect(ic, &InputContext::destroyed, this, [this, id = ic->id(), it]() {
-        inputContexts_.remove(id);
-        Q_EMIT it.value()->destroyed(QString());
-    });
-    connect(ic, &InputContext::focused, this, [this, id = ic->id(), it]() {
-        focusedIC_ = id;
-        Q_EMIT it.value()->focusIn(QString());
-    });
-    connect(ic, &InputContext::unFocused, this, [this, it]() {
-        focusedIC_ = 0;
-        Q_EMIT it.value()->focusOut(QString());
-    });
-}
-
 void Dim::loadAddons()
 {
     QDir dir(DIM_ADDON_INFO_DIR);
@@ -130,7 +103,7 @@ bool Dim::postEvent(Event &event)
 {
     switch (event.type()) {
     case EventType::InputContextCreated:
-        // TODO:
+        postInputContextCreated(event);
         break;
     case EventType::InputContextDestroyed:
         // TODO:
@@ -160,6 +133,33 @@ const QMap<QString, InputMethodEntry> &Dim::ims() const
 const QList<QString> &Dim::enabledIMs() const
 {
     return enabledIMs_;
+}
+
+void Dim::postInputContextCreated(Event &event) {
+    auto *ic = event.ic();
+    inputContexts_.insert(ic->id(), ic);
+
+    auto it = inputMethodAddons_.find(QStringLiteral("fcitx5proxy"));
+    if (it == inputMethodAddons_.end()) {
+        qDebug() << "failed to find fcitx5proxy";
+        return;
+    }
+
+    // TODO: it must be replaced by actual app name
+    Q_EMIT it.value()->createInputContext(QString());
+
+    connect(ic, &InputContext::destroyed, this, [this, id = ic->id(), it]() {
+        inputContexts_.remove(id);
+        Q_EMIT it.value()->destroyed(QString());
+    });
+    connect(ic, &InputContext::focused, this, [this, id = ic->id(), it]() {
+        focusedIC_ = id;
+        Q_EMIT it.value()->focusIn(QString());
+    });
+    connect(ic, &InputContext::unFocused, this, [this, it]() {
+        focusedIC_ = 0;
+        Q_EMIT it.value()->focusOut(QString());
+    });
 }
 
 void Dim::postKeyEvent(KeyEvent &event)

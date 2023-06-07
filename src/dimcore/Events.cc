@@ -8,7 +8,7 @@ Event::Event(EventType type, InputContext *ic)
 }
 
 KeyEvent::KeyEvent(InputContext *ic, uint32_t keyVal, uint32_t keycode, uint32_t state, bool isRelease, uint32_t time)
-    : Event(EventType::Key, ic)
+    : Event(EventType::InputContextKeyEvent, ic)
     , keyVal_(keyVal)
     , keycode_(keycode)
     , state_(state)

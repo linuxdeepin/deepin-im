@@ -10,7 +10,8 @@ InputContext::InputContext(Dim *dim, QObject *parent)
     , dim_(dim)
     , inputState_(dim)
 {
-    dim_->inputContextCreated(this);
+    Event e(EventType::InputContextCreated, this);
+    dim_->postEvent(e);
 }
 
 void InputContext::destroy()
