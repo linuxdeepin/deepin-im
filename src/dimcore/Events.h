@@ -10,7 +10,11 @@ namespace dim {
 class InputContext;
 
 enum class EventType {
-    Key,
+    InputContextCreated,
+    InputContextDestroyed,
+    InputContextFocused,
+    InputContextUnfocused,
+    InputContextKeyEvent,
 };
 
 class Event

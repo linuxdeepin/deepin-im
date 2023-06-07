@@ -129,7 +129,19 @@ void Dim::initInputMethodAddon(InputMethodAddon *addon)
 bool Dim::postEvent(Event &event)
 {
     switch (event.type()) {
-    case EventType::Key:
+    case EventType::InputContextCreated:
+        // TODO:
+        break;
+    case EventType::InputContextDestroyed:
+        // TODO:
+        break;
+    case EventType::InputContextFocused:
+        // TODO:
+        break;
+    case EventType::InputContextUnfocused:
+        // TODO:
+        break;
+    case EventType::InputContextKeyEvent:
         postKeyEvent(reinterpret_cast<KeyEvent &>(event));
         break;
     }
