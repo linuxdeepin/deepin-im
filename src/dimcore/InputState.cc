@@ -10,8 +10,3 @@ InputState::InputState(Dim *dim)
     auto &ims = dim_->enabledIMs();
     current_im_ = ims[0];
 }
-
-const QString &InputState::currentIM() const
-{
-    return current_im_;
-}

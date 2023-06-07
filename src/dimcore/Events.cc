@@ -3,15 +3,15 @@
 using namespace org::deepin::dim;
 
 Event::Event(EventType type, InputContext *ic)
-    : type(type)
-    , ic(ic) {
+    : type_(type)
+    , ic_(ic) {
 }
 
-KeyEvent::KeyEvent(InputContext *ic, uint32_t keyval, uint32_t keycode, uint32_t state, bool isRelease, uint32_t time)
+KeyEvent::KeyEvent(InputContext *ic, uint32_t keyVal, uint32_t keycode, uint32_t state, bool isRelease, uint32_t time)
     : Event(EventType::Key, ic)
-    , keyval(keyval)
-    , keycode(keycode)
-    , state(state)
-    , isRelease(isRelease)
-    , time(time) {
+    , keyVal_(keyVal)
+    , keycode_(keycode)
+    , state_(state)
+    , isRelease_(isRelease)
+    , time_(time) {
 }

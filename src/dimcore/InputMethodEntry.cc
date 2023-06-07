@@ -1,6 +1,7 @@
 #include "InputMethodEntry.h"
 
-class InputMethodEntryPrivate {
+class InputMethodEntryPrivate
+{
 public:
     QString addon;
     QString uniqueName;
@@ -18,32 +19,38 @@ InputMethodEntry::InputMethodEntry(const QString &addon,
                                    const QString &description,
                                    const QString &label,
                                    const QString &iconName)
-    : d(new InputMethodEntryPrivate{addon, uniqueName, name, description, label, iconName}) {
+    : d(new InputMethodEntryPrivate{ addon, uniqueName, name, description, label, iconName })
+{
 }
 
-InputMethodEntry::~InputMethodEntry() {
-}
+InputMethodEntry::~InputMethodEntry() { }
 
-const QString &InputMethodEntry::addon() const {
+const QString &InputMethodEntry::addon() const
+{
     return d->addon;
 }
 
-const QString &InputMethodEntry::uniqueName() const {
+const QString &InputMethodEntry::uniqueName() const
+{
     return d->uniqueName;
 }
 
-const QString &InputMethodEntry::name() const {
+const QString &InputMethodEntry::name() const
+{
     return d->name;
 }
 
-const QString &InputMethodEntry::description() const {
+const QString &InputMethodEntry::description() const
+{
     return d->description;
 }
 
-const QString &InputMethodEntry::label() const {
+const QString &InputMethodEntry::label() const
+{
     return d->label;
 }
 
-const QString &InputMethodEntry::iconName() const {
+const QString &InputMethodEntry::iconName() const
+{
     return d->iconName;
 }

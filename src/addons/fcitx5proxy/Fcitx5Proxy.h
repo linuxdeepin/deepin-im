@@ -5,6 +5,7 @@
 
 #include <QDBusObjectPath>
 #include <QDBusPendingReply>
+#include <QDBusInterface>
 
 namespace org {
 namespace deepin {
@@ -21,13 +22,19 @@ public:
     QList<InputMethodEntry> getInputMethods() override;
     void keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) override;
 
+private:
+    inline bool isICDBusInterfaceValid(const QString &appName)
+    {
+        return !icMap_.isEmpty() && icMap_.contains(appName) && icMap_[appName]->isValid();
+    }
+
 private Q_SLOTS:
-    QDBusPendingReply<QDBusObjectPath, QByteArray> createFcitxInputContext(const QString &app);
+    void createFcitxInputContext(const QString &app);
 
 private:
     DBusProvider *dbusProvider_;
     bool available_;
-
+    QMap<QString, QDBusInterface *> icMap_;
     QList<InputMethodEntry> inputMethods_;
 
     void updateInputMethods();

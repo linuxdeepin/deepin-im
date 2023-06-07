@@ -28,21 +28,27 @@ void Dim::inputContextCreated(InputContext *ic)
 {
     inputContexts_.insert(ic->id(), ic);
 
-    connect(ic, &InputContext::destroyed, this, [this, id = ic->id()]() {
-        inputContexts_.remove(id);
-    });
-    connect(ic, &InputContext::focused, this, [this, id = ic->id()]() {
-        focusedIC_ = id;
-    });
-    connect(ic, &InputContext::unFocused, this, [this]() {
-        focusedIC_ = 0;
-    });
-
     auto it = inputMethodAddons_.find(QStringLiteral("fcitx5proxy"));
-    if (it != inputMethodAddons_.end()) {
-        // TODO: it must be replaced by actual app name
-        Q_EMIT it.value()->createInputContext(QString());
+    if (it == inputMethodAddons_.end()) {
+        qDebug() << "failed to find fcitx5proxy";
+        return;
     }
+
+    // TODO: it must be replaced by actual app name
+    Q_EMIT it.value()->createInputContext(QString());
+
+    connect(ic, &InputContext::destroyed, this, [this, id = ic->id(), it]() {
+        inputContexts_.remove(id);
+        Q_EMIT it.value()->destroyed(QString());
+    });
+    connect(ic, &InputContext::focused, this, [this, id = ic->id(), it]() {
+        focusedIC_ = id;
+        Q_EMIT it.value()->focusIn(QString());
+    });
+    connect(ic, &InputContext::unFocused, this, [this, it]() {
+        focusedIC_ = 0;
+        Q_EMIT it.value()->focusOut(QString());
+    });
 }
 
 void Dim::loadAddons()
@@ -122,7 +128,7 @@ void Dim::initInputMethodAddon(InputMethodAddon *addon)
 
 bool Dim::postEvent(Event &event)
 {
-    switch (event.type) {
+    switch (event.type()) {
     case EventType::Key:
         postKeyEvent(reinterpret_cast<KeyEvent &>(event));
         break;
@@ -145,7 +151,7 @@ void Dim::postKeyEvent(KeyEvent &event)
 {
     // TODO: check shortcuts (switch im etc.)
 
-    const auto &inputState = event.ic->inputState();
+    const auto &inputState = event.ic()->inputState();
 
     const QString &currentIMKey = inputState.currentIM();
     auto i = ims_.find(currentIMKey);

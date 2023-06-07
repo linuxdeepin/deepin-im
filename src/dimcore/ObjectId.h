@@ -13,7 +13,7 @@ public:
         created_++;
     }
 
-    uint32_t id() { return id_; }
+    inline uint32_t id() { return id_; }
 
 private:
     static uint32_t created_;

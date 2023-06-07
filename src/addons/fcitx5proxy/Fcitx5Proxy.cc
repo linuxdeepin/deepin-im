@@ -1,6 +1,9 @@
 #include "Fcitx5Proxy.h"
 
 #include "DBusProvider.h"
+#include "dimcore/Events.h"
+
+#include <QGuiApplication>
 
 using namespace org::deepin::dim;
 
@@ -23,19 +26,45 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
             &InputMethodAddon::createInputContext,
             this,
             &Fcitx5Proxy::createFcitxInputContext);
+    connect(qobject_cast<InputMethodAddon *>(this),
+            &InputMethodAddon::focusIn,
+            this,
+            [this](const QString &appName) {
+                if (isICDBusInterfaceValid(appName)) {
+                    icMap_[appName]->asyncCall("FocusIn");
+                }
+            });
+    connect(qobject_cast<InputMethodAddon *>(this),
+            &InputMethodAddon::focusOut,
+            this,
+            [this](const QString &appName) {
+                if (isICDBusInterfaceValid(appName)) {
+                    icMap_[appName]->asyncCall("FocusOut");
+                }
+            });
+    connect(qobject_cast<InputMethodAddon *>(this),
+            &InputMethodAddon::destroyed,
+            this,
+            [this](const QString &appName) {
+                if (isICDBusInterfaceValid(appName)) {
+                    icMap_[appName]->asyncCall("DestroyIC");
+                }
+            });
 
     updateInputMethods();
 }
 
-Fcitx5Proxy::~Fcitx5Proxy() { }
+Fcitx5Proxy::~Fcitx5Proxy()
+{
+    icMap_.clear();
+}
 
 QList<InputMethodEntry> Fcitx5Proxy::getInputMethods()
 {
     return inputMethods_;
 }
 
-QDBusPendingReply<QDBusObjectPath, QByteArray>
-Fcitx5Proxy::createFcitxInputContext(const QString &app)
+void Fcitx5Proxy::createFcitxInputContext(const QString &app)
 {
     FcitxQtStringKeyValueList list;
     FcitxQtStringKeyValue arg;
@@ -45,22 +74,52 @@ Fcitx5Proxy::createFcitxInputContext(const QString &app)
 
     FcitxQtStringKeyValue arg2;
     arg2.setKey("display");
-    arg2.setValue("x11:");
+    if (QGuiApplication::platformName() == QLatin1String("xcb")) {
+        arg2.setValue("x11:");
+    } else if (QGuiApplication::platformName().startsWith("wayland")) {
+        arg2.setValue("wayland:");
+    }
     list << arg2;
 
     auto result = dbusProvider_->imProxy()->CreateInputContext(list);
-    if (!result.isError()) {
-        qWarning() << "failed to create fcitx input context";
-        return QDBusPendingReply{};
-    }
 
-    return result;
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(result, this);
+    QObject::connect(watcher,
+                     &QDBusPendingCallWatcher::finished,
+                     this,
+                     [&](QDBusPendingCallWatcher *watcher) {
+                         watcher->deleteLater();
+
+                         QDBusPendingReply<QDBusObjectPath, QByteArray> reply = *watcher;
+                         if (reply.isError()) {
+                             qDebug()
+                                 << "create fcitx input context error:" << reply.error().message();
+                             return;
+                         }
+
+                         QDBusInterface *icIface =
+                             new QDBusInterface("org.fcitx.Fcitx5",
+                                                reply.value().path(),
+                                                "org.fcitx.Fcitx.InputContext1",
+                                                QDBusConnection::sessionBus(),
+                                                this);
+                         icMap_[app] = icIface;
+                     });
 }
 
 void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent)
 {
     Q_UNUSED(entry);
-    Q_UNUSED(keyEvent);
+    // TODO: wait to inputcontext appname
+    auto appName = QString();
+    if (isICDBusInterfaceValid(appName)) {
+        icMap_[appName]->asyncCall("ProcessKeyEvent ",
+                                   keyEvent.keyValue(),
+                                   keyEvent.keycode(),
+                                   keyEvent.state(),
+                                   keyEvent.isRelease(),
+                                   keyEvent.time());
+    }
 }
 
 void Fcitx5Proxy::updateInputMethods()

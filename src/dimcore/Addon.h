@@ -17,8 +17,9 @@ public:
     explicit Addon(Dim *dim, const QString &key);
     virtual ~Addon();
 
-    Dim *dim() const;
-    const QString &key() const;
+    inline Dim *dim() const { return dim_; }
+
+    inline const QString &key() const { return key_; }
 
 private:
     Dim *dim_;

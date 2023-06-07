@@ -16,7 +16,7 @@ class InputState
 public:
     InputState(Dim *dim);
 
-    const QString &currentIM() const;
+    inline const QString &currentIM() const { return current_im_; }
 
 private:
     Dim *dim_;
