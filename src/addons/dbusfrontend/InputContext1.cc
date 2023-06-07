@@ -19,9 +19,13 @@ InputContext1::InputContext1(Dim *dim, QObject *parent)
 
 InputContext1::~InputContext1() { }
 
-void InputContext1::FocusIn() { }
+void InputContext1::FocusIn() { 
+    focusIn();
+}
 
-void InputContext1::FocusOut() { }
+void InputContext1::FocusOut() {
+    focusOut();
+}
 
 void InputContext1::Destroy()
 {
