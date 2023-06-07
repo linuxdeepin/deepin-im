@@ -15,6 +15,7 @@ enum class EventType {
     InputContextFocused,
     InputContextUnfocused,
     InputContextKeyEvent,
+    InputContextCursorRectChanged,
 };
 
 class Event

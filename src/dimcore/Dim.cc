@@ -144,6 +144,9 @@ bool Dim::postEvent(Event &event)
     case EventType::InputContextKeyEvent:
         postKeyEvent(reinterpret_cast<KeyEvent &>(event));
         break;
+    case EventType::InputContextCursorRectChanged:
+        // TODO:
+        break;
     }
 
     return false;
