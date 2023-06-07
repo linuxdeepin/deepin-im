@@ -45,6 +45,9 @@ private:
     void loadAddon(const QString &infoFile);
     void initInputMethodAddon(InputMethodAddon *addon);
     void postInputContextCreated(Event &event);
+    void postInputContextDestroyed(Event &event);
+    void postInputContextFocused(Event &event);
+    void postInputContextUnfocused(Event &event);
     void postKeyEvent(KeyEvent &event);
 };
 

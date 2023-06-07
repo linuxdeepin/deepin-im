@@ -17,16 +17,21 @@ InputContext::InputContext(Dim *dim, QObject *parent)
 void InputContext::destroy()
 {
     deleteLater();
+
+    Event e(EventType::InputContextDestroyed, this);
+    dim_->postEvent(e);
 }
 
 void InputContext::focusIn()
 {
-    emit focused();
+    Event e(EventType::InputContextFocused, this);
+    dim_->postEvent(e);
 }
 
 void InputContext::focusOut()
 {
-    emit unFocused();
+    Event e(EventType::InputContextUnfocused, this);
+    dim_->postEvent(e);
 }
 
 void InputContext::keyEvent(KeyEvent &event)

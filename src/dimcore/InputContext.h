@@ -29,10 +29,6 @@ public:
 
     const InputState &inputState() const;
 
-signals:
-    void focused();
-    void unFocused();
-
 private:
     Dim *dim_;
     InputState inputState_;
