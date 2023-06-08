@@ -29,6 +29,8 @@ public:
 
     const InputState &inputState() const;
 
+    virtual void commitString(const QString &text) = 0;
+
 private:
     Dim *dim_;
     InputState inputState_;

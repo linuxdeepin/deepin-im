@@ -21,6 +21,8 @@ public:
 
     const QString path() { return path_; }
 
+    void commitString(const QString &text) override;
+
 public slots:
     void FocusIn();
     void FocusOut();

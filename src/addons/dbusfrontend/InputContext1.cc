@@ -19,6 +19,10 @@ InputContext1::InputContext1(Dim *dim, QObject *parent)
 
 InputContext1::~InputContext1() { }
 
+void InputContext1::commitString(const QString &text) {
+    emit adaptor_->CommitString(text);
+}
+
 void InputContext1::FocusIn()
 {
     focusIn();

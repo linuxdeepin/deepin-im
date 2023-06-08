@@ -14,5 +14,8 @@
       <arg type="b" name="isRelease" direction="in"/>
       <arg type="u" name="time" direction="in"/>
     </method>
+    <signal name="CommitString">
+      <arg type="s" name="text"></arg>
+    </signal>
   </interface>
 </node>
