@@ -43,7 +43,6 @@ private:
     QMap<uint32_t, InputContext *> inputContexts_;
     uint32_t focusedIC_;
     QMap<QString, InputMethodAddon *> inputMethodAddons_;
-    QMap<QString, ProxyAddon *> proxyAddons_;
     QSet<FrontendAddon *> frontends_;
 
     QMap<QString, InputMethodEntry> ims_;
@@ -51,7 +50,7 @@ private:
 
     void loadAddons();
     void loadAddon(const QString &infoFile);
-    void initInputMethodAddon();
+    void initInputMethodAddon(InputMethodAddon * imAddon);
     void postInputContextCreated(Event &event);
     void postInputContextDestroyed(Event &event);
     void postInputContextFocused(Event &event);

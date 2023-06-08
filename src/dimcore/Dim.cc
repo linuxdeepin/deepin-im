@@ -19,7 +19,6 @@ using namespace org::deepin::dim;
 static const QMap<QString, AddonType> AddonsType = {
     { "Frontend", AddonType::Frontend },
     { "InputMethod", AddonType::InputMethod },
-    { "Proxy", AddonType::Proxy },
 };
 
 Dim::Dim(QObject *parent)
@@ -92,34 +91,20 @@ void Dim::loadAddon(const QString &infoFile)
     }
     case AddonType::InputMethod: {
         auto *imAddon = qobject_cast<InputMethodAddon *>(addon);
+        initInputMethodAddon(imAddon);
         inputMethodAddons_.insert(imAddon->key(), imAddon);
-        break;
-    }
-    case AddonType::Proxy: {
-        auto *proxyAddon = qobject_cast<ProxyAddon *>(addon);
-        proxyAddons_.insert(proxyAddon->key(), proxyAddon);
         break;
     }
     default:
         qWarning() << "Addon" << name << "has an invalid category" << category;
         delete addon;
     }
-
-    initInputMethodAddon();
 }
 
-void Dim::initInputMethodAddon()
+void Dim::initInputMethodAddon(InputMethodAddon *imAddon)
 {
-    for (const auto &imAddon : inputMethodAddons_) {
-        for (auto &i : imAddon->getInputMethods()) {
-            ims_.insert(i.uniqueName(), std::move(i));
-        }
-    }
-
-    for (const auto &proxyAddon : proxyAddons_) {
-        for (auto &i : proxyAddon->getInputMethods()) {
-            ims_.insert(i.uniqueName(), std::move(i));
-        }
+    for (auto &i : imAddon->getInputMethods()) {
+        ims_.insert(i.uniqueName(), std::move(i));
     }
 }
 
@@ -164,17 +149,23 @@ void Dim::postInputContextCreated(Event &event)
     auto *ic = event.ic();
     inputContexts_.insert(ic->id(), ic);
 
-    for (auto it = proxyAddons_.begin(); it != proxyAddons_.end(); ++it) {
+    for (auto it = inputMethodAddons_.begin(); it != inputMethodAddons_.end(); ++it) {
         // TODO: it must be replaced by actual app name
-        it.value()->createInputContext(ic->id(), QString());
+        ProxyAddon *addon = qobject_cast<ProxyAddon *>(it.value());
+        if (addon) {
+            addon->createInputContext(ic->id(), QString());
+        }
     }
 }
 
 void Dim::postInputContextDestroyed([[maybe_unused]] Event &event)
 {
     inputContexts_.remove(event.ic()->id());
-    for (auto it = proxyAddons_.begin(); it != proxyAddons_.end(); ++it) {
-        it.value()->destroyed(event.ic()->id());
+    for (auto it = inputMethodAddons_.begin(); it != inputMethodAddons_.end(); ++it) {
+        ProxyAddon *addon = qobject_cast<ProxyAddon *>(it.value());
+        if (addon) {
+            addon->destroyed(event.ic()->id());
+        }
     }
 }
 
@@ -182,8 +173,11 @@ void Dim::postInputContextFocused(Event &event)
 {
     focusedIC_ = event.ic()->id();
 
-    for (auto it = proxyAddons_.begin(); it != proxyAddons_.end(); ++it) {
-        it.value()->focusIn(focusedIC_);
+    for (auto it = inputMethodAddons_.begin(); it != inputMethodAddons_.end(); ++it) {
+        ProxyAddon *addon = qobject_cast<ProxyAddon *>(it.value());
+        if (addon) {
+            addon->focusIn(focusedIC_);
+        }
     }
 }
 
@@ -191,8 +185,11 @@ void Dim::postInputContextUnfocused([[maybe_unused]] Event &event)
 {
     focusedIC_ = 0;
 
-    for (auto it = proxyAddons_.begin(); it != proxyAddons_.end(); ++it) {
-        it.value()->focusOut(event.ic()->id());
+    for (auto it = inputMethodAddons_.begin(); it != inputMethodAddons_.end(); ++it) {
+        ProxyAddon *addon = qobject_cast<ProxyAddon *>(it.value());
+        if (addon) {
+            addon->focusOut(event.ic()->id());
+        }
     }
 }
 
@@ -211,18 +208,12 @@ void Dim::postKeyEvent(KeyEvent &event)
     const auto &im = i.value();
 
     const auto &addonKey = im.addon();
-    auto imIt = inputMethodAddons_.find(addonKey);
-    auto proxyIt = proxyAddons_.find(addonKey);
-
-    if (imIt != inputMethodAddons_.end()) {
-        auto *addon = imIt.value();
-
-        addon->keyEvent(im, event);
-    } else if (proxyIt != proxyAddons_.end()) {
-        auto *addon = proxyIt.value();
-
-        addon->keyEvent(im, event);
-    } else {
+    auto j = inputMethodAddons_.find(addonKey);
+    if (j == inputMethodAddons_.end()) {
         // TODO:
+        return;
     }
+    auto *addon = j.value();
+
+    addon->keyEvent(im, event);
 }

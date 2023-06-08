@@ -5,7 +5,7 @@
 #ifndef PROXYADDON_H
 #define PROXYADDON_H
 
-#include "Addon.h"
+#include "InputMethodAddon.h"
 #include "InputMethodEntry.h"
 
 #include <QList>
@@ -14,7 +14,7 @@ namespace org {
 namespace deepin {
 namespace dim {
 
-class ProxyAddon : public Addon
+class ProxyAddon : public InputMethodAddon
 {
     Q_OBJECT
 
@@ -22,8 +22,6 @@ public:
     explicit ProxyAddon(Dim *dim, const QString &key);
     virtual ~ProxyAddon();
 
-    virtual QList<InputMethodEntry> getInputMethods() = 0;
-    virtual void keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) = 0;
     virtual void focusIn(uint32_t id) = 0;
     virtual void focusOut(uint32_t id) = 0;
     virtual void destroyed(uint32_t id) = 0;
