@@ -12,6 +12,7 @@ set(DIMCORE_SOURCES
   InputMethodEntry.cc
   InputState.cc
   Events.cc
+  ProxyAddon.cc
 )
 
 set(DIMCORE_HEADERS
@@ -23,6 +24,7 @@ set(DIMCORE_HEADERS
   InputMethodEntry.h
   InputState.h
   Events.h
+  ProxyAddon.h
 )
 
 add_library(dimcore SHARED

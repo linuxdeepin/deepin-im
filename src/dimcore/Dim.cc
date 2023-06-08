@@ -4,6 +4,7 @@
 #include "FrontendAddon.h"
 #include "InputContext.h"
 #include "InputMethodAddon.h"
+#include "ProxyAddon.h"
 #include "config.h"
 
 #include <QDebug>
@@ -14,6 +15,12 @@
 #include <dlfcn.h>
 
 using namespace org::deepin::dim;
+
+static const QMap<QString, AddonType> AddonsType = {
+    { "Frontend", AddonType::Frontend },
+    { "InputMethod", AddonType::InputMethod },
+    { "Proxy", AddonType::Proxy },
+};
 
 Dim::Dim(QObject *parent)
     : QObject(parent)
@@ -77,25 +84,42 @@ void Dim::loadAddon(const QString &infoFile)
     auto create = reinterpret_cast<addonCreate *>(createFn);
     Addon *addon = create(this);
 
-    if (category == "InputMethod") {
-        auto *imAddon = qobject_cast<InputMethodAddon *>(addon);
-        initInputMethodAddon(imAddon);
-        inputMethodAddons_.insert(imAddon->key(), imAddon);
-    } else if (category == "Frontend") {
+    switch (AddonsType[category]) {
+    case AddonType::Frontend: {
         auto *frontend = qobject_cast<FrontendAddon *>(addon);
         frontends_.insert(frontend);
-    } else {
+        break;
+    }
+    case AddonType::InputMethod: {
+        auto *imAddon = qobject_cast<InputMethodAddon *>(addon);
+        inputMethodAddons_.insert(imAddon->key(), imAddon);
+        break;
+    }
+    case AddonType::Proxy: {
+        auto *proxyAddon = qobject_cast<ProxyAddon *>(addon);
+        proxyAddons_.insert(proxyAddon->key(), proxyAddon);
+        break;
+    }
+    default:
         qWarning() << "Addon" << name << "has an invalid category" << category;
         delete addon;
-        return;
     }
+
+    initInputMethodAddon();
 }
 
-void Dim::initInputMethodAddon(InputMethodAddon *addon)
+void Dim::initInputMethodAddon()
 {
-    // ims_.append(addon->getInputMethods());
-    for (auto &i : addon->getInputMethods()) {
-        ims_.insert(i.uniqueName(), std::move(i));
+    for (const auto &imAddon : inputMethodAddons_) {
+        for (auto &i : imAddon->getInputMethods()) {
+            ims_.insert(i.uniqueName(), std::move(i));
+        }
+    }
+
+    for (const auto &proxyAddon : proxyAddons_) {
+        for (auto &i : proxyAddon->getInputMethods()) {
+            ims_.insert(i.uniqueName(), std::move(i));
+        }
     }
 }
 
@@ -140,40 +164,36 @@ void Dim::postInputContextCreated(Event &event)
     auto *ic = event.ic();
     inputContexts_.insert(ic->id(), ic);
 
-    // auto it = inputMethodAddons_.find(QStringLiteral("fcitx5proxy"));
-    // if (it == inputMethodAddons_.end()) {
-    //     qDebug() << "failed to find fcitx5proxy";
-    //     return;
-    // }
-
-    // // TODO: it must be replaced by actual app name
-    // Q_EMIT it.value()->createInputContext(QString());
-
-    connect(ic, &InputContext::destroyed, this, [this, id = ic->id()]() {
-        inputContexts_.remove(id);
-        // Q_EMIT it.value()->destroyed(QString());
-    });
-    // connect(ic, &InputContext::focused, this, [this, id = ic->id(), it]() {
-    //     focusedIC_ = id;
-    //     Q_EMIT it.value()->focusIn(QString());
-    // });
-    // connect(ic, &InputContext::unFocused, this, [this, it]() {
-    //     focusedIC_ = 0;
-    //     Q_EMIT it.value()->focusOut(QString());
-    // });
+    for (auto it = proxyAddons_.begin(); it != proxyAddons_.end(); ++it) {
+        // TODO: it must be replaced by actual app name
+        it.value()->createInputContext(ic->id(), QString());
+    }
 }
 
-void Dim::postInputContextDestroyed([[maybe_unused]] Event &event) { }
+void Dim::postInputContextDestroyed([[maybe_unused]] Event &event)
+{
+    inputContexts_.remove(event.ic()->id());
+    for (auto it = proxyAddons_.begin(); it != proxyAddons_.end(); ++it) {
+        it.value()->destroyed(event.ic()->id());
+    }
+}
 
 void Dim::postInputContextFocused(Event &event)
 {
-    auto *ic = event.ic();
-    focusedIC_ = ic->id();
+    focusedIC_ = event.ic()->id();
+
+    for (auto it = proxyAddons_.begin(); it != proxyAddons_.end(); ++it) {
+        it.value()->focusIn(focusedIC_);
+    }
 }
 
 void Dim::postInputContextUnfocused([[maybe_unused]] Event &event)
 {
     focusedIC_ = 0;
+
+    for (auto it = proxyAddons_.begin(); it != proxyAddons_.end(); ++it) {
+        it.value()->focusOut(event.ic()->id());
+    }
 }
 
 void Dim::postKeyEvent(KeyEvent &event)
@@ -191,12 +211,18 @@ void Dim::postKeyEvent(KeyEvent &event)
     const auto &im = i.value();
 
     const auto &addonKey = im.addon();
-    auto j = inputMethodAddons_.find(addonKey);
-    if (j == inputMethodAddons_.end()) {
-        // TODO:
-        return;
-    }
-    auto *addon = j.value();
+    auto imIt = inputMethodAddons_.find(addonKey);
+    auto proxyIt = proxyAddons_.find(addonKey);
 
-    addon->keyEvent(im, event);
+    if (imIt != inputMethodAddons_.end()) {
+        auto *addon = imIt.value();
+
+        addon->keyEvent(im, event);
+    } else if (proxyIt != proxyAddons_.end()) {
+        auto *addon = proxyIt.value();
+
+        addon->keyEvent(im, event);
+    } else {
+        // TODO:
+    }
 }

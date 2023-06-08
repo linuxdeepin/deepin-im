@@ -2,6 +2,7 @@
 
 #include "DBusProvider.h"
 #include "dimcore/Events.h"
+#include "dimcore/InputContext.h"
 
 #include <QGuiApplication>
 
@@ -10,7 +11,7 @@ using namespace org::deepin::dim;
 DIM_ADDON_FACTORY(Fcitx5Proxy);
 
 Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
-    : InputMethodAddon(dim, "fcitx5proxy")
+    : ProxyAddon(dim, "fcitx5proxy")
     , dbusProvider_(new DBusProvider(this))
     , available_(dbusProvider_->available())
 {
@@ -21,35 +22,6 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
             available_ ? updateInputMethods() : inputMethods_.clear();
         }
     });
-
-    connect(qobject_cast<InputMethodAddon *>(this),
-            &InputMethodAddon::createInputContext,
-            this,
-            &Fcitx5Proxy::createFcitxInputContext);
-    connect(qobject_cast<InputMethodAddon *>(this),
-            &InputMethodAddon::focusIn,
-            this,
-            [this](const QString &appName) {
-                if (isICDBusInterfaceValid(appName)) {
-                    icMap_[appName]->asyncCall("FocusIn");
-                }
-            });
-    connect(qobject_cast<InputMethodAddon *>(this),
-            &InputMethodAddon::focusOut,
-            this,
-            [this](const QString &appName) {
-                if (isICDBusInterfaceValid(appName)) {
-                    icMap_[appName]->asyncCall("FocusOut");
-                }
-            });
-    connect(qobject_cast<InputMethodAddon *>(this),
-            &InputMethodAddon::destroyed,
-            this,
-            [this](const QString &appName) {
-                if (isICDBusInterfaceValid(appName)) {
-                    icMap_[appName]->asyncCall("DestroyIC");
-                }
-            });
 
     updateInputMethods();
 }
@@ -64,13 +36,13 @@ QList<InputMethodEntry> Fcitx5Proxy::getInputMethods()
     return inputMethods_;
 }
 
-void Fcitx5Proxy::createFcitxInputContext(const QString &app)
+void Fcitx5Proxy::createInputContext(uint32_t id, const QString &appName)
 {
     FcitxQtStringKeyValueList list;
     FcitxQtStringKeyValue arg;
 
     arg.setKey("program");
-    arg.setValue(app);
+    arg.setValue(appName);
 
     FcitxQtStringKeyValue arg2;
     arg2.setKey("display");
@@ -103,22 +75,42 @@ void Fcitx5Proxy::createFcitxInputContext(const QString &app)
                                                 "org.fcitx.Fcitx.InputContext1",
                                                 QDBusConnection::sessionBus(),
                                                 this);
-                         icMap_[app] = icIface;
+                         icMap_[id] = icIface;
                      });
+}
+
+void Fcitx5Proxy::focusIn(uint32_t id)
+{
+    if (isICDBusInterfaceValid(id)) {
+        icMap_[id]->asyncCall("FocusIn");
+    }
+}
+
+void Fcitx5Proxy::focusOut(uint32_t id)
+{
+    if (isICDBusInterfaceValid(id)) {
+        icMap_[id]->asyncCall("FocusOut");
+    }
+}
+
+void Fcitx5Proxy::destroyed(uint32_t id)
+{
+    if (isICDBusInterfaceValid(id)) {
+        icMap_[id]->asyncCall("DestroyIC");
+    }
 }
 
 void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent)
 {
     Q_UNUSED(entry);
-    // TODO: wait to inputcontext appname
-    auto appName = QString();
-    if (isICDBusInterfaceValid(appName)) {
-        icMap_[appName]->asyncCall("ProcessKeyEvent ",
-                                   keyEvent.keyValue(),
-                                   keyEvent.keycode(),
-                                   keyEvent.state(),
-                                   keyEvent.isRelease(),
-                                   keyEvent.time());
+    auto id = keyEvent.ic()->id();
+    if (isICDBusInterfaceValid(id)) {
+        icMap_[id]->asyncCall("ProcessKeyEvent ",
+                              keyEvent.keyValue(),
+                              keyEvent.keycode(),
+                              keyEvent.state(),
+                              keyEvent.isRelease(),
+                              keyEvent.time());
     }
 }
 

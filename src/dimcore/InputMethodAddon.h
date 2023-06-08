@@ -20,12 +20,6 @@ public:
 
     virtual QList<InputMethodEntry> getInputMethods() = 0;
     virtual void keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) = 0;
-
-Q_SIGNALS:
-    void focusIn(const QString &appName);
-    void focusOut(const QString &appName);
-    void destroyed(const QString &appName);
-    void createInputContext(const QString &appName);
 };
 
 } // namespace dim

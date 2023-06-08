@@ -1,7 +1,7 @@
 #ifndef FCITX5PROXY_H
 #define FCITX5PROXY_H
 
-#include <dimcore/InputMethodAddon.h>
+#include <dimcore/ProxyAddon.h>
 
 #include <QDBusObjectPath>
 #include <QDBusPendingReply>
@@ -13,7 +13,7 @@ namespace dim {
 
 class DBusProvider;
 
-class Fcitx5Proxy : public InputMethodAddon
+class Fcitx5Proxy : public ProxyAddon
 {
 public:
     Fcitx5Proxy(Dim *dim);
@@ -21,20 +21,21 @@ public:
 
     QList<InputMethodEntry> getInputMethods() override;
     void keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) override;
+    void createInputContext(uint32_t id, const QString &appName) override;
+    void focusIn(uint32_t id) override;
+    void focusOut(uint32_t id) override;
+    void destroyed(uint32_t id) override;
 
 private:
-    inline bool isICDBusInterfaceValid(const QString &appName)
+    inline bool isICDBusInterfaceValid(uint32_t id)
     {
-        return !icMap_.isEmpty() && icMap_.contains(appName) && icMap_[appName]->isValid();
+        return !icMap_.isEmpty() && icMap_.contains(id) && icMap_[id]->isValid();
     }
-
-private Q_SLOTS:
-    void createFcitxInputContext(const QString &app);
 
 private:
     DBusProvider *dbusProvider_;
     bool available_;
-    QMap<QString, QDBusInterface *> icMap_;
+    QMap<uint32_t, QDBusInterface *> icMap_;
     QList<InputMethodEntry> inputMethods_;
 
     void updateInputMethods();
