@@ -29,7 +29,8 @@ public:
 
     const InputState &inputState() const;
 
-    virtual void commitString(const QString &text) = 0;
+    virtual void updatePreeditString(const QString &text) = 0;
+    virtual void updateCommitString(const QString &text) = 0;
 
 private:
     Dim *dim_;

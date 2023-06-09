@@ -3,7 +3,17 @@
 
 #include "dimcore/InputContext.h"
 
+#include <QVariant>
+
 class InputcontextAdaptor;
+
+struct BatchEvent
+{
+    uint32_t type;
+    QVariant data;
+};
+
+Q_DECLARE_METATYPE(BatchEvent)
 
 namespace org {
 namespace deepin {
@@ -21,18 +31,21 @@ public:
 
     const QString path() { return path_; }
 
-    void commitString(const QString &text) override;
+    void updatePreeditString(const QString &text) override;
+    void updateCommitString(const QString &text) override;
 
 public slots:
     void FocusIn();
     void FocusOut();
     void Destroy();
-    void ProcessKeyEvent(
+    QList<BatchEvent> ProcessKeyEvent(
         uint32_t keyval, uint32_t keycode, uint32_t state, bool isRelease, uint32_t time);
 
 private:
     InputcontextAdaptor *adaptor_;
     QString path_;
+
+    QList<BatchEvent> blockedEvents_;
 };
 
 } // namespace dim

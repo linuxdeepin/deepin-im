@@ -8,11 +8,13 @@
     <method name="Destroy">
     </method>
     <method name="ProcessKeyEvent">
-      <arg type="u" name="keyval" direction="in"/>
-      <arg type="u" name="keycode" direction="in"/>
-      <arg type="u" name="state" direction="in"/>
-      <arg type="b" name="isRelease" direction="in"/>
-      <arg type="u" name="time" direction="in"/>
+      <arg type="u" name="keyval" direction="in" />
+      <arg type="u" name="keycode" direction="in" />
+      <arg type="u" name="state" direction="in" />
+      <arg type="b" name="isRelease" direction="in" />
+      <arg type="u" name="time" direction="in" />
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QList<BatchEvent>" />
+      <arg type="a(uv)" name="result" direction="out" />
     </method>
     <signal name="CommitString">
       <arg type="s" name="text"></arg>
