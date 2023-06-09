@@ -22,6 +22,10 @@ public:
 
     bool eventFilter(QObject *watched, QEvent *event) override;
 
+public slots:
+    void preeditString(const QString &text);
+    void commitString(const QString &text);
+
 private:
     InputContextProxy *proxy_;
     QPointer<QObject> focusObject_;

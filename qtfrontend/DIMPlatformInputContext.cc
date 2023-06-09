@@ -16,6 +16,11 @@ DIMPlatformInputContext::DIMPlatformInputContext()
     , proxy_(new InputContextProxy(this))
     , focusObject_(nullptr)
 {
+    connect(proxy_,
+            &InputContextProxy::preeditString,
+            this,
+            &DIMPlatformInputContext::preeditString);
+    connect(proxy_, &InputContextProxy::commitString, this, &DIMPlatformInputContext::commitString);
 }
 
 bool DIMPlatformInputContext::isValid() const
@@ -78,6 +83,10 @@ bool DIMPlatformInputContext::eventFilter(QObject *object, QEvent *event)
         return false;
     }
 
+    if (!proxy_->available()) {
+        return false;
+    }
+
     QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 
     uint keyval = keyEvent->nativeVirtualKey();
@@ -88,4 +97,15 @@ bool DIMPlatformInputContext::eventFilter(QObject *object, QEvent *event)
     proxy_->processKeyEvent(keyval, keycode, state, isRelease, time);
 
     return true;
+}
+
+void DIMPlatformInputContext::preeditString(const QString &text) {
+    QInputMethodEvent qe(text, {});
+    QGuiApplication::sendEvent(focusObject_, &qe);
+}
+
+void DIMPlatformInputContext::commitString(const QString &text) {
+    QInputMethodEvent qe;
+    qe.setCommitString(text);
+    QGuiApplication::sendEvent(focusObject_, &qe);
 }
