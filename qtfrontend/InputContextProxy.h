@@ -18,6 +18,8 @@ Q_DECLARE_METATYPE(BatchEvent)
 
 class InputContextProxy : public QObject
 {
+    Q_OBJECT
+
 public:
     InputContextProxy(QObject *parent = nullptr);
 

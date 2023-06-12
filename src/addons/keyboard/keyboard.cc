@@ -1,8 +1,8 @@
 #include "keyboard.h"
 
 #include "config.h"
-
-#include <xkbcommon/xkbcommon.h>
+#include "dimcore/Events.h"
+#include "dimcore/InputContext.h"
 
 #include <QDir>
 #include <QDomDocument>
@@ -31,11 +31,15 @@ struct Layout
 
 Keyboard::Keyboard(Dim *dim)
     : InputMethodAddon(dim, "keyboard")
-    , ctx_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
 {
+    ctx_.reset(xkb_context_new(XKB_CONTEXT_NO_FLAGS));
+
     if (!ctx_) {
         throw std::runtime_error("Failed to create xkb context");
     }
+
+    keymap_.reset(nullptr);
+    state_.reset(nullptr);
 
     QDir dir(QStringLiteral(XKEYBOARDCONFIG_XKBBASE) + QDir::separator() + "rules");
     QString rules = dir.absoluteFilePath(QString("%1.xml").arg(DEFAULT_XKB_RULES));
@@ -52,7 +56,11 @@ QList<InputMethodEntry> Keyboard::getInputMethods()
 void Keyboard::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent)
 {
     Q_UNUSED(entry);
-    Q_UNUSED(keyEvent);
+    // TODO: handle keymap
+    auto inputContext = keyEvent.ic();
+
+    inputContext->updatePreeditString(QString());
+    inputContext->updateCommitString(QString());
 }
 
 // static QList<QString> parseLanguageList(const QDomElement &languageListEle) {
