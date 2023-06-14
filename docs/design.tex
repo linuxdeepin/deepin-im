@@ -104,15 +104,15 @@
             \par 核心模块，负责处理输入法的核心逻辑，包括输入法的初始化、配置读取、插件管理、事件处理及分发、状态管理。
 
             \paragraph{事件分发}
-                \par 插件通过调用 \mintinline{c++}{Dim::postEvent()} 方法将事件发送给 DIM core，DIM core 处理完后，将事件分发给对应的插件。
+                \par 各个插件通过调用 \mintinline{c++}{Dim::postEvent()} 方法将事件发送给 DIM core，DIM core 处理完后，根据事件的类型将事件分发给处理该类型事件的插件\footnote{设计上，所有的插件都有触发事件的能力，但不同类型的插件会有触发时机、允许触发事件类型的限制，只不过，目前只有适用于前端插件触发的事件}。
 
                 \par 事件类型：
                 \begin{itemize}
-                    \item{InputContextCreated} 输入上下文创建事件
-                    \item{InputContextDestroyed} 输入上下文销毁事件
-                    \item{InputContextFocused} 输入上下文得到焦点
-                    \item{InputContextUnfocusd} 输入上下文失去焦点
-                    \item{InputContextKeyEvent} 按键事件，由前端插件产生，事件触发后，DIM core 先处理掉切换输入法等快捷键的事件，剩下的事件分发给当前选择的输入法插件。
+                    \item{InputContextCreated} 输入上下文创建事件，由前端插件触发。
+                    \item{InputContextDestroyed} 输入上下文销毁事件，由前端插件触发。
+                    \item{InputContextFocused} 输入上下文得到焦点，由前端插件触发。
+                    \item{InputContextUnfocusd} 输入上下文失去焦点，由前端插件触发。
+                    \item{InputContextKeyEvent} 按键事件，由前端插件触发，事件触发后，DIM core 先处理掉切换输入法等快捷键的事件，剩下的事件分发给当前选择的输入法插件。
                 \end{itemize}
 
                 \par 事件处理流程：
@@ -131,6 +131,9 @@
                 case (上下文得到焦点)
                     :设置当前焦点 InputContext ID;
                 case (上下文失去焦点)
+                    if (原焦点是否有未提交 preedit) then (是)
+                        :将 preedit 提交;
+                    endif
                     :设置当前焦点 InputContext ID 为 0;
                 case (按键)
                     :获取按键内容;
