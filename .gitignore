@@ -1,3 +1,11 @@
 /build/
 /.vscode/
 /.cache/
+/docs/*.latex
+/docs/*.txt
+/docs/*.aux
+/docs/*.log
+/docs/*.out
+/docs/*.pdf
+/docs/*.synctex.gz
+/docs/*.toc
