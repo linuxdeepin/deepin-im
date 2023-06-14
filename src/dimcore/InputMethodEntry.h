@@ -12,7 +12,7 @@ namespace deepin {
 namespace dim {
 
 class InputMethodAddon;
-class KeyEvent;
+class InputContextKeyEvent;
 
 class InputMethodEntry
 {

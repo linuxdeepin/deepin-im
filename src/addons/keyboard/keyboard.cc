@@ -53,7 +53,7 @@ QList<InputMethodEntry> Keyboard::getInputMethods()
     return keyboards_;
 }
 
-void Keyboard::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent)
+void Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
 {
     Q_UNUSED(entry);
     // TODO: handle keymap

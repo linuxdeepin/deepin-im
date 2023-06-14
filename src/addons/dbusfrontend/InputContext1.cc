@@ -49,7 +49,7 @@ void InputContext1::Destroy()
 QList<BatchEvent> InputContext1::ProcessKeyEvent(
     uint32_t keyval, uint32_t keycode, uint32_t state, bool isRelease, uint32_t time)
 {
-    KeyEvent e(this, keyval, keycode, state, isRelease, time);
+    InputContextKeyEvent e(this, keyval, keycode, state, isRelease, time);
     keyEvent(e);
 
     QList<BatchEvent> events;

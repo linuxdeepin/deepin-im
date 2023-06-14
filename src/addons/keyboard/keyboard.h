@@ -31,7 +31,7 @@ public:
     ~Keyboard();
 
     QList<InputMethodEntry> getInputMethods() override;
-    void keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) override;
+    void keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
 
 private:
     UniqueCPtr<struct xkb_context, xkb_context_unref> ctx_;

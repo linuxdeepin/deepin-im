@@ -100,7 +100,7 @@ void Fcitx5Proxy::destroyed(uint32_t id)
     }
 }
 
-void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent)
+void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
 {
     Q_UNUSED(entry);
     auto id = keyEvent.ic()->id();

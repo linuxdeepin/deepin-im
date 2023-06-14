@@ -20,7 +20,7 @@ public:
     virtual ~Fcitx5Proxy();
 
     QList<InputMethodEntry> getInputMethods() override;
-    void keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) override;
+    void keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
     void createInputContext(uint32_t id, const QString &appName) override;
     void focusIn(uint32_t id) override;
     void focusOut(uint32_t id) override;

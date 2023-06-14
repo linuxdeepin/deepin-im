@@ -24,7 +24,7 @@ class ProxyAddon;
 class FrontendAddon;
 class Addon;
 class Event;
-class KeyEvent;
+class InputContextKeyEvent;
 
 class Dim : public QObject
 {
@@ -55,7 +55,7 @@ private:
     void postInputContextDestroyed(Event &event);
     void postInputContextFocused(Event &event);
     void postInputContextUnfocused(Event &event);
-    void postInputContextKeyEvent(KeyEvent &event);
+    void postInputContextKeyEvent(InputContextKeyEvent &event);
 };
 
 } // namespace dim

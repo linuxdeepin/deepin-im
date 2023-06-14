@@ -124,7 +124,7 @@ bool Dim::postEvent(Event &event)
         postInputContextUnfocused(event);
         break;
     case EventType::InputContextKeyEvent:
-        postInputContextKeyEvent(reinterpret_cast<KeyEvent &>(event));
+        postInputContextKeyEvent(reinterpret_cast<InputContextKeyEvent &>(event));
         break;
     case EventType::InputContextCursorRectChanged:
         // TODO:
@@ -193,7 +193,7 @@ void Dim::postInputContextUnfocused([[maybe_unused]] Event &event)
     }
 }
 
-void Dim::postInputContextKeyEvent(KeyEvent &event)
+void Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
 {
     // TODO: check shortcuts (switch im etc.)
 

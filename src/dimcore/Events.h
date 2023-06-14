@@ -32,16 +32,16 @@ private:
     InputContext *ic_;
 };
 
-class KeyEvent : public Event
+class InputContextKeyEvent : public Event
 {
 public:
-    KeyEvent(InputContext *ic,
+    InputContextKeyEvent(InputContext *ic,
              uint32_t keyVal_,
              uint32_t keycode,
              uint32_t state,
              bool isRelease,
              uint32_t time);
-    ~KeyEvent() = default;
+    ~InputContextKeyEvent() = default;
 
 public:
     inline uint32_t keyValue() const { return keyVal_; }

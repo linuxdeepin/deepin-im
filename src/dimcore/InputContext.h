@@ -25,7 +25,7 @@ public:
     void destroy();
     void focusIn();
     void focusOut();
-    void keyEvent(KeyEvent &event);
+    void keyEvent(InputContextKeyEvent &event);
 
     const InputState &inputState() const;
 

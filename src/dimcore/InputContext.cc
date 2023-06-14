@@ -34,7 +34,7 @@ void InputContext::focusOut()
     dim_->postEvent(e);
 }
 
-void InputContext::keyEvent(KeyEvent &event)
+void InputContext::keyEvent(InputContextKeyEvent &event)
 {
     dim_->postEvent(event);
 }
