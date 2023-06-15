@@ -28,6 +28,8 @@ public:
 
     inline bool available() const { return controller_ != nullptr; }
 
+    inline FcitxQtWatcher *watch() const { return watcher_; }
+
     inline FcitxQtControllerProxy *controller() { return controller_; }
 
     inline FcitxQtInputMethodProxy *imProxy() { return imProxy_; }

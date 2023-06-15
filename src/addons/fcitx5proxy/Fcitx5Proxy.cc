@@ -36,7 +36,7 @@ QList<InputMethodEntry> Fcitx5Proxy::getInputMethods()
     return inputMethods_;
 }
 
-void Fcitx5Proxy::createInputContext(uint32_t id, const QString &appName)
+void Fcitx5Proxy::createFcitxInputContext(InputContext *ic, const QString &appName)
 {
     FcitxQtStringKeyValueList list;
     FcitxQtStringKeyValue arg;
@@ -69,34 +69,49 @@ void Fcitx5Proxy::createInputContext(uint32_t id, const QString &appName)
                              return;
                          }
 
-                         QDBusInterface *icIface =
-                             new QDBusInterface("org.fcitx.Fcitx5",
-                                                reply.value().path(),
-                                                "org.fcitx.Fcitx.InputContext1",
-                                                QDBusConnection::sessionBus(),
-                                                this);
-                         icMap_[id] = icIface;
+                         FcitxQtInputContextProxy *icProxy =
+                             new FcitxQtInputContextProxy(dbusProvider_->watch(), ic);
+
+                         if (!icProxy || !icProxy->isValid()) {
+                             qDebug() << "invalid input context proxy";
+                             return;
+                         }
+
+                         QObject::connect(icProxy,
+                                          &FcitxQtInputContextProxy::commitString,
+                                          ic,
+                                          &InputContext::updateCommitString);
+                         // TODO: handle forwardkey
+                         // QObject::connect(icProxy,
+                         //                  &FcitxQtInputContextProxy::ForwardKey,
+                         //                  ic,
+                         //                  &InputContext::forwardKey);
+                        //  QObject::connect(icProxy,
+                        //                   &FcitxQtInputContextProxy::updateFormattedPreedit,
+                        //                   ic,
+                        //                   &InputContext::updatePreeditString);
+                         icMap_[ic->id()] = icProxy;
                      });
 }
 
 void Fcitx5Proxy::focusIn(uint32_t id)
 {
     if (isICDBusInterfaceValid(id)) {
-        icMap_[id]->asyncCall("FocusIn");
+        icMap_[id]->focusIn();
     }
 }
 
 void Fcitx5Proxy::focusOut(uint32_t id)
 {
     if (isICDBusInterfaceValid(id)) {
-        icMap_[id]->asyncCall("FocusOut");
+        icMap_[id]->focusOut();
     }
 }
 
 void Fcitx5Proxy::destroyed(uint32_t id)
 {
     if (isICDBusInterfaceValid(id)) {
-        icMap_[id]->asyncCall("DestroyIC");
+        icMap_[id]->destroyed();
     }
 }
 
@@ -105,12 +120,11 @@ void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &
     Q_UNUSED(entry);
     auto id = keyEvent.ic()->id();
     if (isICDBusInterfaceValid(id)) {
-        icMap_[id]->asyncCall("ProcessKeyEvent ",
-                              keyEvent.keyValue(),
-                              keyEvent.keycode(),
-                              keyEvent.state(),
-                              keyEvent.isRelease(),
-                              keyEvent.time());
+        icMap_[id]->processKeyEvent(keyEvent.keyValue(),
+                                    keyEvent.keycode(),
+                                    keyEvent.state(),
+                                    keyEvent.isRelease(),
+                                    keyEvent.time());
     }
 }
 

@@ -2,10 +2,13 @@
 #define FCITX5PROXY_H
 
 #include <dimcore/ProxyAddon.h>
+#include <fcitxqtinputcontextproxy.h>
 
+#include <QDBusInterface>
 #include <QDBusObjectPath>
 #include <QDBusPendingReply>
-#include <QDBusInterface>
+
+using namespace fcitx;
 
 namespace org {
 namespace deepin {
@@ -21,7 +24,7 @@ public:
 
     QList<InputMethodEntry> getInputMethods() override;
     void keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
-    void createInputContext(uint32_t id, const QString &appName) override;
+    void createFcitxInputContext(InputContext *ic, const QString &appName) override;
     void focusIn(uint32_t id) override;
     void focusOut(uint32_t id) override;
     void destroyed(uint32_t id) override;
@@ -35,7 +38,7 @@ private:
 private:
     DBusProvider *dbusProvider_;
     bool available_;
-    QMap<uint32_t, QDBusInterface *> icMap_;
+    QMap<uint32_t, FcitxQtInputContextProxy *> icMap_;
     QList<InputMethodEntry> inputMethods_;
 
     void updateInputMethods();

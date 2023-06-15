@@ -14,6 +14,8 @@ namespace org {
 namespace deepin {
 namespace dim {
 
+class InputContext;
+
 class ProxyAddon : public InputMethodAddon
 {
     Q_OBJECT
@@ -25,7 +27,7 @@ public:
     virtual void focusIn(uint32_t id) = 0;
     virtual void focusOut(uint32_t id) = 0;
     virtual void destroyed(uint32_t id) = 0;
-    virtual void createInputContext(uint32_t id, const QString &appName) = 0;
+    virtual void createFcitxInputContext(InputContext *, const QString &appName) = 0;
 };
 
 } // namespace dim

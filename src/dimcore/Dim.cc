@@ -153,7 +153,7 @@ void Dim::postInputContextCreated(Event &event)
         // TODO: it must be replaced by actual app name
         ProxyAddon *addon = qobject_cast<ProxyAddon *>(it.value());
         if (addon) {
-            addon->createInputContext(ic->id(), QString());
+            addon->createFcitxInputContext(ic, QString());
         }
     }
 }
