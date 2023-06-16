@@ -150,10 +150,9 @@ void Dim::postInputContextCreated(Event &event)
     inputContexts_.insert(ic->id(), ic);
 
     for (auto it = inputMethodAddons_.begin(); it != inputMethodAddons_.end(); ++it) {
-        // TODO: it must be replaced by actual app name
         ProxyAddon *addon = qobject_cast<ProxyAddon *>(it.value());
         if (addon) {
-            addon->createFcitxInputContext(ic, QString());
+            addon->createFcitxInputContext(ic);
         }
     }
 }

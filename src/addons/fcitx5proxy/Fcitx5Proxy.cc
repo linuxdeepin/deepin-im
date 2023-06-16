@@ -36,62 +36,43 @@ QList<InputMethodEntry> Fcitx5Proxy::getInputMethods()
     return inputMethods_;
 }
 
-void Fcitx5Proxy::createFcitxInputContext(InputContext *ic, const QString &appName)
+void Fcitx5Proxy::createFcitxInputContext(InputContext *ic)
 {
-    FcitxQtStringKeyValueList list;
-    FcitxQtStringKeyValue arg;
-
-    arg.setKey("program");
-    arg.setValue(appName);
-
-    FcitxQtStringKeyValue arg2;
-    arg2.setKey("display");
-    if (QGuiApplication::platformName() == QLatin1String("xcb")) {
-        arg2.setValue("x11:");
-    } else if (QGuiApplication::platformName().startsWith("wayland")) {
-        arg2.setValue("wayland:");
+    if (!ic) {
+        return;
     }
-    list << arg2;
 
-    auto result = dbusProvider_->imProxy()->CreateInputContext(list);
+    FcitxQtInputContextProxy *icProxy = new FcitxQtInputContextProxy(dbusProvider_->watch(), ic);
 
-    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(result, this);
-    QObject::connect(watcher,
-                     &QDBusPendingCallWatcher::finished,
-                     this,
-                     [&](QDBusPendingCallWatcher *watcher) {
-                         watcher->deleteLater();
+    if (!icProxy) {
+        qDebug() << "failed to create FcitxQtInputContextProxy";
+        return;
+    }
 
-                         QDBusPendingReply<QDBusObjectPath, QByteArray> reply = *watcher;
-                         if (reply.isError()) {
-                             qDebug()
-                                 << "create fcitx input context error:" << reply.error().message();
-                             return;
-                         }
+    connect(icProxy, &FcitxQtInputContextProxy::inputContextCreated, this, [=] {
+        if (!icProxy->isValid()) {
+            qDebug() << "invalid input context proxy";
+            return;
+        }
 
-                         FcitxQtInputContextProxy *icProxy =
-                             new FcitxQtInputContextProxy(dbusProvider_->watch(), ic);
+        icProxy->setDisplay("x11:");
 
-                         if (!icProxy || !icProxy->isValid()) {
-                             qDebug() << "invalid input context proxy";
-                             return;
-                         }
-
-                         QObject::connect(icProxy,
-                                          &FcitxQtInputContextProxy::commitString,
-                                          ic,
-                                          &InputContext::updateCommitString);
-                         // TODO: handle forwardkey
-                         // QObject::connect(icProxy,
-                         //                  &FcitxQtInputContextProxy::ForwardKey,
-                         //                  ic,
-                         //                  &InputContext::forwardKey);
-                        //  QObject::connect(icProxy,
-                        //                   &FcitxQtInputContextProxy::updateFormattedPreedit,
-                        //                   ic,
-                        //                   &InputContext::updatePreeditString);
-                         icMap_[ic->id()] = icProxy;
-                     });
+        QObject::connect(icProxy,
+                         &FcitxQtInputContextProxy::commitString,
+                         ic,
+                         &InputContext::updateCommitString);
+        // TODO: handle forwardkey
+        // QObject::connect(icProxy,
+        //                  &FcitxQtInputContextProxy::ForwardKey,
+        //                  ic,
+        //                  &InputContext::forwardKey);
+        // TODO: handle formatpreedit
+        //  QObject::connect(icProxy,
+        //                   &FcitxQtInputContextProxy::updateFormattedPreedit,
+        //                   ic,
+        //                   &InputContext::updatePreeditString);
+        icMap_[ic->id()] = icProxy;
+    });
 }
 
 void Fcitx5Proxy::focusIn(uint32_t id)
@@ -118,7 +99,7 @@ void Fcitx5Proxy::destroyed(uint32_t id)
 void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
 {
     Q_UNUSED(entry);
-    auto id = keyEvent.ic()->id();
+    const auto id = keyEvent.ic()->id();
     if (isICDBusInterfaceValid(id)) {
         icMap_[id]->processKeyEvent(keyEvent.keyValue(),
                                     keyEvent.keycode(),

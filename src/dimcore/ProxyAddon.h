@@ -27,7 +27,7 @@ public:
     virtual void focusIn(uint32_t id) = 0;
     virtual void focusOut(uint32_t id) = 0;
     virtual void destroyed(uint32_t id) = 0;
-    virtual void createFcitxInputContext(InputContext *, const QString &appName) = 0;
+    virtual void createFcitxInputContext(InputContext *) = 0;
 };
 
 } // namespace dim
