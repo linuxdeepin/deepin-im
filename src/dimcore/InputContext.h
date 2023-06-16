@@ -29,7 +29,7 @@ public:
 
     const InputState &inputState() const;
 
-    virtual void updatePreeditString(const QString &text) = 0;
+    virtual void updatePreedit(const QList<QString> &text) = 0;
     virtual void updateCommitString(const QString &text) = 0;
 
 private:

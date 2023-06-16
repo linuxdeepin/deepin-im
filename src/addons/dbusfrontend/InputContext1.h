@@ -31,7 +31,7 @@ public:
 
     const QString path() { return path_; }
 
-    void updatePreeditString(const QString &text) override;
+    void updatePreedit(const QList<QString> &preedit) override;
     void updateCommitString(const QString &text) override;
 
 public slots:

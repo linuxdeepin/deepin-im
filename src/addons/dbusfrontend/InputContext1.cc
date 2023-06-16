@@ -21,9 +21,9 @@ InputContext1::InputContext1(Dim *dim, QObject *parent)
 
 InputContext1::~InputContext1() { }
 
-void InputContext1::updatePreeditString(const QString &text)
+void InputContext1::updatePreedit(const QList<QString> &preedit)
 {
-    blockedEvents_.append({ BATCHED_PREEDIT, text });
+    blockedEvents_.append({ BATCHED_PREEDIT, QVariant::fromValue(preedit) });
 }
 
 void InputContext1::updateCommitString(const QString &text)

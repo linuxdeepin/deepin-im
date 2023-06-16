@@ -59,7 +59,7 @@ void Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &key
     // TODO: handle keymap
     auto inputContext = keyEvent.ic();
 
-    inputContext->updatePreeditString(QString());
+    inputContext->updatePreedit(QList<QString>());
     inputContext->updateCommitString(QString());
 }
 
