@@ -157,8 +157,8 @@
                         Dimcore -> IMA : keyEvent
                             IMA -> IMA : 处理按键内容
                             return
-                            IMA -> DIM : 触发 updatePreedit、commitString、updateLookupTable 信号
-                                DIM -> UA : 更新显示内容
+                            IMA -> Dimcore : 触发 updatePreedit、commitString、updateLookupTable 信号
+                                Dimcore -> UA : 更新显示内容
                                 return
                             return
                         return
@@ -169,8 +169,8 @@
             return
             Process -> Process : 获取光标位置
                 Process -> DF : SetCursorRect
-                    DF -> DIM : InputContextCursorRectChanged
-                        DIM -> UA : 设置光标位置
+                    DF -> Dimcore : InputContextCursorRectChanged
+                        Dimcore -> UA : 设置光标位置
                         return
                     return
                 return
