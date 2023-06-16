@@ -55,22 +55,6 @@ void Fcitx5Proxy::createFcitxInputContext(InputContext *ic)
             return;
         }
 
-        icProxy->setDisplay("x11:");
-
-        QObject::connect(icProxy,
-                         &FcitxQtInputContextProxy::commitString,
-                         ic,
-                         &InputContext::updateCommitString);
-        // TODO: handle forwardkey
-        // QObject::connect(icProxy,
-        //                  &FcitxQtInputContextProxy::ForwardKey,
-        //                  ic,
-        //                  &InputContext::forwardKey);
-        // TODO: handle formatpreedit
-        //  QObject::connect(icProxy,
-        //                   &FcitxQtInputContextProxy::updateFormattedPreedit,
-        //                   ic,
-        //                   &InputContext::updatePreeditString);
         icMap_[ic->id()] = icProxy;
     });
 }
@@ -107,6 +91,10 @@ void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &
                                     keyEvent.isRelease(),
                                     keyEvent.time());
     }
+
+    // TODO: handle commitString
+    // TODO: handle forwardkey
+    // TODO: handle formatpreedit
 }
 
 void Fcitx5Proxy::updateInputMethods()

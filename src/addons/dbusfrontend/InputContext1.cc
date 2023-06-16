@@ -31,6 +31,13 @@ void InputContext1::updateCommitString(const QString &text)
     blockedEvents_.append({ BATCHED_COMMIT_STRING, text });
 }
 
+void InputContext1::forwardKey(uint32_t keyValue, uint32_t state, bool type)
+{
+    ForwardKey forwardKey = ForwardKey{ keyValue, state, type };
+
+    blockedEvents_.append({ BATCHED_FORWARD_KEY, forwardKey });
+}
+
 void InputContext1::FocusIn()
 {
     focusIn();

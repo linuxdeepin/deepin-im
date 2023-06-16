@@ -56,11 +56,15 @@ QList<InputMethodEntry> Keyboard::getInputMethods()
 void Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
 {
     Q_UNUSED(entry);
-    // TODO: handle keymap
-    auto inputContext = keyEvent.ic();
+    auto *ic = keyEvent.ic();
 
-    inputContext->updatePreedit(QList<QString>());
-    inputContext->updateCommitString(QString());
+    // by pass all key release
+    if (keyEvent.isRelease()) {
+        return;
+    }
+
+    ic->updatePreedit(QList<QString>());
+    ic->updateCommitString(QString());
 }
 
 // static QList<QString> parseLanguageList(const QDomElement &languageListEle) {

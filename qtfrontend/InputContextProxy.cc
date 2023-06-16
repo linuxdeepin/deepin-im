@@ -115,12 +115,22 @@ void InputContextProxy::processKeyEventFinished(QDBusPendingCallWatcher *watcher
     QList<BatchEvent> events = reply.value();
     for (const auto &event : events) {
         switch (event.type) {
-        case BATCHED_COMMIT_STRING:
+        case BATCHED_COMMIT_STRING: {
             emit commitString(event.data.toString());
             break;
-        case BATCHED_PREEDIT:
+        }
+        case BATCHED_PREEDIT: {
             emit preeditString(event.data.toString());
             break;
+        }
+        case BATCHED_FORWARD_KEY: {
+            ForwardKey data = event.data.value<ForwardKey>();
+            emit forwardKey(data.keyValue, data.state, data.type);
+            break;
+        }
+        default:
+            qDebug() << "invalid event type " << event.type;
+            return;
         }
     }
 }

@@ -31,6 +31,7 @@ public:
 
     virtual void updatePreedit(const QList<QString> &text) = 0;
     virtual void updateCommitString(const QString &text) = 0;
+    virtual void forwardKey(uint32_t keyValue, uint32_t state, bool type) = 0;
 
 private:
     Dim *dim_;

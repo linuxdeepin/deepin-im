@@ -14,7 +14,17 @@ struct BatchEvent
     QVariant data;
 };
 
+struct ForwardKey
+{
+    uint32_t keyValue;
+    uint32_t state;
+    bool type;
+
+    operator QVariant() const { return QVariant::fromValue(*this); }
+};
+
 Q_DECLARE_METATYPE(BatchEvent)
+Q_DECLARE_METATYPE(ForwardKey)
 
 class InputContextProxy : public QObject
 {
@@ -32,6 +42,7 @@ public:
 signals:
     void preeditString(const QString &text);
     void commitString(const QString &text);
+    void forwardKey(uint32_t keyValue, uint32_t state, bool type);
 
 private:
     QDBusConnection bus_;

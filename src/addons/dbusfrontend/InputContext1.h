@@ -13,7 +13,17 @@ struct BatchEvent
     QVariant data;
 };
 
+struct ForwardKey
+{
+    uint32_t keyValue;
+    uint32_t state;
+    bool type;
+
+    operator QVariant() const { return QVariant::fromValue(*this); }
+};
+
 Q_DECLARE_METATYPE(BatchEvent)
+Q_DECLARE_METATYPE(ForwardKey)
 
 namespace org {
 namespace deepin {
@@ -33,6 +43,7 @@ public:
 
     void updatePreedit(const QList<QString> &preedit) override;
     void updateCommitString(const QString &text) override;
+    void forwardKey(uint32_t keyValue, uint32_t state, bool type) override;
 
 public slots:
     void FocusIn();
