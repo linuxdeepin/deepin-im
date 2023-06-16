@@ -112,10 +112,12 @@
         participant "InputContext1"
         participant "DBus Frontend" as DF
         participant "InputMethod Addon" as IMA
+        participant "UI Addon" as UA
         endbox
         participant "DIM core" as Dimcore
 
         autoactivate on
+        Dimcore -> UA ** : new
         Dimcore -> DF ** : new
         Dimcore -> IMA ** : new
         Dimcore -> IMA : getInputMethods
@@ -149,12 +151,28 @@
                     alt 是快捷键
                         Dimcore -> Dimcore : 处理快捷键
                         return
+                        Dimcore -> UA : 设置提示内容
+                        return
                     else 不是快捷键
                         Dimcore -> IMA : keyEvent
-                            IMA -> InputContext1 : updatePreeditString、updateCommitString
+                            IMA -> IMA : 处理按键内容
+                            return
+                            IMA -> DIM : 触发 updatePreedit、commitString、updateLookupTable 信号
+                                DIM -> UA : 更新显示内容
+                                return
                             return
                         return
                     end
+                return
+            return
+            Process -> Process : 解析返回结果，\n处理 commitString、\nupdatePreedit、\nforwardKey
+            return
+            Process -> Process : 获取光标位置
+                Process -> DF : SetCursorRect
+                    DF -> DIM : InputContextCursorRectChanged
+                        DIM -> UA : 设置光标位置
+                        return
+                    return
                 return
             return
         end
