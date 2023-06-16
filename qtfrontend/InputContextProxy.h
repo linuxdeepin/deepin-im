@@ -40,7 +40,7 @@ public:
     void processKeyEvent(uint keyval, uint keycode, uint state, bool isRelease, uint time);
 
 signals:
-    void preeditString(const QString &text);
+    void preedit(const QList<QString> &preedit);
     void commitString(const QString &text);
     void forwardKey(uint32_t keyValue, uint32_t state, bool type);
 

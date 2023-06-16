@@ -23,7 +23,7 @@ public:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
 public slots:
-    void preeditString(const QString &text);
+    void preedit(const QList<QString> &preedit);
     void commitString(const QString &text);
 
 private:

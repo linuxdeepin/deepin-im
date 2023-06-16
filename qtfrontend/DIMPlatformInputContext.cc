@@ -17,9 +17,9 @@ DIMPlatformInputContext::DIMPlatformInputContext()
     , focusObject_(nullptr)
 {
     connect(proxy_,
-            &InputContextProxy::preeditString,
+            &InputContextProxy::preedit,
             this,
-            &DIMPlatformInputContext::preeditString);
+            &DIMPlatformInputContext::preedit);
     connect(proxy_, &InputContextProxy::commitString, this, &DIMPlatformInputContext::commitString);
 }
 
@@ -99,8 +99,8 @@ bool DIMPlatformInputContext::eventFilter(QObject *object, QEvent *event)
     return true;
 }
 
-void DIMPlatformInputContext::preeditString(const QString &text) {
-    QInputMethodEvent qe(text, {});
+void DIMPlatformInputContext::preedit(const QList<QString> &preedit) {
+    QInputMethodEvent qe(preedit.join(""), {});
     QGuiApplication::sendEvent(focusObject_, &qe);
 }
 

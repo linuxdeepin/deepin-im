@@ -120,7 +120,7 @@ void InputContextProxy::processKeyEventFinished(QDBusPendingCallWatcher *watcher
             break;
         }
         case BATCHED_PREEDIT: {
-            emit preeditString(event.data.toString());
+            emit preedit(event.data.toStringList());
             break;
         }
         case BATCHED_FORWARD_KEY: {
