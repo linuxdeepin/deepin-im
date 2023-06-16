@@ -75,7 +75,7 @@
                 + CreateInputContext()
             }
 
-            class Inputcontext extends InputContext {
+            class InputContext1 extends InputContext {
                 + Destroy()
                 + FocusIn()
                 + FocusOut()
@@ -96,6 +96,68 @@
                 + keyEvent()
             }
         }
+
+        @enduml
+        \end{plantuml}
+
+        \pagebreak
+        \par 时序图（以使用 Qt 输入法插件来与 DIM 交互的 Qt 程序为例）：
+
+        \begin{plantuml}
+        @startuml
+
+        actor User
+        participant "程序" as Process
+        box Addons #LightBlue
+        participant "InputContext1"
+        participant "DBus Frontend" as DF
+        participant "InputMethod Addon" as IMA
+        endbox
+        participant "DIM core" as Dimcore
+
+        autoactivate on
+        Dimcore -> DF ** : new
+        Dimcore -> IMA ** : new
+        Dimcore -> IMA : getInputMethods
+        return 返回插件提供的输入法列表
+        User -> Process ** : 打开
+        Process -> DF : CreateInputContext
+        DF -> InputContext1 ** : new InputContext1
+        DF -> Dimcore : 触发 InputContextCreated 信号
+        return
+        return 返回 InputContext ID
+
+        alt 程序得到焦点
+            Process -> InputContext1 : FocusIn
+                InputContext1 -> Dimcore : 触发 InputContextFocused 信号
+                    Dimcore -> Dimcore : 设置当前输入上下文 ID
+                    return
+                return
+            return
+        else 程序失去焦点
+            Process -> InputContext1 : FocusOut
+                InputContext1 -> Dimcore : 触发 InputContextUnfocused 信号
+                    Dimcore -> Dimcore : 将当前输入上下文 ID 设置为 0
+                    return
+                return
+            return
+        else 用户按键
+            Process -> InputContext1 : ProcessKeyEvent
+                InputContext1 -> Dimcore : 触发 InputContextKeyEvent 信号
+                    Dimcore -> Dimcore : 检查是不是当前 Context 发出的信号
+                    return
+                    alt 是快捷键
+                        Dimcore -> Dimcore : 处理快捷键
+                        return
+                    else 不是快捷键
+                        Dimcore -> IMA : keyEvent
+                            IMA -> InputContext1 : updatePreeditString、updateCommitString
+                            return
+                        return
+                    end
+                return
+            return
+        end
 
         @enduml
         \end{plantuml}
@@ -172,7 +234,7 @@
             \par 支持用于与程序交互的前端插件，包括 DBus 前端、XIM 前端、Wayland IM 前端，其中 DBus 前端同时供 Qt 与 GTK 程序使用。
 
             \paragraph{DBus 前端插件}
-                \par 用于通过 DBus 与需要输入的程序交互，包括 Qt 程序与 GTK 程序。DBus 前端会监听 DBus 的消息，当收到消息时，会将消息转发给 DIM core，DIM core 处理完后，将结果返回给 DBus 前端，DBus 前端再将结果放回给 DBus 程序。
+                \par 用于通过 DBus 与需要输入的程序交互，包括 Qt 程序与 GTK 程序。DBus 前端会监听 DBus 的消息，当收到消息时，将触发事件给 DIM core，DIM core 处理完后，将结果返回给 DBus 前端，DBus 前端再将结果返回给输入的程序。
 
             \paragraph{XIM 前端插件}
                 \par 实现 X 输入法协议前端
