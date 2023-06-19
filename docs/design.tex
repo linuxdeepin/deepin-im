@@ -228,41 +228,40 @@
         \subsubsection{inputmethod 接口}
             \par inputmethod 接口用于给程序提供输入法操作功能，包括创建输入上下文。
             \paragraph{方法}
-                \subparagraph{CreateInputContext}
-                    \par CreateInputContext 用于创建输入上下文，当程序需要输入时，需要调用此方法创建输入上下文。
+                \begin{outline}[enumerate]
+                    \1 CreateInputContext 用于创建输入上下文，当程序需要输入时，需要调用此方法创建输入上下文。
+                \end{outline}
 
         \subsubsection{inputcontext 接口}
             \par inputcontext 接口用于操作上下文，包括处理按键事件、获取当前输入法的状态、获取当前输入法的候选词等。
             \paragraph{方法}
-                \subparagraph{Destroy}
-                    \par Destroy 用于销毁上下文，当窗口关闭时，需要调用此方法销毁上下文。
-                \subparagraph{FocusIn}
-                    \par FocusIn 用于在输入窗口获取焦点时，调用方法。
-                \subparagraph{FocusOut}
-                    \par FocusOut 用于在输入窗口失去焦点时，调用方法。
-                \subparagraph{ProcessKeyEvent}
-                    \par ProcessKeyEvent 处理按键事件，并返回处理结果。签名：\mintinline[breaklines]{c++}{ProcessKeyEvent(uint keyval, uint keycode, uint state, bool isRelease, uint time) => []variant}
-                    \par 返回结果示例：
-                    \begin{minted}{c++}
-                        // 1
-                        [
-                            {
-                                type: 1, // preedit string
-                                data: "ce ui",
-                            },
-                        ]
-                        // 2
-                        [
-                            {
-                                type: 1, // preedit string
-                                data: "",
-                            },
-                            {
-                                type: 2, // commit string
-                                data: "测试",
-                            },
-                        ]
-                    \end{minted}
+                \begin{outline}[enumerate]
+                    \1 Destroy 用于销毁上下文，当窗口关闭时，需要调用此方法销毁上下文。
+                    \1 FocusIn 用于在输入窗口获取焦点时，调用方法。
+                    \1 FocusOut 用于在输入窗口失去焦点时，调用方法。
+                    \1 ProcessKeyEvent 处理按键事件，并返回处理结果。签名：\mintinline[breaklines]{c++}{ProcessKeyEvent(uint keyval, uint keycode, uint state, bool isRelease, uint time) => []variant}
+                        \par 返回结果示例：
+                        \begin{minted}{c++}
+                            // 1
+                            [
+                                {
+                                    type: 1, // preedit string
+                                    data: "ce ui",
+                                },
+                            ]
+                            // 2
+                            [
+                                {
+                                    type: 1, // preedit string
+                                    data: "",
+                                },
+                                {
+                                    type: 2, // commit string
+                                    data: "测试",
+                                },
+                            ]
+                        \end{minted}
+                \end{outline}
 
 % 结束文档
 \end{document}
