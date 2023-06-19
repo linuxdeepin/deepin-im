@@ -192,98 +192,36 @@
         @enduml
         \end{plantuml}
 
-        \subsubsection{DIM core}
-            \par 核心模块，负责处理输入法的核心逻辑，包括输入法的初始化、配置读取、插件管理、事件处理及分发、状态管理。
+        \subsubsection{模块列表}
+        \begin{outline}[enumerate]
+            \1 DIM core：核心模块，负责处理输入法的核心逻辑，包括输入法的初始化、配置读取、插件管理、事件处理及分发、状态管理。
+            \1 插件：各种功能由插件来实现，DIM core 通过插件接口与插件交互。
+                \2 前端插件
+                \2 输入法插件
+                    \3 键盘布局插件：获取系统支持的键盘布局，当切换到键盘布局插件下的布局时，按键事件会被分发到此插件。插件获取当前布局的键盘映射表，并将对应的映射返回。
+                    \3 Fcitx5 代理插件：用于兼容 Fcitx5 的输入法，调用 Fcitx5 的接口获取输入法列表。当切换到插件下的输入法时，按键事件会被分发到此插件。插件将按键事件转发给 Fcitx5，并获取结果返回。
+                    \3 iBus 代理插件：用于兼容 iBus 的输入法，调用 iBus 的接口获取输入法列表。当切换到插件下的输入法时，按键事件会被分发到此插件。插件将按键事件转发给 iBus，并获取结果返回。
+                \2 前端插件：支持用于与程序交互的前端插件，包括 DBus 前端、XIM 前端、Wayland IM 前端，其中 DBus 前端同时供 Qt 与 GTK 程序使用。
+                    \3 DBus 前端插件：用于通过 DBus 与需要输入的程序交互，包括 Qt 程序与 GTK 程序。DBus 前端会监听 DBus 的消息，当收到消息时，将触发事件给 DIM core，DIM core 处理完后，将结果返回给 DBus 前端，DBus 前端再将结果返回给输入的程序。
+                    \3 XIM 前端插件：实现 X 输入法协议前端
+                    \3 Wayland 前端插件：实现支持 Wayland 的 inputmethod 协议的前端插件。
+                \3 UI 插件：用于显示输入法候选词、状态等
+                    \4 输入面板插件
+                    \4 KIM panel 插件
+            \1 配置文件模块
+            \1 Qt 输入法支持：在 Qt 程序中使用 DIM，通过 DBus 前端与 DIM 交互。
+            \1 GTK 输入法支持：在 GTK 程序中使用 DIM，通过 DBus 前端与 DIM 交互。
+            \1 im-config 配置文件：增加 im-config 的配置文件，在系统安装 DIM 后，自动选择 DIM 并导出环境变量。
+        \end{outline}
 
-            \paragraph{事件分发}
-                \par 各个插件通过调用 \mintinline{c++}{Dim::postEvent()} 方法将事件发送给 DIM core，DIM core 处理完后，根据事件的类型将事件分发给处理该类型事件的插件\footnote{设计上，所有的插件都有触发事件的能力，但不同类型的插件会有触发时机、允许触发事件类型的限制，只不过，目前只有适用于前端插件触发的事件}。
-
-                \par 事件类型：
-                \begin{itemize}
-                    \item{InputContextCreated} 输入上下文创建事件，由前端插件触发。
-                    \item{InputContextDestroyed} 输入上下文销毁事件，由前端插件触发。
-                    \item{InputContextFocused} 输入上下文得到焦点，由前端插件触发。
-                    \item{InputContextUnfocusd} 输入上下文失去焦点，由前端插件触发。
-                    \item{InputContextKeyEvent} 按键事件，由前端插件触发，事件触发后，DIM core 先处理掉切换输入法等快捷键的事件，剩下的事件分发给当前选择的输入法插件。
-                \end{itemize}
-
-                \par 事件处理流程：
-
-                \begin{plantuml}
-                @startuml
-                start
-
-                :插件生成事件;
-                :插件调用 Dim::postEvent() 处理事件;
-                switch (判断事件类型)
-                case (上下文创建)
-                    :;
-                case (上下文销毁)
-                    :;
-                case (上下文得到焦点)
-                    :设置当前焦点 InputContext ID;
-                case (上下文失去焦点)
-                    if (原焦点是否有未提交 preedit) then (是)
-                        :将 preedit 提交;
-                    endif
-                    :设置当前焦点 InputContext ID 为 0;
-                case (按键)
-                    :获取按键内容;
-                    if (是否是快捷键？) then (是)
-                        :直接处理快捷键并返回;
-                    else (否)
-                        :获取事件来源的 InputContext;
-                        :根据 InputContext 获取输入法插件，与当前输入法项;
-                        :调用输入法插件的按键处理函数;
-                    endif
-                endswitch
-
-                stop
-                @enduml
-                \end{plantuml}
-
-        \subsubsection{插件支持}
-            \par 各种功能由插件来实现，DIM core 通过插件接口与插件交互。
-            \par 插件类型：
-            \begin{outline}
-                \1 前端插件
-                \1 输入法插件
-            \end{outline}
-
-        \subsubsection{输入法插件支持}
-            \paragraph{键盘布局插件}
-                \par 获取系统支持的键盘布局，当切换到键盘布局插件下的布局时，按键事件会被分发到此插件。插件获取当前布局的键盘映射表，并将对应的映射返回。
-
-            \paragraph{Fcitx5 插件}
-                \par 用于兼容 Fcitx5 的输入法，调用 Fcitx5 的接口获取输入法列表。当切换到插件下的输入法时，按键事件会被分发到此插件。插件将按键事件转发给 Fcitx5，并获取结果返回。
-
-            \paragraph{iBus 插件}
-                \par 用于兼容 iBus 的输入法，调用 iBus 的接口获取输入法列表。当切换到插件下的输入法时，按键事件会被分发到此插件。插件将按键事件转发给 iBus，并获取结果返回。
-
-        \subsubsection{前端插件支持}
-            \par 支持用于与程序交互的前端插件，包括 DBus 前端、XIM 前端、Wayland IM 前端，其中 DBus 前端同时供 Qt 与 GTK 程序使用。
-
-            \paragraph{DBus 前端插件}
-                \par 用于通过 DBus 与需要输入的程序交互，包括 Qt 程序与 GTK 程序。DBus 前端会监听 DBus 的消息，当收到消息时，将触发事件给 DIM core，DIM core 处理完后，将结果返回给 DBus 前端，DBus 前端再将结果返回给输入的程序。
-
-            \paragraph{XIM 前端插件}
-                \par 实现 X 输入法协议前端
-
-            \paragraph{Wayland IM 前端插件}
-                \par 实现支持 Wayland 的 inputmethod 协议的前端插件。
-
-        \subsubsection{配置文件}
-        \subsubsection{输入面板}
-            \par 输入面板用于显示输入法的状态，包括当前输入法、当前输入法的状态、当前输入法的候选词、当前输入法的配置等，需要适配 wayland。
-
-        \subsubsection{Qt 输入法插件}
-            \par Qt 的输入法插件用于在 Qt 程序中使用 DIM，通过 DBus 前端与 DIM 交互。
-
-        \subsubsection{GTK 插件}
-            \par GTK 的输入法插件用于在 GTK 程序中使用 DIM，通过 DBus 前端与 DIM 交互。
-
-        \subsubsection{im-config 配置}
-            \par 增加 im-config 的配置文件，在系统安装 DIM 后，自动选择 DIM 并导出环境变量。
+        \subsubsection{事件类型}
+        \begin{outline}[enumerate]
+            \1 InputContextCreated，输入上下文创建事件，由前端插件触发。
+            \1 InputContextDestroyed，输入上下文销毁事件，由前端插件触发。
+            \1 InputContextFocused，输入上下文得到焦点，由前端插件触发。
+            \1 InputContextUnfocusd，输入上下文失去焦点，由前端插件触发。
+            \1 InputContextKeyEvent，按键事件，由前端插件触发，事件触发后，DIM core 先处理掉切换输入法等快捷键的事件，剩下的事件分发给当前选择的输入法插件。
+        \end{outline}
 
     \subsection{接口设计}
 
