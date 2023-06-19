@@ -136,47 +136,53 @@
         return 返回 InputContext ID
 
         alt 程序得到焦点
-            Process -> InputContext1 : FocusIn
-                InputContext1 -> Dimcore : 触发 InputContextFocused 信号
-                    Dimcore -> Dimcore : 设置当前输入上下文 ID
+            User -> Process : 切换到应用
+                Process -> InputContext1 : FocusIn
+                    InputContext1 -> Dimcore : 触发 InputContextFocused 信号
+                        Dimcore -> Dimcore : 设置当前输入上下文 ID
+                        return
                     return
                 return
             return
         else 程序失去焦点
-            Process -> InputContext1 : FocusOut
-                InputContext1 -> Dimcore : 触发 InputContextUnfocused 信号
-                    Dimcore -> Dimcore : 将当前输入上下文 ID 设置为 0
+            User -> Process : 切出应用
+                Process -> InputContext1 : FocusOut
+                    InputContext1 -> Dimcore : 触发 InputContextUnfocused 信号
+                        Dimcore -> Dimcore : 将当前输入上下文 ID 设置为 0
+                        return
                     return
                 return
             return
         else 用户按键
-            Process -> InputContext1 : ProcessKeyEvent
-                InputContext1 -> Dimcore : 触发 InputContextKeyEvent 信号
-                    Dimcore -> Dimcore : 检查是不是当前 Context 发出的信号
-                    return
-                    alt 是快捷键
-                        Dimcore -> Dimcore : 处理快捷键
+            User -> Process : 按键
+                Process -> InputContext1 : ProcessKeyEvent
+                    InputContext1 -> Dimcore : 触发 InputContextKeyEvent 信号
+                        Dimcore -> Dimcore : 检查是不是当前 Context 发出的信号
                         return
-                        Dimcore -> UA : 设置提示内容
-                        return
-                    else 不是快捷键
-                        Dimcore -> IMA : keyEvent
-                            IMA -> IMA : 处理按键内容
+                        alt 是快捷键
+                            Dimcore -> Dimcore : 处理快捷键
                             return
-                            IMA -> Dimcore : 触发 updatePreedit、commitString、updateLookupTable 信号
-                                Dimcore -> UA : 更新显示内容
+                            Dimcore -> UA : 设置提示内容
+                            return
+                        else 不是快捷键
+                            Dimcore -> IMA : keyEvent
+                                IMA -> IMA : 处理按键内容
+                                return
+                                IMA -> Dimcore : 触发 updatePreedit、commitString、updateLookupTable 信号
+                                    Dimcore -> UA : 更新显示内容
+                                    return
                                 return
                             return
-                        return
-                    end
+                        end
+                    return
                 return
-            return
-            Process -> Process : 解析返回结果，\n处理 commitString、\nupdatePreedit、\nforwardKey
-            return
-            Process -> Process : 获取光标位置
-                Process -> DF : SetCursorRect
-                    DF -> Dimcore : InputContextCursorRectChanged
-                        Dimcore -> UA : 设置光标位置
+                Process -> Process : 解析返回结果，\n处理 commitString、\nupdatePreedit、\nforwardKey
+                return
+                Process -> Process : 获取光标位置
+                    Process -> DF : SetCursorRect
+                        DF -> Dimcore : InputContextCursorRectChanged
+                            Dimcore -> UA : 设置光标位置
+                            return
                         return
                     return
                 return
