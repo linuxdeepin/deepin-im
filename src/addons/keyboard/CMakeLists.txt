@@ -22,6 +22,11 @@ target_link_libraries(keyboard PRIVATE
   PkgConfig::xkbcommon
 )
 
+target_include_directories(keyboard PUBLIC
+    ../../../
+    utils/common.h
+    )
+
 install(TARGETS keyboard
   LIBRARY DESTINATION ${DIM_ADDON_DIR}
 )

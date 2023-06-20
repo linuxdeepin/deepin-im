@@ -3,28 +3,11 @@
 
 #include "InputcontextIface.h"
 #include "InputmethodIface.h"
+#include "utils/common.h"
 
 #include <QDBusConnection>
 #include <QDBusServiceWatcher>
 #include <QObject>
-
-struct BatchEvent
-{
-    uint32_t type;
-    QVariant data;
-};
-
-struct ForwardKey
-{
-    uint32_t keyValue;
-    uint32_t state;
-    bool type;
-
-    operator QVariant() const { return QVariant::fromValue(*this); }
-};
-
-Q_DECLARE_METATYPE(BatchEvent)
-Q_DECLARE_METATYPE(ForwardKey)
 
 class InputContextProxy : public QObject
 {

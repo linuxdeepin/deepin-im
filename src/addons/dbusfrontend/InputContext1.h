@@ -2,28 +2,11 @@
 #define INPUTCONTEXT1_H
 
 #include "dimcore/InputContext.h"
+#include "utils/common.h"
 
 #include <QVariant>
 
 class InputcontextAdaptor;
-
-struct BatchEvent
-{
-    uint32_t type;
-    QVariant data;
-};
-
-struct ForwardKey
-{
-    uint32_t keyValue;
-    uint32_t state;
-    bool type;
-
-    operator QVariant() const { return QVariant::fromValue(*this); }
-};
-
-Q_DECLARE_METATYPE(BatchEvent)
-Q_DECLARE_METATYPE(ForwardKey)
 
 namespace org {
 namespace deepin {
@@ -41,9 +24,9 @@ public:
 
     const QString path() { return path_; }
 
-    void updatePreedit(const QList<QString> &preedit) override;
+    void updatePreedit(const PreeditKey &key) override;
     void updateCommitString(const QString &text) override;
-    void forwardKey(uint32_t keyValue, uint32_t state, bool type) override;
+    void forwardKey(const ForwardKey &key) override;
 
 public slots:
     void FocusIn();
@@ -56,7 +39,7 @@ private:
     InputcontextAdaptor *adaptor_;
     QString path_;
 
-    QList<BatchEvent> blockedEvents_;
+    QList<org::deepin::dim::BatchEvent> blockedEvents_;
 };
 
 } // namespace dim

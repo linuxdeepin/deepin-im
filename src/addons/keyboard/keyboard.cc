@@ -3,6 +3,7 @@
 #include "config.h"
 #include "dimcore/Events.h"
 #include "dimcore/InputContext.h"
+#include <utils/common.h>
 
 #include <QDir>
 #include <QDomDocument>
@@ -63,7 +64,7 @@ void Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &key
         return;
     }
 
-    ic->updatePreedit(QList<QString>());
+    ic->updatePreedit(PreeditKey{});
     ic->updateCommitString(QString());
 }
 

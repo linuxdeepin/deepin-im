@@ -17,6 +17,11 @@ target_link_libraries(fcitx5proxy PRIVATE
   Fcitx5Qt5::DBusAddons
 )
 
+target_include_directories(fcitx5proxy PUBLIC
+    ../../../
+    utils/common.h
+    )
+
 install(TARGETS fcitx5proxy
   LIBRARY DESTINATION ${DIM_ADDON_DIR}
 )

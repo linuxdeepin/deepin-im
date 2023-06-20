@@ -25,6 +25,7 @@ public:
 public slots:
     void preedit(const QList<QString> &preedit);
     void commitString(const QString &text);
+    void forwardKey(uint32_t keyValue, uint32_t state, bool type);
 
 private:
     InputContextProxy *proxy_;

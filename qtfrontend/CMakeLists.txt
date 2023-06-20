@@ -22,6 +22,11 @@ target_link_libraries(dimplatforminputcontextplugin PRIVATE
   Qt5::DBus
 )
 
+target_include_directories(dimplatforminputcontextplugin PUBLIC
+    ../
+    utils/common.h
+    )
+
 include(ECMQueryQmake)
 query_qmake(_QT5PLUGINDIR QT_INSTALL_PLUGINS)
 set(CMAKE_INSTALL_QT5PLUGINDIR ${_QT5PLUGINDIR} CACHE PATH "Qt5 plugin dir")

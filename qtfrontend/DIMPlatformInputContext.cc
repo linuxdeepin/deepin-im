@@ -16,11 +16,9 @@ DIMPlatformInputContext::DIMPlatformInputContext()
     , proxy_(new InputContextProxy(this))
     , focusObject_(nullptr)
 {
-    connect(proxy_,
-            &InputContextProxy::preedit,
-            this,
-            &DIMPlatformInputContext::preedit);
+    connect(proxy_, &InputContextProxy::preedit, this, &DIMPlatformInputContext::preedit);
     connect(proxy_, &InputContextProxy::commitString, this, &DIMPlatformInputContext::commitString);
+    connect(proxy_, &InputContextProxy::forwardKey, this, &DIMPlatformInputContext::forwardKey);
 }
 
 bool DIMPlatformInputContext::isValid() const
@@ -99,13 +97,22 @@ bool DIMPlatformInputContext::eventFilter(QObject *object, QEvent *event)
     return true;
 }
 
-void DIMPlatformInputContext::preedit(const QList<QString> &preedit) {
+void DIMPlatformInputContext::preedit(const QList<QString> &preedit)
+{
     QInputMethodEvent qe(preedit.join(""), {});
     QGuiApplication::sendEvent(focusObject_, &qe);
 }
 
-void DIMPlatformInputContext::commitString(const QString &text) {
+void DIMPlatformInputContext::commitString(const QString &text)
+{
     QInputMethodEvent qe;
     qe.setCommitString(text);
     QGuiApplication::sendEvent(focusObject_, &qe);
+}
+
+void DIMPlatformInputContext::forwardKey(uint32_t keyValue, uint32_t state, bool type)
+{
+    Q_UNUSED(keyValue);
+    Q_UNUSED(state);
+    Q_UNUSED(type);
 }

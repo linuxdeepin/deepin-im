@@ -4,6 +4,7 @@
 #include "Events.h"
 #include "InputState.h"
 #include "ObjectId.h"
+#include "utils/common.h"
 
 #include <QObject>
 
@@ -29,9 +30,9 @@ public:
 
     const InputState &inputState() const;
 
-    virtual void updatePreedit(const QList<QString> &text) = 0;
+    virtual void updatePreedit(const org::deepin::dim::PreeditKey &key) = 0;
     virtual void updateCommitString(const QString &text) = 0;
-    virtual void forwardKey(uint32_t keyValue, uint32_t state, bool type) = 0;
+    virtual void forwardKey(const org::deepin::dim::ForwardKey &key) = 0;
 
 private:
     Dim *dim_;

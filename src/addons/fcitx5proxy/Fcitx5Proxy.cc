@@ -3,6 +3,7 @@
 #include "DBusProvider.h"
 #include "dimcore/Events.h"
 #include "dimcore/InputContext.h"
+#include "utils/common.h"
 
 #include <QGuiApplication>
 
@@ -42,59 +43,116 @@ void Fcitx5Proxy::createFcitxInputContext(InputContext *ic)
         return;
     }
 
-    FcitxQtInputContextProxy *icProxy = new FcitxQtInputContextProxy(dbusProvider_->watch(), ic);
+    FcitxQtStringKeyValueList list;
+    FcitxQtStringKeyValue arg;
 
-    if (!icProxy) {
-        qDebug() << "failed to create FcitxQtInputContextProxy";
-        return;
-    }
+    arg.setKey("program");
+    // TODO: it must be actual app name
+    arg.setValue(QStringLiteral("dim"));
+    list << arg;
 
-    connect(icProxy, &FcitxQtInputContextProxy::inputContextCreated, this, [=] {
-        if (!icProxy->isValid()) {
-            qDebug() << "invalid input context proxy";
-            return;
-        }
+    FcitxQtStringKeyValue arg2;
+    arg2.setKey("display");
+    arg2.setValue("x11:");
+    list << arg2;
 
-        icMap_[ic->id()] = icProxy;
-    });
+    auto result = dbusProvider_->imProxy()->CreateInputContext(list);
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(result, this);
+    QObject::connect(watcher,
+                     &QDBusPendingCallWatcher::finished,
+                     this,
+                     [this, ic](QDBusPendingCallWatcher *watcher) {
+                         watcher->deleteLater();
+                         QDBusPendingReply<QDBusObjectPath, QByteArray> reply = *watcher;
+                         if (reply.isError()) {
+                             qDebug()
+                                 << "create fcitx input context error:" << reply.error().message();
+                             return;
+                         }
+
+                         QDBusInterface *icIface =
+                             new QDBusInterface(QStringLiteral("org.fcitx.Fcitx5"),
+                                                reply.value().path(),
+                                                QStringLiteral("org.fcitx.Fcitx.InputContext1"),
+                                                QDBusConnection::sessionBus(),
+                                                this);
+                         if (icIface && icIface->isValid()) {
+                             icMap_[ic->id()] = icIface;
+                         }
+                     });
 }
 
 void Fcitx5Proxy::focusIn(uint32_t id)
 {
     if (isICDBusInterfaceValid(id)) {
-        icMap_[id]->focusIn();
+        icMap_[id]->asyncCall("FocusIn");
     }
 }
 
 void Fcitx5Proxy::focusOut(uint32_t id)
 {
     if (isICDBusInterfaceValid(id)) {
-        icMap_[id]->focusOut();
+        icMap_[id]->asyncCall("FocusOut");
     }
 }
 
 void Fcitx5Proxy::destroyed(uint32_t id)
 {
     if (isICDBusInterfaceValid(id)) {
-        icMap_[id]->destroyed();
+        icMap_[id]->asyncCall("DestroyIC");
     }
 }
 
 void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
 {
     Q_UNUSED(entry);
-    const auto id = keyEvent.ic()->id();
-    if (isICDBusInterfaceValid(id)) {
-        icMap_[id]->processKeyEvent(keyEvent.keyValue(),
-                                    keyEvent.keycode(),
-                                    keyEvent.state(),
-                                    keyEvent.isRelease(),
-                                    keyEvent.time());
-    }
+    auto id = keyEvent.ic()->id();
 
-    // TODO: handle commitString
-    // TODO: handle forwardkey
-    // TODO: handle formatpreedit
+    if (isICDBusInterfaceValid(id)) {
+        auto response = icMap_[id]->call("ProcessKeyEventBatch ",
+                                         keyEvent.keyValue(),
+                                         keyEvent.keycode(),
+                                         keyEvent.state(),
+                                         keyEvent.isRelease(),
+                                         keyEvent.time());
+
+        if (response.type() == QDBusMessage::ReplyMessage) {
+            auto ic = keyEvent.ic();
+            // 从返回参数获取返回值
+            auto value = response.arguments().takeFirst();
+            if (value.canConvert<QList<BatchEvent>>()) {
+                QList<BatchEvent> events = value.value<QList<BatchEvent>>();
+
+                for (const auto &event : events) {
+                    auto type = std::get<0>(event);
+                    auto v = std::get<1>(event);
+                    switch (type) {
+                    case BATCHED_COMMIT_STRING: {
+                        if (v.canConvert<QString>()) {
+                            ic->updateCommitString(v.toString());
+                        }
+                        break;
+                    }
+                    case BATCHED_PREEDIT: {
+                        if (v.canConvert<PreeditKey>()) {
+                            ic->updatePreedit(v.value<PreeditKey>());
+                        }
+                        break;
+                    }
+                    case BATCHED_FORWARD_KEY: {
+                        if (v.canConvert<ForwardKey>()) {
+                            ic->forwardKey(v.value<ForwardKey>());
+                        }
+                        break;
+                    }
+                    default:
+                        qDebug() << "invalid event type " << type;
+                        return;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void Fcitx5Proxy::updateInputMethods()

@@ -23,6 +23,11 @@ target_link_libraries(dbusfrontend PRIVATE
   Qt5::DBus
 )
 
+target_include_directories(dbusfrontend PUBLIC
+    ../../../
+    utils/common.h
+    )
+
 install(TARGETS dbusfrontend
   LIBRARY DESTINATION ${DIM_ADDON_DIR}
 )

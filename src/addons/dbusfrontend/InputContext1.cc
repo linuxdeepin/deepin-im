@@ -21,21 +21,20 @@ InputContext1::InputContext1(Dim *dim, QObject *parent)
 
 InputContext1::~InputContext1() { }
 
-void InputContext1::updatePreedit(const QList<QString> &preedit)
+void InputContext1::updatePreedit(const PreeditKey &key)
 {
-    blockedEvents_.append({ BATCHED_PREEDIT, QVariant::fromValue(preedit) });
+    blockedEvents_.append(BatchEvent{ BATCHED_PREEDIT, QVariant::fromValue(key) });
 }
 
 void InputContext1::updateCommitString(const QString &text)
 {
-    blockedEvents_.append({ BATCHED_COMMIT_STRING, text });
+    Q_UNUSED(text);
+    blockedEvents_.append(BatchEvent{ BATCHED_COMMIT_STRING, text });
 }
 
-void InputContext1::forwardKey(uint32_t keyValue, uint32_t state, bool type)
+void InputContext1::forwardKey(const ForwardKey &key)
 {
-    ForwardKey forwardKey = ForwardKey{ keyValue, state, type };
-
-    blockedEvents_.append({ BATCHED_FORWARD_KEY, forwardKey });
+    blockedEvents_.append(BatchEvent{ BATCHED_FORWARD_KEY, QVariant::fromValue(key) });
 }
 
 void InputContext1::FocusIn()

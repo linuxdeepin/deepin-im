@@ -6,12 +6,12 @@
 static const QString DIM_SERVICE = "org.deepin.dim";
 static const QString DIM_IM_PATH = "/org/freedesktop/portal/inputmethod";
 
-enum { BATCHED_COMMIT_STRING = 0, BATCHED_PREEDIT, BATCHED_FORWARD_KEY };
+using namespace org::deepin::dim;
 
 const QDBusArgument &operator>>(const QDBusArgument &argument, BatchEvent &event)
 {
     argument.beginStructure();
-    argument >> event.type >> event.data;
+    argument >> std::get<0>(event) >> std::get<1>(event);
     argument.endStructure();
     return argument;
 }
@@ -114,22 +114,32 @@ void InputContextProxy::processKeyEventFinished(QDBusPendingCallWatcher *watcher
 
     QList<BatchEvent> events = reply.value();
     for (const auto &event : events) {
-        switch (event.type) {
+        auto type = std::get<0>(event);
+        auto data = std::get<1>(event);
+        switch (type) {
         case BATCHED_COMMIT_STRING: {
-            emit commitString(event.data.toString());
+            if (data.canConvert<QString>()) {
+                emit commitString(data.toString());
+            }
             break;
         }
         case BATCHED_PREEDIT: {
-            emit preedit(event.data.toStringList());
+            if (data.canConvert<QStringList>()) {
+                emit preedit(data.toStringList());
+            }
             break;
         }
         case BATCHED_FORWARD_KEY: {
-            ForwardKey data = event.data.value<ForwardKey>();
-            emit forwardKey(data.keyValue, data.state, data.type);
+            if (data.canConvert<ForwardKey>()) {
+                ForwardKey forwardKeyEvent = data.value<ForwardKey>();
+                emit forwardKey(std::get<0>(forwardKeyEvent),
+                                std::get<1>(forwardKeyEvent),
+                                std::get<2>(forwardKeyEvent));
+            }
             break;
         }
         default:
-            qDebug() << "invalid event type " << event.type;
+            qDebug() << "invalid event type " << type;
             return;
         }
     }
