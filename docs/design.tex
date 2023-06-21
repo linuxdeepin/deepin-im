@@ -50,6 +50,9 @@
         @startuml
         package "DIM core" {
             class Dim {
+                list<InputContext> inputcontexts
+                list<FrontendAddon> frontendAddons
+                list<InputmethodAddon> inputmethodAddons
                 + postEvent()
                 - postInputContextCreated()
                 - postInputContextDestroyed()
@@ -66,10 +69,20 @@
                 + {abstract} list<InputMethodEntry> getInputMethods()
                 + {abstract} keyEvent(InputMethodEntry, InputContextKeyEvent)
             }
+            class UIAddon extends Addon {
+                + {abstract} updatePreedit()
+                + {abstract} updateLookupTable()
+                + {abstract} setWindowPosition()
+                + {abstract} setCursorRect()
+            }
             class InputState {
             }
             class InputContext {
                 InputState inputState
+                + destroy()
+                + focusIn()
+                + focusOut()
+                + processKeyEvent()
             }
         }
 
@@ -93,6 +106,15 @@
             }
         }
 
+        package "panel" {
+            class Panel extends UIAddon {
+                + updatePreedit()
+                + updateLookupTable()
+                + setWindowPosition()
+                + setCursorRect()
+            }
+        }
+
         package "Fcitx5proxy" {
             class Fcitx5proxyAddon extends InputMethodAddon {
                 + GetInputMethods()
@@ -101,6 +123,9 @@
         }
 
         DBusFrontend::CreateInputContext --> InputContext1
+        InputContext::focusIn --> Dim::postEvent
+        InputContext::focusOut --> Dim::postEvent
+        InputContext::processKeyEvent --> Dim::postEvent
         InputContext::inputState --> InputState
 
         @enduml
