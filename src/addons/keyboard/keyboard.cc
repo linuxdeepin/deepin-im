@@ -3,6 +3,7 @@
 #include "config.h"
 #include "dimcore/Events.h"
 #include "dimcore/InputContext.h"
+
 #include <utils/common.h>
 
 #include <QDir>
@@ -45,6 +46,9 @@ Keyboard::Keyboard(Dim *dim)
     QDir dir(QStringLiteral(XKEYBOARDCONFIG_XKBBASE) + QDir::separator() + "rules");
     QString rules = dir.absoluteFilePath(QString("%1.xml").arg(DEFAULT_XKB_RULES));
     QString extraRules = dir.absoluteFilePath(QString("%1.extras.xml").arg(DEFAULT_XKB_RULES));
+
+    parseRule(rules);
+    parseRule(extraRules);
 }
 
 Keyboard::~Keyboard() { }
@@ -56,7 +60,6 @@ QList<InputMethodEntry> Keyboard::getInputMethods()
 
 void Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
 {
-    Q_UNUSED(entry);
     auto *ic = keyEvent.ic();
 
     // by pass all key release
@@ -64,8 +67,24 @@ void Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &key
         return;
     }
 
-    ic->updatePreedit(PreeditKey{});
-    ic->updateCommitString(QString());
+    struct xkb_rule_names names;
+    const auto layout = entry.name();
+    auto layoutName = layout.contains("_") ? entry.name().split("_").first() : layout;
+    auto variantName = layout.contains("_") ? entry.name().split("_").last() : "";
+
+    names.layout = layoutName.toStdString().c_str();
+    names.variant = variantName.toStdString().c_str();
+    names.rules = DEFAULT_XKB_RULES;
+    names.model = "";
+    names.options = "";
+    keymap_.reset(xkb_keymap_new_from_names(ctx_.get(), &names, XKB_KEYMAP_COMPILE_NO_FLAGS));
+
+    keymap_ ? state_.reset(xkb_state_new(keymap_.get())) : state_.reset();
+    xkb_keysym_t keySym;
+    if (state_) {
+        keySym = xkb_state_key_get_one_sym(state_.get(), keyEvent.keycode());
+    }
+    ic->forwardKey(ForwardKey{ keySym, keyEvent.state(), keyEvent.isRelease() });
 }
 
 // static QList<QString> parseLanguageList(const QDomElement &languageListEle) {
