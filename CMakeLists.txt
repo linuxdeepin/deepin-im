@@ -22,9 +22,11 @@ find_package(Qt5 REQUIRED COMPONENTS Core Gui Quick Widgets Xml DBus)
 find_package(Qt5Gui ${REQUIRED_QT5_VERSION} REQUIRED Private)
 find_package(Fcitx5Qt5DBusAddons REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(WaylandScanner REQUIRED)
 
 pkg_check_modules(xkbcommon REQUIRED IMPORTED_TARGET xkbcommon)
 pkg_check_modules(xkeyboard-config REQUIRED IMPORTED_TARGET xkeyboard-config)
+pkg_check_modules(wayland-client REQUIRED IMPORTED_TARGET wayland-client)
 
 add_subdirectory(kimpanel)
 add_subdirectory(src)
