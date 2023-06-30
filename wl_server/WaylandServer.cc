@@ -8,12 +8,30 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <QDebug>
+
 void text_input_v3_bind([[maybe_unused]] struct wl_client *client,
                         [[maybe_unused]] void *data,
                         uint32_t version,
                         uint32_t id)
 {
     std::cout << "text_input_v3_bind:" << version << id << std::endl;
+}
+
+void input_method_v1_bind([[maybe_unused]] struct wl_client *client,
+                          [[maybe_unused]] void *data,
+                          uint32_t version,
+                          uint32_t id)
+{
+    std::cout << "input_method_v1_bind:" << version << id << std::endl;
+}
+
+void input_method_context_v1_bind([[maybe_unused]] struct wl_client *client,
+                                  [[maybe_unused]] void *data,
+                                  uint32_t version,
+                                  uint32_t id)
+{
+    std::cout << "input_method_context_v1_bind:" << version << id << std::endl;
 }
 
 WaylandServer::WaylandServer()
@@ -25,8 +43,12 @@ WaylandServer::WaylandServer()
     }
 
     wl_global_create(display_, &zwp_text_input_v3_interface, 1, nullptr, &text_input_v3_bind);
-    wl_global_create(display_, &zwp_input_method_v1_interface, 1, nullptr, nullptr);
-    wl_global_create(display_, &zwp_input_method_context_v1_interface, 1, nullptr, nullptr);
+    wl_global_create(display_, &zwp_input_method_v1_interface, 1, nullptr, &input_method_v1_bind);
+    wl_global_create(display_,
+                     &zwp_input_method_context_v1_interface,
+                     1,
+                     nullptr,
+                     &input_method_context_v1_bind);
 }
 
 WaylandServer::~WaylandServer()

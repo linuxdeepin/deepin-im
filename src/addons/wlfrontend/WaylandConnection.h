@@ -21,6 +21,7 @@ public:
 
 private:
     wl_display *display_;
+    int fd_;
     QSocketNotifier *notifier_;
 
     void init();

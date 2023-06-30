@@ -4,6 +4,8 @@
 
 #include <QDebug>
 
+#include <poll.h>
+
 using namespace org::deepin::dim;
 
 WaylandConnection::WaylandConnection(const std::string &name, QObject *parent)
@@ -27,23 +29,39 @@ WaylandConnection::~WaylandConnection()
 
 void WaylandConnection::init()
 {
-    int fd = wl_display_get_fd(display_);
-    if (fd < 0) {
+    fd_ = wl_display_get_fd(display_);
+    if (fd_ < 0) {
         qWarning() << "Failed to get Wayland display fd";
         return;
     }
 
-    while (wl_display_prepare_read(display_) != 0) {
-        wl_display_dispatch_pending(display_);
-    }
-    wl_display_flush(display_);
-
-    notifier_ = new QSocketNotifier(fd, QSocketNotifier::Read, this);
+    notifier_ = new QSocketNotifier(fd_, QSocketNotifier::Read, this);
     connect(notifier_, &QSocketNotifier::activated, this, &WaylandConnection::dispatch);
 }
 
 void WaylandConnection::dispatch()
 {
-    wl_display_read_events(display_);
-    wl_display_dispatch_pending(display_);
+    qWarning() << "dispatch";
+    if (display_ == nullptr) {
+        return;
+    }
+
+    struct pollfd pfd;
+    pfd.fd = fd_;
+    pfd.events = POLLIN;
+    int ret = poll(&pfd, 1, 0);
+    if (ret > 0) {
+        wl_display_read_events(display_);
+    } else {
+        wl_display_cancel_read(display_);
+    }
+
+    if (wl_display_dispatch_pending(display_) == -1) {
+        int error = wl_display_get_error(display_);
+        if (error != 0) {
+            free(display_);
+            display_ = nullptr;
+            return;
+        }
+    }
 }

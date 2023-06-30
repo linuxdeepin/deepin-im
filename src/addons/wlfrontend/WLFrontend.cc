@@ -1,6 +1,5 @@
 #include "WLFrontend.h"
 
-#include "InputContext1.h"
 #include "WaylandConnection.h"
 
 #include <dimcore/Dim.h>
@@ -70,6 +69,9 @@ WLFrontend::WLFrontend()
                                   const char *interface,
                                   uint32_t version) {
         qWarning() << "global" << name << interface << version;
+        if (strcmp(interface, "zwp_input_method_v1") == 0) {
+            wl_registry_bind(registry, name, &zwp_input_method_v1_interface, 1);
+        }
     };
     registry_listener.global_remove = []([[maybe_unused]] void *data,
                                          [[maybe_unused]] struct wl_registry *registry,
@@ -80,6 +82,7 @@ WLFrontend::WLFrontend()
     auto *registry = wl_display_get_registry(wl_->display());
     wl_registry_add_listener(registry, &registry_listener, this);
     wl_display_roundtrip(wl_->display());
+    wl_display_flush(wl_->display());
 
     // zwp_input_method_v1_listener listener;
     // listener.activate = []([[maybe_unused]] void *data,

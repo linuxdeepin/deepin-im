@@ -20,4 +20,5 @@ add_executable(wl_server
 
 target_link_libraries(wl_server PRIVATE
   PkgConfig::wayland-server
+  Qt5::Core
 )
