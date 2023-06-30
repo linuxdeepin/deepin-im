@@ -24,7 +24,7 @@ WaylandServer::WaylandServer()
         throw std::runtime_error("Unable to add socket to Wayland display");
     }
 
-    wl_global_create(display_, &zwp_text_input_v3_interface, 3, nullptr, &text_input_v3_bind);
+    wl_global_create(display_, &zwp_text_input_v3_interface, 1, nullptr, &text_input_v3_bind);
     wl_global_create(display_, &zwp_input_method_v1_interface, 1, nullptr, nullptr);
     wl_global_create(display_, &zwp_input_method_context_v1_interface, 1, nullptr, nullptr);
 }
