@@ -65,3 +65,7 @@ void WaylandConnection::dispatch()
         }
     }
 }
+
+void WaylandConnection::roundTrip() {
+    wl_display_roundtrip(display_);
+}

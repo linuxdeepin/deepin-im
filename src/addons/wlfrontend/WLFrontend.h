@@ -6,6 +6,7 @@
 #include <QDBusObjectPath>
 
 class InputmethodAdaptor;
+struct wl_registry;
 
 namespace org {
 namespace deepin {
@@ -24,6 +25,11 @@ public:
 
 private:
     WaylandConnection *wl_;
+
+    void registryGlobal(struct wl_registry *registry,
+                        uint32_t name,
+                        const char *interface,
+                        uint32_t version);
 };
 
 } // namespace dim

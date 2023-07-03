@@ -8,6 +8,8 @@
 #include <QDBusConnection>
 #include <QDebug>
 
+#include "utils.h"
+
 using namespace org::deepin::dim;
 
 WLFrontend::WLFrontend()
@@ -18,61 +20,10 @@ WLFrontend::WLFrontend()
         // todo: fake wayland server
     }
 
-    // zwp_input_method_context_v1_listener listener;
-    // listener.surrounding_text =
-    //     []([[maybe_unused]] void *data,
-    //        [[maybe_unused]] struct zwp_input_method_context_v1 *zwp_input_method_context_v1,
-    //        const char *text,
-    //        uint32_t cursor,
-    //        uint32_t anchor) {
-    //         qDebug() << "surrounding_text" << text << cursor << anchor;
-    //     };
-    // listener.reset =
-    //     []([[maybe_unused]] void *data,
-    //        [[maybe_unused]] struct zwp_input_method_context_v1 *zwp_input_method_context_v1) {
-    //         qDebug() << "reset";
-    //     };
-    // listener.content_type =
-    //     []([[maybe_unused]] void *data,
-    //        [[maybe_unused]] struct zwp_input_method_context_v1 *zwp_input_method_context_v1,
-    //        uint32_t hint,
-    //        uint32_t purpose) {
-    //         qDebug() << "content_type" << hint << purpose;
-    //     };
-    // listener.invoke_action =
-    //     []([[maybe_unused]] void *data,
-    //        [[maybe_unused]] struct zwp_input_method_context_v1 *zwp_input_method_context_v1,
-    //        uint32_t button,
-    //        uint32_t index) {
-    //         qDebug() << "invoke_action" << button << index;
-    //     };
-    // listener.commit_state =
-    //     []([[maybe_unused]] void *data,
-    //        [[maybe_unused]] struct zwp_input_method_context_v1 *zwp_input_method_context_v1,
-    //        uint32_t serial) {
-    //         qDebug() << "commit_state" << serial;
-    //     };
-    // listener.preferred_language =
-    //     []([[maybe_unused]] void *data,
-    //        [[maybe_unused]] struct zwp_input_method_context_v1 *zwp_input_method_context_v1,
-    //        const char *language) {
-    //         qDebug() << "preferred_language" << language;
-    //     };
-    // zwp_input_method_context_v1_add_listener(nullptr, &listener, nullptr);
-
     wl_ = new WaylandConnection(waylandDisplay, this);
 
     struct wl_registry_listener registry_listener;
-    registry_listener.global = []([[maybe_unused]] void *data,
-                                  [[maybe_unused]] struct wl_registry *registry,
-                                  uint32_t name,
-                                  const char *interface,
-                                  uint32_t version) {
-        qWarning() << "global" << name << interface << version;
-        if (strcmp(interface, "zwp_input_method_v1") == 0) {
-            wl_registry_bind(registry, name, &zwp_input_method_v1_interface, 1);
-        }
-    };
+    registry_listener.global = CallbackWrapper<&WLFrontend::registryGlobal>::func;
     registry_listener.global_remove = []([[maybe_unused]] void *data,
                                          [[maybe_unused]] struct wl_registry *registry,
                                          uint32_t name) {
@@ -81,7 +32,7 @@ WLFrontend::WLFrontend()
 
     auto *registry = wl_display_get_registry(wl_->display());
     wl_registry_add_listener(registry, &registry_listener, this);
-    wl_display_roundtrip(wl_->display());
+    wl_->roundTrip();
     wl_display_flush(wl_->display());
 
     // zwp_input_method_v1_listener listener;
@@ -99,3 +50,19 @@ WLFrontend::WLFrontend()
 }
 
 WLFrontend::~WLFrontend() { }
+
+void WLFrontend::registryGlobal(struct wl_registry *registry,
+                                uint32_t name,
+                                const char *interface,
+                                uint32_t version)
+{
+    qWarning() << "global" << name << interface << version;
+
+#define BIND(interface_type)                                                     \
+  if (strcmp(interface, #interface_type) == 0) {                                 \
+    [[maybe_unused]] auto _ = static_cast<interface_type *>(                     \
+        wl_registry_bind(registry, name, &interface_type##_interface, version)); \
+  }
+
+    BIND(zwp_input_method_v1);
+}
