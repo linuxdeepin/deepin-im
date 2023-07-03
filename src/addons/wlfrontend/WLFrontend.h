@@ -33,7 +33,8 @@ public:
 
 private:
     WaylandConnection *wl_;
-    struct zwp_input_method_context_v1 *icid_;
+    struct zwp_input_method_v1 *input_method_v1_;
+    struct zwp_input_method_context_v1 *input_method_context_v1_;
 
     void registryGlobal(struct wl_registry *registry,
                         uint32_t name,

@@ -39,7 +39,7 @@ WLFrontend::WLFrontend()
     wl_->roundTrip();
     wl_display_flush(wl_->display());
 
-    zwp_input_method_v1_add_listener(nullptr, &imListener, this);
+    zwp_input_method_v1_add_listener(input_method_v1_, &imListener, this);
 }
 
 WLFrontend::~WLFrontend() { }
@@ -51,27 +51,27 @@ void WLFrontend::registryGlobal(struct wl_registry *registry,
 {
     qWarning() << "global" << name << interface << version;
 
-#define BIND(interface_type)                                                     \
+#define BIND(member, interface_type)                                             \
   if (strcmp(interface, #interface_type) == 0) {                                 \
-    [[maybe_unused]] auto _ = static_cast<interface_type *>(                     \
+    member = static_cast<interface_type *>(                                      \
         wl_registry_bind(registry, name, &interface_type##_interface, version)); \
     return;                                                                      \
   }
 
-    BIND(zwp_input_method_v1);
-    BIND(zwp_input_method_context_v1);
+    BIND(input_method_v1_, zwp_input_method_v1);
+    BIND(input_method_context_v1_, zwp_input_method_context_v1);
 }
 
 void WLFrontend::inputMethodActivate(
     [[maybe_unused]] struct zwp_input_method_v1 *zwp_input_method_v1,
-    struct zwp_input_method_context_v1 *id)
+    [[maybe_unused]] struct zwp_input_method_context_v1 *id)
 {
-    icid_ = id;
+    // icid_ = id;
 }
 
 void WLFrontend::inputMethodDeactivate(
     [[maybe_unused]] struct zwp_input_method_v1 *zwp_input_method_v1,
     [[maybe_unused]] struct zwp_input_method_context_v1 *id)
 {
-    icid_ = nullptr;
+    // icid_ = nullptr;
 }

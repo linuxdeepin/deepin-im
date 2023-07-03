@@ -9,6 +9,8 @@ set(WLFRONTEND_SOURCES
   WaylandConnection.cc
   WLFrontend.h
   WLFrontend.cc
+  WaylandInputContextV1.h
+  WaylandInputContextV1.cc
   InputContext1.h
   InputContext1.cc
 )
