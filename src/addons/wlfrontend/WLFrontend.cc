@@ -11,7 +11,7 @@
 
 using namespace org::deepin::dim;
 
-static const zwp_input_method_v1_listener listener = {
+static const zwp_input_method_v1_listener imListener = {
     CallbackWrapper<&WLFrontend::inputMethodActivate>::func,
     CallbackWrapper<&WLFrontend::inputMethodDeactivate>::func,
 };
@@ -39,7 +39,7 @@ WLFrontend::WLFrontend()
     wl_->roundTrip();
     wl_display_flush(wl_->display());
 
-    zwp_input_method_v1_add_listener(nullptr, &listener, this);
+    zwp_input_method_v1_add_listener(nullptr, &imListener, this);
 }
 
 WLFrontend::~WLFrontend() { }
@@ -55,6 +55,7 @@ void WLFrontend::registryGlobal(struct wl_registry *registry,
   if (strcmp(interface, #interface_type) == 0) {                                 \
     [[maybe_unused]] auto _ = static_cast<interface_type *>(                     \
         wl_registry_bind(registry, name, &interface_type##_interface, version)); \
+    return;                                                                      \
   }
 
     BIND(zwp_input_method_v1);
