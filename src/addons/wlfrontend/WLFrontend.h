@@ -7,6 +7,8 @@
 
 class InputmethodAdaptor;
 struct wl_registry;
+struct zwp_input_method_v1;
+struct zwp_input_method_context_v1;
 
 namespace org {
 namespace deepin {
@@ -18,13 +20,20 @@ class InputContext1;
 class WLFrontend : public QObject
 {
     Q_OBJECT
+    friend class zwp_input_method_v1_listener;
 
 public:
     explicit WLFrontend();
     ~WLFrontend();
 
+    void inputMethodActivate(struct zwp_input_method_v1 *zwp_input_method_v1,
+                             struct zwp_input_method_context_v1 *id);
+    void inputMethodDeactivate(struct zwp_input_method_v1 *zwp_input_method_v1,
+                               struct zwp_input_method_context_v1 *id);
+
 private:
     WaylandConnection *wl_;
+    struct zwp_input_method_context_v1 *icid_;
 
     void registryGlobal(struct wl_registry *registry,
                         uint32_t name,

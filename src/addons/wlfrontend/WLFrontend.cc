@@ -1,6 +1,7 @@
 #include "WLFrontend.h"
 
 #include "WaylandConnection.h"
+#include "utils.h"
 
 #include <dimcore/Dim.h>
 #include <wayland-input-method-unstable-v1-client-protocol.h>
@@ -8,9 +9,12 @@
 #include <QDBusConnection>
 #include <QDebug>
 
-#include "utils.h"
-
 using namespace org::deepin::dim;
+
+static const zwp_input_method_v1_listener listener = {
+    CallbackWrapper<&WLFrontend::inputMethodActivate>::func,
+    CallbackWrapper<&WLFrontend::inputMethodDeactivate>::func,
+};
 
 WLFrontend::WLFrontend()
 {
@@ -35,18 +39,7 @@ WLFrontend::WLFrontend()
     wl_->roundTrip();
     wl_display_flush(wl_->display());
 
-    // zwp_input_method_v1_listener listener;
-    // listener.activate = []([[maybe_unused]] void *data,
-    //                        [[maybe_unused]] struct zwp_input_method_v1 *zwp_input_method_v1,
-    //                        [[maybe_unused]] struct zwp_input_method_context_v1 *id) {
-    //     qDebug() << "activate";
-    // };
-    // listener.deactivate = []([[maybe_unused]] void *data,
-    //                          [[maybe_unused]] struct zwp_input_method_v1 *zwp_input_method_v1,
-    //                          [[maybe_unused]] struct zwp_input_method_context_v1 *id) {
-    //     qDebug() << "deactivate";
-    // };
-    // zwp_input_method_v1_add_listener(nullptr, &listener, nullptr);
+    zwp_input_method_v1_add_listener(nullptr, &listener, this);
 }
 
 WLFrontend::~WLFrontend() { }
@@ -65,4 +58,19 @@ void WLFrontend::registryGlobal(struct wl_registry *registry,
   }
 
     BIND(zwp_input_method_v1);
+    BIND(zwp_input_method_context_v1);
+}
+
+void WLFrontend::inputMethodActivate(
+    [[maybe_unused]] struct zwp_input_method_v1 *zwp_input_method_v1,
+    struct zwp_input_method_context_v1 *id)
+{
+    icid_ = id;
+}
+
+void WLFrontend::inputMethodDeactivate(
+    [[maybe_unused]] struct zwp_input_method_v1 *zwp_input_method_v1,
+    [[maybe_unused]] struct zwp_input_method_context_v1 *id)
+{
+    icid_ = nullptr;
 }
