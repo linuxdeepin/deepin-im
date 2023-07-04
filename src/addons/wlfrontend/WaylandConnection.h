@@ -7,10 +7,6 @@
 
 struct wl_display;
 
-namespace org {
-namespace deepin {
-namespace dim {
-
 class WaylandConnection : public QObject
 {
 public:
@@ -29,9 +25,5 @@ private:
     void init();
     void dispatch();
 };
-
-} // namespace dim
-} // namespace deepin
-} // namespace org
 
 #endif // !WAYLANDCONNECTION_H

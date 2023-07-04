@@ -11,6 +11,13 @@
 
 using namespace org::deepin::dim;
 
+static const wl_registry_listener registry_listener = {
+    CallbackWrapper<&WLFrontend::registryGlobal>::func,
+    []([[maybe_unused]] void *data, [[maybe_unused]] struct wl_registry *registry, uint32_t name) {
+        qWarning() << "global_remove" << name;
+    },
+};
+
 static const zwp_input_method_v1_listener imListener = {
     CallbackWrapper<&WLFrontend::inputMethodActivate>::func,
     CallbackWrapper<&WLFrontend::inputMethodDeactivate>::func,
@@ -25,14 +32,6 @@ WLFrontend::WLFrontend()
     }
 
     wl_ = new WaylandConnection(waylandDisplay, this);
-
-    struct wl_registry_listener registry_listener;
-    registry_listener.global = CallbackWrapper<&WLFrontend::registryGlobal>::func;
-    registry_listener.global_remove = []([[maybe_unused]] void *data,
-                                         [[maybe_unused]] struct wl_registry *registry,
-                                         uint32_t name) {
-        qWarning() << "global_remove" << name;
-    };
 
     auto *registry = wl_display_get_registry(wl_->display());
     wl_registry_add_listener(registry, &registry_listener, this);

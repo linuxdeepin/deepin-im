@@ -6,8 +6,6 @@
 
 #include <poll.h>
 
-using namespace org::deepin::dim;
-
 WaylandConnection::WaylandConnection(const std::string &name, QObject *parent)
     : QObject(parent)
     , display_(wl_display_connect(name.empty() ? nullptr : name.c_str()))
@@ -66,6 +64,7 @@ void WaylandConnection::dispatch()
     }
 }
 
-void WaylandConnection::roundTrip() {
+void WaylandConnection::roundTrip()
+{
     wl_display_roundtrip(display_);
 }

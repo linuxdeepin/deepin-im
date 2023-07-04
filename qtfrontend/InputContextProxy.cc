@@ -1,146 +1,120 @@
 #include "InputContextProxy.h"
 
-#include <QDBusPendingCall>
+#include "WaylandConnection.h"
+#include "utils.h"
+
+#include <wayland-text-input-unstable-v3-client-protocol.h>
+
+#include <QDebug>
 #include <QList>
 
-static const QString DIM_SERVICE = "org.deepin.dim";
-static const QString DIM_IM_PATH = "/org/freedesktop/portal/inputmethod";
+static const wl_registry_listener registry_listener = {
+    CallbackWrapper<&InputContextProxy::registryGlobal>::func,
+    []([[maybe_unused]] void *data, [[maybe_unused]] struct wl_registry *registry, uint32_t name) {
+        qWarning() << "global_remove" << name;
+    },
+};
 
-using namespace org::deepin::dim;
-
-const QDBusArgument &operator>>(const QDBusArgument &argument, BatchEvent &event)
-{
-    argument.beginStructure();
-    argument >> std::get<0>(event) >> std::get<1>(event);
-    argument.endStructure();
-    return argument;
-}
+static const zwp_text_input_v3_listener tiListener = {
+    CallbackWrapper<&InputContextProxy::enter>::func,
+    CallbackWrapper<&InputContextProxy::leave>::func,
+    CallbackWrapper<&InputContextProxy::preedit_string>::func,
+    CallbackWrapper<&InputContextProxy::commit_string>::func,
+    CallbackWrapper<&InputContextProxy::delete_surrounding_text>::func,
+    CallbackWrapper<&InputContextProxy::done>::func,
+};
 
 InputContextProxy::InputContextProxy(QObject *parent)
     : QObject(parent)
-    , bus_(QDBusConnection::connectToBus(QDBusConnection::BusType::SessionBus, "dim"))
-    , watcher_(DIM_SERVICE, bus_, QDBusServiceWatcher::WatchModeFlag::WatchForOwnerChange, this)
-    , im_(new org::deepin::dim::portal::inputmethod(
-          DIM_SERVICE, DIM_IM_PATH, QDBusConnection::sessionBus(), this))
-    , ic_(nullptr)
-    , available_(false)
+    , available_(true)
 {
-    connect(&watcher_,
-            &QDBusServiceWatcher::serviceOwnerChanged,
-            this,
-            &InputContextProxy::serviceAvailableChanged);
-    checkServiceAndCreateIC();
-}
-
-void InputContextProxy::checkServiceAndCreateIC()
-{
-    if (!bus_.interface()->isServiceRegistered(DIM_SERVICE)) {
-        return;
+    std::string waylandServer = getenv("WAYLAND_SERVER");
+    if (waylandServer.empty()) {
+        qWarning() << "WAYLAND_SERVER is empty";
+        // TODO:
     }
 
-    if (ic_) {
-        available_ = false;
-        delete ic_;
-        ic_ = nullptr;
-    }
+    wl_ = new WaylandConnection(waylandServer, this);
 
-    QDBusPendingReply<QDBusObjectPath> penddingReply = im_->CreateInputContext();
-    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(penddingReply, this);
-    QObject::connect(watcher,
-                     &QDBusPendingCallWatcher::finished,
-                     this,
-                     &InputContextProxy::createIcFinished);
-}
+    auto *registry = wl_display_get_registry(wl_->display());
+    wl_registry_add_listener(registry, &registry_listener, this);
+    wl_->roundTrip();
+    wl_display_flush(wl_->display());
 
-void InputContextProxy::serviceAvailableChanged()
-{
-    qDebug() << "onServiceOwnerChanged";
-    QTimer::singleShot(100, this, &InputContextProxy::checkServiceAndCreateIC);
-}
-
-void InputContextProxy::createIcFinished(QDBusPendingCallWatcher *watcher)
-{
-    watcher->deleteLater();
-
-    QDBusPendingReply<QDBusObjectPath> reply = *watcher;
-    if (reply.isError()) {
-        qDebug() << "CreateInputContext error:" << reply.error().message();
-        return;
-    }
-
-    QDBusObjectPath path = reply.value();
-    ic_ = new org::deepin::dim::portal::inputcontext(DIM_SERVICE, path.path(), bus_, this);
-    available_ = true;
+    zwp_text_input_v3_add_listener(text_input_v3_, &tiListener, this);
 }
 
 void InputContextProxy::focusIn()
 {
-    if (!ic_) {
-        return;
-    }
-
-    ic_->FocusIn();
+    // TODO:
 }
 
 void InputContextProxy::focusOut()
 {
-    if (!ic_) {
-        return;
-    }
-
-    ic_->FocusOut();
+    // TODO:
 }
 
-void InputContextProxy::processKeyEvent(
-    uint keyval, uint keycode, uint state, bool isRelease, uint time)
+void InputContextProxy::processKeyEvent([[maybe_unused]] uint keyval,
+                                        [[maybe_unused]] uint keycode,
+                                        [[maybe_unused]] uint state,
+                                        [[maybe_unused]] bool isRelease,
+                                        [[maybe_unused]] uint time)
 {
-    auto pendingCall = ic_->ProcessKeyEvent(keyval, keycode, state, isRelease, time);
-    QDBusPendingCallWatcher watcher(pendingCall);
-    connect(&watcher,
-            &QDBusPendingCallWatcher::finished,
-            this,
-            &InputContextProxy::processKeyEventFinished);
+    // TODO:
 }
 
-void InputContextProxy::processKeyEventFinished(QDBusPendingCallWatcher *watcher)
+void InputContextProxy::registryGlobal(struct wl_registry *registry,
+                                       uint32_t name,
+                                       const char *interface,
+                                       uint32_t version)
 {
-    watcher->deleteLater();
+    qWarning() << "global" << name << interface << version;
 
-    QDBusPendingReply<QList<BatchEvent>> reply = *watcher;
-    if (reply.isError()) {
-        qDebug() << "ProcessKeyEvent error:" << reply.error().message();
-        return;
-    }
+#define BIND(member, interface_type)                                             \
+  if (strcmp(interface, #interface_type) == 0) {                                 \
+    member = static_cast<interface_type *>(                                      \
+        wl_registry_bind(registry, name, &interface_type##_interface, version)); \
+    return;                                                                      \
+  }
 
-    QList<BatchEvent> events = reply.value();
-    for (const auto &event : events) {
-        auto type = std::get<0>(event);
-        auto data = std::get<1>(event);
-        switch (type) {
-        case BATCHED_COMMIT_STRING: {
-            if (data.canConvert<QString>()) {
-                emit commitString(data.toString());
-            }
-            break;
-        }
-        case BATCHED_PREEDIT: {
-            if (data.canConvert<QStringList>()) {
-                emit preedit(data.toStringList());
-            }
-            break;
-        }
-        case BATCHED_FORWARD_KEY: {
-            if (data.canConvert<ForwardKey>()) {
-                ForwardKey forwardKeyEvent = data.value<ForwardKey>();
-                emit forwardKey(std::get<0>(forwardKeyEvent),
-                                std::get<1>(forwardKeyEvent),
-                                std::get<2>(forwardKeyEvent));
-            }
-            break;
-        }
-        default:
-            qDebug() << "invalid event type " << type;
-            return;
-        }
-    }
+    BIND(text_input_v3_, zwp_text_input_v3);
+}
+
+void InputContextProxy::enter([[maybe_unused]] struct zwp_text_input_v3 *zwp_text_input_v3,
+                              [[maybe_unused]] struct wl_surface *surface)
+{
+}
+
+void InputContextProxy::leave([[maybe_unused]] struct zwp_text_input_v3 *zwp_text_input_v3,
+                              [[maybe_unused]] struct wl_surface *surface)
+{
+}
+
+void InputContextProxy::preedit_string([[maybe_unused]] struct zwp_text_input_v3 *zwp_text_input_v3,
+                                       const char *text,
+                                       [[maybe_unused]] int32_t cursor_begin,
+                                       [[maybe_unused]] int32_t cursor_end)
+{
+    QStringList data;
+    data << text;
+    // todo: split by cursor
+    emit preedit(data);
+}
+
+void InputContextProxy::commit_string([[maybe_unused]] struct zwp_text_input_v3 *zwp_text_input_v3,
+                                      const char *text)
+{
+    emit commitString(text);
+}
+
+void InputContextProxy::delete_surrounding_text(
+    [[maybe_unused]] struct zwp_text_input_v3 *zwp_text_input_v3,
+    [[maybe_unused]] uint32_t before_length,
+    [[maybe_unused]] uint32_t after_length)
+{
+}
+
+void InputContextProxy::done([[maybe_unused]] struct zwp_text_input_v3 *zwp_text_input_v3,
+                             [[maybe_unused]] uint32_t serial)
+{
 }
