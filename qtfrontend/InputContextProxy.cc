@@ -28,11 +28,13 @@ InputContextProxy::InputContextProxy(QObject *parent)
     : QObject(parent)
     , available_(true)
 {
-    std::string waylandServer = getenv("WAYLAND_SERVER");
-    if (waylandServer.empty()) {
-        qWarning() << "WAYLAND_SERVER is empty";
+    std::string waylandServer;
+    const char *waylandServerCStr = getenv("WAYLAND_DISPLAY");
+    if (waylandServerCStr == nullptr) {
+        qWarning() << "WAYLAND_DISPLAY is empty";
         // TODO:
     }
+    waylandServer = waylandServerCStr;
 
     wl_ = new WaylandConnection(waylandServer, this);
 
@@ -46,12 +48,12 @@ InputContextProxy::InputContextProxy(QObject *parent)
 
 void InputContextProxy::focusIn()
 {
-    // TODO:
+    zwp_text_input_v3_enable(text_input_v3_);
 }
 
 void InputContextProxy::focusOut()
 {
-    // TODO:
+    zwp_text_input_v3_disable(text_input_v3_);
 }
 
 void InputContextProxy::processKeyEvent([[maybe_unused]] uint keyval,
@@ -60,7 +62,6 @@ void InputContextProxy::processKeyEvent([[maybe_unused]] uint keyval,
                                         [[maybe_unused]] bool isRelease,
                                         [[maybe_unused]] uint time)
 {
-    // TODO:
 }
 
 void InputContextProxy::registryGlobal(struct wl_registry *registry,
