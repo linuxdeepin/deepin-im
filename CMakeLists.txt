@@ -29,6 +29,20 @@ pkg_check_modules(xkeyboard-config REQUIRED IMPORTED_TARGET xkeyboard-config)
 pkg_check_modules(wayland-client REQUIRED IMPORTED_TARGET wayland-client)
 pkg_check_modules(wayland-server REQUIRED IMPORTED_TARGET wayland-server)
 
+add_library(wayland_protocols OBJECT)
+
+ecm_add_wayland_server_protocol(wayland_protocols
+  PROTOCOL misc/wayland-protocols/input-method-unstable-v1.xml
+  BASENAME input-method-unstable-v1
+)
+
+ecm_add_wayland_server_protocol(wayland_protocols
+  PROTOCOL misc/wayland-protocols/text-input-unstable-v3.xml
+  BASENAME text-input-unstable-v3
+)
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 add_subdirectory(kimpanel)
 add_subdirectory(wl_server)
 add_subdirectory(src)

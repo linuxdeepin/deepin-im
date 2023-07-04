@@ -19,19 +19,12 @@ add_executable(wlfrontend
   ${WLFRONTEND_SOURCES}
 )
 
-# add_library(wlfrontend MODULE
-#   ${WLFRONTEND_SOURCES}
-# )
-
-ecm_add_wayland_client_protocol(wlfrontend
-                                PROTOCOL ${CMAKE_SOURCE_DIR}/misc/wayland-protocols/input-method-unstable-v1.xml
-                                BASENAME input-method-unstable-v1)
-
 target_link_libraries(wlfrontend PRIVATE
   dimcore
   Qt5::Core
   Qt5::DBus
   PkgConfig::wayland-client
+  wayland_protocols
 )
 
 target_include_directories(wlfrontend PUBLIC
