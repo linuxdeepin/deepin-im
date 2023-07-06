@@ -4,7 +4,7 @@
 #include "utils.h"
 
 #include <dimcore/Dim.h>
-#include <wayland-input-method-unstable-v1-client-protocol.h>
+#include <wayland-input-method-unstable-v2-client-protocol.h>
 
 #include <QDBusConnection>
 #include <QDebug>
@@ -18,9 +18,14 @@ static const wl_registry_listener registry_listener = {
     },
 };
 
-static const zwp_input_method_v1_listener imListener = {
+static const zwp_input_method_v2_listener imListener = {
     CallbackWrapper<&WLFrontend::inputMethodActivate>::func,
     CallbackWrapper<&WLFrontend::inputMethodDeactivate>::func,
+    CallbackWrapper<&WLFrontend::inputMethodSurroundingText>::func,
+    CallbackWrapper<&WLFrontend::inputMethodTextChangeCause>::func,
+    CallbackWrapper<&WLFrontend::inputMethodContentType>::func,
+    CallbackWrapper<&WLFrontend::inputMethodDone>::func,
+    CallbackWrapper<&WLFrontend::inputMethodUnavailable>::func,
 };
 
 WLFrontend::WLFrontend()
@@ -38,7 +43,7 @@ WLFrontend::WLFrontend()
     wl_->roundTrip();
     wl_display_flush(wl_->display());
 
-    zwp_input_method_v1_add_listener(input_method_v1_, &imListener, this);
+    zwp_input_method_v2_add_listener(input_method_v2_, &imListener, this);
 }
 
 WLFrontend::~WLFrontend() { }
@@ -57,20 +62,48 @@ void WLFrontend::registryGlobal(struct wl_registry *registry,
     return;                                                                      \
   }
 
-    BIND(input_method_v1_, zwp_input_method_v1);
-    BIND(input_method_context_v1_, zwp_input_method_context_v1);
+    BIND(input_method_manager_v2_, zwp_input_method_manager_v2);
+    BIND(input_method_v2_, zwp_input_method_v2);
 }
 
 void WLFrontend::inputMethodActivate(
-    [[maybe_unused]] struct zwp_input_method_v1 *zwp_input_method_v1,
-    [[maybe_unused]] struct zwp_input_method_context_v1 *id)
+    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
     // icid_ = id;
 }
 
 void WLFrontend::inputMethodDeactivate(
-    [[maybe_unused]] struct zwp_input_method_v1 *zwp_input_method_v1,
-    [[maybe_unused]] struct zwp_input_method_context_v1 *id)
+    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
     // icid_ = nullptr;
+}
+
+void WLFrontend::inputMethodSurroundingText(
+    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
+    [[maybe_unused]] const char *text,
+    [[maybe_unused]] uint32_t cursor,
+    [[maybe_unused]] uint32_t anchor)
+{
+}
+
+void WLFrontend::inputMethodTextChangeCause(
+    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
+    [[maybe_unused]] uint32_t cause)
+{
+}
+
+void WLFrontend::inputMethodContentType(
+    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
+    [[maybe_unused]] uint32_t hint,
+    [[maybe_unused]] uint32_t purpose)
+{
+}
+
+void WLFrontend::inputMethodDone([[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
+{
+}
+
+void WLFrontend::inputMethodUnavailable(
+    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
+{
 }

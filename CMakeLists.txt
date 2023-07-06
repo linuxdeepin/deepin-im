@@ -32,8 +32,8 @@ pkg_check_modules(wayland-server REQUIRED IMPORTED_TARGET wayland-server)
 add_library(wayland_protocols OBJECT)
 
 ecm_add_wayland_server_protocol(wayland_protocols
-  PROTOCOL misc/wayland-protocols/input-method-unstable-v1.xml
-  BASENAME input-method-unstable-v1
+  PROTOCOL misc/wayland-protocols/input-method-unstable-v2.xml
+  BASENAME input-method-unstable-v2
 )
 
 ecm_add_wayland_server_protocol(wayland_protocols
@@ -47,3 +47,4 @@ add_subdirectory(kimpanel)
 add_subdirectory(wl_server)
 add_subdirectory(src)
 add_subdirectory(qtfrontend)
+add_subdirectory(demowindow)

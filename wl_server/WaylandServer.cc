@@ -1,7 +1,7 @@
 #include "WaylandServer.h"
 
 #include "utils.h"
-#include "wayland-input-method-unstable-v1-server-protocol.h"
+#include "wayland-input-method-unstable-v2-server-protocol.h"
 #include "wayland-text-input-unstable-v3-server-protocol.h"
 
 #include <wayland-server.h>
@@ -30,18 +30,18 @@ WaylandServer::WaylandServer()
                                           1,
                                           this,
                                           CallbackWrapper<&WaylandServer::textInputV3Bind>::func);
-    input_method_global_ =
+    input_method_manager_global_ =
         wl_global_create(display_,
-                         &zwp_input_method_v1_interface,
-                         1,
-                         this,
-                         CallbackWrapper<&WaylandServer::inputMethodV1Bind>::func);
-    input_method_context_global_ =
-        wl_global_create(display_,
-                         &zwp_input_method_context_v1_interface,
+                         &zwp_input_method_manager_v2_interface,
                          1,
                          this,
                          CallbackWrapper<&WaylandServer::inputMethodContextV1Bind>::func);
+    input_method_global_ =
+        wl_global_create(display_,
+                         &zwp_input_method_v2_interface,
+                         1,
+                         this,
+                         CallbackWrapper<&WaylandServer::inputMethodV1Bind>::func);
 }
 
 WaylandServer::~WaylandServer()

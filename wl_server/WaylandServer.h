@@ -19,7 +19,7 @@ private:
     wl_global *text_input_manager_global_;
     wl_global *text_input_global_;
     wl_global *input_method_global_;
-    wl_global *input_method_context_global_;
+    wl_global *input_method_manager_global_;
 
     void textInputManagerV3Bind(struct wl_client *client, uint32_t version, uint32_t id);
     void textInputV3Bind(struct wl_client *client, uint32_t version, uint32_t id);
