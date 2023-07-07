@@ -18,8 +18,10 @@ public:
 
 private:
     static const zwp_input_method_v2_listener im_listener_;
+    static const zwp_input_method_keyboard_grab_v2_listener grab_listener_;
     std::shared_ptr<WlType<zwp_input_method_v2>> im_;
     std::shared_ptr<WlType<zwp_virtual_keyboard_v1>> vk_;
+    std::shared_ptr<WlType<zwp_input_method_keyboard_grab_v2>> grab_;
 
     void activate(struct zwp_input_method_v2 *zwp_input_method_v2);
     void deactivate(struct zwp_input_method_v2 *zwp_input_method_v2);
@@ -33,6 +35,25 @@ private:
                      uint32_t purpose);
     void done(struct zwp_input_method_v2 *zwp_input_method_v2);
     void unavailable(struct zwp_input_method_v2 *zwp_input_method_v2);
+
+    void keymap(struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
+                uint32_t format,
+                int32_t fd,
+                uint32_t size);
+    void key(struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
+             uint32_t serial,
+             uint32_t time,
+             uint32_t key,
+             uint32_t state);
+    void modifiers(struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
+                   uint32_t serial,
+                   uint32_t mods_depressed,
+                   uint32_t mods_latched,
+                   uint32_t mods_locked,
+                   uint32_t group);
+    void repeatInfo(struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
+                    int32_t rate,
+                    int32_t delay);
 
     int id() { return 0; }
 };

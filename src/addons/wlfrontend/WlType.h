@@ -54,6 +54,8 @@ public:
             zwp_virtual_keyboard_manager_v1_destroy(val_);
         } else if constexpr (std::is_same_v<T, zwp_virtual_keyboard_v1>) {
             zwp_virtual_keyboard_v1_destroy(val_);
+        } else if constexpr (std::is_same_v<T, zwp_input_method_keyboard_grab_v2>) {
+            zwp_input_method_keyboard_grab_v2_destroy(val_);
         } else {
             static_assert(always_false_v<T>, "unknown type");
         }

@@ -17,6 +17,13 @@ const zwp_input_method_v2_listener WaylandInputContextV2::im_listener_ = {
     CallbackWrapper<&WaylandInputContextV2::unavailable>::func,
 };
 
+const zwp_input_method_keyboard_grab_v2_listener WaylandInputContextV2::grab_listener_ = {
+    CallbackWrapper<&WaylandInputContextV2::keymap>::func,
+    CallbackWrapper<&WaylandInputContextV2::key>::func,
+    CallbackWrapper<&WaylandInputContextV2::modifiers>::func,
+    CallbackWrapper<&WaylandInputContextV2::repeatInfo>::func,
+};
+
 WaylandInputContextV2::WaylandInputContextV2(
     const std::shared_ptr<WlType<zwp_input_method_v2>> &im,
     const std::shared_ptr<WlType<zwp_virtual_keyboard_v1>> &vk)
@@ -24,6 +31,10 @@ WaylandInputContextV2::WaylandInputContextV2(
     , vk_(vk)
 {
     zwp_input_method_v2_add_listener(im_->get(), &im_listener_, this);
+
+    grab_ = std::make_shared<WlType<zwp_input_method_keyboard_grab_v2>>(
+        zwp_input_method_v2_grab_keyboard(im_->get()));
+    zwp_input_method_keyboard_grab_v2_add_listener(grab_->get(), &grab_listener_, this);
 }
 
 void WaylandInputContextV2::activate(
@@ -71,6 +82,45 @@ void WaylandInputContextV2::unavailable(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
     qWarning() << "im unvailable:" << id();
+}
+
+void WaylandInputContextV2::keymap(
+    [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
+    uint32_t format,
+    int32_t fd,
+    uint32_t size)
+{
+    qWarning() << "grab keymap:" << format << fd << size;
+}
+
+void WaylandInputContextV2::key(
+    [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
+    uint32_t serial,
+    uint32_t time,
+    uint32_t key,
+    uint32_t state)
+{
+    qWarning() << "grab key:" << serial << time << key << state;
+}
+
+void WaylandInputContextV2::modifiers(
+    [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
+    uint32_t serial,
+    uint32_t mods_depressed,
+    uint32_t mods_latched,
+    uint32_t mods_locked,
+    uint32_t group)
+{
+    qWarning() << "grab modifiers:" << serial << mods_depressed << mods_latched << mods_locked
+               << group;
+}
+
+void WaylandInputContextV2::repeatInfo(
+    [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
+    int32_t rate,
+    int32_t delay)
+{
+    qWarning() << "grab repeatInfo:" << rate << delay;
 }
 
 // void WaylandInputContextV2::updatePreedit([[maybe_unused]] const org::deepin::dim::PreeditKey
