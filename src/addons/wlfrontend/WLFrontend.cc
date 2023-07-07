@@ -1,9 +1,11 @@
 #include "WLFrontend.h"
 
 #include "WaylandConnection.h"
+#include "WlType.h"
 #include "utils.h"
 
 #include <dimcore/Dim.h>
+#include <wayland-client-core.h>
 #include <wayland-input-method-unstable-v2-client-protocol.h>
 
 #include <QDBusConnection>
@@ -16,16 +18,6 @@ static const wl_registry_listener registry_listener = {
     []([[maybe_unused]] void *data, [[maybe_unused]] struct wl_registry *registry, uint32_t name) {
         qWarning() << "global_remove" << name;
     },
-};
-
-static const zwp_input_method_v2_listener imListener = {
-    CallbackWrapper<&WLFrontend::inputMethodActivate>::func,
-    CallbackWrapper<&WLFrontend::inputMethodDeactivate>::func,
-    CallbackWrapper<&WLFrontend::inputMethodSurroundingText>::func,
-    CallbackWrapper<&WLFrontend::inputMethodTextChangeCause>::func,
-    CallbackWrapper<&WLFrontend::inputMethodContentType>::func,
-    CallbackWrapper<&WLFrontend::inputMethodDone>::func,
-    CallbackWrapper<&WLFrontend::inputMethodUnavailable>::func,
 };
 
 WLFrontend::WLFrontend()
@@ -42,68 +34,26 @@ WLFrontend::WLFrontend()
     wl_registry_add_listener(registry, &registry_listener, this);
     wl_->roundTrip();
     wl_display_flush(wl_->display());
-
-    zwp_input_method_v2_add_listener(input_method_v2_, &imListener, this);
 }
 
 WLFrontend::~WLFrontend() { }
 
-void WLFrontend::registryGlobal(struct wl_registry *registry,
+void WLFrontend::registryGlobal([[maybe_unused]] struct wl_registry *registry,
                                 uint32_t name,
                                 const char *interface,
                                 uint32_t version)
 {
     qWarning() << "global" << name << interface << version;
 
-#define BIND(member, interface_type)                                             \
-  if (strcmp(interface, #interface_type) == 0) {                                 \
-    member = static_cast<interface_type *>(                                      \
-        wl_registry_bind(registry, name, &interface_type##_interface, version)); \
-    return;                                                                      \
+#define BIND(interface_type)                                                         \
+  if (strcmp(interface, #interface_type) == 0) {                                     \
+    auto p = std::make_shared<WlType<interface_type>>(static_cast<interface_type *>( \
+        wl_registry_bind(registry, name, &interface_type##_interface, version)));    \
+    globals_[WlType<interface_type>::key()].emplace(std::make_pair(name, p));        \
+    return;                                                                          \
   }
 
-    BIND(input_method_manager_v2_, zwp_input_method_manager_v2);
-    BIND(input_method_v2_, zwp_input_method_v2);
-}
-
-void WLFrontend::inputMethodActivate(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
-{
-    // icid_ = id;
-}
-
-void WLFrontend::inputMethodDeactivate(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
-{
-    // icid_ = nullptr;
-}
-
-void WLFrontend::inputMethodSurroundingText(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
-    [[maybe_unused]] const char *text,
-    [[maybe_unused]] uint32_t cursor,
-    [[maybe_unused]] uint32_t anchor)
-{
-}
-
-void WLFrontend::inputMethodTextChangeCause(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
-    [[maybe_unused]] uint32_t cause)
-{
-}
-
-void WLFrontend::inputMethodContentType(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
-    [[maybe_unused]] uint32_t hint,
-    [[maybe_unused]] uint32_t purpose)
-{
-}
-
-void WLFrontend::inputMethodDone([[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
-{
-}
-
-void WLFrontend::inputMethodUnavailable(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
-{
+    BIND(wl_seat);
+    BIND(zwp_input_method_manager_v2);
+    BIND(zwp_input_method_v2);
 }

@@ -9,8 +9,8 @@ set(WLFRONTEND_SOURCES
   WaylandConnection.cc
   WLFrontend.h
   WLFrontend.cc
-  WaylandInputContextV1.h
-  WaylandInputContextV1.cc
+  WaylandInputContextV2.h
+  WaylandInputContextV2.cc
 )
 
 add_executable(wlfrontend
