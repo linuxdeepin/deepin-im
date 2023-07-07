@@ -19,6 +19,7 @@ public:
 private:
     static const zwp_input_method_v2_listener im_listener_;
     static const zwp_input_method_keyboard_grab_v2_listener grab_listener_;
+    std::shared_ptr<WlType<wl_seat>> seat_;
     std::shared_ptr<WlType<zwp_input_method_v2>> im_;
     std::shared_ptr<WlType<zwp_virtual_keyboard_v1>> vk_;
     std::shared_ptr<WlType<zwp_input_method_keyboard_grab_v2>> grab_;

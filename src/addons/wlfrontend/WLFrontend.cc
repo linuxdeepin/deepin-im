@@ -81,13 +81,12 @@ void WLFrontend::reloadSeats()
         getGlobal<zwp_virtual_keyboard_manager_v1>()->get();
 
     auto seats = getGlobals<wl_seat>();
-    for (auto &it : seats) {
-        wl_seat *seat = it->get();
+    for (auto &seat : seats) {;
         auto vk = std::make_shared<WlType<zwp_virtual_keyboard_v1>>(
             static_cast<zwp_virtual_keyboard_v1 *>(
-                zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkManager, seat)));
+                zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkManager, seat->get())));
         auto im = std::make_shared<WlType<zwp_input_method_v2>>(static_cast<zwp_input_method_v2 *>(
-            zwp_input_method_manager_v2_get_input_method(imManager, seat)));
+            zwp_input_method_manager_v2_get_input_method(imManager, seat->get())));
 
         ims_.emplace_back(std::make_shared<WaylandInputContextV2>(im, vk));
     }
