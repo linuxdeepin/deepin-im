@@ -2,6 +2,7 @@
 #define DBUSFRONTEND_H
 
 #include "WlType.h"
+
 #include <dimcore/FrontendAddon.h>
 
 #include <QDBusObjectPath>
@@ -32,32 +33,43 @@ public:
                         uint32_t name,
                         const char *interface,
                         uint32_t version);
-    
+
     template<typename T>
-    std::unordered_map<uint32_t, std::shared_ptr<WlType<T>>> getGlobals() {
+    std::vector<std::shared_ptr<WlType<T>>> getGlobals()
+    {
         uint32_t key = WlType<T>::key();
         auto iter = globals_.find(key);
         if (iter == globals_.end()) {
             return {};
         }
 
-        return iter->second;
+        auto m = iter->second;
+        std::vector<std::shared_ptr<WlType<T>>> l;
+        l.reserve(m.size());
+        for (auto &it : m) {
+            l.push_back(std::static_pointer_cast<WlType<T>>(it.second));
+        }
+
+        return l;
     }
 
     template<typename T>
-    std::shared_ptr<WlType<T>> getGlobal() {
+    std::shared_ptr<WlType<T>> getGlobal()
+    {
         auto v = getGlobals<T>();
-        if (v.count() == 0) {
+        if (v.empty()) {
             return nullptr;
         }
 
-        return v.begin();
+        return *v.begin();
     }
 
 private:
     WaylandConnection *wl_;
 
     std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::shared_ptr<void>>> globals_;
+
+    void reloadSeats();
 };
 
 } // namespace dim
