@@ -68,3 +68,8 @@ void WaylandConnection::roundTrip()
 {
     wl_display_roundtrip(display_);
 }
+
+void WaylandConnection::flush()
+{
+    wl_display_flush(display_);
+}

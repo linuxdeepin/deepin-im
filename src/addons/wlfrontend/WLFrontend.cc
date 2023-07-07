@@ -82,4 +82,6 @@ void WLFrontend::reloadSeats()
 
         ims_.emplace_back(std::make_shared<WaylandInputContextV2>(im, vk));
     }
+
+    wl_->flush();
 }
