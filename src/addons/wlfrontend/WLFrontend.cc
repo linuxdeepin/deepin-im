@@ -57,18 +57,29 @@ void WLFrontend::registryGlobal([[maybe_unused]] struct wl_registry *registry,
 
     BIND(wl_seat);
     BIND(zwp_input_method_manager_v2);
-    BIND(zwp_input_method_v2);
+    BIND(zwp_virtual_keyboard_manager_v1);
+}
+
+void WLFrontend::init()
+{
+    reloadSeats();
 }
 
 void WLFrontend::reloadSeats()
 {
     zwp_input_method_manager_v2 *imManager = getGlobal<zwp_input_method_manager_v2>()->get();
+    zwp_virtual_keyboard_manager_v1 *vkManager =
+        getGlobal<zwp_virtual_keyboard_manager_v1>()->get();
+
     auto seats = getGlobals<wl_seat>();
     for (auto &it : seats) {
         wl_seat *seat = it->get();
+        auto vk = std::make_shared<WlType<zwp_virtual_keyboard_v1>>(
+            static_cast<zwp_virtual_keyboard_v1 *>(
+                zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkManager, seat)));
         auto im = std::make_shared<WlType<zwp_input_method_v2>>(static_cast<zwp_input_method_v2 *>(
             zwp_input_method_manager_v2_get_input_method(imManager, seat)));
 
-        ims_.emplace_back(std::make_shared<WaylandInputContextV2>(im));
+        ims_.emplace_back(std::make_shared<WaylandInputContextV2>(im, vk));
     }
 }

@@ -9,7 +9,8 @@
 class WaylandInputContextV2
 {
 public:
-    WaylandInputContextV2(const std::shared_ptr<WlType<zwp_input_method_v2>> &im);
+    WaylandInputContextV2(const std::shared_ptr<WlType<zwp_input_method_v2>> &im,
+                          const std::shared_ptr<WlType<zwp_virtual_keyboard_v1>> &vk);
 
     // virtual void updatePreedit(const org::deepin::dim::PreeditKey &key) override;
     // virtual void updateCommitString(const QString &text) override;
@@ -18,6 +19,7 @@ public:
 private:
     static const zwp_input_method_v2_listener im_listener_;
     std::shared_ptr<WlType<zwp_input_method_v2>> im_;
+    std::shared_ptr<WlType<zwp_virtual_keyboard_v1>> vk_;
 
     void activate(struct zwp_input_method_v2 *zwp_input_method_v2);
     void deactivate(struct zwp_input_method_v2 *zwp_input_method_v2);
@@ -31,6 +33,7 @@ private:
                      uint32_t purpose);
     void done(struct zwp_input_method_v2 *zwp_input_method_v2);
     void unavailable(struct zwp_input_method_v2 *zwp_input_method_v2);
+
     int id() { return 0; }
 };
 

@@ -72,6 +72,7 @@ private:
                         const char *interface,
                         uint32_t version);
 
+    void init();
     void reloadSeats();
 };
 

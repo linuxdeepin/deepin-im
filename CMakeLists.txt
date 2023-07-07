@@ -37,6 +37,11 @@ ecm_add_wayland_server_protocol(wayland_protocols
 )
 
 ecm_add_wayland_server_protocol(wayland_protocols
+  PROTOCOL misc/wayland-protocols/virtual-keyboard-unstable-v1.xml
+  BASENAME virtual-keyboard-unstable-v1
+)
+
+ecm_add_wayland_server_protocol(wayland_protocols
   PROTOCOL misc/wayland-protocols/text-input-unstable-v3.xml
   BASENAME text-input-unstable-v3
 )

@@ -17,8 +17,11 @@ const zwp_input_method_v2_listener WaylandInputContextV2::im_listener_ = {
     CallbackWrapper<&WaylandInputContextV2::unavailable>::func,
 };
 
-WaylandInputContextV2::WaylandInputContextV2(const std::shared_ptr<WlType<zwp_input_method_v2>> &im)
+WaylandInputContextV2::WaylandInputContextV2(
+    const std::shared_ptr<WlType<zwp_input_method_v2>> &im,
+    const std::shared_ptr<WlType<zwp_virtual_keyboard_v1>> &vk)
     : im_(im)
+    , vk_(vk)
 {
     zwp_input_method_v2_add_listener(im_->get(), &im_listener_, this);
 }
