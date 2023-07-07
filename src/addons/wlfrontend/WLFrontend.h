@@ -1,6 +1,7 @@
 #ifndef DBUSFRONTEND_H
 #define DBUSFRONTEND_H
 
+#include "WaylandInputContextV2.h"
 #include "WlType.h"
 
 #include <dimcore/FrontendAddon.h>
@@ -68,6 +69,8 @@ private:
     WaylandConnection *wl_;
 
     std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::shared_ptr<void>>> globals_;
+
+    std::vector<std::shared_ptr<WaylandInputContextV2>> ims_;
 
     void reloadSeats();
 };

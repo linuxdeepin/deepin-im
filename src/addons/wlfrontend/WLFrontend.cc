@@ -66,7 +66,9 @@ void WLFrontend::reloadSeats()
     auto seats = getGlobals<wl_seat>();
     for (auto &it : seats) {
         wl_seat *seat = it->get();
-        zwp_input_method_v2 *im = zwp_input_method_manager_v2_get_input_method(imManager, seat);
-        qWarning() << "im:" << im;
+        auto im = std::make_shared<WlType<zwp_input_method_v2>>(static_cast<zwp_input_method_v2 *>(
+            zwp_input_method_manager_v2_get_input_method(imManager, seat)));
+
+        ims_.emplace_back(std::make_shared<WaylandInputContextV2>(im));
     }
 }

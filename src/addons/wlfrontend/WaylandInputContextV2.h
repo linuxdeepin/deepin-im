@@ -1,12 +1,15 @@
 #ifndef WAYLANDINPUTCONTEXTV1
 #define WAYLANDINPUTCONTEXTV1
 
+#include "WlType.h"
+#include "wayland-input-method-unstable-v2-client-protocol.h"
+
 #include <dimcore/InputContext.h>
 
-class WaylandInputContextV2 : public org::deepin::dim::InputContext
+class WaylandInputContextV2
 {
 public:
-    WaylandInputContextV2(org::deepin::dim::Dim *dim, QObject *parent = nullptr);
+    WaylandInputContextV2(const std::shared_ptr<WlType<zwp_input_method_v2>> &im);
 
     void activate(struct zwp_input_method_v2 *zwp_input_method_v2);
     void deactivate(struct zwp_input_method_v2 *zwp_input_method_v2);
@@ -21,8 +24,14 @@ public:
     void done(struct zwp_input_method_v2 *zwp_input_method_v2);
     void unavailable(struct zwp_input_method_v2 *zwp_input_method_v2);
 
+    // virtual void updatePreedit(const org::deepin::dim::PreeditKey &key) override;
+    // virtual void updateCommitString(const QString &text) override;
+    // virtual void forwardKey(const org::deepin::dim::ForwardKey &key) override;
+
 private:
-    struct zwp_input_method_context_v1 *input_method_context_v1_;
+    std::shared_ptr<WlType<zwp_input_method_v2>> im_;
+
+    int id() { return 0; }
 };
 
 #endif // !WAYLANDINPUTCONTEXTV1
