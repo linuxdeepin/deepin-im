@@ -15,7 +15,7 @@ public:
 
     wl_display *display() const { return display_; }
 
-    void roundTrip();
+    void roundtrip();
     void flush();
 
 private:

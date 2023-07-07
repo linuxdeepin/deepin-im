@@ -40,7 +40,7 @@ InputContextProxy::InputContextProxy(QObject *parent)
 
     auto *registry = wl_display_get_registry(wl_->display());
     wl_registry_add_listener(registry, &registry_listener, this);
-    wl_->roundTrip();
+    wl_->roundtrip();
     wl_display_flush(wl_->display());
 
     zwp_text_input_v3_add_listener(text_input_v3_, &tiListener, this);

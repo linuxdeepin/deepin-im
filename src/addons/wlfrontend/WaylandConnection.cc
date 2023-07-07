@@ -44,27 +44,10 @@ void WaylandConnection::dispatch()
         return;
     }
 
-    struct pollfd pfd;
-    pfd.fd = fd_;
-    pfd.events = POLLIN;
-    int ret = poll(&pfd, 1, 0);
-    if (ret > 0) {
-        wl_display_read_events(display_);
-    } else {
-        wl_display_cancel_read(display_);
-    }
-
-    if (wl_display_dispatch_pending(display_) == -1) {
-        int error = wl_display_get_error(display_);
-        if (error != 0) {
-            free(display_);
-            display_ = nullptr;
-            return;
-        }
-    }
+    roundtrip();
 }
 
-void WaylandConnection::roundTrip()
+void WaylandConnection::roundtrip()
 {
     wl_display_roundtrip(display_);
 }

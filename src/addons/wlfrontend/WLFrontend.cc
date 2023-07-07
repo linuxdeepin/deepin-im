@@ -32,7 +32,7 @@ WLFrontend::WLFrontend()
 
     auto *registry = wl_display_get_registry(wl_->display());
     wl_registry_add_listener(registry, &registry_listener_, this);
-    wl_->roundTrip();
+    wl_->roundtrip();
     wl_display_flush(wl_->display());
 
     reloadSeats();
