@@ -30,11 +30,6 @@ public:
     explicit WLFrontend();
     ~WLFrontend();
 
-    void registryGlobal(struct wl_registry *registry,
-                        uint32_t name,
-                        const char *interface,
-                        uint32_t version);
-
     template<typename T>
     std::vector<std::shared_ptr<WlType<T>>> getGlobals()
     {
@@ -66,11 +61,16 @@ public:
     }
 
 private:
+    static const wl_registry_listener registry_listener_;
     WaylandConnection *wl_;
 
     std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::shared_ptr<void>>> globals_;
-
     std::vector<std::shared_ptr<WaylandInputContextV2>> ims_;
+
+    void registryGlobal(struct wl_registry *registry,
+                        uint32_t name,
+                        const char *interface,
+                        uint32_t version);
 
     void reloadSeats();
 };

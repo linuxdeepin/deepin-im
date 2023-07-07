@@ -7,7 +7,7 @@
 
 using namespace org::deepin::dim;
 
-[[maybe_unused]] static const zwp_input_method_v2_listener imListener = {
+const zwp_input_method_v2_listener WaylandInputContextV2::im_listener_ = {
     CallbackWrapper<&WaylandInputContextV2::activate>::func,
     CallbackWrapper<&WaylandInputContextV2::deactivate>::func,
     CallbackWrapper<&WaylandInputContextV2::surroundingText>::func,
@@ -20,7 +20,7 @@ using namespace org::deepin::dim;
 WaylandInputContextV2::WaylandInputContextV2(const std::shared_ptr<WlType<zwp_input_method_v2>> &im)
     : im_(im)
 {
-    zwp_input_method_v2_add_listener(im_->get(), &imListener, this);
+    zwp_input_method_v2_add_listener(im_->get(), &im_listener_, this);
 }
 
 void WaylandInputContextV2::activate(
@@ -70,10 +70,12 @@ void WaylandInputContextV2::unavailable(
     qWarning() << "im unvailable:" << id();
 }
 
-// void WaylandInputContextV2::updatePreedit([[maybe_unused]] const org::deepin::dim::PreeditKey &key)
+// void WaylandInputContextV2::updatePreedit([[maybe_unused]] const org::deepin::dim::PreeditKey
+// &key)
 // {
 // }
 
 // void WaylandInputContextV2::updateCommitString([[maybe_unused]] const QString &text) { }
 
-// void WaylandInputContextV2::forwardKey([[maybe_unused]] const org::deepin::dim::ForwardKey &key) { }
+// void WaylandInputContextV2::forwardKey([[maybe_unused]] const org::deepin::dim::ForwardKey &key)
+// { }

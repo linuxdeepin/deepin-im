@@ -13,7 +13,7 @@
 
 using namespace org::deepin::dim;
 
-static const wl_registry_listener registry_listener = {
+const wl_registry_listener WLFrontend::registry_listener_ = {
     CallbackWrapper<&WLFrontend::registryGlobal>::func,
     []([[maybe_unused]] void *data, [[maybe_unused]] struct wl_registry *registry, uint32_t name) {
         qWarning() << "global_remove" << name;
@@ -31,7 +31,7 @@ WLFrontend::WLFrontend()
     wl_ = new WaylandConnection(waylandDisplay, this);
 
     auto *registry = wl_display_get_registry(wl_->display());
-    wl_registry_add_listener(registry, &registry_listener, this);
+    wl_registry_add_listener(registry, &registry_listener_, this);
     wl_->roundTrip();
     wl_display_flush(wl_->display());
 
