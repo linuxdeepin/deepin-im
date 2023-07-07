@@ -67,10 +67,9 @@ private:
     std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::shared_ptr<void>>> globals_;
     std::vector<std::shared_ptr<WaylandInputContextV2>> ims_;
 
-    void registryGlobal(struct wl_registry *registry,
-                        uint32_t name,
-                        const char *interface,
-                        uint32_t version);
+    void
+    global(struct wl_registry *registry, uint32_t name, const char *interface, uint32_t version);
+    void globalRemove(struct wl_registry *wl_registry, uint32_t name);
 
     void init();
     void reloadSeats();

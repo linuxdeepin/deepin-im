@@ -14,10 +14,8 @@
 using namespace org::deepin::dim;
 
 const wl_registry_listener WLFrontend::registry_listener_ = {
-    CallbackWrapper<&WLFrontend::registryGlobal>::func,
-    []([[maybe_unused]] void *data, [[maybe_unused]] struct wl_registry *registry, uint32_t name) {
-        qWarning() << "global_remove" << name;
-    },
+    CallbackWrapper<&WLFrontend::global>::func,
+    CallbackWrapper<&WLFrontend::globalRemove>::func,
 };
 
 WLFrontend::WLFrontend()
@@ -40,10 +38,10 @@ WLFrontend::WLFrontend()
 
 WLFrontend::~WLFrontend() { }
 
-void WLFrontend::registryGlobal([[maybe_unused]] struct wl_registry *registry,
-                                uint32_t name,
-                                const char *interface,
-                                uint32_t version)
+void WLFrontend::global([[maybe_unused]] struct wl_registry *registry,
+                        uint32_t name,
+                        const char *interface,
+                        uint32_t version)
 {
     qWarning() << "global" << name << interface << version;
 
@@ -58,6 +56,17 @@ void WLFrontend::registryGlobal([[maybe_unused]] struct wl_registry *registry,
     BIND(wl_seat);
     BIND(zwp_input_method_manager_v2);
     BIND(zwp_virtual_keyboard_manager_v1);
+}
+
+void WLFrontend::globalRemove([[maybe_unused]] struct wl_registry *wl_registry, uint32_t name)
+{
+    qWarning() << "global_remove" << name;
+    auto iter = globals_.find(name);
+    if (iter == globals_.end()) {
+        return;
+    }
+
+    globals_.erase(iter);
 }
 
 void WLFrontend::init()
