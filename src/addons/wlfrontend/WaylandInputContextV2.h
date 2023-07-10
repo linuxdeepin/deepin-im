@@ -6,21 +6,26 @@
 
 #include <dimcore/InputContext.h>
 
+namespace org {
+namespace deepin {
+namespace dim {
+
 class State
 {
 public:
     uint32_t serial = 1;
 };
 
-class WaylandInputContextV2
+class WaylandInputContextV2 : public InputContext
 {
 public:
-    WaylandInputContextV2(const std::shared_ptr<WlType<zwp_input_method_v2>> &im,
+    WaylandInputContextV2(Dim *dim,
+                          const std::shared_ptr<WlType<zwp_input_method_v2>> &im,
                           const std::shared_ptr<WlType<zwp_virtual_keyboard_v1>> &vk);
 
-    // virtual void updatePreedit(const org::deepin::dim::PreeditKey &key) override;
-    // virtual void updateCommitString(const QString &text) override;
-    // virtual void forwardKey(const org::deepin::dim::ForwardKey &key) override;
+    virtual void updatePreedit(const org::deepin::dim::PreeditKey &key) override;
+    virtual void updateCommitString(const QString &text) override;
+    virtual void forwardKey(const org::deepin::dim::ForwardKey &key) override;
 
 private:
     static const zwp_input_method_v2_listener im_listener_;
@@ -66,5 +71,9 @@ private:
 
     int id() { return 0; }
 };
+
+} // namespace dim
+} // namespace deepin
+} // namespace org
 
 #endif // !WAYLANDINPUTCONTEXTV1

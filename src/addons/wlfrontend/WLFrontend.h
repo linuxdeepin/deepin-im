@@ -21,12 +21,12 @@ namespace dim {
 
 class InputContext1;
 
-class WLFrontend : public QObject
+class WLFrontend : public FrontendAddon
 {
     Q_OBJECT
 
 public:
-    explicit WLFrontend();
+    explicit WLFrontend(Dim *dim);
     ~WLFrontend();
 
     template<typename T>

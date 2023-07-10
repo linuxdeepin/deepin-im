@@ -25,9 +25,11 @@ const zwp_input_method_keyboard_grab_v2_listener WaylandInputContextV2::grab_lis
 };
 
 WaylandInputContextV2::WaylandInputContextV2(
+    Dim *dim,
     const std::shared_ptr<WlType<zwp_input_method_v2>> &im,
     const std::shared_ptr<WlType<zwp_virtual_keyboard_v1>> &vk)
-    : im_(im)
+    : InputContext(dim)
+    , im_(im)
     , vk_(vk)
     , state_(std::make_unique<State>())
 {
@@ -126,12 +128,10 @@ void WaylandInputContextV2::repeatInfo(
     qWarning() << "grab repeatInfo:" << rate << delay;
 }
 
-// void WaylandInputContextV2::updatePreedit([[maybe_unused]] const org::deepin::dim::PreeditKey
-// &key)
-// {
-// }
+void WaylandInputContextV2::updatePreedit([[maybe_unused]] const org::deepin::dim::PreeditKey &key)
+{
+}
 
-// void WaylandInputContextV2::updateCommitString([[maybe_unused]] const QString &text) { }
+void WaylandInputContextV2::updateCommitString([[maybe_unused]] const QString &text) { }
 
-// void WaylandInputContextV2::forwardKey([[maybe_unused]] const org::deepin::dim::ForwardKey &key)
-// { }
+void WaylandInputContextV2::forwardKey([[maybe_unused]] const org::deepin::dim::ForwardKey &key) { }

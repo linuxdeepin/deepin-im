@@ -1,10 +1,4 @@
-# configure_file(
-#     config.h.in
-#     config.h
-# )
-
 set(WLFRONTEND_SOURCES
-  main.cc
   WaylandConnection.h
   WaylandConnection.cc
   WLFrontend.h
@@ -13,7 +7,7 @@ set(WLFRONTEND_SOURCES
   WaylandInputContextV2.cc
 )
 
-add_executable(wlfrontend
+add_library(wlfrontend SHARED
   ${WLFRONTEND_SOURCES}
 )
 
@@ -24,11 +18,6 @@ target_link_libraries(wlfrontend PRIVATE
   PkgConfig::wayland-client
   wayland_protocols
 )
-
-target_include_directories(wlfrontend PUBLIC
-    ../../../
-    utils/common.h
-    )
 
 install(TARGETS wlfrontend
   LIBRARY DESTINATION ${DIM_ADDON_DIR}

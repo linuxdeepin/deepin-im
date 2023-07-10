@@ -13,12 +13,15 @@
 
 using namespace org::deepin::dim;
 
+DIM_ADDON_FACTORY(WLFrontend)
+
 const wl_registry_listener WLFrontend::registry_listener_ = {
     CallbackWrapper<&WLFrontend::global>::func,
     CallbackWrapper<&WLFrontend::globalRemove>::func,
 };
 
-WLFrontend::WLFrontend()
+WLFrontend::WLFrontend(Dim *dim)
+    : FrontendAddon(dim, "wlfrontend")
 {
     std::string waylandDisplay = getenv("WAYLAND_DISPLAY");
     if (waylandDisplay.empty()) {
@@ -81,14 +84,15 @@ void WLFrontend::reloadSeats()
         getGlobal<zwp_virtual_keyboard_manager_v1>()->get();
 
     auto seats = getGlobals<wl_seat>();
-    for (auto &seat : seats) {;
+    for (auto &seat : seats) {
+        ;
         auto vk = std::make_shared<WlType<zwp_virtual_keyboard_v1>>(
             static_cast<zwp_virtual_keyboard_v1 *>(
                 zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkManager, seat->get())));
         auto im = std::make_shared<WlType<zwp_input_method_v2>>(static_cast<zwp_input_method_v2 *>(
             zwp_input_method_manager_v2_get_input_method(imManager, seat->get())));
 
-        ims_.emplace_back(std::make_shared<WaylandInputContextV2>(im, vk));
+        ims_.emplace_back(std::make_shared<WaylandInputContextV2>(dim(), im, vk));
     }
 
     wl_->flush();
