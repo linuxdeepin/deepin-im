@@ -50,6 +50,7 @@ void WaylandInputContextV2::deactivate(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
     qWarning() << "im deactivated:" << id();
+    state_.reset(new State);
 }
 
 void WaylandInputContextV2::surroundingText(
@@ -118,6 +119,10 @@ void WaylandInputContextV2::modifiers(
 {
     qWarning() << "grab modifiers:" << serial << mods_depressed << mods_latched << mods_locked
                << group;
+    state_->serial = serial;
+    state_->mods_depressed = mods_depressed;
+    state_->mods_latched = mods_latched;
+    state_->mods_locked = mods_locked;
 }
 
 void WaylandInputContextV2::repeatInfo(

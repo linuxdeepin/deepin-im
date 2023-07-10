@@ -14,6 +14,10 @@ class State
 {
 public:
     uint32_t serial = 1;
+    uint32_t mods_depressed = 0;
+    uint32_t mods_latched = 0;
+    uint32_t mods_locked = 0;
+    uint32_t group = 0;
 };
 
 class WaylandInputContextV2 : public InputContext
