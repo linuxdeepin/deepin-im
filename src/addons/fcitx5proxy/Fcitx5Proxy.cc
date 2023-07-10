@@ -20,7 +20,7 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
         if (available_ != available) {
             available_ = available;
 
-            available_ ? updateInputMethods() : inputMethods_.clear();
+            updateInputMethods();
         }
     });
 
@@ -40,6 +40,10 @@ QList<InputMethodEntry> Fcitx5Proxy::getInputMethods()
 void Fcitx5Proxy::createFcitxInputContext(InputContext *ic)
 {
     if (!ic) {
+        return;
+    }
+
+    if (!available_) {
         return;
     }
 
@@ -157,6 +161,11 @@ void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &
 
 void Fcitx5Proxy::updateInputMethods()
 {
+    if (!available_) {
+        inputMethods_.clear();
+        return;
+    }
+
     auto call = dbusProvider_->controller()->AvailableInputMethods();
     auto watcher = new QDBusPendingCallWatcher(call, this);
     connect(
