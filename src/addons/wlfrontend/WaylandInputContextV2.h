@@ -6,6 +6,12 @@
 
 #include <dimcore/InputContext.h>
 
+class State
+{
+public:
+    uint32_t serial = 1;
+};
+
 class WaylandInputContextV2
 {
 public:
@@ -23,6 +29,8 @@ private:
     std::shared_ptr<WlType<zwp_input_method_v2>> im_;
     std::shared_ptr<WlType<zwp_virtual_keyboard_v1>> vk_;
     std::shared_ptr<WlType<zwp_input_method_keyboard_grab_v2>> grab_;
+
+    std::unique_ptr<State> state_;
 
     void activate(struct zwp_input_method_v2 *zwp_input_method_v2);
     void deactivate(struct zwp_input_method_v2 *zwp_input_method_v2);

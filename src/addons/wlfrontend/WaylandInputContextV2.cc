@@ -29,6 +29,7 @@ WaylandInputContextV2::WaylandInputContextV2(
     const std::shared_ptr<WlType<zwp_virtual_keyboard_v1>> &vk)
     : im_(im)
     , vk_(vk)
+    , state_(std::make_unique<State>())
 {
     zwp_input_method_v2_add_listener(im_->get(), &im_listener_, this);
 
@@ -101,6 +102,8 @@ void WaylandInputContextV2::key(
     uint32_t state)
 {
     qWarning() << "grab key:" << serial << time << key << state;
+    zwp_input_method_v2_commit_string(im_->get(), "test");
+    zwp_input_method_v2_commit(im_->get(), state_->serial++);
 }
 
 void WaylandInputContextV2::modifiers(
