@@ -31,23 +31,22 @@ WaylandInputContextV2::WaylandInputContextV2(
     , vk_(vk)
 {
     zwp_input_method_v2_add_listener(im_->get(), &im_listener_, this);
-}
-
-void WaylandInputContextV2::activate(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
-{
-    qWarning() << "im activated:" << id();
 
     grab_ = std::make_shared<WlType<zwp_input_method_keyboard_grab_v2>>(
         zwp_input_method_v2_grab_keyboard(im_->get()));
     zwp_input_method_keyboard_grab_v2_add_listener(grab_->get(), &grab_listener_, this);
 }
 
+void WaylandInputContextV2::activate(
+    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
+{
+    qWarning() << "im activated:" << id();
+}
+
 void WaylandInputContextV2::deactivate(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
     qWarning() << "im deactivated:" << id();
-    grab_.reset();
 }
 
 void WaylandInputContextV2::surroundingText(
