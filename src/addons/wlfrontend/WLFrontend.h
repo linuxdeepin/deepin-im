@@ -24,7 +24,6 @@ class InputContext1;
 class WLFrontend : public QObject
 {
     Q_OBJECT
-    friend class zwp_input_method_v1_listener;
 
 public:
     explicit WLFrontend();
