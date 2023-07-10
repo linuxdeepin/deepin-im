@@ -53,7 +53,10 @@ public:
         } else if constexpr (std::is_same_v<T, zwp_virtual_keyboard_manager_v1>) {
             zwp_virtual_keyboard_manager_v1_destroy(val_);
         } else if constexpr (std::is_same_v<T, zwp_virtual_keyboard_v1>) {
-            zwp_virtual_keyboard_v1_destroy(val_);
+            auto version = zwp_virtual_keyboard_v1_get_version(val_);
+            if (version >= 1) {
+                zwp_virtual_keyboard_v1_destroy(val_);
+            }
         } else if constexpr (std::is_same_v<T, zwp_input_method_keyboard_grab_v2>) {
             zwp_input_method_keyboard_grab_v2_destroy(val_);
         } else {
