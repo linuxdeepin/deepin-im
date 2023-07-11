@@ -5,6 +5,20 @@
 #include "wayland-input-method-unstable-v2-client-protocol.h"
 
 #include <dimcore/InputContext.h>
+#include <xkbcommon/xkbcommon.h>
+
+template<auto Func>
+class Deleter
+{
+public:
+    template<typename T>
+    void operator()(T *ptr) const
+    {
+        if (ptr) {
+            Func(ptr);
+        }
+    }
+};
 
 namespace org {
 namespace deepin {
@@ -40,6 +54,10 @@ private:
     std::shared_ptr<WlType<zwp_input_method_keyboard_grab_v2>> grab_;
 
     std::unique_ptr<State> state_;
+
+    std::unique_ptr<xkb_context, Deleter<xkb_context_unref>> xkb_context_;
+    std::unique_ptr<xkb_keymap, Deleter<xkb_keymap_unref>> xkb_keymap_;
+    std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> xkb_state_;
 
     void activate(struct zwp_input_method_v2 *zwp_input_method_v2);
     void deactivate(struct zwp_input_method_v2 *zwp_input_method_v2);

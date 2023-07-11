@@ -5,6 +5,8 @@
 
 #include <QDebug>
 
+#include <sys/mman.h>
+
 using namespace org::deepin::dim;
 
 const zwp_input_method_v2_listener WaylandInputContextV2::im_listener_ = {
@@ -32,12 +34,15 @@ WaylandInputContextV2::WaylandInputContextV2(
     , im_(im)
     , vk_(vk)
     , state_(std::make_unique<State>())
+    , xkb_context_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
 {
     zwp_input_method_v2_add_listener(im_->get(), &im_listener_, this);
 
     grab_ = std::make_shared<WlType<zwp_input_method_keyboard_grab_v2>>(
         zwp_input_method_v2_grab_keyboard(im_->get()));
     zwp_input_method_keyboard_grab_v2_add_listener(grab_->get(), &grab_listener_, this);
+
+    xkb_context_.reset();
 }
 
 void WaylandInputContextV2::activate(
@@ -95,6 +100,23 @@ void WaylandInputContextV2::keymap(
     uint32_t size)
 {
     qWarning() << "grab keymap:" << format << fd << size;
+
+    void *ptr = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0);
+    xkb_keymap_.reset(xkb_keymap_new_from_string(xkb_context_.get(),
+                                                 static_cast<const char *>(ptr),
+                                                 XKB_KEYMAP_FORMAT_TEXT_V1,
+                                                 XKB_KEYMAP_COMPILE_NO_FLAGS));
+    munmap(ptr, size);
+
+    if (!xkb_keymap_) {
+        return;
+    }
+
+    xkb_state_.reset(xkb_state_new(xkb_keymap_.get()));
+    if (!xkb_state_) {
+        xkb_keymap_.reset();
+        return;
+    }
 }
 
 void WaylandInputContextV2::key(
