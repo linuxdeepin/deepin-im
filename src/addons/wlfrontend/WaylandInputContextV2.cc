@@ -120,6 +120,8 @@ void WaylandInputContextV2::keymap(
         return;
     }
 
+    zwp_virtual_keyboard_v1_keymap(vk_->get(), format, fd, size);
+
     xkb_state_.reset(xkb_state_new(xkb_keymap_.get()));
     if (!xkb_state_) {
         xkb_keymap_.reset();
