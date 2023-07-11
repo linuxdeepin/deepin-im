@@ -16,6 +16,7 @@ target_link_libraries(wlfrontend PRIVATE
   Qt5::Core
   Qt5::DBus
   PkgConfig::wayland-client
+  PkgConfig::xkbcommon
   wayland_protocols
 )
 
