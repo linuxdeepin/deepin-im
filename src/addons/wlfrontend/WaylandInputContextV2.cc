@@ -127,6 +127,31 @@ void WaylandInputContextV2::keymap(
         xkb_keymap_.reset();
         return;
     }
+
+    modifierMask_[static_cast<uint8_t>(Modifiers::Shift)] = 1
+        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Shift");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Lock)] = 1
+        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Lock");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Control)] = 1
+        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Control");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Mod1)] = 1
+        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Mod1");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Mod2)] = 1
+        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Mod2");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Mod3)] = 1
+        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Mod3");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Mod4)] = 1
+        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Mod4");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Mod5)] = 1
+        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Mod5");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Alt)] = 1
+        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Alt");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Meta)] = 1
+        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Meta");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Super)] = 1
+        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Super");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Hyper)] = 1
+        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Hyper");
 }
 
 void WaylandInputContextV2::key(
@@ -140,7 +165,12 @@ void WaylandInputContextV2::key(
 
     xkb_keysym_t sym = xkb_state_key_get_one_sym(xkb_state_.get(), key + 8);
     // todo: modifiers
-    InputContextKeyEvent ke(this, key, static_cast<uint32_t>(sym), 0, state == WL_KEYBOARD_KEY_STATE_RELEASED, time);
+    InputContextKeyEvent ke(this,
+                            key,
+                            static_cast<uint32_t>(sym),
+                            state_->modifiers,
+                            state == WL_KEYBOARD_KEY_STATE_RELEASED,
+                            time);
 
     keyEvent(ke);
 }
@@ -155,19 +185,53 @@ void WaylandInputContextV2::modifiers(
 {
     qWarning() << "grab modifiers:" << serial << mods_depressed << mods_latched << mods_locked
                << group;
-    state_->serial = serial;
-    state_->mods_depressed = mods_depressed;
-    state_->mods_latched = mods_latched;
-    state_->mods_locked = mods_locked;
 
     if (xkb_state_) {
-        xkb_state_update_mask(xkb_state_.get(),
-                              mods_depressed,
-                              mods_latched,
-                              mods_locked,
-                              0,
-                              0,
-                              group);
+        xkb_state_component comp = xkb_state_update_mask(xkb_state_.get(),
+                                                         mods_depressed,
+                                                         mods_latched,
+                                                         mods_locked,
+                                                         0,
+                                                         0,
+                                                         group);
+        xkb_mod_mask_t mask = xkb_state_serialize_mods(xkb_state_.get(), comp);
+        state_->modifiers = 0;
+        if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Shift)]) {
+            state_->modifiers |= SHIFT_MASK;
+        }
+        if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Lock)]) {
+            state_->modifiers |= LOCK_MASK;
+        }
+        if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Control)]) {
+            state_->modifiers |= CONTROL_MASK;
+        }
+        if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod1)]) {
+            state_->modifiers |= MOD1_MASK;
+        }
+        if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod2)]) {
+            state_->modifiers |= MOD2_MASK;
+        }
+        if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod3)]) {
+            state_->modifiers |= MOD3_MASK;
+        }
+        if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod4)]) {
+            state_->modifiers |= MOD4_MASK;
+        }
+        if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod5)]) {
+            state_->modifiers |= MOD5_MASK;
+        }
+        if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Alt)]) {
+            state_->modifiers |= ALT_MASK;
+        }
+        if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Meta)]) {
+            state_->modifiers |= META_MASK;
+        }
+        if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Super)]) {
+            state_->modifiers |= SUPER_MASK;
+        }
+        if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Hyper)]) {
+            state_->modifiers |= HYPER_MASK;
+        }
     }
 
     if (vk_) {

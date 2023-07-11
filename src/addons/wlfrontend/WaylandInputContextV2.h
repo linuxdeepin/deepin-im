@@ -28,10 +28,25 @@ class State
 {
 public:
     uint32_t serial = 1;
-    uint32_t mods_depressed = 0;
-    uint32_t mods_latched = 0;
-    uint32_t mods_locked = 0;
+    uint32_t modifiers = 0;
     uint32_t group = 0;
+};
+
+enum class Modifiers : uint8_t {
+    Shift,
+    Lock,
+    Control,
+    Mod1,
+    Mod2,
+    Mod3,
+    Mod4,
+    Mod5,
+    Alt,
+    Meta,
+    Super,
+    Hyper,
+
+    CNT,
 };
 
 class WaylandInputContextV2 : public InputContext
@@ -58,6 +73,8 @@ private:
     std::unique_ptr<xkb_context, Deleter<xkb_context_unref>> xkb_context_;
     std::unique_ptr<xkb_keymap, Deleter<xkb_keymap_unref>> xkb_keymap_;
     std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> xkb_state_;
+
+    uint32_t modifierMask_[static_cast<uint8_t>(Modifiers::CNT)];
 
     void activate(struct zwp_input_method_v2 *zwp_input_method_v2);
     void deactivate(struct zwp_input_method_v2 *zwp_input_method_v2);
