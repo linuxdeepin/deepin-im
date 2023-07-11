@@ -43,8 +43,6 @@ WaylandInputContextV2::WaylandInputContextV2(
     grab_ = std::make_shared<WlType<zwp_input_method_keyboard_grab_v2>>(
         zwp_input_method_v2_grab_keyboard(im_->get()));
     zwp_input_method_keyboard_grab_v2_add_listener(grab_->get(), &grab_listener_, this);
-
-    xkb_context_.reset();
 }
 
 void WaylandInputContextV2::activate(
