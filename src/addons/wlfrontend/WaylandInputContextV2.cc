@@ -102,6 +102,10 @@ void WaylandInputContextV2::keymap(
     qWarning() << "grab keymap:" << format << fd << size;
 
     void *ptr = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (ptr == MAP_FAILED) {
+        return;
+    }
+
     xkb_keymap_.reset(xkb_keymap_new_from_string(xkb_context_.get(),
                                                  static_cast<const char *>(ptr),
                                                  XKB_KEYMAP_FORMAT_TEXT_V1,
@@ -145,6 +149,24 @@ void WaylandInputContextV2::modifiers(
     state_->mods_depressed = mods_depressed;
     state_->mods_latched = mods_latched;
     state_->mods_locked = mods_locked;
+
+    if (xkb_state_) {
+        xkb_state_update_mask(xkb_state_.get(),
+                              mods_depressed,
+                              mods_latched,
+                              mods_locked,
+                              0,
+                              0,
+                              group);
+    }
+
+    if (vk_) {
+        zwp_virtual_keyboard_v1_modifiers(vk_->get(),
+                                          mods_depressed,
+                                          mods_latched,
+                                          mods_locked,
+                                          group);
+    }
 }
 
 void WaylandInputContextV2::repeatInfo(
