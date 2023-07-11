@@ -3,6 +3,8 @@
 #include "utils.h"
 #include "wayland-input-method-unstable-v2-client-protocol.h"
 
+#include <linux/input.h>
+
 #include <QDebug>
 
 #include <sys/mman.h>
@@ -101,6 +103,10 @@ void WaylandInputContextV2::keymap(
 {
     qWarning() << "grab keymap:" << format << fd << size;
 
+    if (format == WL_KEYBOARD_KEYMAP_FORMAT_NO_KEYMAP) {
+        return;
+    }
+
     void *ptr = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (ptr == MAP_FAILED) {
         return;
@@ -131,8 +137,12 @@ void WaylandInputContextV2::key(
     uint32_t state)
 {
     qWarning() << "grab key:" << serial << time << key << state;
-    zwp_input_method_v2_commit_string(im_->get(), "test");
-    zwp_input_method_v2_commit(im_->get(), state_->serial++);
+
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(xkb_state_.get(), key + 8);
+    // todo: modifiers
+    InputContextKeyEvent ke(this, key, static_cast<uint32_t>(sym), 0, state == WL_KEYBOARD_KEY_STATE_RELEASED, time);
+
+    keyEvent(ke);
 }
 
 void WaylandInputContextV2::modifiers(
