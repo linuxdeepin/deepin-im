@@ -34,9 +34,9 @@ void InputContext::focusOut()
     dim_->postEvent(e);
 }
 
-void InputContext::keyEvent(InputContextKeyEvent &event)
+bool InputContext::keyEvent(InputContextKeyEvent &event)
 {
-    dim_->postEvent(event);
+    return dim_->postEvent(event);
 }
 
 void InputContext::updatePreedit(const QString &text, int32_t cursorBegin, int32_t cursorEnd)

@@ -44,7 +44,7 @@ public:
     void destroy();
     void focusIn();
     void focusOut();
-    void keyEvent(InputContextKeyEvent &event);
+    bool keyEvent(InputContextKeyEvent &event);
 
     const InputState &inputState() const;
 

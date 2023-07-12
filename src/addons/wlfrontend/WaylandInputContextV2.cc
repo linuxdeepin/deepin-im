@@ -172,12 +172,16 @@ void WaylandInputContextV2::key(
 
     xkb_keysym_t sym = xkb_state_key_get_one_sym(xkb_state_.get(), key + 8);
     InputContextKeyEvent ke(this,
-                            key,
                             static_cast<uint32_t>(sym),
+                            key,
                             state_->modifiers,
                             state == WL_KEYBOARD_KEY_STATE_RELEASED,
                             time);
-    keyEvent(ke);
+    bool res = keyEvent(ke);
+    if (!res) {
+        zwp_virtual_keyboard_v1_key(vk_->get(), getTimestamp(), key, state);
+        return;
+    }
 
     auto list = getAndClearBatchList();
     for (auto &e : list) {

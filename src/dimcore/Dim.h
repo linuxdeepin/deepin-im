@@ -55,7 +55,7 @@ private:
     void postInputContextDestroyed(Event &event);
     void postInputContextFocused(Event &event);
     void postInputContextUnfocused(Event &event);
-    void postInputContextKeyEvent(InputContextKeyEvent &event);
+    bool postInputContextKeyEvent(InputContextKeyEvent &event);
 };
 
 } // namespace dim

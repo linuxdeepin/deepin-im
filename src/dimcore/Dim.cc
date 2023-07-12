@@ -124,7 +124,7 @@ bool Dim::postEvent(Event &event)
         postInputContextUnfocused(event);
         break;
     case EventType::InputContextKeyEvent:
-        postInputContextKeyEvent(reinterpret_cast<InputContextKeyEvent &>(event));
+        return postInputContextKeyEvent(reinterpret_cast<InputContextKeyEvent &>(event));
         break;
     case EventType::InputContextCursorRectChanged:
         // TODO:
@@ -192,7 +192,7 @@ void Dim::postInputContextUnfocused([[maybe_unused]] Event &event)
     }
 }
 
-void Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
+bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
 {
     // TODO: check shortcuts (switch im etc.)
 
@@ -202,7 +202,7 @@ void Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
     auto i = ims_.find(currentIMKey);
     if (i == ims_.end()) {
         // TODO:
-        return;
+        return false;
     }
     const auto &im = i.value();
 
@@ -210,9 +210,10 @@ void Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
     auto j = inputMethodAddons_.find(addonKey);
     if (j == inputMethodAddons_.end()) {
         // TODO:
-        return;
+        return false;
     }
     auto *addon = j.value();
 
     addon->keyEvent(im, event);
+    return true;
 }
