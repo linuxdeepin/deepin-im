@@ -56,6 +56,7 @@ void WaylandInputContextV2::activate(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
     qWarning() << "im activated:" << id();
+    focusIn();
 }
 
 void WaylandInputContextV2::deactivate(
@@ -63,6 +64,7 @@ void WaylandInputContextV2::deactivate(
 {
     qWarning() << "im deactivated:" << id();
     state_.reset(new State);
+    focusOut();
 }
 
 void WaylandInputContextV2::surroundingText(
