@@ -60,7 +60,7 @@ QList<InputMethodEntry> Keyboard::getInputMethods()
 
 void Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
 {
-    auto *ic = keyEvent.ic();
+    // auto *ic = keyEvent.ic();
 
     // by pass all key release
     if (keyEvent.isRelease()) {
@@ -80,11 +80,11 @@ void Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &key
     keymap_.reset(xkb_keymap_new_from_names(ctx_.get(), &names, XKB_KEYMAP_COMPILE_NO_FLAGS));
 
     keymap_ ? state_.reset(xkb_state_new(keymap_.get())) : state_.reset();
-    xkb_keysym_t keySym;
-    if (state_) {
-        keySym = xkb_state_key_get_one_sym(state_.get(), keyEvent.keycode());
-    }
-    ic->forwardKey(ForwardKey{ keySym, keyEvent.state(), keyEvent.isRelease() });
+    // xkb_keysym_t keySym;
+    // if (state_) {
+    //     keySym = xkb_state_key_get_one_sym(state_.get(), keyEvent.keycode());
+    // }
+    // ic->forwardKey(DBusForwardKey{ keySym, keyEvent.state(), keyEvent.isRelease() });
 }
 
 // static QList<QString> parseLanguageList(const QDomElement &languageListEle) {

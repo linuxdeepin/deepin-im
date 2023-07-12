@@ -28,6 +28,13 @@ const zwp_input_method_keyboard_grab_v2_listener WaylandInputContextV2::grab_lis
     CallbackWrapper<&WaylandInputContextV2::repeatInfo>::func,
 };
 
+static int32_t getTimestamp()
+{
+    struct timespec time;
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    return time.tv_sec * 1000 + time.tv_nsec / (1000 * 1000);
+}
+
 WaylandInputContextV2::WaylandInputContextV2(
     Dim *dim,
     const std::shared_ptr<WlType<zwp_input_method_v2>> &im,
@@ -164,15 +171,45 @@ void WaylandInputContextV2::key(
     qWarning() << "grab key:" << serial << time << key << state;
 
     xkb_keysym_t sym = xkb_state_key_get_one_sym(xkb_state_.get(), key + 8);
-    // todo: modifiers
     InputContextKeyEvent ke(this,
                             key,
                             static_cast<uint32_t>(sym),
                             state_->modifiers,
                             state == WL_KEYBOARD_KEY_STATE_RELEASED,
                             time);
-
     keyEvent(ke);
+
+    auto list = getAndClearBatchList();
+    for (auto &e : list) {
+        if (std::holds_alternative<ForwardKey>(e)) {
+            auto forwardKey = std::get<ForwardKey>(e);
+            zwp_virtual_keyboard_v1_key(vk_->get(),
+                                        getTimestamp(),
+                                        forwardKey.keycode,
+                                        forwardKey.pressed ? WL_KEYBOARD_KEY_STATE_PRESSED
+                                                           : WL_KEYBOARD_KEY_STATE_RELEASED);
+            continue;
+        }
+
+        if (std::holds_alternative<PreeditInfo>(e)) {
+            auto preeditInfo = std::get<PreeditInfo>(e);
+            zwp_input_method_v2_set_preedit_string(im_->get(),
+                                                   preeditInfo.text.toStdString().c_str(),
+                                                   preeditInfo.cursorBegin,
+                                                   preeditInfo.cursorEnd);
+            continue;
+        }
+
+        if (std::holds_alternative<CommitString>(e)) {
+            auto text = std::get<CommitString>(e).text;
+            zwp_input_method_v2_commit_string(im_->get(), text.toStdString().c_str());
+            continue;
+        }
+    }
+
+    if (!list.empty()) {
+        zwp_input_method_v2_commit(im_->get(), state_->serial++);
+    }
 }
 
 void WaylandInputContextV2::modifiers(
@@ -251,10 +288,17 @@ void WaylandInputContextV2::repeatInfo(
     qWarning() << "grab repeatInfo:" << rate << delay;
 }
 
-void WaylandInputContextV2::updatePreedit([[maybe_unused]] const org::deepin::dim::PreeditKey &key)
-{
-}
+// void WaylandInputContextV2::updatePreedit(const QString &text,
+//                                           int32_t cursorBegin,
+//                                           int32_t cursorEnd)
+// {
+//     zwp_input_method_v2_set_preedit_string(im_->get(),
+//                                            text.toStdString().c_str(),
+//                                            cursorBegin,
+//                                            cursorEnd);
+// }
 
-void WaylandInputContextV2::updateCommitString([[maybe_unused]] const QString &text) { }
-
-void WaylandInputContextV2::forwardKey([[maybe_unused]] const org::deepin::dim::ForwardKey &key) { }
+// void WaylandInputContextV2::updateCommitString(const QString &text)
+// {
+//     zwp_input_method_v2_commit_string(im_->get(), text.toStdString().c_str());
+// }

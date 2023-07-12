@@ -56,10 +56,6 @@ public:
                           const std::shared_ptr<WlType<zwp_input_method_v2>> &im,
                           const std::shared_ptr<WlType<zwp_virtual_keyboard_v1>> &vk);
 
-    virtual void updatePreedit(const org::deepin::dim::PreeditKey &key) override;
-    virtual void updateCommitString(const QString &text) override;
-    virtual void forwardKey(const org::deepin::dim::ForwardKey &key) override;
-
 private:
     static const zwp_input_method_v2_listener im_listener_;
     static const zwp_input_method_keyboard_grab_v2_listener grab_listener_;

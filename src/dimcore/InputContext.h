@@ -14,6 +14,24 @@ namespace dim {
 
 class Dim;
 
+struct PreeditInfo
+{
+    QString text;
+    int32_t cursorBegin;
+    int32_t cursorEnd;
+};
+
+struct CommitString
+{
+    QString text;
+};
+
+struct ForwardKey
+{
+    uint32_t keycode;
+    bool pressed;
+};
+
 class InputContext : public QObject, public ObjectId<InputContext>
 {
     Q_OBJECT
@@ -30,13 +48,18 @@ public:
 
     const InputState &inputState() const;
 
-    virtual void updatePreedit(const org::deepin::dim::PreeditKey &key) = 0;
-    virtual void updateCommitString(const QString &text) = 0;
-    virtual void forwardKey(const org::deepin::dim::ForwardKey &key) = 0;
+    void updatePreedit(const QString &text, int32_t cursorBegin, int32_t cursorEnd);
+    void updateCommitString(const QString &text);
+    void forwardKey(uint32_t keycode, bool pressed);
+
+protected:
+    std::list<std::variant<ForwardKey, PreeditInfo, CommitString>> getAndClearBatchList();
 
 private:
     Dim *dim_;
     InputState inputState_;
+
+    std::list<std::variant<ForwardKey, PreeditInfo, CommitString>> batchList_;
 };
 
 } // namespace dim

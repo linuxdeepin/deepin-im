@@ -139,13 +139,13 @@ void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &
                     }
                     case BATCHED_PREEDIT: {
                         if (v.canConvert<PreeditKey>()) {
-                            ic->updatePreedit(v.value<PreeditKey>());
+                            // ic->updatePreedit(v.value<PreeditKey>());
                         }
                         break;
                     }
                     case BATCHED_FORWARD_KEY: {
-                        if (v.canConvert<ForwardKey>()) {
-                            ic->forwardKey(v.value<ForwardKey>());
+                        if (v.canConvert<DBusForwardKey>()) {
+                            // ic->forwardKey(v.value<DBusForwardKey>());
                         }
                         break;
                     }
