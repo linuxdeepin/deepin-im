@@ -24,6 +24,7 @@ static const QMap<QString, AddonType> AddonsType = {
 Dim::Dim(QObject *parent)
     : QObject(parent)
     , focusedIC_(0)
+    , enabledIMs_({ "pinyin" })
 {
     loadAddons();
 }
@@ -115,7 +116,7 @@ bool Dim::postEvent(Event &event)
         postInputContextCreated(event);
         break;
     case EventType::InputContextDestroyed:
-        postInputContextDestroyed(event);
+        postInputContextCreated(event);
         break;
     case EventType::InputContextFocused:
         postInputContextFocused(event);
