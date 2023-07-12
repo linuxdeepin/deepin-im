@@ -12,8 +12,8 @@ namespace dim {
 enum { BATCHED_COMMIT_STRING = 0, BATCHED_PREEDIT, BATCHED_FORWARD_KEY };
 
 using BatchEvent = dbus::DBusStruct<uint32_t, QVariant>;
-using DBusForwardKey = dbus::DBusStruct<uint32_t, uint32_t, bool>;
-using PreeditKey = dbus::DBusStruct<std::vector<dbus::DBusStruct<QString, int32_t>>, int32_t>;
+using DBusForwardKey = dbus::DBusStruct<uint32_t, uint32_t, bool>; // keysym, keystate, isRelease
+using PreeditKey = dbus::DBusStruct<std::vector<dbus::DBusStruct<QString, int32_t>>, int32_t>; // preedit text, preedit text format, cursor
 
 } // namespace dim
 } // namespace deepin

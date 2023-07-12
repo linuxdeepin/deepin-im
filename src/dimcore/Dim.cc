@@ -115,7 +115,7 @@ bool Dim::postEvent(Event &event)
         postInputContextCreated(event);
         break;
     case EventType::InputContextDestroyed:
-        postInputContextCreated(event);
+        postInputContextDestroyed(event);
         break;
     case EventType::InputContextFocused:
         postInputContextFocused(event);

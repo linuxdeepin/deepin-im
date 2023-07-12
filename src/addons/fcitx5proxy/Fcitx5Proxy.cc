@@ -139,13 +139,18 @@ void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &
                     }
                     case BATCHED_PREEDIT: {
                         if (v.canConvert<PreeditKey>()) {
-                            // ic->updatePreedit(v.value<PreeditKey>());
+                            auto strs = std::get<0>(v.value<PreeditKey>());
+                            auto cursor = std::get<1>(v.value<PreeditKey>());
+                            for (size_t i = 0; i < strs.size(); i++) {
+                                ic->updatePreedit(std::get<0>(strs[i]), cursor, cursor);
+                            }
                         }
                         break;
                     }
                     case BATCHED_FORWARD_KEY: {
                         if (v.canConvert<DBusForwardKey>()) {
-                            // ic->forwardKey(v.value<DBusForwardKey>());
+                            ic->forwardKey(std::get<0>(v.value<DBusForwardKey>()),
+                                           std::get<2>(v.value<DBusForwardKey>()));
                         }
                         break;
                     }
