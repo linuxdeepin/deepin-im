@@ -107,8 +107,6 @@ private:
     void repeatInfo(struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
                     int32_t rate,
                     int32_t delay);
-
-    int id() { return 0; }
 };
 
 } // namespace dim
