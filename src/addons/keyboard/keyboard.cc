@@ -49,6 +49,7 @@ Keyboard::Keyboard(Dim *dim)
 
     parseRule(rules);
     parseRule(extraRules);
+    Q_EMIT addonInitFinished(this);
 }
 
 Keyboard::~Keyboard() { }

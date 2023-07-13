@@ -92,8 +92,8 @@ void Dim::loadAddon(const QString &infoFile)
     }
     case AddonType::InputMethod: {
         auto *imAddon = qobject_cast<InputMethodAddon *>(addon);
-        initInputMethodAddon(imAddon);
         inputMethodAddons_.insert(imAddon->key(), imAddon);
+        connect(imAddon, &InputMethodAddon::addonInitFinished, this , &Dim::initInputMethodAddon);
         break;
     }
     default:

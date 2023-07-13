@@ -188,5 +188,6 @@ void Fcitx5Proxy::updateInputMethods()
             }
 
             inputMethods_.swap(inputMethods);
+            Q_EMIT addonInitFinished(this);
         });
 }
