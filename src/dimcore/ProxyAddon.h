@@ -6,7 +6,6 @@
 #define PROXYADDON_H
 
 #include "InputMethodAddon.h"
-#include "InputMethodEntry.h"
 
 #include <QList>
 

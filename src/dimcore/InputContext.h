@@ -4,9 +4,10 @@
 #include "Events.h"
 #include "InputState.h"
 #include "ObjectId.h"
-#include "utils/common.h"
 
 #include <QObject>
+
+#include <variant>
 
 namespace org {
 namespace deepin {

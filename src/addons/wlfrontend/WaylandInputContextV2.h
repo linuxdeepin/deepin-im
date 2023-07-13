@@ -7,6 +7,8 @@
 #include <dimcore/InputContext.h>
 #include <xkbcommon/xkbcommon.h>
 
+#include <memory>
+
 template<auto Func>
 class Deleter
 {

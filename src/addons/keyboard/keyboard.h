@@ -10,16 +10,19 @@ namespace org {
 namespace deepin {
 namespace dim {
 
-template <auto FreeFunction>
-struct FunctionDeleter {
-    template <typename T>
-    void operator()(T *p) const {
+template<auto FreeFunction>
+struct FunctionDeleter
+{
+    template<typename T>
+    void operator()(T *p) const
+    {
         if (p) {
             FreeFunction(const_cast<std::remove_const_t<T> *>(p));
         }
     }
 };
-template <typename T, auto FreeFunction = std::free>
+
+template<typename T, auto FreeFunction = std::free>
 using UniqueCPtr = std::unique_ptr<T, FunctionDeleter<FreeFunction>>;
 static_assert(sizeof(char *) == sizeof(UniqueCPtr<char>),
               ""); // ensure no overhead

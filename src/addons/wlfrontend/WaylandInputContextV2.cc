@@ -293,18 +293,3 @@ void WaylandInputContextV2::repeatInfo(
 {
     qWarning() << "grab repeatInfo:" << rate << delay;
 }
-
-// void WaylandInputContextV2::updatePreedit(const QString &text,
-//                                           int32_t cursorBegin,
-//                                           int32_t cursorEnd)
-// {
-//     zwp_input_method_v2_set_preedit_string(im_->get(),
-//                                            text.toStdString().c_str(),
-//                                            cursorBegin,
-//                                            cursorEnd);
-// }
-
-// void WaylandInputContextV2::updateCommitString(const QString &text)
-// {
-//     zwp_input_method_v2_commit_string(im_->get(), text.toStdString().c_str());
-// }
