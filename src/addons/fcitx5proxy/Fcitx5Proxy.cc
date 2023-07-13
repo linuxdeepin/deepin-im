@@ -113,7 +113,7 @@ void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &
     auto id = keyEvent.ic()->id();
 
     if (isICDBusInterfaceValid(id)) {
-        auto response = icMap_[id]->call("ProcessKeyEventBatch ",
+        auto response = icMap_[id]->call("ProcessKeyEventBatch",
                                          keyEvent.keyValue(),
                                          keyEvent.keycode(),
                                          keyEvent.state(),
