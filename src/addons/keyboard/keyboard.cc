@@ -4,7 +4,7 @@
 #include "dimcore/Events.h"
 #include "dimcore/InputContext.h"
 
-#include <utils/common.h>
+#include <common/common.h>
 
 #include <QDir>
 #include <QDomDocument>

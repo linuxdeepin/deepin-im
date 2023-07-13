@@ -1,8 +1,13 @@
 #ifndef WAYLANDCONNECTION_H
 #define WAYLANDCONNECTION_H
 
+#include "common/common.h"
+
+#include <wayland-client-core.h>
+
 #include <QSocketNotifier>
 
+#include <memory>
 #include <string>
 
 struct wl_display;
@@ -13,13 +18,13 @@ public:
     WaylandConnection(const std::string &name, QObject *parent = nullptr);
     ~WaylandConnection();
 
-    wl_display *display() const { return display_; }
+    wl_display *display() const { return display_.get(); }
 
     void roundtrip();
     void flush();
 
 private:
-    wl_display *display_;
+    std::unique_ptr<wl_display, Deleter<&wl_display_disconnect>> display_;
     int fd_;
     QSocketNotifier *notifier_;
 

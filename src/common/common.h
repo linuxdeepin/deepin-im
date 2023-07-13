@@ -23,5 +23,17 @@ Q_DECLARE_METATYPE(org::deepin::dim::BatchEvent)
 Q_DECLARE_METATYPE(org::deepin::dim::DBusForwardKey)
 Q_DECLARE_METATYPE(org::deepin::dim::PreeditKey)
 
+template<auto Func>
+class Deleter
+{
+public:
+    template<typename T>
+    void operator()(T *ptr) const
+    {
+        if (ptr) {
+            Func(ptr);
+        }
+    }
+};
 
 #endif // _ORG_DEEPIN_DIM_COMMON_H_

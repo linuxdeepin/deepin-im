@@ -11,7 +11,7 @@ WaylandConnection::WaylandConnection(const std::string &name, QObject *parent)
     , display_(wl_display_connect(name.empty() ? nullptr : name.c_str()))
 {
     if (!display_) {
-        qWarning() << "Failed to connect to Wayland server" << wl_display_get_error(display_);
+        qWarning() << "Failed to connect to Wayland server" << wl_display_get_error(display_.get());
     }
 
     init();
@@ -20,14 +20,14 @@ WaylandConnection::WaylandConnection(const std::string &name, QObject *parent)
 WaylandConnection::~WaylandConnection()
 {
     if (display_) {
-        wl_display_disconnect(display_);
+        wl_display_disconnect(display_.get());
         display_ = nullptr;
     }
 }
 
 void WaylandConnection::init()
 {
-    fd_ = wl_display_get_fd(display_);
+    fd_ = wl_display_get_fd(display_.get());
     if (fd_ < 0) {
         qWarning() << "Failed to get Wayland display fd";
         return;
@@ -49,10 +49,10 @@ void WaylandConnection::dispatch()
 
 void WaylandConnection::roundtrip()
 {
-    wl_display_roundtrip(display_);
+    wl_display_roundtrip(display_.get());
 }
 
 void WaylandConnection::flush()
 {
-    wl_display_flush(display_);
+    wl_display_flush(display_.get());
 }

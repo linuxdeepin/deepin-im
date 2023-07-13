@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef QTFRONTEND_UTILS_H
+#define QTFRONTEND_UTILS_H
 
 template<auto F>
 struct CallbackWrapper;
@@ -14,4 +14,4 @@ struct CallbackWrapper<F>
     }
 };
 
-#endif // !UTILS_H
+#endif // !QTFRONTEND_UTILS_H

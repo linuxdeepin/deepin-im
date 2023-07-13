@@ -2,25 +2,13 @@
 #define WAYLANDINPUTCONTEXTV1
 
 #include "WlType.h"
+#include "common/common.h"
 #include "wayland-input-method-unstable-v2-client-protocol.h"
 
 #include <dimcore/InputContext.h>
 #include <xkbcommon/xkbcommon.h>
 
 #include <memory>
-
-template<auto Func>
-class Deleter
-{
-public:
-    template<typename T>
-    void operator()(T *ptr) const
-    {
-        if (ptr) {
-            Func(ptr);
-        }
-    }
-};
 
 namespace org {
 namespace deepin {

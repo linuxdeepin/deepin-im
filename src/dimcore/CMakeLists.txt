@@ -39,11 +39,6 @@ target_link_libraries(dimcore PRIVATE
   ${CMAKE_DL_LIBS}
 )
 
-target_include_directories(dimcore PUBLIC
-    ../../
-    utils/common.h
-    )
-
 install(TARGETS dimcore
   BUNDLE DESTINATION .
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
