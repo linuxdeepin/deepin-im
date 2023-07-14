@@ -2,7 +2,6 @@
 
 #include "BatchEvent.h"
 #include "DBusProvider.h"
-#include "common/common.h"
 #include "dimcore/Events.h"
 #include "dimcore/InputContext.h"
 
@@ -113,59 +112,55 @@ bool Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &
     Q_UNUSED(entry);
     auto id = keyEvent.ic()->id();
 
-    if (isICDBusInterfaceValid(id)) {
-        // auto response = icMap_[id]->call("ProcessKeyEventBatch",
-        //                                  keyEvent.keyValue(),
-        //                                  keyEvent.keycode(),
-        //                                  keyEvent.state(),
-        //                                  keyEvent.isRelease(),
-        //                                  keyEvent.time());
-        auto response = icMap_[id]->ProcessKeyEventBatch(keyEvent.keyValue(),
-                                                         keyEvent.keycode(),
-                                                         keyEvent.state(),
-                                                         keyEvent.isRelease(),
-                                                         keyEvent.time());
-        response.waitForFinished();
-        bool res = response.argumentAt<1>();
-        if (!res) {
-            return false;
+    if (!isICDBusInterfaceValid(id)) {
+        return false;
+    }
+
+    auto response = icMap_[id]->ProcessKeyEventBatch(keyEvent.keyValue(),
+                                                     keyEvent.keycode(),
+                                                     keyEvent.state(),
+                                                     keyEvent.isRelease(),
+                                                     keyEvent.time());
+    response.waitForFinished();
+    bool res = response.argumentAt<1>();
+    if (!res) {
+        return false;
+    }
+
+    QList<BatchEvent> events = response.argumentAt<0>();
+    auto ic = keyEvent.ic();
+    // 从返回参数获取返回值
+
+    for (const auto &event : events) {
+        auto type = event.type;
+        auto v = event.data;
+        switch (type) {
+        case BATCHED_COMMIT_STRING: {
+            if (v.canConvert<QString>()) {
+                ic->updateCommitString(v.toString());
+            }
+            break;
         }
-
-        QList<BatchEvent> events = response.argumentAt<0>();
-        auto ic = keyEvent.ic();
-        // 从返回参数获取返回值
-
-        for (const auto &event : events) {
-            auto type = event.type;
-            auto v = event.data;
-            switch (type) {
-            case BATCHED_COMMIT_STRING: {
-                if (v.canConvert<QString>()) {
-                    ic->updateCommitString(v.toString());
+        case BATCHED_PREEDIT: {
+            if (v.canConvert<PreeditKey>()) {
+                auto strs = v.value<PreeditKey>().info;
+                auto cursor = v.value<PreeditKey>().cursor;
+                for (auto &str : strs) {
+                    ic->updatePreedit(str.text, cursor, cursor);
                 }
-                break;
             }
-            case BATCHED_PREEDIT: {
-                if (v.canConvert<PreeditKey>()) {
-                    auto strs = v.value<PreeditKey>().info;
-                    auto cursor = v.value<PreeditKey>().cursor;
-                    for (auto &str : strs) {
-                        ic->updatePreedit(str.text, cursor, cursor);
-                    }
-                }
-                break;
+            break;
+        }
+        case BATCHED_FORWARD_KEY: {
+            if (v.canConvert<DBusForwardKey>()) {
+                ic->forwardKey(v.value<DBusForwardKey>().keysym,
+                               v.value<DBusForwardKey>().isRelease);
             }
-            case BATCHED_FORWARD_KEY: {
-                if (v.canConvert<DBusForwardKey>()) {
-                    ic->forwardKey(v.value<DBusForwardKey>().keysym,
-                                   v.value<DBusForwardKey>().isRelease);
-                }
-                break;
-            }
-            default:
-                qDebug() << "invalid event type " << type;
-                return false;
-            }
+            break;
+        }
+        default:
+            qDebug() << "invalid event type " << type;
+            return false;
         }
     }
 

@@ -4,6 +4,8 @@
 #include <QDBusArgument>
 #include <QVariant>
 
+enum { BATCHED_COMMIT_STRING = 0, BATCHED_PREEDIT, BATCHED_FORWARD_KEY };
+
 struct BatchEvent
 {
     uint32_t type;
