@@ -28,6 +28,8 @@ public:
     void focusOut(uint32_t id) override;
     void destroyed(uint32_t id) override;
 
+    void addCapability(uint32_t id);
+
 private:
     inline bool isICDBusInterfaceValid(uint32_t id)
     {
