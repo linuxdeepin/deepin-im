@@ -1,8 +1,8 @@
 #include "WLFrontend.h"
 
-#include "WaylandConnection.h"
-#include "WlType.h"
 #include "utils.h"
+#include "wl/Connection.h"
+#include "wl/Type.h"
 
 #include <dimcore/Dim.h>
 #include <wayland-client-core.h>
@@ -29,7 +29,7 @@ WLFrontend::WLFrontend(Dim *dim)
         // todo: fake wayland server
     }
 
-    wl_ = new WaylandConnection(waylandDisplay, this);
+    wl_ = new wl::Connection(waylandDisplay, this);
 
     auto *registry = wl_display_get_registry(wl_->display());
     wl_registry_add_listener(registry, &registry_listener_, this);
@@ -48,12 +48,12 @@ void WLFrontend::global([[maybe_unused]] struct wl_registry *registry,
 {
     qWarning() << "global" << name << interface << version;
 
-#define BIND(interface_type)                                                         \
-  if (strcmp(interface, #interface_type) == 0) {                                     \
-    auto p = std::make_shared<WlType<interface_type>>(static_cast<interface_type *>( \
-        wl_registry_bind(registry, name, &interface_type##_interface, version)));    \
-    globals_[WlType<interface_type>::key()].emplace(std::make_pair(name, p));        \
-    return;                                                                          \
+#define BIND(interface_type)                                                           \
+  if (strcmp(interface, #interface_type) == 0) {                                       \
+    auto p = std::make_shared<wl::Type<interface_type>>(static_cast<interface_type *>( \
+        wl_registry_bind(registry, name, &interface_type##_interface, version)));      \
+    globals_[wl::Type<interface_type>::key()].emplace(std::make_pair(name, p));        \
+    return;                                                                            \
   }
 
     BIND(wl_seat);
@@ -85,12 +85,12 @@ void WLFrontend::reloadSeats()
 
     auto seats = getGlobals<wl_seat>();
     for (auto &seat : seats) {
-        ;
-        auto vk = std::make_shared<WlType<zwp_virtual_keyboard_v1>>(
+        auto vk = std::make_shared<wl::Type<zwp_virtual_keyboard_v1>>(
             static_cast<zwp_virtual_keyboard_v1 *>(
                 zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkManager, seat->get())));
-        auto im = std::make_shared<WlType<zwp_input_method_v2>>(static_cast<zwp_input_method_v2 *>(
-            zwp_input_method_manager_v2_get_input_method(imManager, seat->get())));
+        auto im =
+            std::make_shared<wl::Type<zwp_input_method_v2>>(static_cast<zwp_input_method_v2 *>(
+                zwp_input_method_manager_v2_get_input_method(imManager, seat->get())));
 
         ims_.emplace_back(std::make_shared<WaylandInputContextV2>(dim(), im, vk));
     }

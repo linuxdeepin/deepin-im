@@ -1,7 +1,7 @@
 #include "InputContextProxy.h"
 
-#include "WaylandConnection.h"
 #include "utils.h"
+#include "wl/Connection.h"
 
 #include <wayland-text-input-unstable-v3-client-protocol.h>
 
@@ -36,7 +36,7 @@ InputContextProxy::InputContextProxy(QObject *parent)
     }
     waylandServer = waylandServerCStr;
 
-    wl_ = new WaylandConnection(waylandServer, this);
+    wl_ = new wl::Connection(waylandServer, this);
 
     auto *registry = wl_display_get_registry(wl_->display());
     wl_registry_add_listener(registry, &registry_listener, this);

@@ -1,5 +1,5 @@
-#ifndef WAYLANDCONNECTION_H
-#define WAYLANDCONNECTION_H
+#ifndef WL_CONNECTION_H
+#define WL_CONNECTION_H
 
 #include "common/common.h"
 
@@ -12,11 +12,13 @@
 
 struct wl_display;
 
-class WaylandConnection : public QObject
+namespace wl {
+
+class Connection : public QObject
 {
 public:
-    WaylandConnection(const std::string &name, QObject *parent = nullptr);
-    ~WaylandConnection();
+    Connection(const std::string &name, QObject *parent = nullptr);
+    ~Connection();
 
     wl_display *display() const { return display_.get(); }
 
@@ -32,4 +34,6 @@ private:
     void dispatch();
 };
 
-#endif // !WAYLANDCONNECTION_H
+} // namespace wl
+
+#endif // !WL_CONNECTION_H

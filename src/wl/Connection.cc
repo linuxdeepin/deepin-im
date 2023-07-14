@@ -1,4 +1,4 @@
-#include "WaylandConnection.h"
+#include "Connection.h"
 
 #include <wayland-client-core.h>
 
@@ -6,7 +6,9 @@
 
 #include <poll.h>
 
-WaylandConnection::WaylandConnection(const std::string &name, QObject *parent)
+using namespace wl;
+
+Connection::Connection(const std::string &name, QObject *parent)
     : QObject(parent)
     , display_(wl_display_connect(name.empty() ? nullptr : name.c_str()))
 {
@@ -17,7 +19,7 @@ WaylandConnection::WaylandConnection(const std::string &name, QObject *parent)
     init();
 }
 
-WaylandConnection::~WaylandConnection()
+Connection::~Connection()
 {
     if (display_) {
         wl_display_disconnect(display_.get());
@@ -25,7 +27,7 @@ WaylandConnection::~WaylandConnection()
     }
 }
 
-void WaylandConnection::init()
+void Connection::init()
 {
     fd_ = wl_display_get_fd(display_.get());
     if (fd_ < 0) {
@@ -34,10 +36,10 @@ void WaylandConnection::init()
     }
 
     notifier_ = new QSocketNotifier(fd_, QSocketNotifier::Read, this);
-    connect(notifier_, &QSocketNotifier::activated, this, &WaylandConnection::dispatch);
+    connect(notifier_, &QSocketNotifier::activated, this, &Connection::dispatch);
 }
 
-void WaylandConnection::dispatch()
+void Connection::dispatch()
 {
     qWarning() << "dispatch";
     if (display_ == nullptr) {
@@ -47,12 +49,12 @@ void WaylandConnection::dispatch()
     roundtrip();
 }
 
-void WaylandConnection::roundtrip()
+void Connection::roundtrip()
 {
     wl_display_roundtrip(display_.get());
 }
 
-void WaylandConnection::flush()
+void Connection::flush()
 {
     wl_display_flush(display_.get());
 }

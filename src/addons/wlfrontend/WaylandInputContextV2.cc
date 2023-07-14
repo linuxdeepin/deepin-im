@@ -37,8 +37,8 @@ static int32_t getTimestamp()
 
 WaylandInputContextV2::WaylandInputContextV2(
     Dim *dim,
-    const std::shared_ptr<WlType<zwp_input_method_v2>> &im,
-    const std::shared_ptr<WlType<zwp_virtual_keyboard_v1>> &vk)
+    const std::shared_ptr<wl::Type<zwp_input_method_v2>> &im,
+    const std::shared_ptr<wl::Type<zwp_virtual_keyboard_v1>> &vk)
     : InputContext(dim)
     , im_(im)
     , vk_(vk)
@@ -47,7 +47,7 @@ WaylandInputContextV2::WaylandInputContextV2(
 {
     zwp_input_method_v2_add_listener(im_->get(), &im_listener_, this);
 
-    grab_ = std::make_shared<WlType<zwp_input_method_keyboard_grab_v2>>(
+    grab_ = std::make_shared<wl::Type<zwp_input_method_keyboard_grab_v2>>(
         zwp_input_method_v2_grab_keyboard(im_->get()));
     zwp_input_method_keyboard_grab_v2_add_listener(grab_->get(), &grab_listener_, this);
 }

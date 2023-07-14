@@ -1,6 +1,7 @@
 #ifndef WLTYPE_H
 #define WLTYPE_H
 
+#include "common/common.h"
 #include "wayland-input-method-unstable-v2-client-protocol.h"
 #include "wayland-virtual-keyboard-unstable-v1-client-protocol.h"
 
@@ -10,11 +11,10 @@
 
 #include <stdint.h>
 
-template<typename T>
-inline constexpr bool always_false_v = false;
+namespace wl {
 
 template<typename T>
-class WlType
+class Type
 {
 public:
     static constexpr uint32_t key()
@@ -32,12 +32,12 @@ public:
         }
     };
 
-    WlType(T *val)
+    Type(T *val)
         : val_(val)
     {
     }
 
-    ~WlType()
+    ~Type()
     {
         if constexpr (std::is_same_v<T, wl_seat>) {
             uint32_t version = wl_seat_get_version(val_);
@@ -69,5 +69,7 @@ public:
 private:
     T *val_;
 };
+
+} // namespace wl
 
 #endif // !WLTYPE_H

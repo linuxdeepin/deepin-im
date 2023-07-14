@@ -3,7 +3,10 @@
 
 #include <QObject>
 
-class WaylandConnection;
+namespace wl {
+class Connection;
+}
+
 struct zwp_text_input_v3;
 
 class InputContextProxy : public QObject
@@ -42,7 +45,7 @@ signals:
     void forwardKey(uint32_t keyValue, uint32_t state, bool type);
 
 private:
-    WaylandConnection *wl_;
+    wl::Connection *wl_;
     struct zwp_text_input_v3 *text_input_v3_;
     bool available_;
 };

@@ -3,8 +3,6 @@ set(QTFRONTEND_SOURCES
   DIMPlatformInputContextPlugin.cc
   DIMPlatformInputContext.h
   DIMPlatformInputContext.cc
-  WaylandConnection.h
-  WaylandConnection.cc
   InputContextProxy.h
   InputContextProxy.cc
 )
@@ -20,6 +18,7 @@ target_link_libraries(dimplatforminputcontextplugin PRIVATE
   PkgConfig::wayland-client
   Qt5::GuiPrivate
   Qt5::DBus
+  wl
   wayland_protocols
 )
 

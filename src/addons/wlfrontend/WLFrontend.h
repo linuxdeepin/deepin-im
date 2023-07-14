@@ -2,7 +2,7 @@
 #define DBUSFRONTEND_H
 
 #include "WaylandInputContextV2.h"
-#include "WlType.h"
+#include "wl/Type.h"
 
 #include <dimcore/FrontendAddon.h>
 
@@ -10,7 +10,10 @@
 
 #include <memory>
 
-class WaylandConnection;
+namespace wl {
+class Connection;
+}
+
 struct wl_registry;
 struct zwp_input_method_v2;
 struct zwp_input_method_context_v2;
@@ -30,26 +33,26 @@ public:
     ~WLFrontend();
 
     template<typename T>
-    std::vector<std::shared_ptr<WlType<T>>> getGlobals()
+    std::vector<std::shared_ptr<wl::Type<T>>> getGlobals()
     {
-        uint32_t key = WlType<T>::key();
+        uint32_t key = wl::Type<T>::key();
         auto iter = globals_.find(key);
         if (iter == globals_.end()) {
             return {};
         }
 
         auto m = iter->second;
-        std::vector<std::shared_ptr<WlType<T>>> l;
+        std::vector<std::shared_ptr<wl::Type<T>>> l;
         l.reserve(m.size());
         for (auto &it : m) {
-            l.push_back(std::static_pointer_cast<WlType<T>>(it.second));
+            l.push_back(std::static_pointer_cast<wl::Type<T>>(it.second));
         }
 
         return l;
     }
 
     template<typename T>
-    std::shared_ptr<WlType<T>> getGlobal()
+    std::shared_ptr<wl::Type<T>> getGlobal()
     {
         auto v = getGlobals<T>();
         if (v.empty()) {
@@ -61,7 +64,7 @@ public:
 
 private:
     static const wl_registry_listener registry_listener_;
-    WaylandConnection *wl_;
+    wl::Connection *wl_;
 
     std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::shared_ptr<void>>> globals_;
     std::vector<std::shared_ptr<WaylandInputContextV2>> ims_;

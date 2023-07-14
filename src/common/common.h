@@ -1,6 +1,9 @@
 #ifndef COMMON_COMMON_H_
 #define COMMON_COMMON_H_
 
+template<typename T>
+inline constexpr bool always_false_v = false;
+
 template<auto Func>
 class Deleter
 {

@@ -1,6 +1,4 @@
 set(WLFRONTEND_SOURCES
-  WaylandConnection.h
-  WaylandConnection.cc
   WLFrontend.h
   WLFrontend.cc
   WaylandInputContextV2.h
@@ -17,7 +15,7 @@ target_link_libraries(wlfrontend PRIVATE
   Qt5::DBus
   PkgConfig::wayland-client
   PkgConfig::xkbcommon
-  wayland_protocols
+  wl
 )
 
 install(TARGETS wlfrontend
