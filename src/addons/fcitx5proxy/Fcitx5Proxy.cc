@@ -1,15 +1,23 @@
 #include "Fcitx5Proxy.h"
 
 #include "DBusProvider.h"
+#include "common/common.h"
 #include "dimcore/Events.h"
 #include "dimcore/InputContext.h"
-#include "common/common.h"
 
 #include <QGuiApplication>
 
 using namespace org::deepin::dim;
 
 DIM_ADDON_FACTORY(Fcitx5Proxy);
+
+const QDBusArgument &operator>>(const QDBusArgument &argument, BatchEvent &event)
+{
+    argument.beginStructure();
+    argument >> event.type >> event.data;
+    argument.endStructure();
+    return argument;
+}
 
 Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
     : ProxyAddon(dim, "fcitx5proxy")
@@ -62,28 +70,26 @@ void Fcitx5Proxy::createFcitxInputContext(InputContext *ic)
 
     auto result = dbusProvider_->imProxy()->CreateInputContext(list);
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(result, this);
-    QObject::connect(watcher,
-                     &QDBusPendingCallWatcher::finished,
-                     this,
-                     [this, ic](QDBusPendingCallWatcher *watcher) {
-                         watcher->deleteLater();
-                         QDBusPendingReply<QDBusObjectPath, QByteArray> reply = *watcher;
-                         if (reply.isError()) {
-                             qDebug()
-                                 << "create fcitx input context error:" << reply.error().message();
-                             return;
-                         }
+    QObject::connect(
+        watcher,
+        &QDBusPendingCallWatcher::finished,
+        this,
+        [this, ic](QDBusPendingCallWatcher *watcher) {
+            watcher->deleteLater();
+            QDBusPendingReply<QDBusObjectPath, QByteArray> reply = *watcher;
+            if (reply.isError()) {
+                qDebug() << "create fcitx input context error:" << reply.error().message();
+                return;
+            }
 
-                         QDBusInterface *icIface =
-                             new QDBusInterface(QStringLiteral("org.fcitx.Fcitx5"),
-                                                reply.value().path(),
-                                                QStringLiteral("org.fcitx.Fcitx.InputContext1"),
-                                                QDBusConnection::sessionBus(),
-                                                this);
-                         if (icIface && icIface->isValid()) {
-                             icMap_[ic->id()] = icIface;
-                         }
-                     });
+            auto *icIface = new org::fcitx::Fcitx::InputContext1(QStringLiteral("org.fcitx.Fcitx5"),
+                                                                 reply.value().path(),
+                                                                 QDBusConnection::sessionBus(),
+                                                                 this);
+            if (icIface && icIface->isValid()) {
+                icMap_[ic->id()] = icIface;
+            }
+        });
 }
 
 void Fcitx5Proxy::focusIn(uint32_t id)
@@ -113,52 +119,53 @@ void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &
     auto id = keyEvent.ic()->id();
 
     if (isICDBusInterfaceValid(id)) {
-        auto response = icMap_[id]->call("ProcessKeyEventBatch",
-                                         keyEvent.keyValue(),
-                                         keyEvent.keycode(),
-                                         keyEvent.state(),
-                                         keyEvent.isRelease(),
-                                         keyEvent.time());
+        // auto response = icMap_[id]->call("ProcessKeyEventBatch",
+        //                                  keyEvent.keyValue(),
+        //                                  keyEvent.keycode(),
+        //                                  keyEvent.state(),
+        //                                  keyEvent.isRelease(),
+        //                                  keyEvent.time());
+        auto response = icMap_[id]->ProcessKeyEventBatch(keyEvent.keyValue(),
+                                                         keyEvent.keycode(),
+                                                         keyEvent.state(),
+                                                         keyEvent.isRelease(),
+                                                         keyEvent.time());
+        response.waitForFinished();
+        QList<BatchEvent> events = response.value();
 
-        if (response.type() == QDBusMessage::ReplyMessage) {
-            auto ic = keyEvent.ic();
-            // 从返回参数获取返回值
-            auto value = response.arguments().takeFirst();
-            if (value.canConvert<QList<BatchEvent>>()) {
-                QList<BatchEvent> events = value.value<QList<BatchEvent>>();
+        auto ic = keyEvent.ic();
+        // 从返回参数获取返回值
 
-                for (const auto &event : events) {
-                    auto type = std::get<0>(event);
-                    auto v = std::get<1>(event);
-                    switch (type) {
-                    case BATCHED_COMMIT_STRING: {
-                        if (v.canConvert<QString>()) {
-                            ic->updateCommitString(v.toString());
-                        }
-                        break;
-                    }
-                    case BATCHED_PREEDIT: {
-                        if (v.canConvert<PreeditKey>()) {
-                            auto strs = std::get<0>(v.value<PreeditKey>());
-                            auto cursor = std::get<1>(v.value<PreeditKey>());
-                            for (size_t i = 0; i < strs.size(); i++) {
-                                ic->updatePreedit(std::get<0>(strs[i]), cursor, cursor);
-                            }
-                        }
-                        break;
-                    }
-                    case BATCHED_FORWARD_KEY: {
-                        if (v.canConvert<DBusForwardKey>()) {
-                            ic->forwardKey(std::get<0>(v.value<DBusForwardKey>()),
-                                           std::get<2>(v.value<DBusForwardKey>()));
-                        }
-                        break;
-                    }
-                    default:
-                        qDebug() << "invalid event type " << type;
-                        return;
+        for (const auto &event : events) {
+            auto type = event.type;
+            auto v = event.data;
+            switch (type) {
+            case BATCHED_COMMIT_STRING: {
+                if (v.canConvert<QString>()) {
+                    ic->updateCommitString(v.toString());
+                }
+                break;
+            }
+            case BATCHED_PREEDIT: {
+                if (v.canConvert<PreeditKey>()) {
+                    auto strs = v.value<PreeditKey>().info;
+                    auto cursor = v.value<PreeditKey>().cursor;
+                    for (auto &str : strs) {
+                        ic->updatePreedit(str.text, cursor, cursor);
                     }
                 }
+                break;
+            }
+            case BATCHED_FORWARD_KEY: {
+                if (v.canConvert<DBusForwardKey>()) {
+                    ic->forwardKey(v.value<DBusForwardKey>().keysym,
+                                   v.value<DBusForwardKey>().isRelease);
+                }
+                break;
+            }
+            default:
+                qDebug() << "invalid event type " << type;
+                return;
             }
         }
     }

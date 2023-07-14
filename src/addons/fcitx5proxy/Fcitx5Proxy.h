@@ -1,6 +1,8 @@
 #ifndef FCITX5PROXY_H
 #define FCITX5PROXY_H
 
+#include "Fcitx5InputContextIface.h"
+
 #include <dimcore/ProxyAddon.h>
 
 #include <QDBusInterface>
@@ -35,7 +37,7 @@ private:
 private:
     DBusProvider *dbusProvider_;
     bool available_;
-    QMap<uint32_t, QDBusInterface *> icMap_;
+    QMap<uint32_t, org::fcitx::Fcitx::InputContext1 *> icMap_;
     QList<InputMethodEntry> inputMethods_;
 
     void updateInputMethods();
