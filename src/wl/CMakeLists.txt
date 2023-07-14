@@ -1,6 +1,8 @@
 set(WL_SOURCES
   Connection.h
   Connection.cc
+  Type.h
+  Type.cc
 )
 
 add_library(wl STATIC

@@ -7,6 +7,7 @@
 
 #include <wayland-client-protocol.h>
 
+#include <string>
 #include <type_traits>
 
 #include <stdint.h>
@@ -17,20 +18,8 @@ template<typename T>
 class Type
 {
 public:
-    static constexpr uint32_t key()
-    {
-        if constexpr (std::is_same_v<T, wl_seat>) {
-            return 1;
-        } else if constexpr (std::is_same_v<T, zwp_input_method_manager_v2>) {
-            return 2;
-        } else if constexpr (std::is_same_v<T, zwp_input_method_v2>) {
-            return 3;
-        } else if constexpr (std::is_same_v<T, zwp_virtual_keyboard_manager_v1>) {
-            return 4;
-        } else {
-            static_assert(always_false_v<T>, "unknown type");
-        }
-    };
+    static inline const std::string interface;
+    static inline const struct wl_interface *wl_interface;
 
     Type(T *val)
         : val_(val)
@@ -69,6 +58,19 @@ public:
 private:
     T *val_;
 };
+
+#define INIT_WL_TYPE(type)                                \
+  template<>                                              \
+  inline const std::string Type<type>::interface = #type; \
+                                                          \
+  template<>                                              \
+  inline const struct wl_interface *Type<type>::wl_interface = &type##_interface;
+
+INIT_WL_TYPE(wl_seat);
+INIT_WL_TYPE(zwp_input_method_manager_v2);
+INIT_WL_TYPE(zwp_input_method_v2);
+INIT_WL_TYPE(zwp_virtual_keyboard_manager_v1);
+INIT_WL_TYPE(zwp_input_method_keyboard_grab_v2);
 
 } // namespace wl
 

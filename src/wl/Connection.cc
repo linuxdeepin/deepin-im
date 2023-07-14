@@ -1,12 +1,17 @@
 #include "Connection.h"
 
-#include <wayland-client-core.h>
+#include "utils.h"
 
 #include <QDebug>
 
 #include <poll.h>
 
 using namespace wl;
+
+const wl_registry_listener Connection::registry_listener_ = {
+    CallbackWrapper<&Connection::onGlobal>::func,
+    CallbackWrapper<&Connection::onGlobalRemove>::func,
+};
 
 Connection::Connection(const std::string &name, QObject *parent)
     : QObject(parent)
@@ -17,6 +22,10 @@ Connection::Connection(const std::string &name, QObject *parent)
     }
 
     init();
+
+    auto *registry = wl_display_get_registry(display_.get());
+    wl_registry_add_listener(registry, &registry_listener_, this);
+    roundtrip();
 }
 
 Connection::~Connection()
@@ -57,4 +66,21 @@ void Connection::roundtrip()
 void Connection::flush()
 {
     wl_display_flush(display_.get());
+}
+
+void Connection::onGlobal([[maybe_unused]] struct wl_registry *registry,
+                          uint32_t name,
+                          const char *interface,
+                          uint32_t version)
+{
+    auto &gi = globals_[interface];
+    gi.version = version;
+    gi.names.emplace(name);
+}
+
+void Connection::onGlobalRemove([[maybe_unused]] struct wl_registry *wl_registry, uint32_t name)
+{
+    for (auto &gi : globals_) {
+        gi.second.names.erase(name);
+    }
 }

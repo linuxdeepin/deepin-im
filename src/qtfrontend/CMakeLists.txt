@@ -19,7 +19,6 @@ target_link_libraries(dimplatforminputcontextplugin PRIVATE
   Qt5::GuiPrivate
   Qt5::DBus
   wl
-  wayland_protocols
 )
 
 include(ECMQueryQmake)
