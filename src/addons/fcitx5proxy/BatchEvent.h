@@ -1,6 +1,7 @@
 #ifndef BATCHEVENT_H
 #define BATCHEVENT_H
 
+#include <QDBusArgument>
 #include <QVariant>
 
 struct BatchEvent
@@ -32,5 +33,10 @@ Q_DECLARE_METATYPE(BatchEvent)
 Q_DECLARE_METATYPE(DBusForwardKey)
 Q_DECLARE_METATYPE(PreeditKeyData)
 Q_DECLARE_METATYPE(PreeditKey)
+
+void registerBatchEventQtDBusTypes();
+
+QDBusArgument &operator<<(QDBusArgument &argument, const BatchEvent &event);
+const QDBusArgument &operator>>(const QDBusArgument &argument, BatchEvent &event);
 
 #endif // !BATCHEVENT_H

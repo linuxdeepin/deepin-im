@@ -4,6 +4,7 @@ set(FCITX5PROXY_SOURCES
   DBusProvider.h
   DBusProvider.cc
   BatchEvent.h
+  BatchEvent.cc
 )
 
 set_source_files_properties(${CMAKE_SOURCE_DIR}/misc/fcitx5-inputcontext.xml

@@ -1,5 +1,6 @@
 #include "Fcitx5Proxy.h"
 
+#include "BatchEvent.h"
 #include "DBusProvider.h"
 #include "common/common.h"
 #include "dimcore/Events.h"
@@ -11,19 +12,13 @@ using namespace org::deepin::dim;
 
 DIM_ADDON_FACTORY(Fcitx5Proxy);
 
-const QDBusArgument &operator>>(const QDBusArgument &argument, BatchEvent &event)
-{
-    argument.beginStructure();
-    argument >> event.type >> event.data;
-    argument.endStructure();
-    return argument;
-}
-
 Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
     : ProxyAddon(dim, "fcitx5proxy")
     , dbusProvider_(new DBusProvider(this))
     , available_(dbusProvider_->available())
 {
+    registerBatchEventQtDBusTypes();
+
     connect(dbusProvider_, &DBusProvider::availabilityChanged, this, [this](bool available) {
         if (available_ != available) {
             available_ = available;
