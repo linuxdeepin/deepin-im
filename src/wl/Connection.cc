@@ -50,7 +50,6 @@ void Connection::init()
 
 void Connection::dispatch()
 {
-    qWarning() << "dispatch";
     if (display_ == nullptr) {
         return;
     }

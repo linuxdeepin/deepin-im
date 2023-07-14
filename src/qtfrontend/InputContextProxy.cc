@@ -10,8 +10,7 @@
 
 static const wl_registry_listener registry_listener = {
     CallbackWrapper<&InputContextProxy::registryGlobal>::func,
-    []([[maybe_unused]] void *data, [[maybe_unused]] struct wl_registry *registry, uint32_t name) {
-        qWarning() << "global_remove" << name;
+    []([[maybe_unused]] void *data, [[maybe_unused]] struct wl_registry *registry, [[maybe_unused]] uint32_t name) {
     },
 };
 
@@ -69,7 +68,7 @@ void InputContextProxy::registryGlobal(struct wl_registry *registry,
                                        const char *interface,
                                        uint32_t version)
 {
-    qWarning() << "global" << name << interface << version;
+    qDebug() << "global" << name << interface << version;
 
 #define BIND(member, interface_type)                                             \
   if (strcmp(interface, #interface_type) == 0) {                                 \

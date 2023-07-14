@@ -55,14 +55,14 @@ WaylandInputContextV2::WaylandInputContextV2(
 void WaylandInputContextV2::activate(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
-    qWarning() << "im activated:" << id();
+    qDebug() << "im activated:" << id();
     focusIn();
 }
 
 void WaylandInputContextV2::deactivate(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
-    qWarning() << "im deactivated:" << id();
+    qDebug() << "im deactivated:" << id();
     state_.reset(new State);
     focusOut();
 }
@@ -73,14 +73,14 @@ void WaylandInputContextV2::surroundingText(
     [[maybe_unused]] uint32_t cursor,
     [[maybe_unused]] uint32_t anchor)
 {
-    qWarning() << "im surroundingText:" << id();
+    qDebug() << "im surroundingText:" << id();
 }
 
 void WaylandInputContextV2::textChangeCause(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
     [[maybe_unused]] uint32_t cause)
 {
-    qWarning() << "im textChangeCause:" << id();
+    qDebug() << "im textChangeCause:" << id();
 }
 
 void WaylandInputContextV2::contentType(
@@ -88,18 +88,16 @@ void WaylandInputContextV2::contentType(
     [[maybe_unused]] uint32_t hint,
     [[maybe_unused]] uint32_t purpose)
 {
-    qWarning() << "im contentType:" << id();
+    qDebug() << "im contentType:" << id();
 }
 
 void WaylandInputContextV2::done([[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
-    qWarning() << "im done:" << id();
 }
 
 void WaylandInputContextV2::unavailable(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
-    qWarning() << "im unvailable:" << id();
 }
 
 void WaylandInputContextV2::keymap(
@@ -108,7 +106,7 @@ void WaylandInputContextV2::keymap(
     int32_t fd,
     uint32_t size)
 {
-    qWarning() << "grab keymap:" << format << fd << size;
+    qDebug() << "grab keymap:" << format << fd << size;
 
     if (format == WL_KEYBOARD_KEYMAP_FORMAT_NO_KEYMAP) {
         return;
@@ -170,7 +168,7 @@ void WaylandInputContextV2::key(
     uint32_t key,
     uint32_t state)
 {
-    qWarning() << "grab key:" << serial << time << key << state;
+    qDebug() << "grab key:" << serial << time << key << state;
 
     xkb_keysym_t sym = xkb_state_key_get_one_sym(xkb_state_.get(), key + 8);
     InputContextKeyEvent ke(this,
@@ -226,7 +224,7 @@ void WaylandInputContextV2::modifiers(
     uint32_t mods_locked,
     uint32_t group)
 {
-    qWarning() << "grab modifiers:" << serial << mods_depressed << mods_latched << mods_locked
+    qDebug() << "grab modifiers:" << serial << mods_depressed << mods_latched << mods_locked
                << group;
 
     if (xkb_state_) {
@@ -291,5 +289,5 @@ void WaylandInputContextV2::repeatInfo(
     int32_t rate,
     int32_t delay)
 {
-    qWarning() << "grab repeatInfo:" << rate << delay;
+    qDebug() << "grab repeatInfo:" << rate << delay;
 }
