@@ -19,7 +19,7 @@ public:
     virtual ~InputMethodAddon();
 
     virtual QList<InputMethodEntry> getInputMethods() = 0;
-    virtual void keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) = 0;
+    virtual bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) = 0;
 
 Q_SIGNALS:
     void addonInitFinished(InputMethodAddon *imAddon);

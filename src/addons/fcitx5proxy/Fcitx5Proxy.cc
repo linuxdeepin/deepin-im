@@ -108,7 +108,7 @@ void Fcitx5Proxy::destroyed(uint32_t id)
     }
 }
 
-void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
+bool Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
 {
     Q_UNUSED(entry);
     auto id = keyEvent.ic()->id();
@@ -126,8 +126,12 @@ void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &
                                                          keyEvent.isRelease(),
                                                          keyEvent.time());
         response.waitForFinished();
-        QList<BatchEvent> events = response.value();
+        bool res = response.argumentAt<1>();
+        if (!res) {
+            return false;
+        }
 
+        QList<BatchEvent> events = response.argumentAt<0>();
         auto ic = keyEvent.ic();
         // 从返回参数获取返回值
 
@@ -160,10 +164,12 @@ void Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &
             }
             default:
                 qDebug() << "invalid event type " << type;
-                return;
+                return false;
             }
         }
     }
+
+    return true;
 }
 
 void Fcitx5Proxy::updateInputMethods()

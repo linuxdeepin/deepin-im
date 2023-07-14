@@ -59,13 +59,13 @@ QList<InputMethodEntry> Keyboard::getInputMethods()
     return keyboards_;
 }
 
-void Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
+bool Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
 {
     auto *ic = keyEvent.ic();
 
     // by pass all key release
     if (keyEvent.isRelease()) {
-        return;
+        return false;
     }
 
     struct xkb_rule_names names;
@@ -87,6 +87,7 @@ void Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &key
     }
 
     ic->forwardKey(keySym, keyEvent.isRelease());
+    return true;
 }
 
 // static QList<QString> parseLanguageList(const QDomElement &languageListEle) {

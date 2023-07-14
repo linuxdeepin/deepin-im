@@ -19,7 +19,7 @@ public:
     ~Keyboard();
 
     QList<InputMethodEntry> getInputMethods() override;
-    void keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
+    bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
 
 private:
     std::unique_ptr<struct xkb_context, Deleter<xkb_context_unref>> ctx_;

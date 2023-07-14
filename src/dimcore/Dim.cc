@@ -215,6 +215,5 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
     }
     auto *addon = j.value();
 
-    addon->keyEvent(im, event);
-    return true;
+    return addon->keyEvent(im, event);
 }
