@@ -4,6 +4,8 @@
 #include "common/common.h"
 #include "wayland-input-method-unstable-v2-client-protocol.h"
 #include "wl/Type.h"
+#include "wl/ZwpInputMethodV2.h"
+#include "wl/ZwpVirtualKeyboardV1.h"
 
 #include <dimcore/InputContext.h>
 #include <xkbcommon/xkbcommon.h>
@@ -43,15 +45,14 @@ class WaylandInputContextV2 : public InputContext
 {
 public:
     WaylandInputContextV2(Dim *dim,
-                          const std::shared_ptr<wl::Type<zwp_input_method_v2>> &im,
-                          const std::shared_ptr<wl::Type<zwp_virtual_keyboard_v1>> &vk);
+                          const std::shared_ptr<wl::ZwpInputMethodV2> &im,
+                          const std::shared_ptr<wl::ZwpVirtualKeyboardV1> &vk);
 
 private:
     static const zwp_input_method_v2_listener im_listener_;
     static const zwp_input_method_keyboard_grab_v2_listener grab_listener_;
-    std::shared_ptr<wl::Type<wl_seat>> seat_;
-    std::shared_ptr<wl::Type<zwp_input_method_v2>> im_;
-    std::shared_ptr<wl::Type<zwp_virtual_keyboard_v1>> vk_;
+    const std::shared_ptr<wl::ZwpInputMethodV2> im_;
+    const std::shared_ptr<wl::ZwpVirtualKeyboardV1> vk_;
     std::shared_ptr<wl::Type<zwp_input_method_keyboard_grab_v2>> grab_;
 
     std::unique_ptr<State> state_;

@@ -2,6 +2,7 @@
 
 #include "utils.h"
 #include "wayland-input-method-unstable-v2-client-protocol.h"
+#include "wl/ZwpInputMethodKeyboardGrabV2.h"
 
 #include <linux/input.h>
 
@@ -35,10 +36,9 @@ static int32_t getTimestamp()
     return time.tv_sec * 1000 + time.tv_nsec / (1000 * 1000);
 }
 
-WaylandInputContextV2::WaylandInputContextV2(
-    Dim *dim,
-    const std::shared_ptr<wl::Type<zwp_input_method_v2>> &im,
-    const std::shared_ptr<wl::Type<zwp_virtual_keyboard_v1>> &vk)
+WaylandInputContextV2::WaylandInputContextV2(Dim *dim,
+                                             const std::shared_ptr<wl::ZwpInputMethodV2> &im,
+                                             const std::shared_ptr<wl::ZwpVirtualKeyboardV1> &vk)
     : InputContext(dim)
     , im_(im)
     , vk_(vk)
@@ -47,8 +47,7 @@ WaylandInputContextV2::WaylandInputContextV2(
 {
     zwp_input_method_v2_add_listener(im_->get(), &im_listener_, this);
 
-    grab_ = std::make_shared<wl::Type<zwp_input_method_keyboard_grab_v2>>(
-        zwp_input_method_v2_grab_keyboard(im_->get()));
+    grab_ = im_->grabKeyboard();
     zwp_input_method_keyboard_grab_v2_add_listener(grab_->get(), &grab_listener_, this);
 }
 
@@ -127,7 +126,7 @@ void WaylandInputContextV2::keymap(
         return;
     }
 
-    zwp_virtual_keyboard_v1_keymap(vk_->get(), format, fd, size);
+    vk_->keymap(format, fd, size);
 
     xkb_state_.reset(xkb_state_new(xkb_keymap_.get()));
     if (!xkb_state_) {
@@ -179,7 +178,7 @@ void WaylandInputContextV2::key(
                             time);
     bool res = keyEvent(ke);
     if (!res) {
-        zwp_virtual_keyboard_v1_key(vk_->get(), getTimestamp(), key, state);
+        vk_->key(getTimestamp(), key, state);
         return;
     }
 
@@ -187,32 +186,30 @@ void WaylandInputContextV2::key(
     for (auto &e : list) {
         if (std::holds_alternative<ForwardKey>(e)) {
             auto forwardKey = std::get<ForwardKey>(e);
-            zwp_virtual_keyboard_v1_key(vk_->get(),
-                                        getTimestamp(),
-                                        forwardKey.keycode,
-                                        forwardKey.pressed ? WL_KEYBOARD_KEY_STATE_PRESSED
-                                                           : WL_KEYBOARD_KEY_STATE_RELEASED);
+            vk_->key(getTimestamp(),
+                     forwardKey.keycode,
+                     forwardKey.pressed ? WL_KEYBOARD_KEY_STATE_PRESSED
+                                        : WL_KEYBOARD_KEY_STATE_RELEASED);
             continue;
         }
 
         if (std::holds_alternative<PreeditInfo>(e)) {
             auto preeditInfo = std::get<PreeditInfo>(e);
-            zwp_input_method_v2_set_preedit_string(im_->get(),
-                                                   preeditInfo.text.toStdString().c_str(),
-                                                   preeditInfo.cursorBegin,
-                                                   preeditInfo.cursorEnd);
+            im_->setPreeditString(preeditInfo.text.toStdString().c_str(),
+                                  preeditInfo.cursorBegin,
+                                  preeditInfo.cursorEnd);
             continue;
         }
 
         if (std::holds_alternative<CommitString>(e)) {
             auto text = std::get<CommitString>(e).text;
-            zwp_input_method_v2_commit_string(im_->get(), text.toStdString().c_str());
+            im_->commitString(text.toStdString().c_str());
             continue;
         }
     }
 
     if (!list.empty()) {
-        zwp_input_method_v2_commit(im_->get(), state_->serial++);
+        im_->commit(state_->serial++);
     }
 }
 
@@ -225,7 +222,7 @@ void WaylandInputContextV2::modifiers(
     uint32_t group)
 {
     qDebug() << "grab modifiers:" << serial << mods_depressed << mods_latched << mods_locked
-               << group;
+             << group;
 
     if (xkb_state_) {
         xkb_state_component comp = xkb_state_update_mask(xkb_state_.get(),
@@ -276,11 +273,7 @@ void WaylandInputContextV2::modifiers(
     }
 
     if (vk_) {
-        zwp_virtual_keyboard_v1_modifiers(vk_->get(),
-                                          mods_depressed,
-                                          mods_latched,
-                                          mods_locked,
-                                          group);
+        vk_->modifiers(mods_depressed, mods_latched, mods_locked, group);
     }
 }
 

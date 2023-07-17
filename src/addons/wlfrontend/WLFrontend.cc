@@ -1,8 +1,9 @@
 #include "WLFrontend.h"
 
-#include "utils.h"
 #include "wl/Connection.h"
-#include "wl/Type.h"
+#include "wl/Seat.h"
+#include "wl/ZwpInputMethodManagerV2.h"
+#include "wl/ZwpVirtualKeyboardManagerV1.h"
 
 #include <dimcore/Dim.h>
 #include <wayland-client-core.h>
@@ -38,17 +39,13 @@ void WLFrontend::init()
 
 void WLFrontend::reloadSeats()
 {
-    auto *imManager = wl_->getGlobal<zwp_input_method_manager_v2>()->get();
-    auto *vkManager = wl_->getGlobal<zwp_virtual_keyboard_manager_v1>()->get();
-    auto seats = wl_->getGlobals<wl_seat>();
+    auto imManager = wl_->getGlobal<wl::ZwpInputMethodManagerV2>();
+    auto vkManager = wl_->getGlobal<wl::ZwpVirtualKeyboardManagerV1>();
+    auto seats = wl_->getGlobals<wl::Seat>();
 
     for (auto &seat : seats) {
-        auto vk = std::make_shared<wl::Type<zwp_virtual_keyboard_v1>>(
-            static_cast<zwp_virtual_keyboard_v1 *>(
-                zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkManager, seat->get())));
-        auto im =
-            std::make_shared<wl::Type<zwp_input_method_v2>>(static_cast<zwp_input_method_v2 *>(
-                zwp_input_method_manager_v2_get_input_method(imManager, seat->get())));
+        auto vk = vkManager->createVirtualKeyboard(seat);
+        auto im = imManager->getInputMethod(seat);
 
         ims_.emplace_back(std::make_shared<WaylandInputContextV2>(dim(), im, vk));
     }

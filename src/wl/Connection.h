@@ -1,7 +1,6 @@
 #ifndef WL_CONNECTION_H
 #define WL_CONNECTION_H
 
-#include "Type.h"
 #include "common/common.h"
 
 #include <wayland-client-protocol.h>
@@ -33,9 +32,9 @@ public:
     void flush();
 
     template<typename T>
-    std::vector<std::shared_ptr<Type<T>>> getGlobals()
+    std::vector<std::shared_ptr<T>> getGlobals()
     {
-        const std::string &interface = Type<T>::interface;
+        const std::string &interface = T::interface;
         auto iter = bindedGlobals_.find(interface);
         if (iter == bindedGlobals_.end()) {
             // bind
@@ -46,11 +45,12 @@ public:
 
             uint32_t version = gIter->second.version;
             for (auto &name : gIter->second.names) {
-                auto *g = static_cast<T *>(wl_registry_bind(wl_display_get_registry(display_.get()),
-                                                            name,
-                                                            Type<T>::wl_interface,
-                                                            version));
-                std::shared_ptr<void> ptr = std::make_shared<Type<T>>(g);
+                auto *g = static_cast<typename T::raw_type *>(
+                    wl_registry_bind(wl_display_get_registry(display_.get()),
+                                     name,
+                                     T::wl_interface,
+                                     version));
+                std::shared_ptr<void> ptr = std::make_shared<T>(g);
                 bindedGlobals_[interface].emplace(name, ptr);
             }
 
@@ -58,18 +58,18 @@ public:
         }
 
         auto &tmp = iter->second;
-        std::vector<std::shared_ptr<Type<T>>> res;
+        std::vector<std::shared_ptr<T>> res;
         res.reserve(tmp.size());
 
         std::transform(tmp.cbegin(), tmp.cend(), std::back_inserter(res), [](const auto &pair) {
-            return std::static_pointer_cast<Type<T>>(pair.second);
+            return std::static_pointer_cast<T>(pair.second);
         });
 
         return res;
     }
 
     template<typename T>
-    std::shared_ptr<Type<T>> getGlobal()
+    std::shared_ptr<T> getGlobal()
     {
         auto list = getGlobals<T>();
         if (list.empty()) {

@@ -18,6 +18,7 @@ template<typename T>
 class Type
 {
 public:
+    using raw_type = T;
     static inline const std::string interface;
     static inline const struct wl_interface *wl_interface;
 
@@ -26,32 +27,7 @@ public:
     {
     }
 
-    ~Type()
-    {
-        if constexpr (std::is_same_v<T, wl_seat>) {
-            uint32_t version = wl_seat_get_version(val_);
-            if (version >= 5) {
-                wl_seat_release(val_);
-            } else {
-                wl_seat_destroy(val_);
-            }
-        } else if constexpr (std::is_same_v<T, zwp_input_method_manager_v2>) {
-            zwp_input_method_manager_v2_destroy(val_);
-        } else if constexpr (std::is_same_v<T, zwp_input_method_v2>) {
-            zwp_input_method_v2_destroy(val_);
-        } else if constexpr (std::is_same_v<T, zwp_virtual_keyboard_manager_v1>) {
-            zwp_virtual_keyboard_manager_v1_destroy(val_);
-        } else if constexpr (std::is_same_v<T, zwp_virtual_keyboard_v1>) {
-            auto version = zwp_virtual_keyboard_v1_get_version(val_);
-            if (version >= 1) {
-                zwp_virtual_keyboard_v1_destroy(val_);
-            }
-        } else if constexpr (std::is_same_v<T, zwp_input_method_keyboard_grab_v2>) {
-            zwp_input_method_keyboard_grab_v2_destroy(val_);
-        } else {
-            static_assert(always_false_v<T>, "unknown type");
-        }
-    }
+    ~Type() = default;
 
     T *get() { return val_; }
 
