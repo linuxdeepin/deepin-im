@@ -2,6 +2,7 @@
 #define WL_CONNECTION_H
 
 #include "common/common.h"
+#include "wl/Type.h"
 
 #include <wayland-client-protocol.h>
 
@@ -34,6 +35,8 @@ public:
     template<typename T>
     std::vector<std::shared_ptr<T>> getGlobals()
     {
+        static_assert(std::is_base_of<Type<typename T::raw_type>, T>::value);
+
         const std::string &interface = T::interface;
         auto iter = bindedGlobals_.find(interface);
         if (iter == bindedGlobals_.end()) {

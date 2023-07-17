@@ -1,10 +1,14 @@
 set(WL_SOURCES
   Connection.h
   Connection.cc
+  Server.h
+  Server.cc
   Type.h
   Type.cc
   Seat.h
   Seat.cc
+  Global.h
+  Global.cc
   ZwpInputMethodManagerV2.h
   ZwpInputMethodManagerV2.cc
   ZwpInputMethodV2.h
