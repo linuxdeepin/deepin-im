@@ -1,14 +1,12 @@
-#ifndef WLTYPE_H
-#define WLTYPE_H
+#ifndef WL_TYPE_H
+#define WL_TYPE_H
 
-#include "common/common.h"
 #include "wayland-input-method-unstable-v2-client-protocol.h"
 #include "wayland-virtual-keyboard-unstable-v1-client-protocol.h"
 
 #include <wayland-client-protocol.h>
 
 #include <string>
-#include <type_traits>
 
 #include <stdint.h>
 
@@ -50,4 +48,4 @@ INIT_WL_TYPE(zwp_input_method_keyboard_grab_v2);
 
 } // namespace wl
 
-#endif // !WLTYPE_H
+#endif // !WL_TYPE_H

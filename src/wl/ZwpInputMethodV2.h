@@ -1,3 +1,6 @@
+#ifndef WL_ZWPINPUTMETHODV2_H
+#define WL_ZWPINPUTMETHODV2_H
+
 #include "Type.h"
 
 #include <memory>
@@ -20,3 +23,5 @@ public:
 };
 
 } // namespace wl
+
+#endif // !WL_ZWPINPUTMETHODV2_H

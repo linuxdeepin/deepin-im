@@ -1,5 +1,5 @@
-#ifndef ZWPVIRTUALKEYBOARDV1_H
-#define ZWPVIRTUALKEYBOARDV1_H
+#ifndef WL_ZWPVIRTUALKEYBOARDV1_H
+#define WL_ZWPVIRTUALKEYBOARDV1_H
 
 #include "Type.h"
 
@@ -19,4 +19,4 @@ public:
 
 } // namespace wl
 
-#endif // !ZWPVIRTUALKEYBOARDV1_H
+#endif // !WL_ZWPVIRTUALKEYBOARDV1_H
