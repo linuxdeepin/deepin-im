@@ -1,7 +1,7 @@
 #ifndef WL_SEAT_H
 #define WL_SEAT_H
 
-#include "Type.h"
+#include "wl/Type.h"
 
 namespace wl {
 

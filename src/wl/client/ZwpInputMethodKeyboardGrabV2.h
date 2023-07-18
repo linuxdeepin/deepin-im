@@ -1,7 +1,7 @@
 #ifndef WL_ZWPINPUTMETHODKEYBOARDGRABV2_H
 #define WL_ZWPINPUTMETHODKEYBOARDGRABV2_H
 
-#include "Type.h"
+#include "wl/Type.h"
 
 namespace wl {
 

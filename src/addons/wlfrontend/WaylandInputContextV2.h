@@ -3,9 +3,8 @@
 
 #include "common/common.h"
 #include "wayland-input-method-unstable-v2-client-protocol.h"
-#include "wl/Type.h"
-#include "wl/ZwpInputMethodV2.h"
-#include "wl/ZwpVirtualKeyboardV1.h"
+#include "wl/client/ZwpInputMethodV2.h"
+#include "wl/client/ZwpVirtualKeyboardV1.h"
 
 #include <dimcore/InputContext.h>
 #include <xkbcommon/xkbcommon.h>

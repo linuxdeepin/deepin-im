@@ -18,7 +18,7 @@ target_link_libraries(dimplatforminputcontextplugin PRIVATE
   PkgConfig::wayland-client
   Qt5::GuiPrivate
   Qt5::DBus
-  wl
+  wlc
 )
 
 include(ECMQueryQmake)

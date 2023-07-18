@@ -7,7 +7,7 @@ add_library(wlserver STATIC
 )
 
 target_link_libraries(wlserver PRIVATE
-  wl
+  wls
 )
 
 install(TARGETS wlserver

@@ -1,4 +1,4 @@
-#include "wl/Server.h"
+#include "wl/server/Server.h"
 
 int main()
 {

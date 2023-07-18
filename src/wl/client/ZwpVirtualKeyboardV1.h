@@ -1,7 +1,7 @@
 #ifndef WL_ZWPVIRTUALKEYBOARDV1_H
 #define WL_ZWPVIRTUALKEYBOARDV1_H
 
-#include "Type.h"
+#include "wl/Type.h"
 
 namespace wl {
 

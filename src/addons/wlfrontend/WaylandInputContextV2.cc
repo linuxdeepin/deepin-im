@@ -2,7 +2,7 @@
 
 #include "utils.h"
 #include "wayland-input-method-unstable-v2-client-protocol.h"
-#include "wl/ZwpInputMethodKeyboardGrabV2.h"
+#include "wl/client/ZwpInputMethodKeyboardGrabV2.h"
 
 #include <linux/input.h>
 

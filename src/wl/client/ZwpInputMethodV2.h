@@ -1,7 +1,7 @@
 #ifndef WL_ZWPINPUTMETHODV2_H
 #define WL_ZWPINPUTMETHODV2_H
 
-#include "Type.h"
+#include "wl/Type.h"
 
 #include <memory>
 

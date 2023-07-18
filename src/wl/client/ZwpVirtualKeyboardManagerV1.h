@@ -1,7 +1,7 @@
 #ifndef WL_ZWPVIRTUALKEYBOARDMANAGERV1_H
 #define WL_ZWPVIRTUALKEYBOARDMANAGERV1_H
 
-#include "Type.h"
+#include "wl/Type.h"
 
 #include <memory>
 

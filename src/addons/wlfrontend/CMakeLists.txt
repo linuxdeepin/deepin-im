@@ -15,7 +15,7 @@ target_link_libraries(wlfrontend PRIVATE
   Qt5::DBus
   PkgConfig::wayland-client
   PkgConfig::xkbcommon
-  wl
+  wlc
 )
 
 install(TARGETS wlfrontend

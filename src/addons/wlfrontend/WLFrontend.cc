@@ -1,9 +1,9 @@
 #include "WLFrontend.h"
 
-#include "wl/Connection.h"
-#include "wl/Seat.h"
-#include "wl/ZwpInputMethodManagerV2.h"
-#include "wl/ZwpVirtualKeyboardManagerV1.h"
+#include "wl/client/Connection.h"
+#include "wl/client/Seat.h"
+#include "wl/client/ZwpInputMethodManagerV2.h"
+#include "wl/client/ZwpVirtualKeyboardManagerV1.h"
 
 #include <dimcore/Dim.h>
 #include <wayland-client-core.h>
