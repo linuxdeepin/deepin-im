@@ -17,6 +17,8 @@ set(WL_SOURCES
   ZwpVirtualKeyboardManagerV1.cc
   ZwpVirtualKeyboardV1.h
   ZwpVirtualKeyboardV1.cc
+  ZwpInputMethodKeyboardGrabV2.cc
+  ZwpInputMethodKeyboardGrabV2.h
 )
 
 add_library(wl STATIC
