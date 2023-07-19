@@ -1,6 +1,6 @@
 #include "Connection.h"
 
-#include "utils.h"
+#include "common/common.h"
 
 #include <QDebug>
 

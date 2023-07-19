@@ -1,6 +1,6 @@
 #include "InputContextProxy.h"
 
-#include "utils.h"
+#include "common/common.h"
 #include "wl/client/Connection.h"
 
 #include <wayland-text-input-unstable-v3-client-protocol.h>
