@@ -36,9 +36,10 @@ static int32_t getTimestamp()
     return time.tv_sec * 1000 + time.tv_nsec / (1000 * 1000);
 }
 
-WaylandInputContextV2::WaylandInputContextV2(Dim *dim,
-                                             const std::shared_ptr<wl::ZwpInputMethodV2> &im,
-                                             const std::shared_ptr<wl::ZwpVirtualKeyboardV1> &vk)
+WaylandInputContextV2::WaylandInputContextV2(
+    Dim *dim,
+    const std::shared_ptr<wl::client::ZwpInputMethodV2> &im,
+    const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk)
     : InputContext(dim)
     , im_(im)
     , vk_(vk)

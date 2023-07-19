@@ -1,11 +1,12 @@
-#ifndef WL_GLOBAL_H
-#define WL_GLOBAL_H
+#ifndef WL_SERVER_GLOBAL_H
+#define WL_SERVER_GLOBAL_H
 
 #include "Server.h"
 
 #include <memory>
 
 namespace wl {
+namespace server {
 
 template<auto F>
 struct GlobalCallbackWrapper;
@@ -40,6 +41,7 @@ private:
     static void onDestroy();
 };
 
+} // namespace server
 } // namespace wl
 
-#endif // !WL_GLOBAL_H
+#endif // !WL_SERVER_GLOBAL_H

@@ -1,6 +1,6 @@
 #include "ZwpVirtualKeyboardV1.h"
 
-using namespace wl;
+using namespace wl::client;
 
 ZwpVirtualKeyboardV1::ZwpVirtualKeyboardV1(zwp_virtual_keyboard_v1 *val)
     : Type(val)

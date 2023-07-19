@@ -1,6 +1,6 @@
 #include "Global.h"
 
-using namespace wl;
+using namespace wl::server;
 
 Global::Global(const std::shared_ptr<Server> &server, const wl_interface *interface)
     : global_(wl_global_create(

@@ -1,28 +1,30 @@
 #ifndef WL_SERVER_ZWPINPUTMETHODMANAGERV2_H
 #define WL_SERVER_ZWPINPUTMETHODMANAGERV2_H
 
+#include "Type.h"
 #include "wayland-input-method-unstable-v2-server-protocol.h"
-#include "wl/Type.h"
 
 #include <memory>
 
 namespace wl {
+namespace server {
 
 class Seat;
 class ZwpInputMethodV2;
 
-class ZwpInputMethodManagerV2 : public Type<zwp_input_method_manager_v2>
+class ZwpInputMethodManagerV2 : public BASE_TYPE(zwp_input_method_manager_v2)
 {
-public:
-    static const struct zwp_input_method_manager_v2_interface impl;
+    friend class Type;
 
-    static void getInputMethod(struct wl_client *client,
-                        struct wl_resource *resource,
-                        struct wl_resource *seat,
-                        uint32_t input_method);
-    static void destroy(struct wl_client *client, struct wl_resource *resource);
+public:
+    ZwpInputMethodManagerV2();
+
+private:
+    void getInputMethod(struct wl_client *client, struct wl_resource *seat, uint32_t input_method);
+    void destroy(struct wl_client *client);
 };
 
+} // namespace server
 }; // namespace wl
 
 #endif // !WL_SERVER_ZWPINPUTMETHODMANAGERV2_H

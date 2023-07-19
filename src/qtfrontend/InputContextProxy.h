@@ -4,8 +4,10 @@
 #include <QObject>
 
 namespace wl {
+namespace client {
 class Connection;
 }
+} // namespace wl
 
 struct zwp_text_input_v3;
 
@@ -45,7 +47,7 @@ signals:
     void forwardKey(uint32_t keyValue, uint32_t state, bool type);
 
 private:
-    wl::Connection *wl_;
+    wl::client::Connection *wl_;
     struct zwp_text_input_v3 *text_input_v3_;
     bool available_;
 };

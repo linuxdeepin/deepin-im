@@ -1,11 +1,12 @@
-#ifndef WL_ZWPVIRTUALKEYBOARDMANAGERV1_H
-#define WL_ZWPVIRTUALKEYBOARDMANAGERV1_H
+#ifndef WL_CLIENT_ZWPVIRTUALKEYBOARDMANAGERV1_H
+#define WL_CLIENT_ZWPVIRTUALKEYBOARDMANAGERV1_H
 
-#include "wl/Type.h"
+#include "Type.h"
 
 #include <memory>
 
 namespace wl {
+namespace client {
 
 class Seat;
 class ZwpVirtualKeyboardV1;
@@ -19,6 +20,7 @@ public:
     std::shared_ptr<ZwpVirtualKeyboardV1> createVirtualKeyboard(const std::shared_ptr<Seat> &seat);
 };
 
+} // namespace client
 } // namespace wl
 
-#endif // !WL_ZWPVIRTUALKEYBOARDMANAGERV1_H
+#endif // !WL_CLIENT_ZWPVIRTUALKEYBOARDMANAGERV1_H

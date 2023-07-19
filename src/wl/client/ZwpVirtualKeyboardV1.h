@@ -1,9 +1,10 @@
-#ifndef WL_ZWPVIRTUALKEYBOARDV1_H
-#define WL_ZWPVIRTUALKEYBOARDV1_H
+#ifndef WL_CLIENT_ZWPVIRTUALKEYBOARDV1_H
+#define WL_CLIENT_ZWPVIRTUALKEYBOARDV1_H
 
-#include "wl/Type.h"
+#include "Type.h"
 
 namespace wl {
+namespace client {
 
 class ZwpVirtualKeyboardV1 : public Type<zwp_virtual_keyboard_v1>
 {
@@ -17,6 +18,7 @@ public:
     modifiers(uint32_t modsDepressed, uint32_t modsLatched, uint32_t modsLocked, uint32_t group);
 };
 
+} // namespace client
 } // namespace wl
 
-#endif // !WL_ZWPVIRTUALKEYBOARDV1_H
+#endif // !WL_CLIENT_ZWPVIRTUALKEYBOARDV1_H

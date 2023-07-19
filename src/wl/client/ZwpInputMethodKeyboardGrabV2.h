@@ -1,9 +1,10 @@
-#ifndef WL_ZWPINPUTMETHODKEYBOARDGRABV2_H
-#define WL_ZWPINPUTMETHODKEYBOARDGRABV2_H
+#ifndef WL_CLIENT_ZWPINPUTMETHODKEYBOARDGRABV2_H
+#define WL_CLIENT_ZWPINPUTMETHODKEYBOARDGRABV2_H
 
-#include "wl/Type.h"
+#include "Type.h"
 
 namespace wl {
+namespace client {
 
 class ZwpInputMethodKeyboardGrabV2 : public Type<zwp_input_method_keyboard_grab_v2>
 {
@@ -12,6 +13,7 @@ public:
     ~ZwpInputMethodKeyboardGrabV2();
 };
 
+} // namespace client
 }; // namespace wl
 
-#endif // !WL_ZWPINPUTMETHODKEYBOARDGRABV2_H
+#endif // !WL_CLIENT_ZWPINPUTMETHODKEYBOARDGRABV2_H

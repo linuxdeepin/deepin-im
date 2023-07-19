@@ -3,7 +3,7 @@
 #include "Seat.h"
 #include "ZwpVirtualKeyboardV1.h"
 
-using namespace wl;
+using namespace wl::client;
 
 ZwpVirtualKeyboardManagerV1::ZwpVirtualKeyboardManagerV1(zwp_virtual_keyboard_manager_v1 *val)
     : Type(val)

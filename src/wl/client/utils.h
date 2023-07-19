@@ -1,5 +1,5 @@
-#ifndef WL_UTILS_H
-#define WL_UTILS_H
+#ifndef WL_CLIENT_UTILS_H
+#define WL_CLIENT_UTILS_H
 
 template<auto F>
 struct CallbackWrapper;
@@ -14,4 +14,4 @@ struct CallbackWrapper<F>
     }
 };
 
-#endif // !WL_UTILS_H
+#endif // !WL_CLIENT_UTILS_H

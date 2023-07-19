@@ -1,6 +1,6 @@
 #include "Seat.h"
 
-using namespace wl;
+using namespace wl::client;
 
 Seat::Seat(wl_seat *val)
     : Type(val)

@@ -1,6 +1,6 @@
 #include "Resource.h"
 
-using namespace wl;
+using namespace wl::server;
 
 Resource::Resource(struct wl_client *client,
                    const struct wl_interface *interface,
@@ -8,9 +8,15 @@ Resource::Resource(struct wl_client *client,
                    uint32_t id)
     : resource_(wl_resource_create(client, interface, version, id))
 {
-    wl_resource_set_user_data(resource_.get(), this);
 }
 
-void Resource::onDestroy() {
-
+void Resource::setImplementation(const void *implementation,
+                                 void *data,
+                                 wl_resource_destroy_func_t destroy)
+{
+    wl_resource_set_implementation(resource_.get(),
+                                   implementation, // T::impl,
+                                   data,           // r.get(),
+                                   destroy //  ResourceDestrouWrapper<&Resource::onDestroy>::func
+    );
 }

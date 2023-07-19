@@ -9,7 +9,7 @@ struct CallbackWrapper<F>
 {
     static R func(void *userdata, Args... args)
     {
-        auto *p = reinterpret_cast<C *>(userdata);
+        auto *p = static_cast<C *>(userdata);
         return (p->*F)(args...);
     }
 };

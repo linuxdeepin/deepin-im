@@ -3,7 +3,7 @@
 #include "Seat.h"
 #include "ZwpInputMethodV2.h"
 
-using namespace wl;
+using namespace wl::client;
 
 ZwpInputMethodManagerV2::ZwpInputMethodManagerV2(zwp_input_method_manager_v2 *val)
     : Type(val)

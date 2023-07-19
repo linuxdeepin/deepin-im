@@ -1,5 +1,5 @@
-#ifndef WL_CONNECTION_H
-#define WL_CONNECTION_H
+#ifndef WL_CLIENT_CONNECTION_H
+#define WL_CLIENT_CONNECTION_H
 
 #include "common/common.h"
 #include "wl/Type.h"
@@ -14,6 +14,7 @@
 #include <unordered_map>
 
 namespace wl {
+namespace client {
 
 struct globalInfo
 {
@@ -100,6 +101,7 @@ private:
     void onGlobalRemove(struct wl_registry *wl_registry, uint32_t name);
 };
 
+} // namespace client
 } // namespace wl
 
-#endif // !WL_CONNECTION_H
+#endif // !WL_CLIENT_CONNECTION_H

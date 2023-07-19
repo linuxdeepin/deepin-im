@@ -1,6 +1,6 @@
 #include "Server.h"
 
-using namespace wl;
+using namespace wl::server;
 
 Server::Server()
     : display_(wl_display_create())

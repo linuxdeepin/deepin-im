@@ -2,7 +2,7 @@
 
 #include "ZwpInputMethodKeyboardGrabV2.h"
 
-using namespace wl;
+using namespace wl::client;
 
 ZwpInputMethodV2::ZwpInputMethodV2(zwp_input_method_v2 *val)
     : Type(val)

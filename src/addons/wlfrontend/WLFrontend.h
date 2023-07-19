@@ -10,8 +10,10 @@
 #include <memory>
 
 namespace wl {
+namespace client {
 class Connection;
 }
+} // namespace wl
 
 namespace org {
 namespace deepin {
@@ -28,7 +30,7 @@ public:
     ~WLFrontend();
 
 private:
-    wl::Connection *wl_;
+    wl::client::Connection *wl_;
 
     std::vector<std::shared_ptr<WaylandInputContextV2>> ims_;
 

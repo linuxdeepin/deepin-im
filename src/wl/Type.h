@@ -19,18 +19,6 @@ public:
     using raw_type = T;
     static inline const std::string interface;
     static inline const struct wl_interface *wl_interface;
-
-    Type(T *val)
-        : val_(val)
-    {
-    }
-
-    ~Type() = default;
-
-    T *get() { return val_; }
-
-private:
-    T *val_;
 };
 
 #define INIT_WL_TYPE(type)                                \

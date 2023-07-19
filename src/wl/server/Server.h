@@ -9,6 +9,7 @@
 #include <string>
 
 namespace wl {
+namespace server {
 
 class Server
 {
@@ -25,6 +26,7 @@ private:
     std::unique_ptr<wl_display, Deleter<wl_display_destroy>> display_;
 };
 
+} // namespace server
 } // namespace wl
 
 #endif // !WL_SERVER_H

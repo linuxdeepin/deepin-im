@@ -5,6 +5,8 @@ set(WLS_SOURCES
   Global.cc
   Resource.h
   Resource.cc
+  Seat.h
+  Seat.cc
   ZwpInputMethodManagerV2.h
   ZwpInputMethodManagerV2.cc
   ZwpInputMethodV2.h

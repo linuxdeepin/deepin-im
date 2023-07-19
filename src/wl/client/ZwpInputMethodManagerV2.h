@@ -1,11 +1,12 @@
-#ifndef WL_ZWPINPUTMETHODMANAGERV2_H
-#define WL_ZWPINPUTMETHODMANAGERV2_H
+#ifndef WL_CLIENT_ZWPINPUTMETHODMANAGERV2_H
+#define WL_CLIENT_ZWPINPUTMETHODMANAGERV2_H
 
-#include "wl/Type.h"
+#include "Type.h"
 
 #include <memory>
 
 namespace wl {
+namespace client {
 
 class Seat;
 class ZwpInputMethodV2;
@@ -19,6 +20,7 @@ public:
     std::shared_ptr<ZwpInputMethodV2> getInputMethod(const std::shared_ptr<Seat> &seat);
 };
 
+} // namespace client
 }; // namespace wl
 
-#endif // !WL_ZWPINPUTMETHODMANAGERV2_H
+#endif // !WL_CLIENT_ZWPINPUTMETHODMANAGERV2_H

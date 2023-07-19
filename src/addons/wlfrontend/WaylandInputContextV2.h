@@ -44,15 +44,15 @@ class WaylandInputContextV2 : public InputContext
 {
 public:
     WaylandInputContextV2(Dim *dim,
-                          const std::shared_ptr<wl::ZwpInputMethodV2> &im,
-                          const std::shared_ptr<wl::ZwpVirtualKeyboardV1> &vk);
+                          const std::shared_ptr<wl::client::ZwpInputMethodV2> &im,
+                          const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk);
 
 private:
     static const zwp_input_method_v2_listener im_listener_;
     static const zwp_input_method_keyboard_grab_v2_listener grab_listener_;
-    const std::shared_ptr<wl::ZwpInputMethodV2> im_;
-    const std::shared_ptr<wl::ZwpVirtualKeyboardV1> vk_;
-    std::shared_ptr<wl::Type<zwp_input_method_keyboard_grab_v2>> grab_;
+    const std::shared_ptr<wl::client::ZwpInputMethodV2> im_;
+    const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> vk_;
+    std::shared_ptr<wl::client::ZwpInputMethodKeyboardGrabV2> grab_;
 
     std::unique_ptr<State> state_;
 

@@ -6,7 +6,7 @@
 
 #include <poll.h>
 
-using namespace wl;
+using namespace wl::client;
 
 const wl_registry_listener Connection::registry_listener_ = {
     CallbackWrapper<&Connection::onGlobal>::func,

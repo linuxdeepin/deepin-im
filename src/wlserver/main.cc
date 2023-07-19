@@ -2,7 +2,7 @@
 
 int main()
 {
-    wl::Server server;
+    wl::server::Server server;
     server.run();
 
     return 0;

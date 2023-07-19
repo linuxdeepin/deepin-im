@@ -1,11 +1,12 @@
-#ifndef WL_ZWPINPUTMETHODV2_H
-#define WL_ZWPINPUTMETHODV2_H
+#ifndef WL_CLIENT_ZWPINPUTMETHODV2_H
+#define WL_CLIENT_ZWPINPUTMETHODV2_H
 
-#include "wl/Type.h"
+#include "Type.h"
 
 #include <memory>
 
 namespace wl {
+namespace client {
 
 class ZwpInputMethodKeyboardGrabV2;
 
@@ -22,6 +23,7 @@ public:
     void commit(uint32_t serial);
 };
 
+} // namespace client
 } // namespace wl
 
-#endif // !WL_ZWPINPUTMETHODV2_H
+#endif // !WL_CLIENT_ZWPINPUTMETHODV2_H

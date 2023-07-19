@@ -1,9 +1,10 @@
-#ifndef WL_SEAT_H
-#define WL_SEAT_H
+#ifndef WL_CLIENT_SEAT_H
+#define WL_CLIENT_SEAT_H
 
-#include "wl/Type.h"
+#include "Type.h"
 
 namespace wl {
+namespace client {
 
 class Seat : public Type<wl_seat>
 {
@@ -12,6 +13,7 @@ public:
     ~Seat();
 };
 
+} // namespace client
 } // namespace wl
 
-#endif // !WL_SEAT_H
+#endif // !WL_CLIENT_SEAT_H

@@ -10,8 +10,9 @@
 
 static const wl_registry_listener registry_listener = {
     CallbackWrapper<&InputContextProxy::registryGlobal>::func,
-    []([[maybe_unused]] void *data, [[maybe_unused]] struct wl_registry *registry, [[maybe_unused]] uint32_t name) {
-    },
+    []([[maybe_unused]] void *data,
+       [[maybe_unused]] struct wl_registry *registry,
+       [[maybe_unused]] uint32_t name) {},
 };
 
 static const zwp_text_input_v3_listener tiListener = {
@@ -35,7 +36,7 @@ InputContextProxy::InputContextProxy(QObject *parent)
     }
     waylandServer = waylandServerCStr;
 
-    wl_ = new wl::Connection(waylandServer, this);
+    wl_ = new wl::client::Connection(waylandServer, this);
 
     auto *registry = wl_display_get_registry(wl_->display());
     wl_registry_add_listener(registry, &registry_listener, this);
