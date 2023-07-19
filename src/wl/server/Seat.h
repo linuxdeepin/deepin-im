@@ -1,7 +1,6 @@
 #ifndef WL_SERVER_SEAT_H
 #define WL_SERVER_SEAT_H
 
-#include "Resource.h"
 #include "Type.h"
 
 #include <wayland-server-protocol.h>
@@ -10,6 +9,8 @@
 
 namespace wl {
 namespace server {
+
+class Resource;
 
 class Seat : public BASE_TYPE(wl_seat)
 {
@@ -24,8 +25,7 @@ private:
     void getTouch(struct wl_client *client, uint32_t id);
     void release(struct wl_client *client);
 
-private:
-    std::shared_ptr<Resource> resource_;
+    void resourceDestroy() override;
 };
 
 } // namespace server

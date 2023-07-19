@@ -17,12 +17,8 @@ const struct zwp_input_method_v2_interface ZwpInputMethodV2::Type::impl = {
 };
 
 ZwpInputMethodV2::ZwpInputMethodV2(wl_client *client, uint32_t id)
-    : Type()
-    , resource_(Resource::create<ZwpInputMethodV2>(client, id))
+    : Type(client, id)
 {
-    resource_->setImplementation(&impl,
-                                 this,
-                                 ResourceDestroyWrapper<&ZwpInputMethodV2::resourceDestroy>::func);
 }
 
 void ZwpInputMethodV2::commitString([[maybe_unused]] struct wl_client *client,

@@ -2,7 +2,6 @@
 #define WL_RESOURCE_H
 
 #include "common/common.h"
-#include "utils.h"
 
 #include <wayland-server-core.h>
 
@@ -14,13 +13,10 @@ namespace server {
 class Resource
 {
 public:
-    template<typename T>
-    static std::shared_ptr<Resource> create(wl_client *client, uint32_t id)
-    {
-        auto r = std::make_shared<Resource>(client, T::interface, T::interface.version, id);
-
-        return r;
-    }
+    Resource(struct wl_client *client,
+             const struct wl_interface *interface,
+             int version,
+             uint32_t id);
 
     void setImplementation(const void *implementation,
                            void *data,
@@ -28,11 +24,6 @@ public:
 
 private:
     std::unique_ptr<wl_resource, Deleter<wl_resource_destroy>> resource_;
-
-    Resource(struct wl_client *client,
-             const struct wl_interface *interface,
-             int version,
-             uint32_t id);
 };
 
 } // namespace server

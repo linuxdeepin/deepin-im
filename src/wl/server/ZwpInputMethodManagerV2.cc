@@ -10,8 +10,8 @@ const struct zwp_input_method_manager_v2_interface ZwpInputMethodManagerV2::Type
     ResourceCallbackWrapper<&ZwpInputMethodManagerV2::destroy>::func,
 };
 
-ZwpInputMethodManagerV2::ZwpInputMethodManagerV2()
-    : Type()
+ZwpInputMethodManagerV2::ZwpInputMethodManagerV2(wl_client *client, uint32_t id)
+    : Type(client, id)
 {
 }
 
@@ -22,3 +22,5 @@ void ZwpInputMethodManagerV2::getInputMethod([[maybe_unused]] struct wl_client *
 }
 
 void ZwpInputMethodManagerV2::destroy([[maybe_unused]] struct wl_client *client) { }
+
+void ZwpInputMethodManagerV2::resourceDestroy() { }

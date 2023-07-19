@@ -1,7 +1,6 @@
 #ifndef WL_SERVER_ZWPINPUTMETHODV2_H
 #define WL_SERVER_ZWPINPUTMETHODV2_H
 
-#include "Resource.h"
 #include "Type.h"
 #include "wayland-input-method-unstable-v2-server-protocol.h"
 
@@ -31,10 +30,7 @@ private:
     void grabKeyboard(struct wl_client *client, uint32_t keyboard);
     void destroy(struct wl_client *client);
 
-    void resourceDestroy();
-
-private:
-    std::shared_ptr<Resource> resource_;
+    void resourceDestroy() override;
 };
 
 } // namespace server
