@@ -1,8 +1,8 @@
-#include "wl/server/Server.h"
+#include "WLServer.h"
 
 int main()
 {
-    wl::server::Server server;
+    WLServer server;
     server.run();
 
     return 0;

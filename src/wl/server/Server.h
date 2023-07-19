@@ -15,7 +15,7 @@ class Server
 {
 public:
     Server();
-    ~Server();
+    ~Server() = default;
 
     wl_display *display() const { return display_.get(); }
 

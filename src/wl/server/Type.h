@@ -27,6 +27,8 @@ public:
                                      ResourceDestroyWrapper<&Type::resourceDestroy>::func);
     }
 
+    virtual ~Type() = default;
+
 protected:
     static const I impl;
 

@@ -3,6 +3,7 @@
 
 #include "Server.h"
 
+#include <functional>
 #include <memory>
 
 namespace wl {
@@ -24,21 +25,17 @@ struct GlobalCallbackWrapper<F>
 class Global
 {
 public:
-    template<typename T>
-    static std::shared_ptr<Global> create(const std::shared_ptr<Server> &server)
-    {
-        auto g = std::make_shared<Global>(server, T::interface);
-
-        return g;
-    }
+    Global(const std::shared_ptr<Server> &server,
+           const struct wl_interface *interface,
+           const std::function<void(struct wl_client *client, uint32_t version, uint32_t id)>
+               &onBindCallback);
 
 private:
     std::unique_ptr<wl_global, Deleter<wl_global_destroy>> global_;
-
-    Global(const std::shared_ptr<Server> &server, const struct wl_interface *interface);
+    const std::function<void(struct wl_client *client, uint32_t version, uint32_t id)>
+        onBindCallback_;
 
     void onBind(struct wl_client *client, uint32_t version, uint32_t id);
-    static void onDestroy();
 };
 
 } // namespace server

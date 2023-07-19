@@ -14,7 +14,7 @@ set(WLS_SOURCES
 )
 
 add_library(wls STATIC
-  ${WL_SOURCES}
+  ${WLS_SOURCES}
 )
 
 target_link_libraries(wls PRIVATE

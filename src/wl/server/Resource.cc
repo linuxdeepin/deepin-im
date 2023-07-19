@@ -14,9 +14,5 @@ void Resource::setImplementation(const void *implementation,
                                  void *data,
                                  wl_resource_destroy_func_t destroy)
 {
-    wl_resource_set_implementation(resource_.get(),
-                                   implementation, // T::impl,
-                                   data,           // r.get(),
-                                   destroy //  ResourceDestrouWrapper<&Resource::onDestroy>::func
-    );
+    wl_resource_set_implementation(resource_.get(), implementation, data, destroy);
 }

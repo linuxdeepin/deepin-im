@@ -1,8 +1,10 @@
 set(WLSERVER_SOURCES
   main.cc
+  WLServer.h
+  WLServer.cc
 )
 
-add_library(wlserver STATIC
+add_executable(wlserver
   ${WLSERVER_SOURCES}
 )
 
