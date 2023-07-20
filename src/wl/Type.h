@@ -3,6 +3,7 @@
 
 #include "wayland-input-method-unstable-v2-client-protocol.h"
 #include "wayland-virtual-keyboard-unstable-v1-client-protocol.h"
+#include "wayland-text-input-unstable-v3-client-protocol.h"
 
 #include <wayland-client-protocol.h>
 
@@ -33,6 +34,8 @@ INIT_WL_TYPE(zwp_input_method_manager_v2);
 INIT_WL_TYPE(zwp_input_method_v2);
 INIT_WL_TYPE(zwp_virtual_keyboard_manager_v1);
 INIT_WL_TYPE(zwp_input_method_keyboard_grab_v2);
+INIT_WL_TYPE(zwp_text_input_manager_v3);
+INIT_WL_TYPE(zwp_text_input_v3);
 
 } // namespace wl
 

@@ -7,6 +7,10 @@ set(WLS_SOURCES
   Resource.cc
   Seat.h
   Seat.cc
+  ZwpTextInputManagerV3.h
+  ZwpTextInputManagerV3.cc
+  ZwpTextInputV3.h
+  ZwpTextInputV3.cc
   ZwpInputMethodManagerV2.h
   ZwpInputMethodManagerV2.cc
   ZwpInputMethodV2.h

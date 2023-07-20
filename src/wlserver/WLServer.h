@@ -8,6 +8,7 @@ namespace server {
 class Server;
 class Global;
 class Seat;
+class ZwpTextInputManagerV3;
 class ZwpInputMethodManagerV2;
 } // namespace server
 } // namespace wl
@@ -23,6 +24,8 @@ private:
     std::shared_ptr<wl::server::Server> server_;
     std::shared_ptr<wl::server::Global> seatGlobal_;
     std::shared_ptr<wl::server::Seat> seat_;
+    std::shared_ptr<wl::server::Global> textInputManagerGlobal_;
+    std::shared_ptr<wl::server::ZwpTextInputManagerV3> textInputManager_;
     std::shared_ptr<wl::server::Global> inputMethodManagerGlobal_;
     std::shared_ptr<wl::server::ZwpInputMethodManagerV2> inputMethodManager_;
 };
