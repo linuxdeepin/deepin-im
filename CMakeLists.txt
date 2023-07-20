@@ -28,6 +28,8 @@ pkg_check_modules(xkbcommon REQUIRED IMPORTED_TARGET xkbcommon)
 pkg_check_modules(xkeyboard-config REQUIRED IMPORTED_TARGET xkeyboard-config)
 pkg_check_modules(wayland-client REQUIRED IMPORTED_TARGET wayland-client)
 pkg_check_modules(wayland-server REQUIRED IMPORTED_TARGET wayland-server)
+pkg_check_modules(libudev REQUIRED IMPORTED_TARGET libudev)
+pkg_check_modules(libinput REQUIRED IMPORTED_TARGET libinput)
 
 add_library(wayland_protocols OBJECT)
 

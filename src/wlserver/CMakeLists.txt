@@ -10,6 +10,8 @@ add_executable(wlserver
 
 target_link_libraries(wlserver PRIVATE
   wls
+  PkgConfig::libudev
+  PkgConfig::libinput
 )
 
 install(TARGETS wlserver
