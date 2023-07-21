@@ -23,6 +23,8 @@ find_package(Qt5Gui ${REQUIRED_QT5_VERSION} REQUIRED Private)
 find_package(Fcitx5Qt5DBusAddons REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(WaylandScanner REQUIRED)
+find_package(XCB COMPONENTS XCB KEYSYMS)
+find_package(GLIB2 REQUIRED)
 
 pkg_check_modules(xkbcommon REQUIRED IMPORTED_TARGET xkbcommon)
 pkg_check_modules(xkeyboard-config REQUIRED IMPORTED_TARGET xkeyboard-config)
@@ -30,6 +32,8 @@ pkg_check_modules(wayland-client REQUIRED IMPORTED_TARGET wayland-client)
 pkg_check_modules(wayland-server REQUIRED IMPORTED_TARGET wayland-server)
 pkg_check_modules(libudev REQUIRED IMPORTED_TARGET libudev)
 pkg_check_modules(libinput REQUIRED IMPORTED_TARGET libinput)
+pkg_check_modules(IBUS "ibus-1.0>=1.5.0" IMPORTED_TARGET)
+pkg_check_modules(GOBJECT gobject-2.0 IMPORTED_TARGET)
 
 add_library(wayland_protocols OBJECT)
 
