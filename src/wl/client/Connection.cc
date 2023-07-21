@@ -72,6 +72,7 @@ void Connection::onGlobal([[maybe_unused]] struct wl_registry *registry,
                           const char *interface,
                           uint32_t version)
 {
+    qWarning() << "onGlobal:" << name << interface << version;
     auto &gi = globals_[interface];
     gi.version = version;
     gi.names.emplace(name);

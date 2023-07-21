@@ -15,6 +15,7 @@ class Global;
 class Seat;
 class ZwpTextInputManagerV3;
 class ZwpInputMethodManagerV2;
+class ZwpVirtualKeyboardManagerV1;
 } // namespace server
 } // namespace wl
 
@@ -36,6 +37,8 @@ private:
     std::shared_ptr<wl::server::ZwpTextInputManagerV3> textInputManager_;
     std::shared_ptr<wl::server::Global> inputMethodManagerGlobal_;
     std::shared_ptr<wl::server::ZwpInputMethodManagerV2> inputMethodManager_;
+    std::shared_ptr<wl::server::Global> virtualKeyboardManagerGlobal_;
+    std::shared_ptr<wl::server::ZwpVirtualKeyboardManagerV1> virtualKeyboardManager_;
 
     void processLibinputEvents();
     void deviceAdded(struct libinput_event *event);

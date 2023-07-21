@@ -5,6 +5,7 @@
 #include "wl/server/Server.h"
 #include "wl/server/ZwpInputMethodManagerV2.h"
 #include "wl/server/ZwpTextInputManagerV3.h"
+#include "wl/server/ZwpVirtualKeyboardManagerV1.h"
 
 #include <iostream>
 
@@ -13,16 +14,12 @@
 
 static int open_restricted(const char *path, int flags, [[maybe_unused]] void *user_data)
 {
-    std::cerr << "xxxxxxxxxxxxx" << std::endl;
-    std::cerr << std::flush;
     int fd = open(path, flags);
     return fd < 0 ? -errno : fd;
 }
 
 static void close_restricted(int fd, [[maybe_unused]] void *user_data)
 {
-    std::cerr << "xxxxxxxxxxxxx" << std::endl;
-    std::cerr << std::flush;
     close(fd);
 }
 
@@ -56,9 +53,13 @@ WLServer::WLServer()
         [this](struct wl_client *client, [[maybe_unused]] uint32_t version, uint32_t id) {
             inputMethodManager_ = std::make_shared<wl::server::ZwpInputMethodManagerV2>(client, id);
         });
-
-    std::cerr << "xxxxxxxxxxxxx" << std::endl;
-    std::cerr << std::flush;
+    virtualKeyboardManagerGlobal_ = std::make_shared<wl::server::Global>(
+        server_,
+        wl::server::ZwpVirtualKeyboardManagerV1::wl_interface,
+        [this](struct wl_client *client, [[maybe_unused]] uint32_t version, uint32_t id) {
+            virtualKeyboardManager_ =
+                std::make_shared<wl::server::ZwpVirtualKeyboardManagerV1>(client, id);
+        });
 
     auto *loop = wl_display_get_event_loop(server_->display());
     int lifd = libinput_get_fd(li_.get());
@@ -73,17 +74,6 @@ WLServer::WLServer()
             int res = libinput_dispatch(wlserver->li_.get());
             wlserver->processLibinputEvents();
             return res != 0;
-        },
-        this);
-    std::cerr << "xxxxxxxxxxxxx" << std::endl;
-    std::cerr << std::flush;
-
-    wl_event_loop_add_timer(
-        loop,
-        []([[maybe_unused]] void *data) -> int {
-            std::cerr << "uuuuuuuuuuuuuuuu" << std::endl;
-            std::cerr << std::flush;
-            return 0;
         },
         this);
 }

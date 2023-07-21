@@ -15,6 +15,8 @@ set(WLS_SOURCES
   ZwpInputMethodManagerV2.cc
   ZwpInputMethodV2.h
   ZwpInputMethodV2.cc
+  ZwpVirtualKeyboardManagerV1.h
+  ZwpVirtualKeyboardManagerV1.cc
 )
 
 add_library(wls STATIC
