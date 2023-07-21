@@ -78,7 +78,8 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
                                               IBUS_INTERFACE_PORTAL,
                                               m_watcher->connection());
 
-    QDBusPendingCall call = interface.asyncCall("CreateInputContext");
+    // TODO: it must be actual app name
+    QDBusPendingCall call = interface.asyncCall("CreateInputContext", "dim");
 
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(call, this);
     QObject::connect(
@@ -87,7 +88,7 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
         this,
         [this, ic](QDBusPendingCallWatcher *watcher) {
             watcher->deleteLater();
-            QDBusPendingReply<QDBusObjectPath, QByteArray> reply = *watcher;
+            QDBusPendingReply<QDBusObjectPath> reply = *watcher;
             if (reply.isError()) {
                 qDebug() << "create ibus input context error:" << reply.error().message();
                 return;
@@ -105,16 +106,12 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 
             GDBusConnection *connection = ibus_bus_get_connection(m_bus);
             if (connection) {
-                GError *error;
                 auto context =
-                    ibus_input_context_new(path.toStdString().c_str(), connection, nullptr, &error);
+                    ibus_input_context_get_input_context(path.toStdString().c_str(), connection);
 
-                if (error != nullptr) {
-                    qWarning() << "failed to get ibus input context" << error->message;
-                    return;
+                if (context) {
+                    iBusICMap_[ic->id()] = context;
                 }
-
-                iBusICMap_[ic->id()] = context;
             }
         });
 }
