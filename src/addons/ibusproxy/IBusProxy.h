@@ -1,13 +1,10 @@
 #ifndef IBUSPROXY_H
 #define IBUSPROXY_H
 
-#include <dimcore/ProxyAddon.h>
-#include <ibus.h>
 #include "IBUSInputContextIface.h"
 
-#include <QDBusInterface>
-#include <QDBusObjectPath>
-#include <QDBusPendingReply>
+#include <dimcore/ProxyAddon.h>
+#include <ibus.h>
 
 namespace org {
 namespace deepin {
@@ -29,7 +26,8 @@ public:
 private:
     inline bool isICDBusInterfaceValid(uint32_t id)
     {
-        return !iBusICInterfaceMap_.isEmpty() && iBusICInterfaceMap_.contains(id) && iBusICInterfaceMap_[id]->isValid();
+        return !iBusICInterfaceMap_.isEmpty() && iBusICInterfaceMap_.contains(id)
+            && iBusICInterfaceMap_[id]->isValid();
     }
 
     inline bool isIBusICValid(uint32_t id)
@@ -47,8 +45,9 @@ public Q_SLOTS:
 private:
     QList<InputMethodEntry> inputMethods_;
     QMap<uint32_t, org::freedesktop::IBus::InputContext *> iBusICInterfaceMap_;
-    QMap<uint32_t, IBusInputContext*> iBusICMap_;
+    QMap<uint32_t, IBusInputContext *> iBusICMap_;
     IBusBus *m_bus;
+    QDBusServiceWatcher *m_watcher;
 };
 
 } // namespace dim

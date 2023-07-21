@@ -6,7 +6,11 @@ using namespace org::deepin::dim;
 
 DimIBusProxy::DimIBusProxy(Dim *dim)
     : ProxyAddon(dim, "ibusproxy")
+    , m_watcher(new QDBusServiceWatcher(this))
 {
+    m_watcher->setConnection(QDBusConnection::sessionBus());
+    m_watcher->addWatchedService(QStringLiteral("org.freedesktop.IBus"));
+
     init();
     updateInputMethods();
 }
@@ -36,6 +40,7 @@ void DimIBusProxy::init()
     }
     g_signal_connect(m_bus, "disconnected", G_CALLBACK(ibus_disconnected_cb), this);
     g_signal_connect(m_bus, "connected", G_CALLBACK(ibus_connected_cb), this);
+    connect(m_watcher, &QDBusServiceWatcher::serviceUnregistered, this, &DimIBusProxy::finalize);
 }
 
 void DimIBusProxy::finalize()
@@ -67,9 +72,9 @@ QList<InputMethodEntry> DimIBusProxy::getInputMethods()
 void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 {
     QDBusInterface interface = QDBusInterface(IBUS_SERVICE_PORTAL,
-                                                   IBUS_PATH_IBUS,
-                                                   IBUS_INTERFACE_PORTAL,
-                                                   QDBusConnection::sessionBus());
+                                              IBUS_PATH_IBUS,
+                                              IBUS_INTERFACE_PORTAL,
+                                              m_watcher->connection());
 
     QDBusPendingCall call = interface.asyncCall("CreateInputContext");
 
