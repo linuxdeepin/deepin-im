@@ -11,5 +11,5 @@ InputState::InputState(Dim *dim)
     if (ims.isEmpty()) {
         return;
     }
-    current_im_ = ims[0];
+    current_im_ = ims[1];
 }

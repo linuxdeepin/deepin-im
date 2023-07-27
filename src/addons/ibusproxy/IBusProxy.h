@@ -17,11 +17,15 @@ public:
     virtual ~DimIBusProxy();
 
     QList<InputMethodEntry> getInputMethods() override;
+    void initInputMethods() override;
     bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
     void createFcitxInputContext(InputContext *ic) override;
     void focusIn(uint32_t id) override;
     void focusOut(uint32_t id) override;
     void destroyed(uint32_t id) override;
+    bool isUseSyncMode();
+
+    void updateInputMethods();
 
 private:
     inline bool isICDBusInterfaceValid(uint32_t id)
@@ -35,19 +39,17 @@ private:
         return !iBusICMap_.isEmpty() && iBusICMap_.contains(id) && iBusICMap_[id] != nullptr;
     }
 
-    void updateInputMethods();
-
 public Q_SLOTS:
     void init();
     void finalize();
     void clean();
 
 private:
+    bool init_;
     QList<InputMethodEntry> inputMethods_;
     QMap<uint32_t, org::freedesktop::IBus::InputContext *> iBusICInterfaceMap_;
     QMap<uint32_t, IBusInputContext *> iBusICMap_;
-    IBusBus *m_bus;
-    QDBusServiceWatcher *m_watcher;
+    IBusBus *bus_;
 };
 
 } // namespace dim

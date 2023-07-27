@@ -24,7 +24,7 @@ static const QMap<QString, AddonType> AddonsType = {
 Dim::Dim(QObject *parent)
     : QObject(parent)
     , focusedIC_(0)
-    , enabledIMs_({ "pinyin" })
+    , enabledIMs_({ "pinyin", "Pinyin"})
 {
     loadAddons();
 }
@@ -92,8 +92,9 @@ void Dim::loadAddon(const QString &infoFile)
     }
     case AddonType::InputMethod: {
         auto *imAddon = qobject_cast<InputMethodAddon *>(addon);
-        inputMethodAddons_.insert(imAddon->key(), imAddon);
         connect(imAddon, &InputMethodAddon::addonInitFinished, this , &Dim::initInputMethodAddon);
+        imAddon->initInputMethods();
+        inputMethodAddons_.insert(imAddon->key(), imAddon);
         break;
     }
     default:

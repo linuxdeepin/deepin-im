@@ -49,7 +49,6 @@ Keyboard::Keyboard(Dim *dim)
 
     parseRule(rules);
     parseRule(extraRules);
-    Q_EMIT addonInitFinished(this);
 }
 
 Keyboard::~Keyboard() { }
@@ -57,6 +56,11 @@ Keyboard::~Keyboard() { }
 QList<InputMethodEntry> Keyboard::getInputMethods()
 {
     return keyboards_;
+}
+
+void Keyboard::initInputMethods()
+{
+    Q_EMIT addonInitFinished(this);
 }
 
 bool Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)

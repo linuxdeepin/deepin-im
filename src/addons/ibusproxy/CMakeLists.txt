@@ -23,7 +23,6 @@ target_link_libraries(ibusproxy PRIVATE
     PkgConfig::GOBJECT
     Qt::Core
     Qt::DBus
-    XCB::KEYSYMS
 )
 
 install(TARGETS ibusproxy

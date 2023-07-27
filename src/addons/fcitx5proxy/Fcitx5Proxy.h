@@ -21,6 +21,7 @@ public:
     Fcitx5Proxy(Dim *dim);
     virtual ~Fcitx5Proxy();
 
+    void initInputMethods() override;
     QList<InputMethodEntry> getInputMethods() override;
     bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
     void createFcitxInputContext(InputContext *ic) override;

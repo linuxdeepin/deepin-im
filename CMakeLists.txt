@@ -23,7 +23,6 @@ find_package(Qt5Gui ${REQUIRED_QT5_VERSION} REQUIRED Private)
 find_package(Fcitx5Qt5DBusAddons REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(WaylandScanner REQUIRED)
-find_package(XCB COMPONENTS XCB KEYSYMS)
 find_package(GLIB2 REQUIRED)
 
 pkg_check_modules(xkbcommon REQUIRED IMPORTED_TARGET xkbcommon)

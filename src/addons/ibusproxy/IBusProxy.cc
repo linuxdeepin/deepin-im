@@ -8,41 +8,127 @@ DIM_ADDON_FACTORY(DimIBusProxy);
 
 DimIBusProxy::DimIBusProxy(Dim *dim)
     : ProxyAddon(dim, "ibusproxy")
-    , m_watcher(new QDBusServiceWatcher(this))
+    , init_(false)
 {
-    m_watcher->setConnection(QDBusConnection::sessionBus());
-    m_watcher->addWatchedService(QStringLiteral("org.freedesktop.IBus"));
-
     init();
-    updateInputMethods();
 }
 
-static void ibus_connected_cb(IBusBus *m_bus, gpointer user_data)
+bool DimIBusProxy::isUseSyncMode()
 {
-    Q_UNUSED(m_bus);
+    auto mode = qgetenv("IBUS_ENABLE_SYNC_MODE");
+    if (mode.compare("1") == 0 || mode.compare("true") == 0) {
+        return true;
+    }
+
+    // use sync mode default
+    return true;
+}
+
+static void iBusConnected(IBusBus *bus_, gpointer user_data)
+{
+    Q_UNUSED(bus_);
+
+    g_return_if_fail(user_data);
     DimIBusProxy *proxy = (DimIBusProxy *)user_data;
     proxy->init();
 }
 
-static void ibus_disconnected_cb(IBusBus *m_bus, gpointer user_data)
+static void iBusDisconnected(IBusBus *bus_, gpointer user_data)
 {
-    Q_UNUSED(m_bus);
+    Q_UNUSED(bus_);
+
+    g_return_if_fail(user_data);
     DimIBusProxy *proxy = (DimIBusProxy *)user_data;
     proxy->finalize();
 }
 
+static void iBusGlobalEngineChanged(IBusBus *bus, const gchar *engine_name, gpointer user_data)
+{
+    Q_UNUSED(bus);
+
+    qDebug() << "Global engine is changed to " << engine_name;
+    g_return_if_fail(user_data);
+
+    DimIBusProxy *proxy = (DimIBusProxy *)user_data;
+    proxy->updateInputMethods();
+}
+
+static void processKeyEventDone(GObject *object, GAsyncResult *res, gpointer user_data)
+{
+    g_return_if_fail(user_data);
+    IBusInputContext *context = (IBusInputContext *)object;
+
+    GError *error = nullptr;
+    gboolean retval = ibus_input_context_process_key_event_async_finish(context, res, &error);
+
+    if (error != nullptr) {
+        qWarning() << "Process Key Event failed" << error->message;
+        g_error_free(error);
+    }
+
+    if (retval == FALSE) {
+        // TODO: need to ignore the event and return
+    }
+}
+
+static void commitText(IBusInputContext *context, IBusText *text, InputContext *ic)
+{
+    g_assert(IBUS_IS_INPUT_CONTEXT(context));
+    g_assert(IBUS_IS_TEXT(text));
+
+    ic->updateCommitString(text->text);
+}
+
+static void forwardKeyEvent(
+    IBusInputContext *context, guint keyval, guint keycode, guint state, InputContext *ic)
+{
+    Q_UNUSED(context);
+    Q_UNUSED(keyval);
+    ic->forwardKey(keycode, state);
+}
+
+static void updatePreedit(
+    IBusInputContext *context, IBusText *text, gint cursor_pos, gboolean visible, InputContext *ic)
+{
+    Q_UNUSED(visible);
+    g_assert(IBUS_IS_INPUT_CONTEXT(context));
+    g_assert(IBUS_IS_TEXT(text));
+
+    ic->updatePreedit(text->text, cursor_pos, cursor_pos);
+}
+
+static void showPreedit(IBusInputContext *context)
+{
+    g_assert(IBUS_IS_INPUT_CONTEXT(context));
+}
+
 void DimIBusProxy::init()
 {
-    ibus_init();
-
-    m_bus = ibus_bus_new();
-
-    if (!ibus_bus_is_connected(m_bus)) {
+    // only init once
+    if (init_) {
         return;
     }
-    g_signal_connect(m_bus, "disconnected", G_CALLBACK(ibus_disconnected_cb), this);
-    g_signal_connect(m_bus, "connected", G_CALLBACK(ibus_connected_cb), this);
-    connect(m_watcher, &QDBusServiceWatcher::serviceUnregistered, this, &DimIBusProxy::finalize);
+
+    ibus_init();
+
+    bus_ = ibus_bus_new();
+    if (!bus_) {
+        qWarning() << "create ibus failed";
+        return;
+    }
+
+    g_signal_connect(bus_, "connected", G_CALLBACK(iBusConnected), this);
+    g_signal_connect(bus_, "disconnected", G_CALLBACK(iBusDisconnected), this);
+    g_signal_connect(bus_, "global-engine-changed", G_CALLBACK(iBusGlobalEngineChanged), this);
+
+    ibus_bus_set_watch_dbus_signal(bus_, TRUE);
+    ibus_bus_set_watch_ibus_signal(bus_, TRUE);
+
+    if (!ibus_bus_is_connected(bus_)) {
+        return;
+    }
+
+    init_ = true;
 }
 
 void DimIBusProxy::finalize()
@@ -53,17 +139,31 @@ void DimIBusProxy::finalize()
 
 void DimIBusProxy::clean()
 {
-    if (m_bus) {
-        g_signal_handlers_disconnect_by_func(m_bus, (gpointer)ibus_disconnected_cb, this);
-        g_signal_handlers_disconnect_by_func(m_bus, (gpointer)ibus_connected_cb, this);
-        g_object_unref(m_bus);
-        m_bus = nullptr;
+    if (bus_) {
+        g_signal_handlers_disconnect_by_func(bus_, (gpointer)iBusDisconnected, this);
+        g_signal_handlers_disconnect_by_func(bus_, (gpointer)iBusConnected, this);
+        g_object_unref(bus_);
+        bus_ = nullptr;
     }
 }
 
 DimIBusProxy::~DimIBusProxy()
 {
     clean();
+
+    for (auto iter = iBusICMap_.begin(); iter != iBusICMap_.end(); ++iter) {
+        auto v = iter.value();
+        if (v != nullptr) {
+            g_slice_free(IBusInputContext, v);
+            v = nullptr;
+        }
+    }
+}
+
+void DimIBusProxy::initInputMethods()
+{
+    updateInputMethods();
+    Q_EMIT addonInitFinished(this);
 }
 
 QList<InputMethodEntry> DimIBusProxy::getInputMethods()
@@ -73,47 +173,29 @@ QList<InputMethodEntry> DimIBusProxy::getInputMethods()
 
 void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 {
-    QDBusInterface interface = QDBusInterface(IBUS_SERVICE_PORTAL,
-                                              IBUS_PATH_IBUS,
-                                              IBUS_INTERFACE_PORTAL,
-                                              m_watcher->connection());
+    if (!ic || !bus_) {
+        return;
+    }
 
-    // TODO: it must be actual app name
-    QDBusPendingCall call = interface.asyncCall("CreateInputContext", "dim");
+    auto id = ic->id();
 
-    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(call, this);
-    QObject::connect(
-        watcher,
-        &QDBusPendingCallWatcher::finished,
-        this,
-        [this, ic](QDBusPendingCallWatcher *watcher) {
-            watcher->deleteLater();
-            QDBusPendingReply<QDBusObjectPath> reply = *watcher;
-            if (reply.isError()) {
-                qDebug() << "create ibus input context error:" << reply.error().message();
-                return;
-            }
+    QString name = QString("%1_%2").arg("dim").arg(id);
 
-            const QString path = reply.value().path();
+    IBusInputContext *ibusIC = ibus_bus_create_input_context(bus_, name.toStdString().c_str());
 
-            auto *icIface = new org::freedesktop::IBus::InputContext(IBUS_SERVICE_PORTAL,
-                                                                     path,
-                                                                     QDBusConnection::sessionBus(),
-                                                                     this);
-            if (icIface && icIface->isValid()) {
-                iBusICInterfaceMap_[ic->id()] = icIface;
-            }
+    if (ibusIC == nullptr) {
+        g_slice_free(IBusInputContext, ibusIC);
+        return;
+    }
 
-            GDBusConnection *connection = ibus_bus_get_connection(m_bus);
-            if (connection) {
-                auto context =
-                    ibus_input_context_get_input_context(path.toStdString().c_str(), connection);
+    iBusICMap_[id] = ibusIC;
 
-                if (context) {
-                    iBusICMap_[ic->id()] = context;
-                }
-            }
-        });
+    g_signal_connect(ibusIC, "commit-text", G_CALLBACK(commitText), ic);
+    g_signal_connect(ibusIC, "forward-key-event", G_CALLBACK(forwardKeyEvent), ic);
+    g_signal_connect(ibusIC, "update-preedit-text", G_CALLBACK(updatePreedit), ic);
+    g_signal_connect(ibusIC, "show-preedit-text", G_CALLBACK(showPreedit), ic);
+
+    ibus_input_context_set_capabilities(ibusIC, IBUS_CAP_FOCUS | IBUS_CAP_PREEDIT_TEXT);
 }
 
 void DimIBusProxy::focusIn(uint32_t id)
@@ -142,7 +224,8 @@ void DimIBusProxy::destroyed(uint32_t id)
         call.waitForFinished();
 
         if (call.isError()) {
-            qWarning() << "destroyed" << id << iBusICInterfaceMap_[id]->path();
+            qWarning() << "failed to destroyed ibus inputContext" << id
+                       << iBusICInterfaceMap_[id]->path();
         }
     }
 }
@@ -150,9 +233,67 @@ void DimIBusProxy::destroyed(uint32_t id)
 bool DimIBusProxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
 {
     Q_UNUSED(entry);
-    Q_UNUSED(keyEvent);
+    bool result = false;
 
-    return false;
+    auto id = keyEvent.ic()->id();
+
+    // only handle key press
+    if (keyEvent.isRelease() == true) {
+        return false;
+    }
+
+    if (isIBusICValid(id)) {
+        if (isUseSyncMode()) {
+            result = ibus_input_context_process_key_event(iBusICMap_[id],
+                                                          keyEvent.keyValue(),
+                                                          keyEvent.keycode() - 8,
+                                                          keyEvent.state());
+            if (result) {
+                return true;
+            }
+        } else {
+            ibus_input_context_process_key_event_async(iBusICMap_[id],
+                                                       keyEvent.keyValue(),
+                                                       keyEvent.keycode() - 8,
+                                                       keyEvent.state(),
+                                                       -1,
+                                                       nullptr,
+                                                       processKeyEventDone,
+                                                       nullptr);
+
+            result = true;
+        }
+    }
+
+    return result;
 }
 
-void DimIBusProxy::updateInputMethods() { }
+void DimIBusProxy::updateInputMethods()
+{
+    if (!bus_) {
+        return;
+    }
+
+    auto ibusEngineList = ibus_bus_list_engines(bus_);
+
+    if (!ibusEngineList) {
+        qWarning() << "failed get ibus engines list";
+        return;
+    }
+
+    QList<InputMethodEntry> inputMethods;
+    for (; ibusEngineList; ibusEngineList = g_list_next(ibusEngineList)) {
+        IBusEngineDesc *engine_desc = IBUS_ENGINE_DESC(ibusEngineList->data);
+        g_assert(engine_desc);
+
+        inputMethods.append({ key(),
+                              ibus_engine_desc_get_longname(engine_desc),
+                              ibus_engine_desc_get_name(engine_desc),
+                              ibus_engine_desc_get_description(engine_desc),
+                              QString(),
+                              ibus_engine_desc_get_icon(engine_desc) });
+    }
+
+    inputMethods_.swap(inputMethods);
+    g_list_free(ibusEngineList);
+}

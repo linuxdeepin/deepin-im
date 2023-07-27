@@ -19,6 +19,7 @@ public:
     ~Keyboard();
 
     QList<InputMethodEntry> getInputMethods() override;
+    void initInputMethods() override;
     bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
 
 private:
