@@ -13,6 +13,10 @@ set(WLC_SOURCES
   ZwpVirtualKeyboardManagerV1.cc
   ZwpVirtualKeyboardV1.h
   ZwpVirtualKeyboardV1.cc
+  ZwpTextInputManagerV3.h
+  ZwpTextInputManagerV3.cc
+  ZwpTextInputV3.h
+  ZwpTextInputV3.cc
 )
 
 add_library(wlc STATIC
