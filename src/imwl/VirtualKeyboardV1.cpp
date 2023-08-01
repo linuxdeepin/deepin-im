@@ -54,6 +54,7 @@ protected:
                                      uint32_t key,
                                      uint32_t state) override
     {
+        q->m_seat->sendKeyEvent(key, state);
     }
 
     void zwp_virtual_keyboard_v1_modifiers(Resource *resource,
