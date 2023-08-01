@@ -36,9 +36,10 @@ InputContextProxy::InputContextProxy(QObject *parent)
 
     auto seats = wl_->getGlobals<wl::client::Seat>();
     auto tiManager = wl_->getGlobal<wl::client::ZwpTextInputManagerV3>();
+    // TODO: select seat
     auto seat = seats[0];
 
-    tiManager->getTextInput(seat);
+    ti_ = tiManager->getTextInput(seat);
 
     // todo: select seat
     zwp_text_input_v3_add_listener(ti_->get(), &tiListener, this);
