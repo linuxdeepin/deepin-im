@@ -33,9 +33,9 @@ add_library(dimcore SHARED
 )
 
 target_link_libraries(dimcore PRIVATE
-  Qt5::Core
-  Qt5::Quick
-  Qt5::DBus
+  Qt6::Core
+  Qt6::Quick
+  Qt6::DBus
   ${CMAKE_DL_LIBS}
 )
 

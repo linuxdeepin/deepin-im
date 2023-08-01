@@ -5,18 +5,18 @@ set(KIMPANEL_SOURCES
   qml.qrc
 )
 
-qt5_add_dbus_adaptor(KIMPANEL_SOURCES org.kde.impanel.xml Panel.h Panel ImpanelAdaptor)
-qt5_add_dbus_adaptor(KIMPANEL_SOURCES org.kde.impanel2.xml Panel.h Panel Impanel2Adaptor)
-qt5_add_dbus_interface(KIMPANEL_SOURCES org.kde.impanel.inputmethod.xml ImpanelInputmethod)
+qt_add_dbus_adaptor(KIMPANEL_SOURCES org.kde.impanel.xml Panel.h Panel ImpanelAdaptor)
+qt_add_dbus_adaptor(KIMPANEL_SOURCES org.kde.impanel2.xml Panel.h Panel Impanel2Adaptor)
+qt_add_dbus_interface(KIMPANEL_SOURCES org.kde.impanel.inputmethod.xml ImpanelInputmethod)
 
 add_executable(kimpanel
   ${KIMPANEL_SOURCES}
 )
 
 target_link_libraries(kimpanel PRIVATE
-  Qt5::Core
-  Qt5::Quick
-  Qt5::DBus
+  Qt6::Core
+  Qt6::Quick
+  Qt6::DBus
 )
 
 install(TARGETS kimpanel

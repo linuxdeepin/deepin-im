@@ -24,7 +24,7 @@ add_library(wls STATIC
 )
 
 target_link_libraries(wls PRIVATE
-  Qt5::Core
+  Qt6::Core
   PkgConfig::wayland-server
   wayland_protocols
 )

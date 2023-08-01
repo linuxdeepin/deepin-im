@@ -11,8 +11,8 @@ add_library(wlfrontend SHARED
 
 target_link_libraries(wlfrontend PRIVATE
   dimcore
-  Qt5::Core
-  Qt5::DBus
+  Qt6::Core
+  Qt6::DBus
   PkgConfig::wayland-client
   PkgConfig::xkbcommon
   wlc

@@ -8,7 +8,7 @@ add_executable(dim
 
 target_link_libraries(dim PRIVATE
   dimcore
-  Qt5::Core
+  Qt6::Core
 )
 
 install(TARGETS dim

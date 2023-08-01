@@ -20,7 +20,7 @@ add_library(wlc STATIC
 )
 
 target_link_libraries(wlc PRIVATE
-  Qt5::Core
+  Qt6::Core
   PkgConfig::wayland-client
   wayland_protocols
 )

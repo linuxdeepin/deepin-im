@@ -5,7 +5,7 @@ set(IBUSPROXY_SOURCES
     IBusProxy.cc
 )
 
-qt5_add_dbus_interface(IC_SOURCES
+qt_add_dbus_interface(IC_SOURCES
     ${CMAKE_SOURCE_DIR}/misc/ibus-inputcontext.xml
     IBUSInputContextIface
 )

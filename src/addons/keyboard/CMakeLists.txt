@@ -17,8 +17,8 @@ add_library(keyboard MODULE
 
 target_link_libraries(keyboard PRIVATE
   dimcore
-  Qt5::Core
-  Qt5::Xml
+  Qt6::Core
+  Qt6::Xml
   PkgConfig::xkbcommon
 )
 
