@@ -19,7 +19,7 @@ find_package(ECM 1.4.0 REQUIRED)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Widgets Xml DBus)
-find_package(Qt6Gui ${REQUIRED_QT5_VERSION} REQUIRED Private)
+find_package(Qt6Gui ${REQUIRED_QT6_VERSION} REQUIRED Private)
 find_package(Fcitx5Qt6DBusAddons REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(WaylandScanner REQUIRED)
