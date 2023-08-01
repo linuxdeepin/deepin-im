@@ -2,6 +2,7 @@
 
 #include "common/common.h"
 #include "wl/client/Connection.h"
+#include "wl/client/Seat.h"
 #include "wl/client/ZwpTextInputManagerV3.h"
 #include "wl/client/ZwpTextInputV3.h"
 
