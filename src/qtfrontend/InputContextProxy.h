@@ -1,12 +1,15 @@
 #ifndef INPUTCONTEXTPROXY_H
 #define INPUTCONTEXTPROXY_H
 
+#include "wayland-text-input-unstable-v3-client-protocol.h"
+
 #include <QObject>
 
 namespace wl {
 namespace client {
 class Connection;
-}
+class ZwpTextInputV3;
+} // namespace client
 } // namespace wl
 
 struct zwp_text_input_v3;
@@ -24,11 +27,8 @@ public:
     void focusOut();
     void processKeyEvent(uint keyval, uint keycode, uint state, bool isRelease, uint time);
 
+protected:
     // wayland listeners
-    void registryGlobal(struct wl_registry *registry,
-                        uint32_t name,
-                        const char *interface,
-                        uint32_t version);
     void enter(struct zwp_text_input_v3 *zwp_text_input_v3, struct wl_surface *surface);
     void leave(struct zwp_text_input_v3 *zwp_text_input_v3, struct wl_surface *surface);
     void preedit_string(struct zwp_text_input_v3 *zwp_text_input_v3,
@@ -48,8 +48,9 @@ signals:
 
 private:
     wl::client::Connection *wl_;
-    struct zwp_text_input_v3 *text_input_v3_;
     bool available_;
+    std::shared_ptr<wl::client::ZwpTextInputV3> ti_;
+    static const zwp_text_input_v3_listener tiListener;
 };
 
 #endif // !INPUTCONTEXTPROXY_H

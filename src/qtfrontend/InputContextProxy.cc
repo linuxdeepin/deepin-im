@@ -2,20 +2,15 @@
 
 #include "common/common.h"
 #include "wl/client/Connection.h"
+#include "wl/client/ZwpTextInputManagerV3.h"
+#include "wl/client/ZwpTextInputV3.h"
 
 #include <wayland-text-input-unstable-v3-client-protocol.h>
 
 #include <QDebug>
 #include <QList>
 
-static const wl_registry_listener registry_listener = {
-    CallbackWrapper<&InputContextProxy::registryGlobal>::func,
-    []([[maybe_unused]] void *data,
-       [[maybe_unused]] struct wl_registry *registry,
-       [[maybe_unused]] uint32_t name) {},
-};
-
-static const zwp_text_input_v3_listener tiListener = {
+const zwp_text_input_v3_listener InputContextProxy::tiListener = {
     CallbackWrapper<&InputContextProxy::enter>::func,
     CallbackWrapper<&InputContextProxy::leave>::func,
     CallbackWrapper<&InputContextProxy::preedit_string>::func,
@@ -38,22 +33,24 @@ InputContextProxy::InputContextProxy(QObject *parent)
 
     wl_ = new wl::client::Connection(waylandServer, this);
 
-    auto *registry = wl_display_get_registry(wl_->display());
-    wl_registry_add_listener(registry, &registry_listener, this);
-    wl_->roundtrip();
-    wl_display_flush(wl_->display());
+    auto seats = wl_->getGlobals<wl::client::Seat>();
+    auto tiManager = wl_->getGlobal<wl::client::ZwpTextInputManagerV3>();
+    auto seat = seats[0];
 
-    zwp_text_input_v3_add_listener(text_input_v3_, &tiListener, this);
+    tiManager->getTextInput(seat);
+
+    // todo: select seat
+    zwp_text_input_v3_add_listener(ti_->get(), &tiListener, this);
 }
 
 void InputContextProxy::focusIn()
 {
-    zwp_text_input_v3_enable(text_input_v3_);
+    ti_->enable();
 }
 
 void InputContextProxy::focusOut()
 {
-    zwp_text_input_v3_disable(text_input_v3_);
+    ti_->disable();
 }
 
 void InputContextProxy::processKeyEvent([[maybe_unused]] uint keyval,
@@ -62,23 +59,6 @@ void InputContextProxy::processKeyEvent([[maybe_unused]] uint keyval,
                                         [[maybe_unused]] bool isRelease,
                                         [[maybe_unused]] uint time)
 {
-}
-
-void InputContextProxy::registryGlobal(struct wl_registry *registry,
-                                       uint32_t name,
-                                       const char *interface,
-                                       uint32_t version)
-{
-    qDebug() << "global" << name << interface << version;
-
-#define BIND(member, interface_type)                                             \
-  if (strcmp(interface, #interface_type) == 0) {                                 \
-    member = static_cast<interface_type *>(                                      \
-        wl_registry_bind(registry, name, &interface_type##_interface, version)); \
-    return;                                                                      \
-  }
-
-    BIND(text_input_v3_, zwp_text_input_v3);
 }
 
 void InputContextProxy::enter([[maybe_unused]] struct zwp_text_input_v3 *zwp_text_input_v3,
