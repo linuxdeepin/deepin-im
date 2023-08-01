@@ -13,18 +13,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-add_compile_options(-Wall -Wextra -Wpedantic -Werror)
-
 find_package(ECM 1.4.0 REQUIRED)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Widgets Xml DBus)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Widgets Xml DBus WaylandCompositor)
 find_package(Qt6Gui ${REQUIRED_QT6_VERSION} REQUIRED Private)
 find_package(Fcitx5Qt6DBusAddons REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(WaylandScanner REQUIRED)
 find_package(GLIB2 REQUIRED)
 
+pkg_check_modules(xcb REQUIRED IMPORTED_TARGET xcb)
+pkg_check_modules(xcb-xinput REQUIRED IMPORTED_TARGET xcb-xinput)
 pkg_check_modules(xkbcommon REQUIRED IMPORTED_TARGET xkbcommon)
 pkg_check_modules(xkeyboard-config REQUIRED IMPORTED_TARGET xkeyboard-config)
 pkg_check_modules(wayland-client REQUIRED IMPORTED_TARGET wayland-client)
