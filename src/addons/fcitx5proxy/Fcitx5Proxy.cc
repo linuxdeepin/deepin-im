@@ -68,7 +68,6 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
 void Fcitx5Proxy::initInputMethods()
 {
     updateInputMethods();
-    Q_EMIT addonInitFinished(this);
 }
 
 Fcitx5Proxy::~Fcitx5Proxy()
@@ -254,5 +253,6 @@ void Fcitx5Proxy::updateInputMethods()
             }
 
             inputMethods_.swap(inputMethods);
+            Q_EMIT addonInitFinished(this);
         });
 }
