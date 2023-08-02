@@ -1,7 +1,7 @@
 set(WLSERVER_SOURCES
-  main.cc
+  main.cpp
   WLServer.h
-  WLServer.cc
+  WLServer.cpp
 )
 
 add_executable(wlserver

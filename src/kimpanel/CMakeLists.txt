@@ -1,7 +1,7 @@
 set(KIMPANEL_SOURCES
-  main.cc
+  main.cpp
   Panel.h
-  Panel.cc
+  Panel.cpp
   qml.qrc
 )
 

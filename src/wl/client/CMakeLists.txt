@@ -1,22 +1,22 @@
 set(WLC_SOURCES
   Connection.h
-  Connection.cc
+  Connection.cpp
   Seat.h
-  Seat.cc
+  Seat.cpp
   ZwpInputMethodManagerV2.h
-  ZwpInputMethodManagerV2.cc
+  ZwpInputMethodManagerV2.cpp
   ZwpInputMethodV2.h
-  ZwpInputMethodV2.cc
+  ZwpInputMethodV2.cpp
   ZwpInputMethodKeyboardGrabV2.h
-  ZwpInputMethodKeyboardGrabV2.cc
+  ZwpInputMethodKeyboardGrabV2.cpp
   ZwpVirtualKeyboardManagerV1.h
-  ZwpVirtualKeyboardManagerV1.cc
+  ZwpVirtualKeyboardManagerV1.cpp
   ZwpVirtualKeyboardV1.h
-  ZwpVirtualKeyboardV1.cc
+  ZwpVirtualKeyboardV1.cpp
   ZwpTextInputManagerV3.h
-  ZwpTextInputManagerV3.cc
+  ZwpTextInputManagerV3.cpp
   ZwpTextInputV3.h
-  ZwpTextInputV3.cc
+  ZwpTextInputV3.cpp
 )
 
 add_library(wlc STATIC)

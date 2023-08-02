@@ -1,22 +1,22 @@
 set(WLS_SOURCES
   Server.h
-  Server.cc
+  Server.cpp
   Global.h
-  Global.cc
+  Global.cpp
   Resource.h
-  Resource.cc
+  Resource.cpp
   Seat.h
-  Seat.cc
+  Seat.cpp
   ZwpTextInputManagerV3.h
-  ZwpTextInputManagerV3.cc
+  ZwpTextInputManagerV3.cpp
   ZwpTextInputV3.h
-  ZwpTextInputV3.cc
+  ZwpTextInputV3.cpp
   ZwpInputMethodManagerV2.h
-  ZwpInputMethodManagerV2.cc
+  ZwpInputMethodManagerV2.cpp
   ZwpInputMethodV2.h
-  ZwpInputMethodV2.cc
+  ZwpInputMethodV2.cpp
   ZwpVirtualKeyboardManagerV1.h
-  ZwpVirtualKeyboardManagerV1.cc
+  ZwpVirtualKeyboardManagerV1.cpp
 )
 
 add_library(wls STATIC

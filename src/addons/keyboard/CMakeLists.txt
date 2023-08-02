@@ -8,7 +8,7 @@ configure_file(
 
 set(KEYBOARD_SOURCES
   keyboard.h
-  keyboard.cc
+  keyboard.cpp
 )
 
 add_library(keyboard MODULE

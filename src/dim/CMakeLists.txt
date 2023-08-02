@@ -1,5 +1,5 @@
 set(DIM_SOURCES
-  main.cc
+  main.cpp
 )
 
 add_executable(dim

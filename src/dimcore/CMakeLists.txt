@@ -4,15 +4,15 @@ configure_file(
 )
 
 set(DIMCORE_SOURCES
-  Dim.cc
-  Addon.cc
-  FrontendAddon.cc
-  InputContext.cc
-  InputMethodAddon.cc
-  InputMethodEntry.cc
-  InputState.cc
-  Events.cc
-  ProxyAddon.cc
+  Dim.cpp
+  Addon.cpp
+  FrontendAddon.cpp
+  InputContext.cpp
+  InputMethodAddon.cpp
+  InputMethodEntry.cpp
+  InputState.cpp
+  Events.cpp
+  ProxyAddon.cpp
 )
 
 set(DIMCORE_HEADERS

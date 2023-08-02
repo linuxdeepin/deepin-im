@@ -1,10 +1,10 @@
 set(QTFRONTEND_SOURCES
   DIMPlatformInputContextPlugin.h
-  DIMPlatformInputContextPlugin.cc
+  DIMPlatformInputContextPlugin.cpp
   DIMPlatformInputContext.h
-  DIMPlatformInputContext.cc
+  DIMPlatformInputContext.cpp
   InputContextProxy.h
-  InputContextProxy.cc
+  InputContextProxy.cpp
 )
 
 add_library(dimplatforminputcontextplugin MODULE

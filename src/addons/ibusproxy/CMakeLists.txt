@@ -2,7 +2,7 @@ set(CMAKE_C_STANDARD 99)
 
 set(IBUSPROXY_SOURCES
     IBusProxy.h
-    IBusProxy.cc
+    IBusProxy.cpp
 )
 
 qt_add_dbus_interface(IC_SOURCES
