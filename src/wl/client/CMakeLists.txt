@@ -19,8 +19,10 @@ set(WLC_SOURCES
   ZwpTextInputV3.cc
 )
 
-add_library(wlc STATIC
-  ${WLC_SOURCES}
+add_library(wlc OBJECT)
+
+target_sources(wlc
+  PUBLIC ${WLC_SOURCES}
 )
 
 target_link_libraries(wlc PRIVATE
