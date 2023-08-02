@@ -8,7 +8,7 @@
 #include <QObject>
 #include <QSocketNotifier>
 
-class X11KeyboardGrabber: public QObject
+class X11KeyboardGrabber : public QObject
 {
     Q_OBJECT
 public:
@@ -19,12 +19,12 @@ signals:
     void keyEvent(int keycode, bool isRelease);
 
 private:
-    std::unique_ptr<xcb_connection_t, Deleter<xcb_disconnect>> m_xconn;
-    int m_xcbFd;
-    QSocketNotifier *m_socketNotifier;
-    const xcb_setup_t *m_setup;
-    xcb_screen_t *m_screen;
-    uint8_t m_xinput2OPCode;
+    std::unique_ptr<xcb_connection_t, Deleter<xcb_disconnect>> xconn_;
+    int xcbFd_;
+    QSocketNotifier *socketNotifier_;
+    const xcb_setup_t *setup_;
+    xcb_screen_t *screen_;
+    uint8_t xinput2OPCode_;
 
     xcb_screen_t *screenOfDisplay(int screen);
     void onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationEvent);

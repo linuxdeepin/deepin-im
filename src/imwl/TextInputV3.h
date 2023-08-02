@@ -29,9 +29,9 @@ public:
     void sendDone(uint32_t serial);
 
 private:
-    Core *m_core;
-    struct ::wl_resource *m_seat;
     std::unique_ptr<TextInputV3Private> d;
+    Core *core_;
+    struct ::wl_resource *seat_;
 };
 
 #endif // !TEXTINPUTV3_H

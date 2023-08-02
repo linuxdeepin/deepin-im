@@ -28,9 +28,9 @@ public:
     TextInputV3 *getTextInputV4BySeat(struct ::wl_resource *seat);
 
 private:
-    Core *m_core;
     std::unique_ptr<TextInputManagerV3Private> d;
-    std::unordered_map<struct ::wl_resource * /* seat */, TextInputV3 *> m_textInputs;
+    Core *core_;
+    std::unordered_map<struct ::wl_resource * /* seat */, TextInputV3 *> textInputs_;
 };
 
 #endif // !TEXTINPUTMANAGERV3_H

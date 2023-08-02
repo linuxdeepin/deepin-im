@@ -27,7 +27,7 @@ public:
 
 private:
     std::unique_ptr<VirtualKeyboardV1Private> d;
-    QWaylandSeat *m_seat;
+    QWaylandSeat *seat_;
 };
 
 #endif // !VIRTUALKEYBOARDV1_H

@@ -26,9 +26,9 @@ public:
     InputMethodManagerV2 *getInputMethodManagerV2() override;
 
 private:
-    TextInputManagerV3 *m_textInputManagerV3;
-    InputMethodManagerV2 *m_inputMethodManagerV2;
-    VirtualKeyboardManagerV1 *m_virtualKeyboardManagerV1;
+    TextInputManagerV3 *textInputManagerV3_;
+    InputMethodManagerV2 *inputMethodManagerV2_;
+    VirtualKeyboardManagerV1 *virtualKeyboardManagerV1_;
 };
 
 #endif // COMPOSITOR_H

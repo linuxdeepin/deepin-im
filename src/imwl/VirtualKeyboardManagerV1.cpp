@@ -21,10 +21,10 @@ protected:
     {
         auto *s = QWaylandSeat::fromSeatResource(seat);
 
-        auto iter = q->m_virtualKeyboards.find(seat);
-        if (iter == q->m_virtualKeyboards.end()) {
+        auto iter = q->virtualKeyboards_.find(seat);
+        if (iter == q->virtualKeyboards_.end()) {
             auto *vk = new VirtualKeyboardV1(seat, q);
-            auto [i, r] = q->m_virtualKeyboards.emplace(seat, vk);
+            auto [i, r] = q->virtualKeyboards_.emplace(seat, vk);
             iter = i;
         }
 

@@ -26,8 +26,8 @@ public:
 
 private:
     std::unique_ptr<InputMethodKeyboardGrabV2Private> d;
-    struct ::wl_resource *m_seat;
-    X11KeyboardGrabber *m_grabber;
+    struct ::wl_resource *seat_;
+    X11KeyboardGrabber *grabber_;
 
     void onX11KeyEvent(int keycode, bool isRelease);
 };

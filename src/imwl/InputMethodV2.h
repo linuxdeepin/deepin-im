@@ -29,11 +29,11 @@ public:
     void sendActivate();
 
 private:
-    Core *m_core;
     std::unique_ptr<InputMethodV2Private> d;
-    struct ::wl_resource *m_seat;
+    Core *core_;
+    struct ::wl_resource *seat_;
 
-    InputMethodKeyboardGrabV2 *m_grab;
+    InputMethodKeyboardGrabV2 *grab_;
 };
 
 #endif // !INPUTMETHODV2_H

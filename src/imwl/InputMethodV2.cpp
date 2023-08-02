@@ -53,7 +53,7 @@ protected:
 
     void zwp_input_method_v2_grab_keyboard(Resource *resource, uint32_t keyboard) override
     {
-        q->m_grab->add(resource->client(), keyboard);
+        q->grab_->add(resource->client(), keyboard);
     }
 
     void zwp_input_method_v2_destroy(Resource *resource) override
@@ -66,15 +66,15 @@ private:
 
     TextInputV3 *getTextInputV3()
     {
-        return q->m_core->getTextInputManagerV3()->getTextInputV4BySeat(q->m_seat);
+        return q->core_->getTextInputManagerV3()->getTextInputV4BySeat(q->seat_);
     }
 };
 
 InputMethodV2::InputMethodV2(Core *core, struct ::wl_resource *seat, QObject *parent)
     : QObject(parent)
-    , m_core(core)
-    , m_seat(seat)
-    , m_grab(new InputMethodKeyboardGrabV2(seat, this))
+    , core_(core)
+    , seat_(seat)
+    , grab_(new InputMethodKeyboardGrabV2(seat, this))
 {
 }
 

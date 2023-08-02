@@ -28,9 +28,9 @@ public:
     InputMethodV2 *getInputMethodV2BySeat(struct ::wl_resource *seat);
 
 private:
-    Core *m_core;
     std::unique_ptr<InputMethodManagerV2Private> d;
-    std::unordered_map<struct ::wl_resource * /* seat */, InputMethodV2 *> m_inputmethods;
+    Core *core_;
+    std::unordered_map<struct ::wl_resource * /* seat */, InputMethodV2 *> inputmethods_;
 };
 
 #endif // !INPUTMETHODMANAGERV2_H

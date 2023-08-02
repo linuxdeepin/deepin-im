@@ -31,7 +31,7 @@ protected:
     {
         m_enabled.emplace(resource);
 
-        auto *im = q->m_core->getInputMethodManagerV2()->getInputMethodV2BySeat(q->m_seat);
+        auto *im = q->core_->getInputMethodManagerV2()->getInputMethodV2BySeat(q->seat_);
         im->sendActivate();
     }
 
@@ -39,7 +39,7 @@ protected:
     {
         m_enabled.erase(resource);
 
-        auto *im = q->m_core->getInputMethodManagerV2()->getInputMethodV2BySeat(q->m_seat);
+        auto *im = q->core_->getInputMethodManagerV2()->getInputMethodV2BySeat(q->seat_);
         im->sendDeactivate();
     }
 
@@ -72,7 +72,7 @@ private:
 
 TextInputV3::TextInputV3(Core *core, struct ::wl_resource *seat, QObject *parent)
     : QObject(parent)
-    , m_core(core)
+    , core_(core)
     , d(new TextInputV3Private(this))
 {
 }

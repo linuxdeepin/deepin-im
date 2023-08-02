@@ -26,7 +26,7 @@ public:
 
 private:
     std::unique_ptr<VirtualKeyboardManagerV1Private> d;
-    std::unordered_map<struct ::wl_resource * /* seat */, VirtualKeyboardV1 *> m_virtualKeyboards;
+    std::unordered_map<struct ::wl_resource * /* seat */, VirtualKeyboardV1 *> virtualKeyboards_;
 };
 
 #endif // !VIRTUALKEYBOARDMANAGERV1_H

@@ -19,10 +19,10 @@ protected:
                                                       struct ::wl_resource *seat,
                                                       uint32_t input_method) override
     {
-        auto iter = q->m_inputmethods.find(seat);
-        if (iter == q->m_inputmethods.end()) {
-            auto *im = new InputMethodV2(q->m_core, seat, q);
-            auto [i, r] = q->m_inputmethods.emplace(seat, im);
+        auto iter = q->inputmethods_.find(seat);
+        if (iter == q->inputmethods_.end()) {
+            auto *im = new InputMethodV2(q->core_, seat, q);
+            auto [i, r] = q->inputmethods_.emplace(seat, im);
             iter = i;
         }
 
@@ -37,8 +37,8 @@ private:
 
 InputMethodManagerV2::InputMethodManagerV2(Core *core, QObject *parent)
     : QObject(parent)
-    , m_core(core)
     , d(new InputMethodManagerV2Private(this))
+    , core_(core)
 {
 }
 
@@ -48,5 +48,5 @@ INIT_FUNCS(InputMethodManagerV2)
 
 InputMethodV2 *InputMethodManagerV2::getInputMethodV2BySeat(struct ::wl_resource *seat)
 {
-    return m_inputmethods.at(seat);
+    return inputmethods_.at(seat);
 }

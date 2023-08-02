@@ -14,19 +14,19 @@ X11KeyboardGrabber::X11KeyboardGrabber(QObject *parent)
     : QObject(parent)
 {
     int screenDefaultNbr;
-    m_xconn.reset(xcb_connect(nullptr, &screenDefaultNbr));
+    xconn_.reset(xcb_connect(nullptr, &screenDefaultNbr));
 
-    if (int err = xcb_connection_has_error(m_xconn.get())) {
+    if (int err = xcb_connection_has_error(xconn_.get())) {
         qWarning() << "xcb connect failed";
         return;
     }
 
-    m_xcbFd = xcb_get_file_descriptor(m_xconn.get());
-    m_socketNotifier = new QSocketNotifier(m_xcbFd, QSocketNotifier::Type::Read, this);
-    connect(m_socketNotifier, &QSocketNotifier::activated, this, &X11KeyboardGrabber::onXCBEvent);
+    xcbFd_ = xcb_get_file_descriptor(xconn_.get());
+    socketNotifier_ = new QSocketNotifier(xcbFd_, QSocketNotifier::Type::Read, this);
+    connect(socketNotifier_, &QSocketNotifier::activated, this, &X11KeyboardGrabber::onXCBEvent);
 
-    m_setup = xcb_get_setup(m_xconn.get());
-    m_screen = screenOfDisplay(screenDefaultNbr);
+    setup_ = xcb_get_setup(xconn_.get());
+    screen_ = screenOfDisplay(screenDefaultNbr);
 
     initXinputExtension();
 }
@@ -36,14 +36,14 @@ X11KeyboardGrabber::~X11KeyboardGrabber() { }
 void X11KeyboardGrabber::onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationEvent)
 {
     std::unique_ptr<xcb_generic_event_t> event;
-    while (event.reset(xcb_poll_for_event(m_xconn.get())), event) {
+    while (event.reset(xcb_poll_for_event(xconn_.get())), event) {
         auto responseType = event->response_type & ~0x80;
         if (responseType != XCB_GE_GENERIC) {
             continue;
         }
 
         auto *ge = reinterpret_cast<xcb_ge_generic_event_t *>(event.get());
-        if (ge->extension != m_xinput2OPCode) {
+        if (ge->extension != xinput2OPCode_) {
             continue;
         }
 
@@ -61,7 +61,7 @@ void X11KeyboardGrabber::onXCBEvent(QSocketDescriptor socket, QSocketNotifier::T
 
 xcb_screen_t *X11KeyboardGrabber::screenOfDisplay(int screen)
 {
-    xcb_screen_iterator_t iter = xcb_setup_roots_iterator(m_setup);
+    xcb_screen_iterator_t iter = xcb_setup_roots_iterator(setup_);
     for (; iter.rem; --screen, xcb_screen_next(&iter)) {
         if (screen == 0) {
             return iter.data;
@@ -75,16 +75,16 @@ void X11KeyboardGrabber::initXinputExtension()
 {
     {
         const char *extname = "XInputExtension";
-        auto reply = XCB_REPLY(xcb_query_extension, m_xconn.get(), strlen(extname), extname);
+        auto reply = XCB_REPLY(xcb_query_extension, xconn_.get(), strlen(extname), extname);
         if (!reply->present) {
             throw std::runtime_error("XInput extension is not available");
         }
-        m_xinput2OPCode = reply->major_opcode;
+        xinput2OPCode_ = reply->major_opcode;
     }
 
     {
         auto reply = XCB_REPLY(xcb_input_xi_query_version,
-                               m_xconn.get(),
+                               xconn_.get(),
                                XCB_INPUT_MAJOR_VERSION,
                                XCB_INPUT_MINOR_VERSION);
         if (!reply || reply->major_version != 2) {
@@ -104,8 +104,8 @@ void X11KeyboardGrabber::initXinputExtension()
     mask.head.mask_len = sizeof(mask.mask) / sizeof(uint32_t);
     mask.mask = static_cast<xcb_input_xi_event_mask_t>(XCB_INPUT_XI_EVENT_MASK_RAW_KEY_PRESS
                                                        | XCB_INPUT_XI_EVENT_MASK_RAW_KEY_RELEASE);
-    auto cookie = xcb_input_xi_select_events(m_xconn.get(), m_screen->root, 1, &mask.head);
-    auto err = xcb_request_check(m_xconn.get(), cookie);
+    auto cookie = xcb_input_xi_select_events(xconn_.get(), screen_->root, 1, &mask.head);
+    auto err = xcb_request_check(xconn_.get(), cookie);
     if (err) {
         throw std::runtime_error("xcb_input_xi_select_events failed");
     }

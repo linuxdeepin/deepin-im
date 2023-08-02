@@ -54,7 +54,7 @@ protected:
                                      uint32_t key,
                                      uint32_t state) override
     {
-        q->m_seat->sendKeyEvent(key, state);
+        q->seat_->sendKeyEvent(key, state);
     }
 
     void zwp_virtual_keyboard_v1_modifiers(Resource *resource,
@@ -81,7 +81,7 @@ private:
 VirtualKeyboardV1::VirtualKeyboardV1(struct ::wl_resource *seat, QObject *parent)
     : QObject(parent)
     , d(new VirtualKeyboardV1Private(this))
-    , m_seat(QWaylandSeat::fromSeatResource(seat))
+    , seat_(QWaylandSeat::fromSeatResource(seat))
 {
 }
 

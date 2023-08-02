@@ -23,10 +23,10 @@ protected:
                                                   uint32_t id,
                                                   struct ::wl_resource *seat) override
     {
-        auto iter = q->m_textInputs.find(seat);
-        if (iter == q->m_textInputs.end()) {
-            auto *ti = new TextInputV3(q->m_core, seat, q);
-            auto [i, r] = q->m_textInputs.emplace(seat, ti);
+        auto iter = q->textInputs_.find(seat);
+        if (iter == q->textInputs_.end()) {
+            auto *ti = new TextInputV3(q->core_, seat, q);
+            auto [i, r] = q->textInputs_.emplace(seat, ti);
             iter = i;
         }
 
@@ -39,7 +39,7 @@ private:
 
 TextInputManagerV3::TextInputManagerV3(Core *core, QObject *parent)
     : QObject(parent)
-    , m_core(core)
+    , core_(core)
     , d(new TextInputManagerV3Private(this))
 {
 }
@@ -50,5 +50,5 @@ INIT_FUNCS(TextInputManagerV3)
 
 TextInputV3 *TextInputManagerV3::getTextInputV4BySeat(struct ::wl_resource *seat)
 {
-    return m_textInputs.at(seat);
+    return textInputs_.at(seat);
 }
