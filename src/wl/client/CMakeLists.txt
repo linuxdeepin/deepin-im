@@ -22,7 +22,7 @@ set(WLC_SOURCES
 add_library(wlc OBJECT)
 
 target_sources(wlc
-  PUBLIC ${WLC_SOURCES}
+  PRIVATE ${WLC_SOURCES}
 )
 
 target_link_libraries(wlc PRIVATE
