@@ -72,6 +72,7 @@ private:
 
 InputMethodV2::InputMethodV2(Core *core, struct ::wl_resource *seat, QObject *parent)
     : QObject(parent)
+    , d(new InputMethodV2Private(this))
     , core_(core)
     , seat_(seat)
     , grab_(new InputMethodKeyboardGrabV2(seat, this))
