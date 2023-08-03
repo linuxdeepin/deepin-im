@@ -39,9 +39,9 @@ void WLFrontend::init()
 
 void WLFrontend::reloadSeats()
 {
+    auto seats = wl_->getGlobals<wl::client::Seat>();
     auto imManager = wl_->getGlobal<wl::client::ZwpInputMethodManagerV2>();
     auto vkManager = wl_->getGlobal<wl::client::ZwpVirtualKeyboardManagerV1>();
-    auto seats = wl_->getGlobals<wl::client::Seat>();
 
     for (auto &seat : seats) {
         auto vk = vkManager->createVirtualKeyboard(seat);
