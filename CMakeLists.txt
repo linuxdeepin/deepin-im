@@ -36,6 +36,11 @@ pkg_check_modules(libinput REQUIRED IMPORTED_TARGET libinput)
 pkg_check_modules(IBUS "ibus-1.0>=1.5.0" IMPORTED_TARGET)
 pkg_check_modules(GOBJECT gobject-2.0 IMPORTED_TARGET)
 
+pkg_check_modules(Gtk3 REQUIRED IMPORTED_TARGET "gtk+-3.0")
+pkg_check_modules(Gdk3 REQUIRED IMPORTED_TARGET "gdk-3.0")
+pkg_get_variable(GTK3_BINARY_VERSION "gtk+-3.0" "gtk_binary_version")
+pkg_get_variable(GTK3_TARGETS "gtk+-3.0" "targets")
+
 add_library(wayland_protocols OBJECT)
 
 ecm_add_wayland_server_protocol(wayland_protocols
