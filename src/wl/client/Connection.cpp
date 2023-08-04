@@ -21,11 +21,11 @@ Connection::Connection(const std::string &name, QObject *parent)
         qWarning() << "Failed to connect to Wayland server" << wl_display_get_error(display_.get());
     }
 
-    init();
-
     auto *registry = wl_display_get_registry(display_.get());
     wl_registry_add_listener(registry, &registry_listener_, this);
     roundtrip();
+
+    init();
 }
 
 Connection::~Connection()
@@ -38,6 +38,12 @@ Connection::~Connection()
 
 void Connection::init()
 {
+    qDebug() << "wl_display_prepare_read";
+    while (wl_display_prepare_read(display_.get()) < 0) {
+        wl_display_dispatch_pending(display_.get());
+    }
+    wl_display_flush(display_.get());
+
     fd_ = wl_display_get_fd(display_.get());
     if (fd_ < 0) {
         qWarning() << "Failed to get Wayland display fd";
@@ -54,7 +60,21 @@ void Connection::dispatch()
         return;
     }
 
-    roundtrip();
+    qDebug() << "dispatch";
+
+    if (wl_display_read_events(display_.get()) < 0) {
+        qWarning() << "failed to read events from the Wayland socket";
+        return;
+    }
+
+    while (wl_display_prepare_read(display_.get()) != 0) {
+        if (wl_display_dispatch_pending(display_.get()) < 0) {
+            qWarning() << "failed to dispatch pending Wayland events";
+            return;
+        }
+    }
+
+    wl_display_flush(display_.get());
 }
 
 void Connection::roundtrip()
