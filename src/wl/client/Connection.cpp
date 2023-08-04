@@ -28,13 +28,7 @@ Connection::Connection(const std::string &name, QObject *parent)
     init();
 }
 
-Connection::~Connection()
-{
-    if (display_) {
-        wl_display_disconnect(display_.get());
-        display_ = nullptr;
-    }
-}
+Connection::~Connection() { }
 
 void Connection::init()
 {
