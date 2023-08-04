@@ -100,7 +100,15 @@ void Connection::onGlobal([[maybe_unused]] struct wl_registry *registry,
 
 void Connection::onGlobalRemove([[maybe_unused]] struct wl_registry *wl_registry, uint32_t name)
 {
+    for (auto &[_, t] : bindedGlobals_) {
+        if (t.erase(name)) {
+            break;
+        }
+    }
+
     for (auto &gi : globals_) {
-        gi.second.names.erase(name);
+        if (gi.second.names.erase(name)) {
+            break;
+        }
     }
 }
