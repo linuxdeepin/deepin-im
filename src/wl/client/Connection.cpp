@@ -8,22 +8,13 @@
 
 using namespace wl::client;
 
-const wl_registry_listener Connection::registry_listener_ = {
-    CallbackWrapper<&Connection::onGlobal>::func,
-    CallbackWrapper<&Connection::onGlobalRemove>::func,
-};
-
 Connection::Connection(const std::string &name, QObject *parent)
-    : QObject(parent)
+    : ConnectionBase(parent)
     , display_(wl_display_connect(name.empty() ? nullptr : name.c_str()))
 {
     if (!display_) {
-        qWarning() << "Failed to connect to Wayland server" << wl_display_get_error(display_.get());
+        qWarning() << "Failed to connect to Wayland server" << wl_display_get_error(display());
     }
-
-    auto *registry = wl_display_get_registry(display_.get());
-    wl_registry_add_listener(registry, &registry_listener_, this);
-    roundtrip();
 
     init();
 }
@@ -32,13 +23,15 @@ Connection::~Connection() { }
 
 void Connection::init()
 {
-    qDebug() << "wl_display_prepare_read";
-    while (wl_display_prepare_read(display_.get()) < 0) {
-        wl_display_dispatch_pending(display_.get());
-    }
-    wl_display_flush(display_.get());
+    ConnectionBase::init();
 
-    fd_ = wl_display_get_fd(display_.get());
+    qDebug() << "wl_display_prepare_read";
+    while (wl_display_prepare_read(display()) < 0) {
+        wl_display_dispatch_pending(display());
+    }
+    wl_display_flush(display());
+
+    fd_ = wl_display_get_fd(display());
     if (fd_ < 0) {
         qWarning() << "Failed to get Wayland display fd";
         return;
@@ -56,53 +49,22 @@ void Connection::dispatch()
 
     qDebug() << "dispatch";
 
-    if (wl_display_read_events(display_.get()) < 0) {
+    qWarning() << "1111111111111111111111111";
+    if (wl_display_read_events(display()) < 0) {
         qWarning() << "failed to read events from the Wayland socket";
         return;
     }
 
-    while (wl_display_prepare_read(display_.get()) != 0) {
-        if (wl_display_dispatch_pending(display_.get()) < 0) {
+    qWarning() << "2222222222222222222222222";
+    while (wl_display_prepare_read(display()) != 0) {
+        qWarning() << "333333333333333333333333333";
+        if (wl_display_dispatch_pending(display()) < 0) {
             qWarning() << "failed to dispatch pending Wayland events";
             return;
         }
     }
 
-    wl_display_flush(display_.get());
-}
-
-void Connection::roundtrip()
-{
-    wl_display_roundtrip(display_.get());
-}
-
-void Connection::flush()
-{
-    wl_display_flush(display_.get());
-}
-
-void Connection::onGlobal([[maybe_unused]] struct wl_registry *registry,
-                          uint32_t name,
-                          const char *interface,
-                          uint32_t version)
-{
-    qWarning() << "onGlobal:" << name << interface << version;
-    auto &gi = globals_[interface];
-    gi.version = version;
-    gi.names.emplace(name);
-}
-
-void Connection::onGlobalRemove([[maybe_unused]] struct wl_registry *wl_registry, uint32_t name)
-{
-    for (auto &[_, t] : bindedGlobals_) {
-        if (t.erase(name)) {
-            break;
-        }
-    }
-
-    for (auto &gi : globals_) {
-        if (gi.second.names.erase(name)) {
-            break;
-        }
-    }
+    qWarning() << "444444444444444444444444444444";
+    wl_display_flush(display());
+    qWarning() << "5555555555555555555555555555555";
 }

@@ -7,7 +7,7 @@
 
 namespace wl {
 namespace client {
-class Connection;
+class ConnectionFd;
 class ZwpTextInputV3;
 } // namespace client
 } // namespace wl
@@ -47,7 +47,7 @@ signals:
     void forwardKey(uint32_t keyValue, uint32_t state, bool type);
 
 private:
-    wl::client::Connection *wl_;
+    wl::client::ConnectionFd *wl_;
     bool available_;
     std::shared_ptr<wl::client::ZwpTextInputV3> ti_;
     static const zwp_text_input_v3_listener tiListener;
