@@ -15,11 +15,11 @@
 namespace wl {
 namespace client {
 
-class ConnectionFd : public ConnectionBase
+class ConnectionRaw : public ConnectionBase
 {
 public:
-    ConnectionFd(struct wl_display *display, QObject *parent = nullptr);
-    ~ConnectionFd();
+    ConnectionRaw(struct wl_display *display, QObject *parent = nullptr);
+    ~ConnectionRaw();
 
     struct wl_display *display() const override { return display_; }
 

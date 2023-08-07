@@ -1,8 +1,8 @@
 set(WLC_SOURCES
   ConnectionBase.h
   ConnectionBase.cpp
-  ConnectionFd.h
-  ConnectionFd.cpp
+  ConnectionRaw.h
+  ConnectionRaw.cpp
   Connection.h
   Connection.cpp
   Seat.h
