@@ -1,7 +1,6 @@
 #ifndef WL_CLIENT_CONNECTIONBASE_H
 #define WL_CLIENT_CONNECTIONBASE_H
 
-#include "common/common.h"
 #include "wl/Type.h"
 
 #include <wayland-client-protocol.h>
@@ -90,8 +89,6 @@ private:
     std::unordered_map<std::string, globalInfo> globals_;
     std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<void>>>
         bindedGlobals_;
-
-    void dispatch();
 
     void
     onGlobal(struct wl_registry *registry, uint32_t name, const char *interface, uint32_t version);

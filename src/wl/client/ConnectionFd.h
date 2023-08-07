@@ -2,7 +2,6 @@
 #define WL_CLIENT_CONNECTIONFD_H
 
 #include "ConnectionBase.h"
-#include "common/common.h"
 
 #include <wayland-client-protocol.h>
 

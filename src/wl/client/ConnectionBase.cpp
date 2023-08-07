@@ -27,30 +27,6 @@ void ConnectionBase::init()
     roundtrip();
 }
 
-void ConnectionBase::dispatch()
-{
-    qDebug() << "dispatch";
-
-    qWarning() << "1111111111111111111111111";
-    if (wl_display_read_events(display()) < 0) {
-        qWarning() << "failed to read events from the Wayland socket";
-        return;
-    }
-
-    qWarning() << "2222222222222222222222222";
-    while (wl_display_prepare_read(display()) != 0) {
-        qWarning() << "333333333333333333333333333";
-        if (wl_display_dispatch_pending(display()) < 0) {
-            qWarning() << "failed to dispatch pending Wayland events";
-            return;
-        }
-    }
-
-    qWarning() << "444444444444444444444444444444";
-    wl_display_flush(display());
-    qWarning() << "5555555555555555555555555555555";
-}
-
 void ConnectionBase::roundtrip()
 {
     wl_display_roundtrip(display());
