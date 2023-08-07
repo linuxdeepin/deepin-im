@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef TEXTINPUTMANAGERV3_H
 #define TEXTINPUTMANAGERV3_H
 

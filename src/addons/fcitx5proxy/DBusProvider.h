@@ -1,7 +1,5 @@
-// SPDX-FileCopyrightText: 2020~2020 CSSlayer <wengxt@gmail.com>
-// SPDX-FileCopyrightText: 2023 Deepin Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
 //
-// SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #ifndef DBUSPROVIDER_H

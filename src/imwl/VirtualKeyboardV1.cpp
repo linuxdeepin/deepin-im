@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include "VirtualKeyboardV1.h"
 
 #include "qwayland-server-virtual-keyboard-unstable-v1.h"
