@@ -2,6 +2,7 @@
 
 #include "common/common.h"
 #include "wayland-text-input-unstable-v3-client-protocol.h"
+#include "wl/client/Connection.h"
 #include "wl/client/ConnectionRaw.h"
 #include "wl/client/Seat.h"
 #include "wl/client/ZwpTextInputManagerV3.h"
@@ -26,11 +27,15 @@ InputContextProxy::InputContextProxy(QObject *parent)
     : QObject(parent)
     , available_(true)
 {
-    QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
-    struct wl_display *wl_dpy =
-        (struct wl_display *)native->nativeResourceForWindow("display", NULL);
+    if (QGuiApplication::platformName() == "wayland") {
+        QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
+        struct wl_display *wl_dpy =
+            (struct wl_display *)native->nativeResourceForWindow("display", NULL);
 
-    wl_ = new wl::client::ConnectionRaw(wl_dpy, this);
+        wl_ = new wl::client::ConnectionRaw(wl_dpy, this);
+    } else {
+        wl_ = new wl::client::Connection("imfakewl", this);
+    }
 
     auto seats = wl_->getGlobals<wl::client::Seat>();
     auto tiManager = wl_->getGlobal<wl::client::ZwpTextInputManagerV3>();
