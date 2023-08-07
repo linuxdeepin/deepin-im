@@ -124,11 +124,11 @@ void dim_im_context_register_type(GTypeModule *type_module)
                                                         gtk_im_context_get_type(),
                                                         "DimIMContext",
                                                         &type_info,
-                                                        G_TYPE_FLAG_NONE);
+                                                        (GTypeFlags)0);
     } else {
         _im_context_gtype = g_type_register_static(gtk_im_context_get_type(),
                                                    "DimIMContext",
                                                    &type_info,
-                                                   G_TYPE_FLAG_NONE);
+                                                   (GTypeFlags)0);
     }
 }
