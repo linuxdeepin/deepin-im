@@ -1,0 +1,18 @@
+set(GTK_TEST_DEMO_SOURCES
+  main.cpp
+)
+
+add_executable(gtk_im_demo
+  ${GTK_TEST_DEMO_SOURCES}
+)
+
+target_link_libraries(gtk_im_demo
+  PkgConfig::Gtk3
+)
+
+install(TARGETS gtk_im_demo
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+

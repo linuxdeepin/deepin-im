@@ -1,0 +1,2 @@
+add_subdirectory(qttestdemo)
+add_subdirectory(gtktestdemo)
