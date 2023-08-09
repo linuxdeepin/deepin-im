@@ -5,12 +5,12 @@
 #include "InputMethodKeyboardGrabV2.h"
 
 #include "X11KeyboardGrabber.h"
-#include "qwayland-server-input-method-unstable-v2.h"
+#include "wl/server/ZwpInputMethodKeyboardGrabV2.h"
 
 #include <QDateTime>
 #include <QDebug>
 
-class InputMethodKeyboardGrabV2Private : public QtWaylandServer::zwp_input_method_keyboard_grab_v2
+class InputMethodKeyboardGrabV2Private : public wl::server::ZwpInputMethodKeyboardGrabV2
 {
 public:
     InputMethodKeyboardGrabV2Private(InputMethodKeyboardGrabV2 *q)
@@ -25,14 +25,14 @@ public:
         uint32_t ts = QDateTime::currentSecsSinceEpoch();
         const auto resources = resourceMap();
         for (auto r : resources) {
-            send_key(r->handle, nextSerial(), ts, key, state);
+            // send_key(r->handle, nextSerial(), ts, key, state);
         }
     }
 
 protected:
-    virtual void zwp_input_method_keyboard_grab_v2_release(Resource *resource) override
+    virtual void zwp_input_method_keyboard_grab_v2_release(wl::server::Resource *resource) override
     {
-        wl_resource_destroy(resource->handle);
+        resource->destroy();
     }
 
 private:

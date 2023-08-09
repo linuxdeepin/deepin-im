@@ -5,11 +5,9 @@
 #include "TextInputManagerV3.h"
 
 #include "TextInputV3.h"
-#include "qwayland-server-text-input-unstable-v3.h"
+#include "wl/server/ZwpTextInputManagerV3.h"
 
-#include <QtWaylandCompositor/QWaylandSeat>
-
-class TextInputManagerV3Private : public QtWaylandServer::zwp_text_input_manager_v3
+class TextInputManagerV3Private : public wl::server::ZwpTextInputManagerV3
 {
 public:
     TextInputManagerV3Private(TextInputManagerV3 *q)
@@ -18,12 +16,12 @@ public:
     }
 
 protected:
-    void zwp_text_input_manager_v3_destroy(Resource *resource) override
+    void zwp_text_input_manager_v3_destroy(wl::server::Resource *resource) override
     {
-        wl_resource_destroy(resource->handle);
+        resource->destroy();
     }
 
-    void zwp_text_input_manager_v3_get_text_input(Resource *resource,
+    void zwp_text_input_manager_v3_get_text_input(wl::server::Resource *resource,
                                                   uint32_t id,
                                                   struct ::wl_resource *seat) override
     {
@@ -41,9 +39,8 @@ private:
     TextInputManagerV3 *q;
 };
 
-TextInputManagerV3::TextInputManagerV3(Core *core, QObject *parent)
-    : QObject(parent)
-    , core_(core)
+TextInputManagerV3::TextInputManagerV3(Core *core)
+    : core_(core)
     , d(new TextInputManagerV3Private(this))
 {
 }

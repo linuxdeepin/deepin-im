@@ -4,14 +4,14 @@
 
 #include "Compositor.h"
 
-#include <QGuiApplication>
+#include <QCoreApplication>
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
+    QCoreApplication app(argc, argv);
 
     Compositor compositor;
-    compositor.setSocketName("imfakewl");
+    compositor.addSocket("imfakewl");
     compositor.create();
 
     return app.exec();

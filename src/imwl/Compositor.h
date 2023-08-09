@@ -6,27 +6,30 @@
 #define COMPOSITOR_H
 
 #include "Core.h"
+#include "wl/server/Server.h"
 
-#include <QtWaylandCompositor/QWaylandCompositor>
+#include <memory>
+
+class QSocketNotifier;
 
 class TextInputManagerV3;
 class InputMethodManagerV2;
 class VirtualKeyboardManagerV1;
 
-class Compositor : public QWaylandCompositor, public Core
+class Compositor : public wl::server::Server, public Core
 {
-    Q_OBJECT
-
 public:
     Compositor();
-    ~Compositor() override;
+    ~Compositor();
 
-    void create() override;
+    void create();
 
     TextInputManagerV3 *getTextInputManagerV3() override;
     InputMethodManagerV2 *getInputMethodManagerV2() override;
 
 private:
+    std::unique_ptr<QSocketNotifier> noti_;
+
     TextInputManagerV3 *textInputManagerV3_;
     InputMethodManagerV2 *inputMethodManagerV2_;
     VirtualKeyboardManagerV1 *virtualKeyboardManagerV1_;

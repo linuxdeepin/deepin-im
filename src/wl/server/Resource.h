@@ -2,35 +2,55 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef WL_RESOURCE_H
-#define WL_RESOURCE_H
-
-#include "common/common.h"
+#ifndef WL_SERVER_RESOURCE_H
+#define WL_SERVER_RESOURCE_H
 
 #include <wayland-server-core.h>
 
+#include <functional>
 #include <memory>
 
 namespace wl {
 namespace server {
 
-class Resource
+class Resource : public std::enable_shared_from_this<Resource>
 {
 public:
     Resource(struct wl_client *client,
              const struct wl_interface *interface,
              int version,
              uint32_t id);
+    ~Resource() = default;
+
+    struct wl_resource *handle;
+
+    void *object() { return object_; }
 
     void setImplementation(const void *implementation,
-                           void *data,
-                           wl_resource_destroy_func_t destroy);
+                           void *object,
+                           wl_resource_destroy_func_t onDestroy);
+    struct wl_client *client();
+    void destroy();
 
 private:
-    std::unique_ptr<wl_resource, Deleter<wl_resource_destroy>> resource_;
+    void *object_;
+};
+
+template<auto F>
+struct ResourceDestroyWrapper;
+
+template<typename C, void (C::*F)(Resource *)>
+struct ResourceDestroyWrapper<F>
+{
+    static void func(struct wl_resource *resource)
+    {
+        auto *r = static_cast<Resource *>(wl_resource_get_user_data(resource));
+        auto *o = static_cast<C *>(r->object());
+        (o->*F)(r);
+    }
 };
 
 } // namespace server
 } // namespace wl
 
-#endif // !WL_RESOURCE_H
+#endif // !WL_SERVER_RESOURCE_H

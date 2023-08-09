@@ -26,6 +26,9 @@ public:
     bool addSocket(const std::string &name);
     void run();
 
+    std::unique_ptr<wl_event_source, Deleter<wl_event_source_remove>>
+    eventLoopAddFd(int fd, uint32_t mask, wl_event_loop_fd_func_t func, void *data);
+
 private:
     std::unique_ptr<wl_display, Deleter<wl_display_destroy>> display_;
 };

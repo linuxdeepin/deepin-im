@@ -9,22 +9,32 @@
 #include "wayland-virtual-keyboard-unstable-v1-server-protocol.h"
 
 #include <memory>
+#include <unordered_map>
 
 namespace wl {
 namespace server {
 
-class ZwpVirtualKeyboardManagerV1 : public BASE_TYPE(zwp_virtual_keyboard_manager_v1)
+class ZwpVirtualKeyboardV1;
+
+class ZwpVirtualKeyboardManagerV1
+    : public Type<ZwpVirtualKeyboardManagerV1, zwp_virtual_keyboard_manager_v1>
 {
     friend class Type;
 
 public:
-    ZwpVirtualKeyboardManagerV1(struct wl_client *client, uint32_t id);
+    ZwpVirtualKeyboardManagerV1();
     ~ZwpVirtualKeyboardManagerV1();
 
-private:
-    void createVirtualKeyboard(struct wl_client *client, struct wl_resource *seat, uint32_t id);
+protected:
+    virtual void zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(
+        wl::server::Resource *resource, struct ::wl_resource *seat, uint32_t id) = 0;
 
-    void resourceDestroy() override;
+private:
+    static const struct zwp_virtual_keyboard_manager_v1_interface impl;
+    std::unordered_map<struct ::wl_resource * /* seat */, std::shared_ptr<ZwpVirtualKeyboardV1> *>
+        virtualKeyboards_;
+
+    void createVirtualKeyboard(struct wl_client *client, struct wl_resource *seat, uint32_t id);
 };
 
 } // namespace server

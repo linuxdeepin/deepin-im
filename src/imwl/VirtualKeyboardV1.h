@@ -13,7 +13,11 @@ struct wl_client;
 struct wl_display;
 struct wl_resource;
 
-class QWaylandSeat;
+namespace wl {
+namespace server {
+class Seat;
+}
+} // namespace wl
 
 class VirtualKeyboardV1Private;
 
@@ -31,7 +35,7 @@ public:
 
 private:
     std::unique_ptr<VirtualKeyboardV1Private> d;
-    QWaylandSeat *seat_;
+    wl::server::Seat *seat_;
 };
 
 #endif // !VIRTUALKEYBOARDV1_H

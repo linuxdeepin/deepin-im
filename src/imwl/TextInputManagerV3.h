@@ -24,7 +24,7 @@ class TextInputManagerV3 : public QObject
     friend class TextInputManagerV3Private;
 
 public:
-    TextInputManagerV3(Core *core, QObject *parent);
+    TextInputManagerV3(Core *core);
     ~TextInputManagerV3();
 
     INIT_FUNCS_DEF

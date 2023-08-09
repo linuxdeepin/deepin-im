@@ -5,12 +5,10 @@
 #include "VirtualKeyboardManagerV1.h"
 
 #include "VirtualKeyboardV1.h"
-#include "qwayland-server-virtual-keyboard-unstable-v1.h"
+#include "wl/server/Seat.h"
+#include "wl/server/ZwpVirtualKeyboardManagerV1.h"
 
-#include <QWaylandKeymap>
-#include <QWaylandSeat>
-
-class VirtualKeyboardManagerV1Private : public QtWaylandServer::zwp_virtual_keyboard_manager_v1
+class VirtualKeyboardManagerV1Private : public wl::server::ZwpVirtualKeyboardManagerV1
 {
 public:
     VirtualKeyboardManagerV1Private(VirtualKeyboardManagerV1 *q)
@@ -19,11 +17,11 @@ public:
     }
 
 protected:
-    void zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(Resource *resource,
+    void zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(wl::server::Resource *resource,
                                                                  struct ::wl_resource *seat,
                                                                  uint32_t id) override
     {
-        auto *s = QWaylandSeat::fromSeatResource(seat);
+        auto *s = wl::server::Seat::fromResource(seat);
 
         auto iter = q->virtualKeyboards_.find(seat);
         if (iter == q->virtualKeyboards_.end()) {
@@ -39,9 +37,8 @@ private:
     VirtualKeyboardManagerV1 *q;
 };
 
-VirtualKeyboardManagerV1::VirtualKeyboardManagerV1(QObject *paernt)
-    : QObject(paernt)
-    , d(new VirtualKeyboardManagerV1Private(this))
+VirtualKeyboardManagerV1::VirtualKeyboardManagerV1()
+    : d(new VirtualKeyboardManagerV1Private(this))
 {
 }
 

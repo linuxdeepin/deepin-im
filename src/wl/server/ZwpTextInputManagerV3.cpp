@@ -6,14 +6,13 @@
 
 using namespace wl::server;
 
-template<>
-const struct zwp_text_input_manager_v3_interface ZwpTextInputManagerV3::Type::impl = {
+const struct zwp_text_input_manager_v3_interface ZwpTextInputManagerV3::impl = {
     ResourceCallbackWrapper<&ZwpTextInputManagerV3::destroy>::func,
     ResourceCallbackWrapper<&ZwpTextInputManagerV3::getTextInput>::func,
 };
 
-ZwpTextInputManagerV3::ZwpTextInputManagerV3(struct wl_client *client, uint32_t id)
-    : Type(client, id)
+ZwpTextInputManagerV3::ZwpTextInputManagerV3()
+    : Type()
 {
 }
 
@@ -24,5 +23,3 @@ void ZwpTextInputManagerV3::getTextInput([[maybe_unused]] struct wl_client *clie
                                          [[maybe_unused]] struct wl_resource *seat)
 {
 }
-
-void ZwpTextInputManagerV3::resourceDestroy() { }

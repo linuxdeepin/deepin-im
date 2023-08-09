@@ -23,7 +23,7 @@ class VirtualKeyboardManagerV1 : public QObject
     friend class VirtualKeyboardManagerV1Private;
 
 public:
-    VirtualKeyboardManagerV1(QObject *parent);
+    VirtualKeyboardManagerV1();
     ~VirtualKeyboardManagerV1();
 
     INIT_FUNCS_DEF

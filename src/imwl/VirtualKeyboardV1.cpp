@@ -4,17 +4,15 @@
 
 #include "VirtualKeyboardV1.h"
 
-#include "qwayland-server-virtual-keyboard-unstable-v1.h"
+#include "wl/server/Resource.h"
+#include "wl/server/Seat.h"
+#include "wl/server/ZwpVirtualKeyboardV1.h"
 
 #include <xkbcommon/xkbcommon.h>
 
-#include <QKeyEvent>
-#include <QWaylandKeymap>
-#include <QWaylandSeat>
-
 #include <sys/mman.h>
 
-class VirtualKeyboardV1Private : public QtWaylandServer::zwp_virtual_keyboard_v1
+class VirtualKeyboardV1Private : public wl::server::ZwpVirtualKeyboardV1
 {
 public:
     VirtualKeyboardV1Private(VirtualKeyboardV1 *q)
@@ -26,7 +24,7 @@ public:
     ~VirtualKeyboardV1Private() { }
 
 protected:
-    void zwp_virtual_keyboard_v1_keymap(Resource *resource,
+    void zwp_virtual_keyboard_v1_keymap(wl::server::Resource *resource,
                                         uint32_t format,
                                         int32_t fd,
                                         uint32_t size) override
@@ -53,15 +51,15 @@ protected:
         }
     }
 
-    void zwp_virtual_keyboard_v1_key(Resource *resource,
+    void zwp_virtual_keyboard_v1_key(wl::server::Resource *resource,
                                      uint32_t time,
                                      uint32_t key,
                                      uint32_t state) override
     {
-        q->seat_->sendKeyEvent(key, state);
+        // q->seat_->sendKeyEvent(key, state);
     }
 
-    void zwp_virtual_keyboard_v1_modifiers(Resource *resource,
+    void zwp_virtual_keyboard_v1_modifiers(wl::server::Resource *resource,
                                            uint32_t mods_depressed,
                                            uint32_t mods_latched,
                                            uint32_t mods_locked,
@@ -69,9 +67,9 @@ protected:
     {
     }
 
-    void zwp_virtual_keyboard_v1_destroy(Resource *resource) override
+    void zwp_virtual_keyboard_v1_destroy(wl::server::Resource *resource) override
     {
-        wl_resource_destroy(resource->handle);
+        // wl_resource_destroy(resource->handle);
     }
 
 private:
@@ -85,7 +83,7 @@ private:
 VirtualKeyboardV1::VirtualKeyboardV1(struct ::wl_resource *seat, QObject *parent)
     : QObject(parent)
     , d(new VirtualKeyboardV1Private(this))
-    , seat_(QWaylandSeat::fromSeatResource(seat))
+    , seat_(wl::server::Seat::fromResource(seat))
 {
 }
 

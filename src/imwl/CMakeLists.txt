@@ -1,4 +1,4 @@
-qt_add_executable(imwl
+add_executable(imwl
     main.cpp
     common.cpp common.h
     Core.h
@@ -13,17 +13,9 @@ qt_add_executable(imwl
     X11KeyboardGrabber.cpp X11KeyboardGrabber.h
 )
 
-qt6_generate_wayland_protocol_server_sources(imwl
-    FILES
-        ${CMAKE_SOURCE_DIR}/misc/wayland-protocols/text-input-unstable-v3.xml
-        ${CMAKE_SOURCE_DIR}/misc/wayland-protocols/input-method-unstable-v2.xml
-        ${CMAKE_SOURCE_DIR}/misc/wayland-protocols/virtual-keyboard-unstable-v1.xml
-)
-
 target_link_libraries(imwl PUBLIC
     Qt::Core
-    Qt::Gui
-    Qt::WaylandCompositor
+    wls
     PkgConfig::xcb
     PkgConfig::xcb-xinput
     PkgConfig::xkbcommon

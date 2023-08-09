@@ -11,18 +11,24 @@
 namespace wl {
 namespace server {
 
-class ZwpTextInputManagerV3 : public BASE_TYPE(zwp_text_input_manager_v3)
+class ZwpTextInputManagerV3 : public Type<ZwpTextInputManagerV3, zwp_text_input_manager_v3>
 {
     friend class Type;
 
 public:
-    ZwpTextInputManagerV3(struct wl_client *client, uint32_t id);
+    ZwpTextInputManagerV3();
+
+protected:
+    virtual void zwp_text_input_manager_v3_destroy(wl::server::Resource *resource) = 0;
+    virtual void zwp_text_input_manager_v3_get_text_input(wl::server::Resource *resource,
+                                                          uint32_t id,
+                                                          struct ::wl_resource *seat) = 0;
 
 private:
+    static const struct zwp_text_input_manager_v3_interface impl;
+
     void destroy(struct wl_client *client);
     void getTextInput(struct wl_client *client, uint32_t id, struct wl_resource *seat);
-
-    void resourceDestroy() override;
 };
 
 } // namespace server

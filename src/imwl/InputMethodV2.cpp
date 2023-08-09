@@ -9,9 +9,9 @@
 #include "TextInputManagerV3.h"
 #include "TextInputV3.h"
 #include "common.h"
-#include "qwayland-server-input-method-unstable-v2.h"
+#include "wl/server/ZwpInputMethodV2.h"
 
-class InputMethodV2Private : public QtWaylandServer::zwp_input_method_v2
+class InputMethodV2Private : public wl::server::ZwpInputMethodV2
 {
 public:
     InputMethodV2Private(InputMethodV2 *q)
@@ -22,14 +22,15 @@ public:
     ~InputMethodV2Private() { }
 
 protected:
-    void zwp_input_method_v2_commit_string(Resource *resource, const QString &text) override
+    void zwp_input_method_v2_commit_string(wl::server::Resource *resource,
+                                           const char *text) override
     {
         auto *im = getTextInputV3();
         im->sendCommitString(text);
     }
 
-    void zwp_input_method_v2_set_preedit_string(Resource *resource,
-                                                const QString &text,
+    void zwp_input_method_v2_set_preedit_string(wl::server::Resource *resource,
+                                                const char *text,
                                                 int32_t cursor_begin,
                                                 int32_t cursor_end) override
     {
@@ -37,32 +38,33 @@ protected:
         im->sendPreeditString(text, cursor_begin, cursor_end);
     }
 
-    void zwp_input_method_v2_delete_surrounding_text(Resource *resource,
+    void zwp_input_method_v2_delete_surrounding_text(wl::server::Resource *resource,
                                                      uint32_t before_length,
                                                      uint32_t after_length) override
     {
     }
 
-    void zwp_input_method_v2_commit(Resource *resource, uint32_t serial) override
+    void zwp_input_method_v2_commit(wl::server::Resource *resource, uint32_t serial) override
     {
         auto *im = getTextInputV3();
         im->sendDone(serial);
     }
 
-    void zwp_input_method_v2_get_input_popup_surface(Resource *resource,
+    void zwp_input_method_v2_get_input_popup_surface(wl::server::Resource *resource,
                                                      uint32_t id,
                                                      struct ::wl_resource *surface) override
     {
     }
 
-    void zwp_input_method_v2_grab_keyboard(Resource *resource, uint32_t keyboard) override
+    void zwp_input_method_v2_grab_keyboard(wl::server::Resource *resource,
+                                           uint32_t keyboard) override
     {
         q->grab_->add(resource->client(), keyboard);
     }
 
-    void zwp_input_method_v2_destroy(Resource *resource) override
+    void zwp_input_method_v2_destroy(wl::server::Resource *resource) override
     {
-        wl_resource_destroy(resource->handle);
+        resource->destroy();
     }
 
 private:
@@ -89,16 +91,16 @@ INIT_FUNCS(InputMethodV2)
 
 void InputMethodV2::sendDeactivate()
 {
-    const auto resources = d->resourceMap();
-    for (auto *resource : resources) {
-        d->send_deactivate(resource->handle);
-    }
+    // const auto resources = d->resourceMap();
+    // for (auto *resource : resources) {
+    //     d->send_deactivate(resource->handle);
+    // }
 }
 
 void InputMethodV2::sendActivate()
 {
-    const auto resources = d->resourceMap();
-    for (auto *resource : resources) {
-        d->send_activate(resource->handle);
-    }
+    // const auto resources = d->resourceMap();
+    // for (auto *resource : resources) {
+    //     d->send_activate(resource->handle);
+    // }
 }

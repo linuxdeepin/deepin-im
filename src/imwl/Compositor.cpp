@@ -8,24 +8,36 @@
 #include "TextInputManagerV3.h"
 #include "VirtualKeyboardManagerV1.h"
 
+#include <QDebug>
+#include <QSocketNotifier>
+
 Compositor::Compositor()
-    : QWaylandCompositor()
 {
+    auto *loop = wl_display_get_event_loop(display());
+    int fd = wl_event_loop_get_fd(loop);
+
+    auto processWaylandEvents = [this, loop] {
+        int ret = wl_event_loop_dispatch(loop, 0);
+        if (ret)
+            qWarning() << "wl_event_loop_dispatch error:" << ret;
+        wl_display_flush_clients(display());
+    };
+
+    noti_.reset(new QSocketNotifier(fd, QSocketNotifier::Read));
+    QObject::connect(noti_.get(), &QSocketNotifier::activated, processWaylandEvents);
 }
 
 Compositor::~Compositor() { }
 
 void Compositor::create()
 {
-    QWaylandCompositor::create();
-
-    textInputManagerV3_ = new TextInputManagerV3(this, this);
+    textInputManagerV3_ = new TextInputManagerV3(this);
     textInputManagerV3_->init(display());
 
-    inputMethodManagerV2_ = new InputMethodManagerV2(this, this);
+    inputMethodManagerV2_ = new InputMethodManagerV2(this);
     inputMethodManagerV2_->init(display());
 
-    virtualKeyboardManagerV1_ = new VirtualKeyboardManagerV1(this);
+    virtualKeyboardManagerV1_ = new VirtualKeyboardManagerV1();
     virtualKeyboardManagerV1_->init(display());
 }
 

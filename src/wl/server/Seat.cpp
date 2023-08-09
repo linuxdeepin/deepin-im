@@ -8,8 +8,7 @@
 
 using namespace wl::server;
 
-template<>
-const struct wl_seat_interface Seat::Type::impl = {
+const struct wl_seat_interface Seat::impl = {
     ResourceCallbackWrapper<&Seat::getPointer>::func,
     ResourceCallbackWrapper<&Seat::getKeyboard>::func,
     ResourceCallbackWrapper<&Seat::getTouch>::func,
@@ -17,8 +16,9 @@ const struct wl_seat_interface Seat::Type::impl = {
 };
 
 Seat::Seat(wl_client *client, uint32_t id)
-    : Type(client, id)
+    : Type()
 {
+    add(client, id);
 }
 
 void Seat::getPointer([[maybe_unused]] struct wl_client *client, [[maybe_unused]] uint32_t id) { }
@@ -28,5 +28,3 @@ void Seat::getKeyboard([[maybe_unused]] struct wl_client *client, [[maybe_unused
 void Seat::getTouch([[maybe_unused]] struct wl_client *client, [[maybe_unused]] uint32_t id) { }
 
 void Seat::release([[maybe_unused]] struct wl_client *client) { }
-
-void Seat::resourceDestroy() { }

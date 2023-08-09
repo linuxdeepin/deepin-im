@@ -6,20 +6,21 @@
 
 #include "InputMethodV2.h"
 #include "common.h"
-#include "qwayland-server-input-method-unstable-v2.h"
+#include "wl/server/ZwpInputMethodManagerV2.h"
 
-class InputMethodManagerV2Private : public QtWaylandServer::zwp_input_method_manager_v2
+class InputMethodManagerV2Private : public wl::server::ZwpInputMethodManagerV2
 {
 public:
     InputMethodManagerV2Private(InputMethodManagerV2 *q)
-        : q(q)
+        : wl::server::ZwpInputMethodManagerV2()
+        , q(q)
     {
     }
 
     ~InputMethodManagerV2Private() { }
 
 protected:
-    void zwp_input_method_manager_v2_get_input_method(Resource *resource,
+    void zwp_input_method_manager_v2_get_input_method(wl::server::Resource *resource,
                                                       struct ::wl_resource *seat,
                                                       uint32_t input_method) override
     {
@@ -33,16 +34,17 @@ protected:
         iter->second->add(resource->client(), input_method);
     }
 
-    void zwp_input_method_manager_v2_destroy(Resource *resource) override { }
+    void zwp_input_method_manager_v2_destroy(wl::server::Resource *resource) override {
+        resource->destroy();
+    }
 
 private:
     InputMethodManagerV2 *q;
 };
 
-InputMethodManagerV2::InputMethodManagerV2(Core *core, QObject *parent)
-    : QObject(parent)
+InputMethodManagerV2::InputMethodManagerV2(Core *core)
+    : core_(core)
     , d(new InputMethodManagerV2Private(this))
-    , core_(core)
 {
 }
 

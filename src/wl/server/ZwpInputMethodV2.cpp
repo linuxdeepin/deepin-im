@@ -9,8 +9,7 @@ using namespace wl::server;
 template<typename T, typename U>
 T base_of(U T::*);
 
-template<>
-const struct zwp_input_method_v2_interface ZwpInputMethodV2::Type::impl = {
+const struct zwp_input_method_v2_interface ZwpInputMethodV2::impl = {
     ResourceCallbackWrapper<&ZwpInputMethodV2::commitString>::func,
     ResourceCallbackWrapper<&ZwpInputMethodV2::setPreeditString>::func,
     ResourceCallbackWrapper<&ZwpInputMethodV2::deleteSurroundingText>::func,
@@ -20,8 +19,8 @@ const struct zwp_input_method_v2_interface ZwpInputMethodV2::Type::impl = {
     ResourceCallbackWrapper<&ZwpInputMethodV2::destroy>::func,
 };
 
-ZwpInputMethodV2::ZwpInputMethodV2(wl_client *client, uint32_t id)
-    : Type(client, id)
+ZwpInputMethodV2::ZwpInputMethodV2()
+    : Type()
 {
 }
 

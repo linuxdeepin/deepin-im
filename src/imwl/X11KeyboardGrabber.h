@@ -5,7 +5,7 @@
 #ifndef X11KEYBOARDGRABBER_H
 #define X11KEYBOARDGRABBER_H
 
-#include "common.h"
+#include "common/common.h"
 
 #include <xcb/xcb.h>
 

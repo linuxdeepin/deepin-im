@@ -6,8 +6,7 @@
 
 using namespace wl::server;
 
-template<>
-const struct zwp_text_input_v3_interface ZwpTextInputV3::Type::impl = {
+const struct zwp_text_input_v3_interface ZwpTextInputV3::impl = {
     ResourceCallbackWrapper<&ZwpTextInputV3::destroy>::func,
     ResourceCallbackWrapper<&ZwpTextInputV3::enable>::func,
     ResourceCallbackWrapper<&ZwpTextInputV3::disable>::func,
@@ -18,8 +17,8 @@ const struct zwp_text_input_v3_interface ZwpTextInputV3::Type::impl = {
     ResourceCallbackWrapper<&ZwpTextInputV3::commit>::func,
 };
 
-ZwpTextInputV3::ZwpTextInputV3(struct wl_client *client, uint32_t id)
-    : Type(client, id)
+ZwpTextInputV3::ZwpTextInputV3()
+    : Type()
 {
 }
 
@@ -56,5 +55,3 @@ void ZwpTextInputV3::setCursorRectangle([[maybe_unused]] struct wl_client *clien
 }
 
 void ZwpTextInputV3::commit([[maybe_unused]] struct wl_client *client) { }
-
-void ZwpTextInputV3::resourceDestroy() { }

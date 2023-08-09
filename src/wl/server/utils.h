@@ -21,15 +21,15 @@ struct ResourceCallbackWrapper<F>
 };
 
 template<auto F>
-struct ResourceDestroyWrapper;
+struct EventCallbackWrapper;
 
-template<typename C, void (C::*F)()>
-struct ResourceDestroyWrapper<F>
+template<typename C, typename... Args, void (C::*F)(Args...)>
+struct EventCallbackWrapper<F>
 {
-    static void func(struct wl_resource *resource)
+    static void func(Args... args, void *data)
     {
-        auto *p = static_cast<C *>(wl_resource_get_user_data(resource));
-        (p->*F)();
+        auto *p = static_cast<C *>(data);
+        (p->*F)(args...);
     }
 };
 

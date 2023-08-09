@@ -6,22 +6,20 @@
 
 using namespace wl::server;
 
-template<>
-const struct zwp_virtual_keyboard_manager_v1_interface ZwpVirtualKeyboardManagerV1::Type::impl = {
+const struct zwp_virtual_keyboard_manager_v1_interface ZwpVirtualKeyboardManagerV1::impl = {
     ResourceCallbackWrapper<&ZwpVirtualKeyboardManagerV1::createVirtualKeyboard>::func,
 };
 
-ZwpVirtualKeyboardManagerV1::ZwpVirtualKeyboardManagerV1(struct wl_client *client, uint32_t id)
-    : Type(client, id)
+ZwpVirtualKeyboardManagerV1::ZwpVirtualKeyboardManagerV1()
+    : Type()
 {
 }
 
 ZwpVirtualKeyboardManagerV1::~ZwpVirtualKeyboardManagerV1() { }
 
-void ZwpVirtualKeyboardManagerV1::createVirtualKeyboard([[maybe_unused]] struct wl_client *client,
-                                                        [[maybe_unused]] struct wl_resource *seat,
-                                                        [[maybe_unused]] uint32_t id)
+void ZwpVirtualKeyboardManagerV1::createVirtualKeyboard(struct wl_client *client,
+                                                        struct wl_resource *seat,
+                                                        uint32_t id)
 {
+    // zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(client, seat, id);
 }
-
-void ZwpVirtualKeyboardManagerV1::resourceDestroy() { }

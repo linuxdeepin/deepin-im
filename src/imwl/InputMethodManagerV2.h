@@ -24,7 +24,7 @@ class InputMethodManagerV2 : public QObject
     friend class InputMethodManagerV2Private;
 
 public:
-    InputMethodManagerV2(Core *core, QObject *parent);
+    InputMethodManagerV2(Core *core);
     ~InputMethodManagerV2();
 
     INIT_FUNCS_DEF
@@ -32,8 +32,8 @@ public:
     InputMethodV2 *getInputMethodV2BySeat(struct ::wl_resource *seat);
 
 private:
-    std::unique_ptr<InputMethodManagerV2Private> d;
     Core *core_;
+    std::unique_ptr<InputMethodManagerV2Private> d;
     std::unordered_map<struct ::wl_resource * /* seat */, InputMethodV2 *> inputmethods_;
 };
 
