@@ -20,7 +20,8 @@ Build-Depends: debhelper (>= 9),
    xkb-data,
    libglib2.0-dev,
    libgtk-3-dev,
-   libibus-1.0-dev
+   libibus-1.0-dev,
+   libgraphene-1.0-dev
 Standards-Version: 4.6.0
 Homepage: http://www.deepin.org
 

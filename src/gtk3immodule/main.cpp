@@ -44,7 +44,7 @@ G_MODULE_EXPORT GtkIMContext *im_module_create(const gchar *context_id)
         return nullptr;
     }
 
-    auto gty = get_im_context_gtype();
+    auto gty = dim_im_context_get_type();
     if (gty == 0) {
         return nullptr;
     }

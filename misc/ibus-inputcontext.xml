@@ -86,6 +86,5 @@
         <signal name="UpdateProperty">
             <arg type="v" name="prop"/>
         </signal>
-        <property type="b" name="ClientCommitPreedit" access="write"/>
     </interface>
 </node>
