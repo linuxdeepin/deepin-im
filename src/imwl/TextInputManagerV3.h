@@ -5,33 +5,26 @@
 #ifndef TEXTINPUTMANAGERV3_H
 #define TEXTINPUTMANAGERV3_H
 
-#include "common.h"
-
-#include <memory>
-#include <unordered_map>
-
-struct wl_client;
-struct wl_display;
-struct wl_resource;
+#include "wl/server/ZwpTextInputManagerV3.h"
 
 class Core;
-class TextInputManagerV3Private;
 class TextInputV3;
 
-class TextInputManagerV3
+class TextInputManagerV3 : public wl::server::ZwpTextInputManagerV3
 {
-    friend class TextInputManagerV3Private;
-
 public:
     TextInputManagerV3(Core *core);
     ~TextInputManagerV3();
 
-    INIT_FUNCS_DEF
-
     TextInputV3 *getTextInputV4BySeat(struct ::wl_resource *seat);
 
+protected:
+    void zwp_text_input_manager_v3_destroy(wl::server::Resource *resource);
+    void zwp_text_input_manager_v3_get_text_input(wl::server::Resource *resource,
+                                                  uint32_t id,
+                                                  struct ::wl_resource *seat);
+
 private:
-    std::unique_ptr<TextInputManagerV3Private> d;
     Core *core_;
     std::unordered_map<struct ::wl_resource * /* seat */, TextInputV3 *> textInputs_;
 };

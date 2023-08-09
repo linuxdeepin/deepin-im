@@ -5,34 +5,30 @@
 #ifndef INPUTMETHODMANAGERV2_H
 #define INPUTMETHODMANAGERV2_H
 
-#include "common.h"
+#include "wl/server/ZwpInputMethodManagerV2.h"
 
 #include <memory>
 #include <unordered_map>
 
-struct wl_client;
-struct wl_display;
-struct wl_resource;
-
 class Core;
 class InputMethodV2;
-class InputMethodManagerV2Private;
 
-class InputMethodManagerV2
+class InputMethodManagerV2 : public wl::server::ZwpInputMethodManagerV2
 {
-    friend class InputMethodManagerV2Private;
-
 public:
     InputMethodManagerV2(Core *core);
     ~InputMethodManagerV2();
 
-    INIT_FUNCS_DEF
-
     std::shared_ptr<InputMethodV2> getInputMethodV2BySeat(struct ::wl_resource *seat);
+
+protected:
+    void zwp_input_method_manager_v2_get_input_method(wl::server::Resource *resource,
+                                                      struct ::wl_resource *seat,
+                                                      uint32_t input_method) override;
+    void zwp_input_method_manager_v2_destroy(wl::server::Resource *resource) override;
 
 private:
     Core *core_;
-    std::unique_ptr<InputMethodManagerV2Private> d;
     std::unordered_map<struct ::wl_resource * /* seat */, std::shared_ptr<InputMethodV2>>
         inputmethods_;
 };

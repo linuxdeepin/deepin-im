@@ -5,30 +5,25 @@
 #ifndef VIRTUALKEYBOARDMANAGERV1_H
 #define VIRTUALKEYBOARDMANAGERV1_H
 
-#include "common.h"
+#include "wl/server/ZwpVirtualKeyboardManagerV1.h"
 
 #include <memory>
 #include <unordered_map>
 
-struct wl_client;
-struct wl_display;
-struct wl_resource;
-
-class VirtualKeyboardManagerV1Private;
 class VirtualKeyboardV1;
 
-class VirtualKeyboardManagerV1
+class VirtualKeyboardManagerV1 : public wl::server::ZwpVirtualKeyboardManagerV1
 {
-    friend class VirtualKeyboardManagerV1Private;
-
 public:
     VirtualKeyboardManagerV1();
     ~VirtualKeyboardManagerV1();
 
-    INIT_FUNCS_DEF
+protected:
+    void zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(wl::server::Resource *resource,
+                                                                 struct ::wl_resource *seat,
+                                                                 uint32_t id) override;
 
 private:
-    std::unique_ptr<VirtualKeyboardManagerV1Private> d;
     std::unordered_map<struct ::wl_resource * /* seat */, VirtualKeyboardV1 *> virtualKeyboards_;
 };
 
