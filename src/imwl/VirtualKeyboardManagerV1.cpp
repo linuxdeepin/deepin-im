@@ -25,7 +25,7 @@ protected:
 
         auto iter = q->virtualKeyboards_.find(seat);
         if (iter == q->virtualKeyboards_.end()) {
-            auto *vk = new VirtualKeyboardV1(seat, q);
+            auto *vk = new VirtualKeyboardV1(seat);
             auto [i, r] = q->virtualKeyboards_.emplace(seat, vk);
             iter = i;
         }

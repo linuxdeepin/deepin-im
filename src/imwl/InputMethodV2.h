@@ -7,7 +7,7 @@
 
 #include "common.h"
 
-#include <QObject>
+#include <memory>
 
 struct wl_client;
 struct wl_display;
@@ -17,18 +17,16 @@ class Core;
 class InputMethodV2Private;
 class InputMethodKeyboardGrabV2;
 
-class InputMethodV2 : public QObject
+class InputMethodV2
 {
-    Q_OBJECT
-
     friend class InputMethodV2Private;
 
 public:
-    InputMethodV2(Core *core, struct ::wl_resource *seat, QObject *parent);
+    InputMethodV2(Core *core, struct ::wl_resource *seat);
     ~InputMethodV2();
 
     INIT_FUNCS_DEF
-    
+
     void sendDeactivate();
     void sendActivate();
 
@@ -37,7 +35,7 @@ private:
     Core *core_;
     struct ::wl_resource *seat_;
 
-    InputMethodKeyboardGrabV2 *grab_;
+    std::unique_ptr<InputMethodKeyboardGrabV2> grab_;
 };
 
 #endif // !INPUTMETHODV2_H

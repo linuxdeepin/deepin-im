@@ -7,7 +7,8 @@
 
 #include "common.h"
 
-#include <QObject>
+#include <memory>
+#include <unordered_map>
 
 struct wl_client;
 struct wl_display;
@@ -17,10 +18,8 @@ class Core;
 class InputMethodV2;
 class InputMethodManagerV2Private;
 
-class InputMethodManagerV2 : public QObject
+class InputMethodManagerV2
 {
-    Q_OBJECT
-
     friend class InputMethodManagerV2Private;
 
 public:
@@ -29,12 +28,13 @@ public:
 
     INIT_FUNCS_DEF
 
-    InputMethodV2 *getInputMethodV2BySeat(struct ::wl_resource *seat);
+    std::shared_ptr<InputMethodV2> getInputMethodV2BySeat(struct ::wl_resource *seat);
 
 private:
     Core *core_;
     std::unique_ptr<InputMethodManagerV2Private> d;
-    std::unordered_map<struct ::wl_resource * /* seat */, InputMethodV2 *> inputmethods_;
+    std::unordered_map<struct ::wl_resource * /* seat */, std::shared_ptr<InputMethodV2>>
+        inputmethods_;
 };
 
 #endif // !INPUTMETHODMANAGERV2_H

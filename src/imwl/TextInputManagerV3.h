@@ -7,7 +7,8 @@
 
 #include "common.h"
 
-#include <QObject>
+#include <memory>
+#include <unordered_map>
 
 struct wl_client;
 struct wl_display;
@@ -17,10 +18,8 @@ class Core;
 class TextInputManagerV3Private;
 class TextInputV3;
 
-class TextInputManagerV3 : public QObject
+class TextInputManagerV3
 {
-    Q_OBJECT
-
     friend class TextInputManagerV3Private;
 
 public:

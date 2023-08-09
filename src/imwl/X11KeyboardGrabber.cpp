@@ -14,8 +14,8 @@
   std::unique_ptr<call##_reply_t>( \
       call##_reply(XCB_REPLY_CONNECTION_ARG(__VA_ARGS__), call(__VA_ARGS__), nullptr))
 
-X11KeyboardGrabber::X11KeyboardGrabber(QObject *parent)
-    : QObject(parent)
+X11KeyboardGrabber::X11KeyboardGrabber()
+    : QObject()
 {
     int screenDefaultNbr;
     xconn_.reset(xcb_connect(nullptr, &screenDefaultNbr));

@@ -16,7 +16,7 @@ class X11KeyboardGrabber : public QObject
 {
     Q_OBJECT
 public:
-    X11KeyboardGrabber(QObject *parent);
+    X11KeyboardGrabber();
     ~X11KeyboardGrabber();
 
 signals:

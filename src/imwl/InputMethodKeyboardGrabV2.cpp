@@ -39,23 +39,16 @@ private:
     InputMethodKeyboardGrabV2 *q;
 };
 
-InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(struct ::wl_resource *seat, QObject *parent)
-    : QObject(parent)
-    , d(new InputMethodKeyboardGrabV2Private(this))
+InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(struct ::wl_resource *seat)
+    : d(new InputMethodKeyboardGrabV2Private(this))
     , seat_(seat)
-    , grabber_(new X11KeyboardGrabber(this))
+    , grabber_(new X11KeyboardGrabber())
 {
-    connect(grabber_,
-            &X11KeyboardGrabber::keyEvent,
-            this,
-            &InputMethodKeyboardGrabV2::onX11KeyEvent);
+    QObject::connect(grabber_, &X11KeyboardGrabber::keyEvent, [this](int keycode, bool isRelease) {
+        d->sendKey(keycode, isRelease);
+    });
 }
 
 InputMethodKeyboardGrabV2::~InputMethodKeyboardGrabV2() { }
 
 INIT_FUNCS(InputMethodKeyboardGrabV2)
-
-void InputMethodKeyboardGrabV2::onX11KeyEvent(int keycode, bool isRelease)
-{
-    d->sendKey(keycode, isRelease);
-}

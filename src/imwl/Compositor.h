@@ -30,9 +30,9 @@ public:
 private:
     std::unique_ptr<QSocketNotifier> noti_;
 
-    TextInputManagerV3 *textInputManagerV3_;
-    InputMethodManagerV2 *inputMethodManagerV2_;
-    VirtualKeyboardManagerV1 *virtualKeyboardManagerV1_;
+    std::unique_ptr<TextInputManagerV3> textInputManagerV3_;
+    std::unique_ptr<InputMethodManagerV2> inputMethodManagerV2_;
+    std::unique_ptr<VirtualKeyboardManagerV1> virtualKeyboardManagerV1_;
 };
 
 #endif // COMPOSITOR_H

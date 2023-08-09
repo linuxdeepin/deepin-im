@@ -7,7 +7,7 @@
 
 #include "common.h"
 
-#include <QObject>
+#include <memory>
 
 struct wl_client;
 struct wl_display;
@@ -16,20 +16,18 @@ struct wl_resource;
 class Core;
 class TextInputV3Private;
 
-class TextInputV3 : public QObject
+class TextInputV3
 {
-    Q_OBJECT
-
     friend class TextInputV3Private;
 
 public:
-    TextInputV3(Core *core, struct ::wl_resource *seat, QObject *parent);
+    TextInputV3(Core *core, struct ::wl_resource *seat);
     ~TextInputV3();
 
     INIT_FUNCS_DEF
 
-    void sendPreeditString(const QString &text, int32_t cursor_begin, int32_t cursor_end);
-    void sendCommitString(const QString &text);
+    void sendPreeditString(const char *text, int32_t cursor_begin, int32_t cursor_end);
+    void sendCommitString(const char *text);
     void sendDone(uint32_t serial);
 
 private:

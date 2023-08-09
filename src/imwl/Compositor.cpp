@@ -31,22 +31,22 @@ Compositor::~Compositor() { }
 
 void Compositor::create()
 {
-    textInputManagerV3_ = new TextInputManagerV3(this);
+    textInputManagerV3_ = std::make_unique<TextInputManagerV3>(this);
     textInputManagerV3_->init(display());
 
-    inputMethodManagerV2_ = new InputMethodManagerV2(this);
+    inputMethodManagerV2_ = std::make_unique<InputMethodManagerV2>(this);
     inputMethodManagerV2_->init(display());
 
-    virtualKeyboardManagerV1_ = new VirtualKeyboardManagerV1();
+    virtualKeyboardManagerV1_ = std::make_unique<VirtualKeyboardManagerV1>();
     virtualKeyboardManagerV1_->init(display());
 }
 
 TextInputManagerV3 *Compositor::getTextInputManagerV3()
 {
-    return textInputManagerV3_;
+    return textInputManagerV3_.get();
 }
 
 InputMethodManagerV2 *Compositor::getInputMethodManagerV2()
 {
-    return inputMethodManagerV2_;
+    return inputMethodManagerV2_.get();
 }

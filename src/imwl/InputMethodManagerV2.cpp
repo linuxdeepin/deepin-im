@@ -26,7 +26,7 @@ protected:
     {
         auto iter = q->inputmethods_.find(seat);
         if (iter == q->inputmethods_.end()) {
-            auto *im = new InputMethodV2(q->core_, seat, q);
+            auto im = std::make_shared<InputMethodV2>(q->core_, seat);
             auto [i, r] = q->inputmethods_.emplace(seat, im);
             iter = i;
         }
@@ -52,7 +52,7 @@ InputMethodManagerV2::~InputMethodManagerV2() { }
 
 INIT_FUNCS(InputMethodManagerV2)
 
-InputMethodV2 *InputMethodManagerV2::getInputMethodV2BySeat(struct ::wl_resource *seat)
+std::shared_ptr<InputMethodV2> InputMethodManagerV2::getInputMethodV2BySeat(struct ::wl_resource *seat)
 {
     return inputmethods_.at(seat);
 }

@@ -7,7 +7,7 @@
 
 #include "common.h"
 
-#include <QObject>
+#include <memory>
 
 struct wl_client;
 struct wl_display;
@@ -21,14 +21,12 @@ class Seat;
 
 class VirtualKeyboardV1Private;
 
-class VirtualKeyboardV1 : public QObject
+class VirtualKeyboardV1
 {
-    Q_OBJECT
-
     friend class VirtualKeyboardV1Private;
 
 public:
-    VirtualKeyboardV1(struct ::wl_resource *seat, QObject *paernt);
+    VirtualKeyboardV1(struct ::wl_resource *seat);
     ~VirtualKeyboardV1();
 
     INIT_FUNCS_DEF

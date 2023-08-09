@@ -36,7 +36,7 @@ protected:
     {
         m_enabled.emplace(resource);
 
-        auto *im = q->core_->getInputMethodManagerV2()->getInputMethodV2BySeat(q->seat_);
+        auto im = q->core_->getInputMethodManagerV2()->getInputMethodV2BySeat(q->seat_);
         im->sendActivate();
     }
 
@@ -44,7 +44,7 @@ protected:
     {
         m_enabled.erase(resource);
 
-        auto *im = q->core_->getInputMethodManagerV2()->getInputMethodV2BySeat(q->seat_);
+        auto im = q->core_->getInputMethodManagerV2()->getInputMethodV2BySeat(q->seat_);
         im->sendDeactivate();
     }
 
@@ -81,10 +81,9 @@ private:
     std::set<wl::server::Resource *> m_enabled;
 };
 
-TextInputV3::TextInputV3(Core *core, struct ::wl_resource *seat, QObject *parent)
-    : QObject(parent)
-    , core_(core)
-    , d(new TextInputV3Private(this))
+TextInputV3::TextInputV3(Core *core, struct ::wl_resource *seat)
+    : core_(core)
+    , d(std::make_unique<TextInputV3Private>(this))
 {
 }
 
@@ -92,7 +91,7 @@ TextInputV3::~TextInputV3() { }
 
 INIT_FUNCS(TextInputV3)
 
-void TextInputV3::sendPreeditString(const QString &text, int32_t cursor_begin, int32_t cursor_end)
+void TextInputV3::sendPreeditString(const char *text, int32_t cursor_begin, int32_t cursor_end)
 {
     const auto resources = d->resourceMap();
     for (auto &[client, resource] : resources) {
@@ -103,7 +102,7 @@ void TextInputV3::sendPreeditString(const QString &text, int32_t cursor_begin, i
     }
 }
 
-void TextInputV3::sendCommitString(const QString &text)
+void TextInputV3::sendCommitString(const char *text)
 {
     const auto resources = d->resourceMap();
     for (auto &[client, resource] : resources) {

@@ -7,7 +7,8 @@
 
 #include "common.h"
 
-#include <QObject>
+#include <memory>
+#include <unordered_map>
 
 struct wl_client;
 struct wl_display;
@@ -16,10 +17,8 @@ struct wl_resource;
 class VirtualKeyboardManagerV1Private;
 class VirtualKeyboardV1;
 
-class VirtualKeyboardManagerV1 : public QObject
+class VirtualKeyboardManagerV1
 {
-    Q_OBJECT
-
     friend class VirtualKeyboardManagerV1Private;
 
 public:

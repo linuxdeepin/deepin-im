@@ -80,9 +80,8 @@ private:
     std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> m_xkbState;
 };
 
-VirtualKeyboardV1::VirtualKeyboardV1(struct ::wl_resource *seat, QObject *parent)
-    : QObject(parent)
-    , d(new VirtualKeyboardV1Private(this))
+VirtualKeyboardV1::VirtualKeyboardV1(struct ::wl_resource *seat)
+    : d(new VirtualKeyboardV1Private(this))
     , seat_(wl::server::Seat::fromResource(seat))
 {
 }

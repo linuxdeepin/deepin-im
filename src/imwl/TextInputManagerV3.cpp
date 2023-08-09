@@ -27,7 +27,7 @@ protected:
     {
         auto iter = q->textInputs_.find(seat);
         if (iter == q->textInputs_.end()) {
-            auto *ti = new TextInputV3(q->core_, seat, q);
+            auto *ti = new TextInputV3(q->core_, seat);
             auto [i, r] = q->textInputs_.emplace(seat, ti);
             iter = i;
         }
