@@ -52,7 +52,7 @@ void X11KeyboardGrabber::onXCBEvent(QSocketDescriptor socket, QSocketNotifier::T
         }
 
         if (ge->event_type != XCB_INPUT_RAW_KEY_PRESS
-            || ge->event_type != XCB_INPUT_RAW_KEY_RELEASE) {
+            && ge->event_type != XCB_INPUT_RAW_KEY_RELEASE) {
             continue;
         }
 
