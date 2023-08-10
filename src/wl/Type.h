@@ -37,6 +37,7 @@ INIT_WL_TYPE(wl_seat);
 INIT_WL_TYPE(zwp_input_method_manager_v2);
 INIT_WL_TYPE(zwp_input_method_v2);
 INIT_WL_TYPE(zwp_virtual_keyboard_manager_v1);
+INIT_WL_TYPE(zwp_virtual_keyboard_v1);
 INIT_WL_TYPE(zwp_input_method_keyboard_grab_v2);
 INIT_WL_TYPE(zwp_text_input_manager_v3);
 INIT_WL_TYPE(zwp_text_input_v3);
