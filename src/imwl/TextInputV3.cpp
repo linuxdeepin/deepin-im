@@ -9,8 +9,9 @@
 #include "InputMethodV2.h"
 #include "wl/server/Resource.h"
 
-TextInputV3::TextInputV3(Core *core, struct ::wl_resource *seat)
+TextInputV3::TextInputV3(Core *core, wl::server::Seat *seat)
     : core_(core)
+    , seat_(seat)
 {
 }
 

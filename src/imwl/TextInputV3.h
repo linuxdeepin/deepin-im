@@ -9,12 +9,18 @@
 
 #include <set>
 
+namespace wl {
+namespace server {
+class Seat;
+}
+} // namespace wl
+
 class Core;
 
 class TextInputV3 : public wl::server::ZwpTextInputV3
 {
 public:
-    TextInputV3(Core *core, struct ::wl_resource *seat);
+    TextInputV3(Core *core, wl::server::Seat *seat);
     ~TextInputV3();
 
     void sendPreeditString(const char *text, int32_t cursor_begin, int32_t cursor_end);
@@ -43,7 +49,7 @@ protected:
 
 private:
     Core *core_;
-    struct ::wl_resource *seat_;
+    wl::server::Seat *seat_;
     std::set<wl::server::Resource *> m_enabled;
 };
 

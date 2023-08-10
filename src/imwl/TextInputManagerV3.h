@@ -10,13 +10,19 @@
 class Core;
 class TextInputV3;
 
+namespace wl {
+namespace server {
+class Seat;
+}
+} // namespace wl
+
 class TextInputManagerV3 : public wl::server::ZwpTextInputManagerV3
 {
 public:
     TextInputManagerV3(Core *core);
     ~TextInputManagerV3();
 
-    TextInputV3 *getTextInputV4BySeat(struct ::wl_resource *seat);
+    TextInputV3 *getTextInputV4BySeat(wl::server::Seat *seat);
 
 protected:
     void zwp_text_input_manager_v3_destroy(wl::server::Resource *resource);
@@ -26,7 +32,7 @@ protected:
 
 private:
     Core *core_;
-    std::unordered_map<struct ::wl_resource * /* seat */, TextInputV3 *> textInputs_;
+    std::unordered_map<wl::server::Seat *, TextInputV3 *> textInputs_;
 };
 
 #endif // !TEXTINPUTMANAGERV3_H

@@ -5,6 +5,7 @@
 #include "TextInputManagerV3.h"
 
 #include "TextInputV3.h"
+#include "wl/server/Seat.h"
 
 TextInputManagerV3::TextInputManagerV3(Core *core)
     : core_(core)
@@ -13,7 +14,7 @@ TextInputManagerV3::TextInputManagerV3(Core *core)
 
 TextInputManagerV3::~TextInputManagerV3() { }
 
-TextInputV3 *TextInputManagerV3::getTextInputV4BySeat(struct ::wl_resource *seat)
+TextInputV3 *TextInputManagerV3::getTextInputV4BySeat(wl::server::Seat *seat)
 {
     return textInputs_.at(seat);
 }
@@ -27,10 +28,11 @@ void TextInputManagerV3::zwp_text_input_manager_v3_get_text_input(wl::server::Re
                                                                   uint32_t id,
                                                                   struct ::wl_resource *seat)
 {
-    auto iter = textInputs_.find(seat);
+    auto seat_ = wl::server::Seat::fromResource(seat);
+    auto iter = textInputs_.find(seat_);
     if (iter == textInputs_.end()) {
-        auto *ti = new TextInputV3(core_, seat);
-        auto [i, r] = textInputs_.emplace(seat, ti);
+        auto *ti = new TextInputV3(core_, seat_);
+        auto [i, r] = textInputs_.emplace(seat_, ti);
         iter = i;
     }
 

@@ -9,7 +9,7 @@
 #include "TextInputManagerV3.h"
 #include "TextInputV3.h"
 
-InputMethodV2::InputMethodV2(Core *core, struct ::wl_resource *seat)
+InputMethodV2::InputMethodV2(Core *core, wl::server::Seat *seat)
     : core_(core)
     , seat_(seat)
     , grab_(std::make_unique<InputMethodKeyboardGrabV2>(seat))

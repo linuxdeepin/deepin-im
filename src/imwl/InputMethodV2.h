@@ -9,6 +9,12 @@
 
 #include <memory>
 
+namespace wl {
+namespace server {
+class Seat;
+}
+} // namespace wl
+
 class Core;
 class TextInputV3;
 class InputMethodKeyboardGrabV2;
@@ -16,7 +22,7 @@ class InputMethodKeyboardGrabV2;
 class InputMethodV2 : public wl::server::ZwpInputMethodV2
 {
 public:
-    InputMethodV2(Core *core, struct ::wl_resource *seat);
+    InputMethodV2(Core *core, wl::server::Seat *seat);
     ~InputMethodV2();
 
     void sendDeactivate();
@@ -44,7 +50,7 @@ protected:
 
 private:
     Core *core_;
-    struct ::wl_resource *seat_;
+    wl::server::Seat *seat_;
 
     std::unique_ptr<InputMethodKeyboardGrabV2> grab_;
 };

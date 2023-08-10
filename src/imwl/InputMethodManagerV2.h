@@ -19,7 +19,7 @@ public:
     InputMethodManagerV2(Core *core);
     ~InputMethodManagerV2();
 
-    std::shared_ptr<InputMethodV2> getInputMethodV2BySeat(struct ::wl_resource *seat);
+    std::shared_ptr<InputMethodV2> getInputMethodV2BySeat(wl::server::Seat *seat);
 
 protected:
     void zwp_input_method_manager_v2_get_input_method(wl::server::Resource *resource,
@@ -29,8 +29,7 @@ protected:
 
 private:
     Core *core_;
-    std::unordered_map<struct ::wl_resource * /* seat */, std::shared_ptr<InputMethodV2>>
-        inputmethods_;
+    std::unordered_map<wl::server::Seat *, std::shared_ptr<InputMethodV2>> inputmethods_;
 };
 
 #endif // !INPUTMETHODMANAGERV2_H

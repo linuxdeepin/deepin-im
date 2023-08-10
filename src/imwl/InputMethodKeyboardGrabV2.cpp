@@ -9,7 +9,7 @@
 #include <QDateTime>
 #include <QDebug>
 
-InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(struct ::wl_resource *seat)
+InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(wl::server::Seat *seat)
     : seat_(seat)
     , grabber_(std::make_unique<X11KeyboardGrabber>())
 {
