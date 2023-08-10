@@ -17,10 +17,15 @@ typedef struct _DimIMContextWaylandGlobal DimIMContextWaylandGlobal;
 typedef struct _DimIMContext DimIMContext;
 typedef struct _DimIMContextClass DimIMContextClass;
 
+struct _DimIMContextClass
+{
+    GtkIMContextClass parent_class;
+};
+
 G_BEGIN_DECLS
 GType dim_im_context_get_type(void) G_GNUC_CONST;
 DimIMContext *dim_im_context_new(void);
-void dim_im_context_register_type(GTypeModule *type_module);
+void dim_im_context_register(GTypeModule *type_module);
 G_END_DECLS
 
 #endif // !_DIM_IM_CONTEXT_H

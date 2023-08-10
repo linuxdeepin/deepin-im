@@ -7,12 +7,8 @@
 #include "wayland-text-input-unstable-v3-client-protocol.h"
 
 #include <gdk/gdkwayland.h>
-#include <graphene-1.0/graphene.h>
 
 #define POINT_TRANSFORM(p) (DimIMContextWaylandGlobal *)(p)
-
-static GType _im_context_gtype = 0;
-static GtkIMContextClass *_parent_class = NULL;
 
 struct _DimIMContextWaylandGlobal
 {
@@ -50,7 +46,6 @@ struct _DimIMContext
     GtkIMContextSimple parent;
 
     GdkWindow *window;
-    GtkIMContext *slave;
 
     struct
     {
@@ -71,16 +66,9 @@ struct _DimIMContext
     guint use_preedit : 1;
 };
 
-struct _DimIMContextClass
-{
-    GtkIMContextClass parent;
-};
+G_DEFINE_DYNAMIC_TYPE(DimIMContext, dim_im_context, GTK_TYPE_IM_CONTEXT);
 
 /* functions prototype start */
-static void dim_im_context_class_init(DimIMContextClass *klass, gpointer);
-static void dim_im_context_class_finalize(DimIMContextClass *klass, gpointer);
-static void dim_im_context_init(DimIMContext *im_context, gpointer);
-static void dim_im_context_finalize(GObject *obj);
 #if GTK_CHECK_VERSION(3, 98, 4)
 static void dim_im_context_set_client_window(GtkIMContext *context, GdkWidget *client);
 #else
@@ -113,15 +101,20 @@ static void text_input_preedit_apply(DimIMContextWaylandGlobal *global);
 
 static DimIMContextWaylandGlobal *dim_im_context_wayland_get_global(DimIMContext *self)
 {
-    if (self->window == NULL)
-        return NULL;
+    if (self->window == nullptr)
+        return nullptr;
 
     DimIMContextWaylandGlobal *global =
-        dim_im_context_wayland_global_get(gtk_widget_get_display(GTK_WIDGET(self->window)));
+        dim_im_context_wayland_global_get(gdk_window_get_display(self->window));
+
+    if (!global) {
+        return nullptr;
+    }
+
     if (global->current != GTK_IM_CONTEXT(self))
-        return NULL;
-    if (global->text_input == NULL)
-        return NULL;
+        return nullptr;
+    if (global->text_input == nullptr)
+        return nullptr;
 
     return global;
 }
@@ -131,12 +124,12 @@ static void notify_surrounding_text(DimIMContext *context)
 #define MAX_LEN 4000
     const char *start, *end;
     int len, cursor, anchor;
-    char *str = NULL;
+    char *str = nullptr;
 
     if (!context->surrounding.text)
         return;
     DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(context);
-    if (global == NULL)
+    if (global == nullptr)
         return;
 
     len = strlen(context->surrounding.text);
@@ -253,10 +246,10 @@ static void notify_content_type(DimIMContext *context)
     GtkInputPurpose purpose;
 
     DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(context);
-    if (global == NULL)
+    if (global == nullptr)
         return;
 
-    g_object_get(context, "input-hints", &hints, "input-purpose", &purpose, NULL);
+    g_object_get(context, "input-hints", &hints, "input-purpose", &purpose, nullptr);
 
     zwp_text_input_v3_set_content_type(global->text_input,
                                        translate_hints(hints, purpose),
@@ -266,7 +259,8 @@ static void notify_content_type(DimIMContext *context)
 static void commit_state(DimIMContext *context)
 {
     DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(context);
-    if (global == NULL)
+
+    if (global == nullptr)
         return;
 
     global->serial++;
@@ -276,35 +270,19 @@ static void commit_state(DimIMContext *context)
 
 static void notify_cursor_location(DimIMContext *context)
 {
-    cairo_rectangle_int_t rect;
-    double nx, ny;
-    graphene_point_t p;
-
     DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(context);
-    if (global == NULL)
+    if (global == nullptr)
         return;
 
-    rect = context->cursor_rect;
-    if (!gtk_widget_translate_coordinates(
-            GTK_WIDGET(context->window),
-            GTK_WIDGET(gtk_widget_get_toplevel(GTK_WIDGET(context->window))),
-            rect.x,
-            rect.y,
-            (gint *)&p.x,
-            (gint *)&p.y))
-        graphene_point_init(&p, rect.x, rect.y);
-
-    // TODO: must use correct interface
-    //   gtk_native_get_surface_transform (gtk_widget_get_name (GTK_WIDGET(context->window)), &nx,
-    //   &ny);
-
-    rect.x = p.x + nx;
-    rect.y = p.y + ny;
-    zwp_text_input_v3_set_cursor_rectangle(global->text_input,
-                                           rect.x,
-                                           rect.y,
-                                           rect.width,
-                                           rect.height);
+    if (context->window) {
+        cairo_rectangle_int_t rect = context->cursor_rect;
+        gdk_window_get_root_coords(context->window, rect.x, rect.y, &rect.x, &rect.y);
+        zwp_text_input_v3_set_cursor_rectangle(global->text_input,
+                                               rect.x,
+                                               rect.y,
+                                               rect.width,
+                                               rect.height);
+    }
 }
 
 static void notify_im_change(DimIMContext *context, enum zwp_text_input_v3_change_cause cause)
@@ -312,7 +290,7 @@ static void notify_im_change(DimIMContext *context, enum zwp_text_input_v3_chang
     gboolean result;
 
     DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(context);
-    if (global == NULL)
+    if (global == nullptr)
         return;
 
     context->surrounding_change = cause;
@@ -361,7 +339,7 @@ static void disable(DimIMContext *context, DimIMContextWaylandGlobal *global)
 
     /* after disable, incoming state changes won't take effect anyway */
     if (context->current_preedit.text) {
-        text_input_preedit(global, global->text_input, NULL, 0, 0);
+        text_input_preedit(global, global->text_input, nullptr, 0, 0);
         text_input_preedit_apply(global);
     }
 }
@@ -435,7 +413,7 @@ static void text_input_commit_apply(DimIMContextWaylandGlobal *global)
     if (context->pending_commit)
         g_signal_emit_by_name(global->current, "commit", context->pending_commit);
     g_free(context->pending_commit);
-    context->pending_commit = NULL;
+    context->pending_commit = nullptr;
 }
 
 static void text_input_delete_surrounding_text_apply(DimIMContextWaylandGlobal *global)
@@ -467,11 +445,11 @@ static void text_input_preedit_apply(DimIMContextWaylandGlobal *global)
         return;
 
     DimIMContext *context = DIM_IM_CONTEXT(global->current);
-    if (context->pending_preedit.text == NULL && context->current_preedit.text == NULL)
+    if (context->pending_preedit.text == nullptr && context->current_preedit.text == nullptr)
         return;
 
     gboolean state_change =
-        ((context->pending_preedit.text == NULL) != (context->current_preedit.text == NULL));
+        ((context->pending_preedit.text == nullptr) != (context->current_preedit.text == nullptr));
 
     if (state_change && !context->current_preedit.text)
         g_signal_emit_by_name(context, "preedit-start");
@@ -497,7 +475,7 @@ static void text_input_done(void *data, struct zwp_text_input_v3 *text_input, ui
 
     DimIMContext *context = DIM_IM_CONTEXT(global->current);
     gboolean update_im =
-        (context->pending_commit != NULL
+        (context->pending_commit != nullptr
          || g_strcmp0(context->pending_preedit.text, context->current_preedit.text) != 0);
 
     text_input_delete_surrounding_text_apply(global);
@@ -564,7 +542,7 @@ static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *
     DimIMContextWaylandGlobal *global =
         (DimIMContextWaylandGlobal *)g_object_get_data(G_OBJECT(display),
                                                        "dim-im-context-wayland-global");
-    if (global != NULL)
+    if (global != nullptr)
         return global;
 
     global = g_new0(DimIMContextWaylandGlobal, 1);
@@ -597,6 +575,9 @@ static void dim_im_context_set_client_window(GtkIMContext *context, GdkWidget *c
 static void dim_im_context_set_client_window(GtkIMContext *context, GdkWindow *client)
 #endif
 {
+    g_return_if_fail(GTK_IS_IM_CONTEXT(context));
+    g_return_if_fail(client);
+
     DimIMContext *context_wayland = DIM_IM_CONTEXT(context);
 
     if (client == context_wayland->window)
@@ -611,18 +592,20 @@ static void dim_im_context_set_client_window(GtkIMContext *context, GdkWindow *c
 static gboolean dim_im_context_filter_keypress(GtkIMContext *context, GdkEventKey *event)
 {
     /* This is done by the compositor */
-    return GTK_IM_CONTEXT_CLASS(_parent_class)->filter_keypress(context, event);
+    return GTK_IM_CONTEXT_CLASS(dim_im_context_parent_class)->filter_keypress(context, event);
 }
 
 static void dim_im_context_focus_in(GtkIMContext *context)
 {
+    g_return_if_fail(GTK_IS_IM_CONTEXT(context));
+
     DimIMContext *self = DIM_IM_CONTEXT(context);
 
-    if (GTK_WIDGET(self->window) == NULL)
+    if (self->window == nullptr)
         return;
 
     DimIMContextWaylandGlobal *global =
-        dim_im_context_wayland_global_get(gtk_widget_get_display(GTK_WIDGET(self->window)));
+        dim_im_context_wayland_global_get(gdk_window_get_display(self->window));
     if (!global) {
         return;
     }
@@ -643,26 +626,24 @@ static void dim_im_context_focus_out(GtkIMContext *context)
     DimIMContext *self = DIM_IM_CONTEXT(context);
 
     DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(self);
-    if (global == NULL)
+    if (global == nullptr)
         return;
 
     if (global->focused)
         disable(self, global);
 
-    global->current = NULL;
+    global->current = nullptr;
 }
 
 static void dim_im_context_reset(GtkIMContext *context)
 {
     notify_im_change(DIM_IM_CONTEXT(context), ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_OTHER);
-
-    GTK_IM_CONTEXT_CLASS(_parent_class)->reset(context);
 }
 
 static void dim_im_context_wayland_commit(GtkIMContext *context, const gchar *str)
 {
-    if (GTK_IM_CONTEXT_CLASS(_parent_class)->commit)
-        GTK_IM_CONTEXT_CLASS(_parent_class)->commit(context, str);
+    if (GTK_IM_CONTEXT_CLASS(dim_im_context_parent_class)->commit)
+        GTK_IM_CONTEXT_CLASS(dim_im_context_parent_class)->commit(context, str);
 
     notify_im_change(DIM_IM_CONTEXT(context), ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD);
 }
@@ -713,9 +694,10 @@ static void dim_im_context_get_preedit_string(GtkIMContext *context,
     DimIMContext *context_wayland = DIM_IM_CONTEXT(context);
 
     if (attrs)
-        *attrs = NULL;
+        *attrs = nullptr;
 
-    GTK_IM_CONTEXT_CLASS(_parent_class)->get_preedit_string(context, str, attrs, cursor_pos);
+    GTK_IM_CONTEXT_CLASS(dim_im_context_parent_class)
+        ->get_preedit_string(context, str, attrs, cursor_pos);
 
     /* If the parent implementation returns a len>0 string, go with it */
     if (str && *str) {
@@ -776,14 +758,27 @@ static gboolean dim_im_context_get_surrounding(GtkIMContext *context,
     return TRUE;
 }
 
+static void dim_im_context_finalize(GObject *obj)
+{
+    DimIMContext *context = DIM_IM_CONTEXT(obj);
+
+    dim_im_context_focus_out(GTK_IM_CONTEXT(context));
+
+    g_clear_object(&context->window);
+    g_free(context->surrounding.text);
+    g_free(context->current_preedit.text);
+    g_free(context->pending_preedit.text);
+    g_free(context->pending_commit);
+
+    G_OBJECT_CLASS(dim_im_context_parent_class)->finalize(obj);
+}
+
 // virtual functions end
 
-static void dim_im_context_class_init(DimIMContextClass *klass, gpointer _data)
+static void dim_im_context_class_init(DimIMContextClass *klass)
 {
     GtkIMContextClass *im_context_class = GTK_IM_CONTEXT_CLASS(klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
-
-    _parent_class = (GtkIMContextClass *)g_type_class_peek_parent(klass);
 
 #if GTK_CHECK_VERSION(3, 98, 4)
     im_context_class->set_client_widget = dim_im_context_set_client_window;
@@ -804,7 +799,7 @@ static void dim_im_context_class_init(DimIMContextClass *klass, gpointer _data)
     gobject_class->finalize = dim_im_context_finalize;
 }
 
-void dim_im_context_class_finalize(DimIMContextClass *klass, gpointer _data) { }
+static void dim_im_context_class_finalize(DimIMContextClass *klass) { }
 
 static void on_content_type_changed(DimIMContext *context)
 {
@@ -812,9 +807,8 @@ static void on_content_type_changed(DimIMContext *context)
     commit_state(context);
 }
 
-static void dim_im_context_init(DimIMContext *context, gpointer)
+static void dim_im_context_init(DimIMContext *context)
 {
-    context->slave = gtk_im_context_simple_new();
     context->use_preedit = TRUE;
 
     g_signal_connect_swapped(context,
@@ -827,65 +821,13 @@ static void dim_im_context_init(DimIMContext *context, gpointer)
                              context);
 }
 
-static void dim_im_context_finalize(GObject *obj)
-{
-    DimIMContext *context = DIM_IM_CONTEXT(obj);
-
-    dim_im_context_focus_out(GTK_IM_CONTEXT(context));
-
-    g_clear_object(&context->window);
-    g_free(context->surrounding.text);
-    g_free(context->current_preedit.text);
-    g_free(context->pending_preedit.text);
-    g_free(context->pending_commit);
-
-    G_OBJECT_CLASS(_parent_class)->finalize(obj);
-}
-
-GType dim_im_context_get_type(void)
-{
-    if (_im_context_gtype == 0) {
-        dim_im_context_register_type(NULL);
-    }
-
-    g_assert(_im_context_gtype != 0);
-    return _im_context_gtype;
-}
-
 DimIMContext *dim_im_context_new(void)
 {
-    GObject *obj = (GObject *)g_object_new(DIM_TYPE_IM_CONTEXT, NULL);
+    GObject *obj = (GObject *)g_object_new(DIM_TYPE_IM_CONTEXT, nullptr);
     return DIM_IM_CONTEXT(obj);
 }
 
-void dim_im_context_register_type(GTypeModule *type_module)
+void dim_im_context_register(GTypeModule *type_module)
 {
-    static const GTypeInfo type_info = {
-        .class_size = sizeof(DimIMContextClass),
-        .base_init = nullptr,
-        .base_finalize = nullptr,
-        .class_init = (GClassInitFunc)dim_im_context_class_init,
-        .class_finalize = (GClassFinalizeFunc)dim_im_context_class_finalize,
-        .class_data = nullptr,
-        .instance_size = sizeof(DimIMContext),
-        .instance_init = (GInstanceInitFunc)dim_im_context_init,
-        .value_table = nullptr,
-    };
-
-    if (_im_context_gtype) {
-        return;
-    }
-
-    if (type_module) {
-        _im_context_gtype = g_type_module_register_type(type_module,
-                                                        gtk_im_context_get_type(),
-                                                        "DimIMContext",
-                                                        &type_info,
-                                                        (GTypeFlags)0);
-    } else {
-        _im_context_gtype = g_type_register_static(gtk_im_context_get_type(),
-                                                   "DimIMContext",
-                                                   &type_info,
-                                                   (GTypeFlags)0);
-    }
+    dim_im_context_register_type(type_module);
 }

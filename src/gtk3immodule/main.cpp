@@ -33,23 +33,18 @@ G_MODULE_EXPORT void im_module_list(const GtkIMContextInfo ***contexts, guint *n
 G_MODULE_EXPORT void im_module_init(GTypeModule *type_module)
 {
     g_type_module_use(type_module);
-    dim_im_context_register_type(type_module);
+    dim_im_context_register(type_module);
 }
 
 G_MODULE_EXPORT void im_module_exit(void) { }
 
 G_MODULE_EXPORT GtkIMContext *im_module_create(const gchar *context_id)
 {
-    if (g_strcmp0(context_id, _info.context_id) != 0) {
-        return nullptr;
+    if (context_id != NULL && (g_strcmp0(context_id, _info.context_id) == 0)) {
+        DimIMContext *context;
+        context = dim_im_context_new();
+        return (GtkIMContext *)context;
     }
-
-    auto gty = dim_im_context_get_type();
-    if (gty == 0) {
-        return nullptr;
-    }
-
-    gpointer obj = g_object_new(gty, nullptr);
-    return GTK_IM_CONTEXT(obj);
+    return NULL;
 }
 }
