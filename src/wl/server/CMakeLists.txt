@@ -1,10 +1,9 @@
 set(WLS_SOURCES
   Server.h
   Server.cpp
-  Global.h
-  Global.cpp
   Resource.h
   Resource.cpp
+  Type.h
   Seat.h
   Seat.cpp
   ZwpTextInputManagerV3.h

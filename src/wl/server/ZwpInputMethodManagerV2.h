@@ -26,16 +26,11 @@ public:
     virtual ~ZwpInputMethodManagerV2();
 
 protected:
-    virtual void zwp_input_method_manager_v2_get_input_method(wl::server::Resource *resource,
-                                                              struct ::wl_resource *seat,
-                                                              uint32_t input_method) = 0;
-    virtual void zwp_input_method_manager_v2_destroy(wl::server::Resource *resource) = 0;
+    virtual void zwp_input_method_manager_v2_get_input_method(Resource *resource, struct ::wl_resource *seat, uint32_t input_method) = 0;
+    virtual void zwp_input_method_manager_v2_destroy(Resource *resource) = 0;
 
 private:
     static const struct zwp_input_method_manager_v2_interface impl;
-
-    void getInputMethod(struct wl_client *client, struct wl_resource *seat, uint32_t input_method);
-    void destroy(struct wl_client *client);
 };
 
 } // namespace server

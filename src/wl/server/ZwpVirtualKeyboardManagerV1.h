@@ -26,15 +26,12 @@ public:
     ~ZwpVirtualKeyboardManagerV1();
 
 protected:
-    virtual void zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(
-        wl::server::Resource *resource, struct ::wl_resource *seat, uint32_t id) = 0;
+    virtual void zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(Resource *resource, struct ::wl_resource *seat, uint32_t id) = 0;
 
 private:
     static const struct zwp_virtual_keyboard_manager_v1_interface impl;
     std::unordered_map<struct ::wl_resource * /* seat */, std::shared_ptr<ZwpVirtualKeyboardV1> *>
         virtualKeyboards_;
-
-    void createVirtualKeyboard(struct wl_client *client, struct wl_resource *seat, uint32_t id);
 };
 
 } // namespace server

@@ -7,51 +7,17 @@
 using namespace wl::server;
 
 const struct zwp_text_input_v3_interface ZwpTextInputV3::impl = {
-    ResourceCallbackWrapper<&ZwpTextInputV3::destroy>::func,
-    ResourceCallbackWrapper<&ZwpTextInputV3::enable>::func,
-    ResourceCallbackWrapper<&ZwpTextInputV3::disable>::func,
-    ResourceCallbackWrapper<&ZwpTextInputV3::setSurroundingText>::func,
-    ResourceCallbackWrapper<&ZwpTextInputV3::setTextChangeCause>::func,
-    ResourceCallbackWrapper<&ZwpTextInputV3::setContentType>::func,
-    ResourceCallbackWrapper<&ZwpTextInputV3::setCursorRectangle>::func,
-    ResourceCallbackWrapper<&ZwpTextInputV3::commit>::func,
+    ResourceCallbackWrapper<&ZwpTextInputV3::zwp_text_input_v3_destroy>::func,
+    ResourceCallbackWrapper<&ZwpTextInputV3::zwp_text_input_v3_enable>::func,
+    ResourceCallbackWrapper<&ZwpTextInputV3::zwp_text_input_v3_disable>::func,
+    ResourceCallbackWrapper<&ZwpTextInputV3::zwp_text_input_v3_set_surrounding_text>::func,
+    ResourceCallbackWrapper<&ZwpTextInputV3::zwp_text_input_v3_set_text_change_cause>::func,
+    ResourceCallbackWrapper<&ZwpTextInputV3::zwp_text_input_v3_set_content_type>::func,
+    ResourceCallbackWrapper<&ZwpTextInputV3::zwp_text_input_v3_set_cursor_rectangle>::func,
+    ResourceCallbackWrapper<&ZwpTextInputV3::zwp_text_input_v3_commit>::func,
 };
 
 ZwpTextInputV3::ZwpTextInputV3()
     : Type()
 {
 }
-
-void ZwpTextInputV3::destroy([[maybe_unused]] struct wl_client *client) { }
-
-void ZwpTextInputV3::enable([[maybe_unused]] struct wl_client *client) { }
-
-void ZwpTextInputV3::disable([[maybe_unused]] struct wl_client *client) { }
-
-void ZwpTextInputV3::setSurroundingText([[maybe_unused]] struct wl_client *client,
-                                        [[maybe_unused]] const char *text,
-                                        [[maybe_unused]] int32_t cursor,
-                                        [[maybe_unused]] int32_t anchor)
-{
-}
-
-void ZwpTextInputV3::setTextChangeCause([[maybe_unused]] struct wl_client *client,
-                                        [[maybe_unused]] uint32_t cause)
-{
-}
-
-void ZwpTextInputV3::setContentType([[maybe_unused]] struct wl_client *client,
-                                    [[maybe_unused]] uint32_t hint,
-                                    [[maybe_unused]] uint32_t purpose)
-{
-}
-
-void ZwpTextInputV3::setCursorRectangle([[maybe_unused]] struct wl_client *client,
-                                        [[maybe_unused]] int32_t x,
-                                        [[maybe_unused]] int32_t y,
-                                        [[maybe_unused]] int32_t width,
-                                        [[maybe_unused]] int32_t height)
-{
-}
-
-void ZwpTextInputV3::commit([[maybe_unused]] struct wl_client *client) { }

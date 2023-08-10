@@ -4,27 +4,16 @@
 
 #include "Seat.h"
 
-#include "utils.h"
-
 using namespace wl::server;
 
 const struct wl_seat_interface Seat::impl = {
-    ResourceCallbackWrapper<&Seat::getPointer>::func,
-    ResourceCallbackWrapper<&Seat::getKeyboard>::func,
-    ResourceCallbackWrapper<&Seat::getTouch>::func,
-    ResourceCallbackWrapper<&Seat::release>::func,
+    ResourceCallbackWrapper<&Seat::wl_seat_get_pointer>::func,
+    ResourceCallbackWrapper<&Seat::wl_seat_get_keyboard>::func,
+    ResourceCallbackWrapper<&Seat::wl_seat_get_touch>::func,
+    ResourceCallbackWrapper<&Seat::wl_seat_release>::func,
 };
 
-Seat::Seat(wl_client *client, uint32_t id)
+Seat::Seat()
     : Type()
 {
-    add(client, id);
 }
-
-void Seat::getPointer([[maybe_unused]] struct wl_client *client, [[maybe_unused]] uint32_t id) { }
-
-void Seat::getKeyboard([[maybe_unused]] struct wl_client *client, [[maybe_unused]] uint32_t id) { }
-
-void Seat::getTouch([[maybe_unused]] struct wl_client *client, [[maybe_unused]] uint32_t id) { }
-
-void Seat::release([[maybe_unused]] struct wl_client *client) { }

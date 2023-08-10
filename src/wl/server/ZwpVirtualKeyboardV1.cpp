@@ -2,6 +2,11 @@
 
 using namespace wl::server;
 
-const struct zwp_virtual_keyboard_v1_interface ZwpVirtualKeyboardV1::impl = {};
+const struct zwp_virtual_keyboard_v1_interface ZwpVirtualKeyboardV1::impl = {
+    ResourceCallbackWrapper<&ZwpVirtualKeyboardV1::zwp_virtual_keyboard_v1_keymap>::func,
+    ResourceCallbackWrapper<&ZwpVirtualKeyboardV1::zwp_virtual_keyboard_v1_key>::func,
+    ResourceCallbackWrapper<&ZwpVirtualKeyboardV1::zwp_virtual_keyboard_v1_modifiers>::func,
+    ResourceCallbackWrapper<&ZwpVirtualKeyboardV1::zwp_virtual_keyboard_v1_destroy>::func,
+};
 
 ZwpVirtualKeyboardV1::ZwpVirtualKeyboardV1() { }

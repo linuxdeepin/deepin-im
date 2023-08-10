@@ -21,15 +21,16 @@ class Seat : public Type<Seat, wl_seat>
     friend class Type;
 
 public:
-    Seat(wl_client *client, uint32_t id);
+    Seat();
+
+protected:
+    virtual void wl_seat_get_pointer(Resource *resource, uint32_t id) = 0;
+    virtual void wl_seat_get_keyboard(Resource *resource, uint32_t id) = 0;
+    virtual void wl_seat_get_touch(Resource *resource, uint32_t id) = 0;
+    virtual void wl_seat_release(Resource *resource) = 0;
 
 private:
     static const struct wl_seat_interface impl;
-
-    void getPointer(struct wl_client *client, uint32_t id);
-    void getKeyboard(struct wl_client *client, uint32_t id);
-    void getTouch(struct wl_client *client, uint32_t id);
-    void release(struct wl_client *client);
 };
 
 } // namespace server

@@ -7,7 +7,7 @@
 using namespace wl::server;
 
 const struct zwp_virtual_keyboard_manager_v1_interface ZwpVirtualKeyboardManagerV1::impl = {
-    ResourceCallbackWrapper<&ZwpVirtualKeyboardManagerV1::createVirtualKeyboard>::func,
+    ResourceCallbackWrapper<&ZwpVirtualKeyboardManagerV1::zwp_virtual_keyboard_manager_v1_create_virtual_keyboard>::func,
 };
 
 ZwpVirtualKeyboardManagerV1::ZwpVirtualKeyboardManagerV1()
@@ -16,10 +16,3 @@ ZwpVirtualKeyboardManagerV1::ZwpVirtualKeyboardManagerV1()
 }
 
 ZwpVirtualKeyboardManagerV1::~ZwpVirtualKeyboardManagerV1() { }
-
-void ZwpVirtualKeyboardManagerV1::createVirtualKeyboard(struct wl_client *client,
-                                                        struct wl_resource *seat,
-                                                        uint32_t id)
-{
-    // zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(client, seat, id);
-}

@@ -45,8 +45,22 @@ struct ResourceDestroyWrapper<F>
     static void func(struct wl_resource *resource)
     {
         auto *r = static_cast<Resource *>(wl_resource_get_user_data(resource));
-        auto *o = static_cast<C *>(r->object());
-        (o->*F)(r);
+        auto *p = static_cast<C *>(r->object());
+        (p->*F)(r);
+    }
+};
+
+template<auto F>
+struct ResourceCallbackWrapper;
+
+template<typename C, typename R, typename... Args, R (C::*F)(Resource *, Args...)>
+struct ResourceCallbackWrapper<F>
+{
+    static R func(wl_client *client, wl_resource *resource, Args... args)
+    {
+        auto *r = static_cast<Resource *>(wl_resource_get_user_data(resource));
+        auto *p = static_cast<C *>(r->object());
+        (p->*F)(r, args...);
     }
 };
 

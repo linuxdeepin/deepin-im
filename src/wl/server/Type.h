@@ -7,7 +7,6 @@
 
 #include "Resource.h"
 #include "common/common.h"
-#include "utils.h"
 #include "wl/Type.h"
 
 #include <wayland-server-core.h>
