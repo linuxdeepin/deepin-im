@@ -51,12 +51,7 @@ public:
 
     void add(struct wl_client *client, uint32_t id)
     {
-        auto resource =
-            std::make_shared<Resource>(client, this->wl_interface, this->wl_interface->version, id);
-        resource->setImplementation(&C::impl,
-                                    this,
-                                    ResourceDestroyWrapper<&Type::resourceDestroyCb>::func);
-
+        auto resource = bind(client, this->wl_interface->version, id);
         resourceMap_.emplace(client, resource);
     }
 
@@ -75,7 +70,21 @@ private:
     std::unique_ptr<struct wl_global, Deleter<wl_global_destroy>> global_;
     std::multimap<struct wl_client *, std::shared_ptr<Resource>> resourceMap_;
 
-    void bindCb(struct wl_client *client, uint32_t version, uint32_t id) { }
+    std::shared_ptr<Resource> bind(struct wl_client *client, uint32_t version, uint32_t id)
+    {
+        auto resource = std::make_shared<Resource>(client, this->wl_interface, version, id);
+        resource->setImplementation(&C::impl,
+                                    this,
+                                    ResourceDestroyWrapper<&Type::resourceDestroyCb>::func);
+
+        return resource;
+    }
+
+    void bindCb(struct wl_client *client, uint32_t version, uint32_t id)
+    {
+        auto resource = bind(client, version, id);
+        resourceMap_.emplace(client, resource);
+    }
 
     void resourceDestroyCb(Resource *resource)
     {
