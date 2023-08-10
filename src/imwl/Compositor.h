@@ -12,6 +12,7 @@
 
 class QSocketNotifier;
 
+class Seat;
 class TextInputManagerV3;
 class InputMethodManagerV2;
 class VirtualKeyboardManagerV1;
@@ -30,6 +31,7 @@ public:
 private:
     std::unique_ptr<QSocketNotifier> noti_;
 
+    std::unique_ptr<Seat> seat_;
     std::unique_ptr<TextInputManagerV3> textInputManagerV3_;
     std::unique_ptr<InputMethodManagerV2> inputMethodManagerV2_;
     std::unique_ptr<VirtualKeyboardManagerV1> virtualKeyboardManagerV1_;

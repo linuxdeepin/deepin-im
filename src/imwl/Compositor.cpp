@@ -4,6 +4,7 @@
 
 #include "Compositor.h"
 
+#include "Seat.h"
 #include "InputMethodManagerV2.h"
 #include "TextInputManagerV3.h"
 #include "VirtualKeyboardManagerV1.h"
@@ -31,6 +32,9 @@ Compositor::~Compositor() { }
 
 void Compositor::create()
 {
+    seat_ = std::make_unique<Seat>();
+    seat_->init(display());
+
     textInputManagerV3_ = std::make_unique<TextInputManagerV3>(this);
     textInputManagerV3_->init(display());
 

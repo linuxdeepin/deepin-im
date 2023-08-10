@@ -3,6 +3,7 @@ add_executable(imwl
     common.cpp common.h
     Core.h
     Compositor.cpp Compositor.h
+    Seat.cpp Seat.h
     TextInputManagerV3.cpp TextInputManagerV3.h
     TextInputV3.cpp TextInputV3.h
     InputMethodManagerV2.cpp InputMethodManagerV2.h
