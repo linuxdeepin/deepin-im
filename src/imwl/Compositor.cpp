@@ -11,6 +11,8 @@
 
 #include <QDebug>
 #include <QSocketNotifier>
+#include <QThread>
+#include <QAbstractEventDispatcher>
 
 Compositor::Compositor()
 {
@@ -26,6 +28,9 @@ Compositor::Compositor()
 
     noti_.reset(new QSocketNotifier(fd, QSocketNotifier::Read));
     QObject::connect(noti_.get(), &QSocketNotifier::activated, processWaylandEvents);
+
+    QAbstractEventDispatcher *dispatcher = QThread::currentThread()->eventDispatcher();
+    QObject::connect(dispatcher, &QAbstractEventDispatcher::aboutToBlock, processWaylandEvents);
 }
 
 Compositor::~Compositor() { }
