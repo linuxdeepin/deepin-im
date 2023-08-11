@@ -20,18 +20,18 @@ InputMethodV2::~InputMethodV2() { }
 
 void InputMethodV2::sendDeactivate()
 {
-    // const auto resources = d->resourceMap();
-    // for (auto *resource : resources) {
-    //     d->send_deactivate(resource->handle);
-    // }
+    const auto resources = resourceMap();
+    for (auto &[client, resource] : resources) {
+        send_deactivate(resource->handle);
+    }
 }
 
 void InputMethodV2::sendActivate()
 {
-    // const auto resources = d->resourceMap();
-    // for (auto *resource : resources) {
-    //     d->send_activate(resource->handle);
-    // }
+    const auto resources = resourceMap();
+    for (auto &[client, resource] : resources) {
+        send_activate(resource->handle);
+    }
 }
 
 TextInputV3 *InputMethodV2::getTextInputV3()

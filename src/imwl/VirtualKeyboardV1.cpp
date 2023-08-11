@@ -13,6 +13,7 @@
 
 VirtualKeyboardV1::VirtualKeyboardV1(struct ::wl_resource *seat)
     : seat_(wl::server::Seat::fromResource(seat))
+    , xkbContext_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
 {
 }
 
@@ -28,19 +29,19 @@ void VirtualKeyboardV1::zwp_virtual_keyboard_v1_keymap(wl::server::Resource *res
         return;
     }
 
-    m_xkbKeymap.reset(xkb_keymap_new_from_string(m_xkbContext.get(),
+    xkbKeymap_.reset(xkb_keymap_new_from_string(xkbContext_.get(),
                                                  static_cast<const char *>(ptr),
                                                  XKB_KEYMAP_FORMAT_TEXT_V1,
                                                  XKB_KEYMAP_COMPILE_NO_FLAGS));
     munmap(ptr, size);
 
-    if (!m_xkbKeymap) {
+    if (!xkbKeymap_) {
         return;
     }
 
-    m_xkbState.reset(xkb_state_new(m_xkbKeymap.get()));
-    if (!m_xkbState) {
-        m_xkbKeymap.reset();
+    xkbState_.reset(xkb_state_new(xkbKeymap_.get()));
+    if (!xkbState_) {
+        xkbKeymap_.reset();
         return;
     }
 }

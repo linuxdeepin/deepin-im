@@ -7,6 +7,8 @@
 
 #include "wl/server/ZwpInputMethodKeyboardGrabV2.h"
 
+#include <xkbcommon/xkbcommon.h>
+
 #include <memory>
 
 namespace wl {
@@ -26,11 +28,18 @@ public:
     void sendKey(uint32_t key, uint32_t state);
 
 protected:
-    virtual void zwp_input_method_keyboard_grab_v2_release(wl::server::Resource *resource) override;
+    void resource_bind(wl::server::Resource *resource) override;
+    void zwp_input_method_keyboard_grab_v2_release(wl::server::Resource *resource) override;
 
 private:
     wl::server::Seat *seat_;
     std::unique_ptr<X11KeyboardGrabber> grabber_;
+
+    std::unique_ptr<xkb_context, Deleter<xkb_context_unref>> xkbContext_;
+    std::unique_ptr<xkb_keymap, Deleter<xkb_keymap_unref>> xkbKeymap_;
+    std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> xkbState_;
+
+    std::pair<int, size_t> genKeymapData(xkb_keymap *keymap);
 };
 
 #endif // !INPUTMETHODKEYBOARDGRABV2_H

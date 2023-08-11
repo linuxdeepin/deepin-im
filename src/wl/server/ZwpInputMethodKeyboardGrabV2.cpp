@@ -12,3 +12,13 @@ ZwpInputMethodKeyboardGrabV2::ZwpInputMethodKeyboardGrabV2()
 }
 
 ZwpInputMethodKeyboardGrabV2::~ZwpInputMethodKeyboardGrabV2() { }
+
+void ZwpInputMethodKeyboardGrabV2::send_keymap(struct wl_resource *resource, uint32_t format, int32_t fd, uint32_t size) {
+    zwp_input_method_keyboard_grab_v2_send_keymap(resource, format, fd, size);
+}
+
+void ZwpInputMethodKeyboardGrabV2::send_key(
+    struct wl_resource *resource, uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
+{
+    zwp_input_method_keyboard_grab_v2_send_key(resource, serial, time, key, state);
+}

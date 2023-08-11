@@ -14,8 +14,7 @@ InputMethodManagerV2::InputMethodManagerV2(Core *core)
 
 InputMethodManagerV2::~InputMethodManagerV2() { }
 
-std::shared_ptr<InputMethodV2>
-InputMethodManagerV2::getInputMethodV2BySeat(wl::server::Seat *seat)
+std::shared_ptr<InputMethodV2> InputMethodManagerV2::getInputMethodV2BySeat(wl::server::Seat *seat)
 {
     return inputmethods_.at(seat);
 }

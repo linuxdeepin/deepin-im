@@ -16,6 +16,9 @@ public:
     ZwpInputMethodKeyboardGrabV2();
     virtual ~ZwpInputMethodKeyboardGrabV2();
 
+    void send_keymap(struct wl_resource *resource, uint32_t format, int32_t fd, uint32_t size);
+    void send_key(struct wl_resource *resource, uint32_t serial, uint32_t time, uint32_t key, uint32_t state);
+
 protected:
     virtual void zwp_input_method_keyboard_grab_v2_release(Resource *resource) = 0;
 

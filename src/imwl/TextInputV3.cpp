@@ -24,7 +24,7 @@ void TextInputV3::sendPreeditString(const char *text, int32_t cursor_begin, int3
         if (m_enabled.find(resource.get()) == m_enabled.end()) {
             continue;
         }
-        // d->send_preedit_string(resource->handle, text, cursor_begin, cursor_end);
+        send_preedit_string(resource->handle, text, cursor_begin, cursor_end);
     }
 }
 
@@ -35,7 +35,7 @@ void TextInputV3::sendCommitString(const char *text)
         if (m_enabled.find(resource.get()) == m_enabled.end()) {
             continue;
         }
-        // d->send_commit_string(text);
+        send_commit_string(resource->handle, text);
     }
 }
 
@@ -46,7 +46,7 @@ void TextInputV3::sendDone(uint32_t serial)
         if (m_enabled.find(resource.get()) == m_enabled.end()) {
             continue;
         }
-        // d->send_done(resource->handle, serial);
+        send_done(resource->handle, serial);
     }
 }
 

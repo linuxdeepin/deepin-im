@@ -64,6 +64,8 @@ public:
 protected:
     const auto resourceMap() { return resourceMap_; }
 
+    virtual void resource_bind(Resource *resource) { }
+
     virtual void resource_destroy(Resource *resource) { }
 
 private:
@@ -76,6 +78,8 @@ private:
         resource->setImplementation(&C::impl,
                                     this,
                                     ResourceDestroyWrapper<&Type::resourceDestroyCb>::func);
+
+        resource_bind(resource.get());
 
         return resource;
     }

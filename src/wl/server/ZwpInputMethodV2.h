@@ -20,6 +20,14 @@ class ZwpInputMethodV2 : public Type<ZwpInputMethodV2, zwp_input_method_v2>
 public:
     ZwpInputMethodV2();
 
+    void send_activate(struct wl_resource *resource);
+    void send_deactivate(struct wl_resource *resource);
+    void send_surrounding_text(struct wl_resource *resource, const char *text, uint32_t cursor, uint32_t anchor);
+    void send_text_change_cause(struct wl_resource *resource, uint32_t cause);
+    void send_content_type(struct wl_resource *resource, uint32_t hint, uint32_t purpose);
+    void send_done(struct wl_resource *resource);
+    void send_unavailable(struct wl_resource *resource);
+
 protected:
     virtual void zwp_input_method_v2_commit_string(Resource *resource, const char *text) = 0;
     virtual void zwp_input_method_v2_set_preedit_string(Resource *resource, const char *text, int32_t cursor_begin, int32_t cursor_end) = 0;

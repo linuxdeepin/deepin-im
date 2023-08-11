@@ -18,6 +18,13 @@ class ZwpTextInputV3 : public Type<ZwpTextInputV3, zwp_text_input_v3>
 public:
     ZwpTextInputV3();
 
+    void send_enter(struct wl_resource *resource, struct wl_resource *surface);
+    void send_leave(struct wl_resource *resource, struct wl_resource *surface);
+    void send_preedit_string(struct wl_resource *resource, const char *text, int32_t cursor_begin, int32_t cursor_end);
+    void send_commit_string(struct wl_resource *resource, const char *text);
+    void send_delete_surrounding_text(struct wl_resource *resource, uint32_t before_length, uint32_t after_length);
+    void send_done(struct wl_resource *resource, uint32_t serial);
+
 protected:
     virtual void zwp_text_input_v3_destroy(Resource *resource) = 0;
     virtual void zwp_text_input_v3_enable(Resource *resource) = 0;

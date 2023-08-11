@@ -41,9 +41,9 @@ protected:
 
 private:
     wl::server::Seat *seat_;
-    std::unique_ptr<xkb_context, Deleter<xkb_context_unref>> m_xkbContext;
-    std::unique_ptr<xkb_keymap, Deleter<xkb_keymap_unref>> m_xkbKeymap;
-    std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> m_xkbState;
+    std::unique_ptr<xkb_context, Deleter<xkb_context_unref>> xkbContext_;
+    std::unique_ptr<xkb_keymap, Deleter<xkb_keymap_unref>> xkbKeymap_;
+    std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> xkbState_;
 };
 
 #endif // !VIRTUALKEYBOARDV1_H

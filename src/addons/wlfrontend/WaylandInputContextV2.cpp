@@ -173,6 +173,7 @@ void WaylandInputContextV2::key(
     uint32_t state)
 {
     qDebug() << "grab key:" << serial << time << key << state;
+    assert(xkb_state_);
 
     xkb_keysym_t sym = xkb_state_key_get_one_sym(xkb_state_.get(), key + 8);
     InputContextKeyEvent ke(this,
