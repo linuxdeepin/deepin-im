@@ -18,6 +18,7 @@ public:
 
     void send_keymap(struct wl_resource *resource, uint32_t format, int32_t fd, uint32_t size);
     void send_key(struct wl_resource *resource, uint32_t serial, uint32_t time, uint32_t key, uint32_t state);
+    void send_modifiers(struct wl_resource *resource, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group);
 
 protected:
     virtual void zwp_input_method_keyboard_grab_v2_release(Resource *resource) = 0;

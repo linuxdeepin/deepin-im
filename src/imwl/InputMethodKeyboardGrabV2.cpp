@@ -18,6 +18,7 @@ InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(wl::server::Seat *seat)
     : seat_(seat)
     , grabber_(std::make_unique<X11KeyboardGrabber>())
     , xkbContext_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
+    , state_({})
 {
     xkb_rule_names rules = {
         .rules = getenv("XKB_DEFAULT_RULES"),
@@ -28,11 +29,12 @@ InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(wl::server::Seat *seat)
     };
     xkbKeymap_.reset(
         xkb_keymap_new_from_names(xkbContext_.get(), &rules, XKB_KEYMAP_COMPILE_NO_FLAGS));
+    xkbState_.reset(xkb_state_new(xkbKeymap_.get()));
 
     QObject::connect(grabber_.get(),
                      &X11KeyboardGrabber::keyEvent,
                      [this](int keycode, bool isRelease) {
-                         sendKey(keycode, isRelease);
+                         updateState(keycode, isRelease);
                      });
 }
 
@@ -82,4 +84,31 @@ std::pair<int, size_t> InputMethodKeyboardGrabV2::genKeymapData(xkb_keymap *keym
     munmap(tmp, size);
 
     return std::make_pair(fd, size);
+}
+
+void InputMethodKeyboardGrabV2::updateState(uint32_t keycode, bool isRelease)
+{
+    xkb_state_update_key(xkbState_.get(), keycode, isRelease ? XKB_KEY_UP : XKB_KEY_DOWN);
+
+    State state = {};
+    state.modsDepressed = xkb_state_serialize_mods(xkbState_.get(), XKB_STATE_MODS_DEPRESSED);
+    state.modsLatched = xkb_state_serialize_mods(xkbState_.get(), XKB_STATE_MODS_LATCHED);
+    state.modsLocked = xkb_state_serialize_mods(xkbState_.get(), XKB_STATE_MODS_LOCKED);
+    state.group = xkb_state_serialize_layout(xkbState_.get(), XKB_STATE_LAYOUT_EFFECTIVE);
+
+    if (memcmp(&state_, &state, sizeof(state)) == 0) {
+        return;
+    }
+
+    state_ = state;
+
+    auto &resources = resourceMap();
+    for (auto &[client, resource] : resources) {
+        send_modifiers(resource->handle,
+                       nextSerial(),
+                       state.modsDepressed,
+                       state.modsLatched,
+                       state.modsLocked,
+                       state.group);
+    }
 }

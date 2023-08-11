@@ -21,8 +21,17 @@ class X11KeyboardGrabber;
 
 class InputMethodKeyboardGrabV2 : public wl::server::ZwpInputMethodKeyboardGrabV2
 {
-public:
-    InputMethodKeyboardGrabV2(wl::server::Seat *seat);
+
+    struct State
+    {
+        uint32_t modsDepressed;
+        uint32_t modsLatched;
+        uint32_t modsLocked;
+        uint32_t group;
+    };
+
+    public : InputMethodKeyboardGrabV2(wl::server::Seat *seat);
+
     ~InputMethodKeyboardGrabV2();
 
     void sendKey(uint32_t key, uint32_t state);
@@ -39,7 +48,10 @@ private:
     std::unique_ptr<xkb_keymap, Deleter<xkb_keymap_unref>> xkbKeymap_;
     std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> xkbState_;
 
+    State state_;
+
     std::pair<int, size_t> genKeymapData(xkb_keymap *keymap);
+    void updateState(uint32_t keycode, bool isRelease);
 };
 
 #endif // !INPUTMETHODKEYBOARDGRABV2_H

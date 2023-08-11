@@ -22,3 +22,8 @@ void ZwpInputMethodKeyboardGrabV2::send_key(
 {
     zwp_input_method_keyboard_grab_v2_send_key(resource, serial, time, key, state);
 }
+
+
+void ZwpInputMethodKeyboardGrabV2::send_modifiers(struct wl_resource *resource, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group) {
+    zwp_input_method_keyboard_grab_v2_send_modifiers(resource, serial, mods_depressed, mods_latched, mods_locked, group);
+}
