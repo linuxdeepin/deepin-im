@@ -34,7 +34,7 @@ class InputMethodKeyboardGrabV2 : public wl::server::ZwpInputMethodKeyboardGrabV
 
     ~InputMethodKeyboardGrabV2();
 
-    void sendKey(uint32_t key, uint32_t state);
+    void sendKey(uint32_t keycode, bool isRelease);
 
 protected:
     void resource_bind(wl::server::Resource *resource) override;
@@ -51,7 +51,7 @@ private:
     State state_;
 
     std::pair<int, size_t> genKeymapData(xkb_keymap *keymap);
-    void updateState(uint32_t keycode, bool isRelease);
+    bool updateState(uint32_t keycode, bool isRelease);
 };
 
 #endif // !INPUTMETHODKEYBOARDGRABV2_H

@@ -34,18 +34,26 @@ InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(wl::server::Seat *seat)
     QObject::connect(grabber_.get(),
                      &X11KeyboardGrabber::keyEvent,
                      [this](int keycode, bool isRelease) {
-                         updateState(keycode, isRelease);
+                         if (updateState(keycode, isRelease)) {
+                             return;
+                         }
+
+                         sendKey(keycode - 8, isRelease);
                      });
 }
 
 InputMethodKeyboardGrabV2::~InputMethodKeyboardGrabV2() { }
 
-void InputMethodKeyboardGrabV2::sendKey(uint32_t key, uint32_t state)
+void InputMethodKeyboardGrabV2::sendKey(uint32_t keycode, bool isRelease)
 {
     uint32_t ts = QDateTime::currentSecsSinceEpoch();
     const auto resources = resourceMap();
     for (auto &[client, resource] : resources) {
-        send_key(resource->handle, nextSerial(), ts, key, state);
+        send_key(resource->handle,
+                 nextSerial(),
+                 ts,
+                 keycode,
+                 isRelease ? WL_KEYBOARD_KEY_STATE_RELEASED : WL_KEYBOARD_KEY_STATE_PRESSED);
     }
 }
 
@@ -86,7 +94,7 @@ std::pair<int, size_t> InputMethodKeyboardGrabV2::genKeymapData(xkb_keymap *keym
     return std::make_pair(fd, size);
 }
 
-void InputMethodKeyboardGrabV2::updateState(uint32_t keycode, bool isRelease)
+bool InputMethodKeyboardGrabV2::updateState(uint32_t keycode, bool isRelease)
 {
     xkb_state_update_key(xkbState_.get(), keycode, isRelease ? XKB_KEY_UP : XKB_KEY_DOWN);
 
@@ -97,7 +105,7 @@ void InputMethodKeyboardGrabV2::updateState(uint32_t keycode, bool isRelease)
     state.group = xkb_state_serialize_layout(xkbState_.get(), XKB_STATE_LAYOUT_EFFECTIVE);
 
     if (memcmp(&state_, &state, sizeof(state)) == 0) {
-        return;
+        return false;
     }
 
     state_ = state;
@@ -111,4 +119,6 @@ void InputMethodKeyboardGrabV2::updateState(uint32_t keycode, bool isRelease)
                        state.modsLocked,
                        state.group);
     }
+
+    return true;
 }
