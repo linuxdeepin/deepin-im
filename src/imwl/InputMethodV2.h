@@ -15,20 +15,18 @@ class Seat;
 }
 } // namespace wl
 
-class Core;
+class Seat;
 class TextInputV3;
 class InputMethodKeyboardGrabV2;
 
 class InputMethodV2 : public wl::server::ZwpInputMethodV2
 {
 public:
-    InputMethodV2(Core *core, wl::server::Seat *seat);
+    InputMethodV2(Seat *seat);
     ~InputMethodV2();
 
     void sendDeactivate();
     void sendActivate();
-
-    TextInputV3 *getTextInputV3();
 
 protected:
     void zwp_input_method_v2_commit_string(wl::server::Resource *resource,
@@ -49,8 +47,7 @@ protected:
     void zwp_input_method_v2_destroy(wl::server::Resource *resource) override;
 
 private:
-    Core *core_;
-    wl::server::Seat *seat_;
+    Seat *seat_;
 
     std::unique_ptr<InputMethodKeyboardGrabV2> grab_;
 };

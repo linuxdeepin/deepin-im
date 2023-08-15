@@ -4,14 +4,12 @@
 
 #include "InputMethodV2.h"
 
-#include "Core.h"
+#include "Seat.h"
 #include "InputMethodKeyboardGrabV2.h"
-#include "TextInputManagerV3.h"
 #include "TextInputV3.h"
 
-InputMethodV2::InputMethodV2(Core *core, wl::server::Seat *seat)
-    : core_(core)
-    , seat_(seat)
+InputMethodV2::InputMethodV2(Seat *seat)
+    : seat_(seat)
     , grab_(std::make_unique<InputMethodKeyboardGrabV2>(seat))
 {
 }
@@ -34,17 +32,12 @@ void InputMethodV2::sendActivate()
     }
 }
 
-TextInputV3 *InputMethodV2::getTextInputV3()
-{
-    return core_->getTextInputManagerV3()->getTextInputV4BySeat(seat_);
-}
-
 void InputMethodV2::zwp_input_method_v2_commit_string(wl::server::Resource *resource,
                                                       const char *text)
 {
-    auto *im = getTextInputV3();
-    if (im) {
-        im->sendCommitString(text);
+    auto ti3 = seat_->getTextInputV3();
+    if (ti3) {
+        ti3->sendCommitString(text);
     }
 }
 
@@ -53,9 +46,9 @@ void InputMethodV2::zwp_input_method_v2_set_preedit_string(wl::server::Resource 
                                                            int32_t cursor_begin,
                                                            int32_t cursor_end)
 {
-    auto *im = getTextInputV3();
-    if (im) {
-        im->sendPreeditString(text, cursor_begin, cursor_end);
+    auto ti3 = seat_->getTextInputV3();
+    if (ti3) {
+        ti3->sendPreeditString(text, cursor_begin, cursor_end);
     }
 }
 
@@ -67,9 +60,9 @@ void InputMethodV2::zwp_input_method_v2_delete_surrounding_text(wl::server::Reso
 
 void InputMethodV2::zwp_input_method_v2_commit(wl::server::Resource *resource, uint32_t serial)
 {
-    auto *im = getTextInputV3();
-    if (im) {
-        im->sendDone(serial);
+    auto ti3 = seat_->getTextInputV3();
+    if (ti3) {
+        ti3->sendDone(serial);
     }
 }
 

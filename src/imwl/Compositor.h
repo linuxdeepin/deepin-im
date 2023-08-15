@@ -5,7 +5,6 @@
 #ifndef COMPOSITOR_H
 #define COMPOSITOR_H
 
-#include "Core.h"
 #include "wl/server/Server.h"
 
 #include <memory>
@@ -17,16 +16,13 @@ class TextInputManagerV3;
 class InputMethodManagerV2;
 class VirtualKeyboardManagerV1;
 
-class Compositor : public wl::server::Server, public Core
+class Compositor : public wl::server::Server
 {
 public:
     Compositor();
     ~Compositor();
 
     void create();
-
-    TextInputManagerV3 *getTextInputManagerV3() override;
-    InputMethodManagerV2 *getInputMethodManagerV2() override;
 
 private:
     std::unique_ptr<QSocketNotifier> noti_;

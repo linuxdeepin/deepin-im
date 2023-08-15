@@ -40,22 +40,12 @@ void Compositor::create()
     seat_ = std::make_unique<Seat>();
     seat_->init(display());
 
-    textInputManagerV3_ = std::make_unique<TextInputManagerV3>(this);
+    textInputManagerV3_ = std::make_unique<TextInputManagerV3>();
     textInputManagerV3_->init(display());
 
-    inputMethodManagerV2_ = std::make_unique<InputMethodManagerV2>(this);
+    inputMethodManagerV2_ = std::make_unique<InputMethodManagerV2>();
     inputMethodManagerV2_->init(display());
 
     virtualKeyboardManagerV1_ = std::make_unique<VirtualKeyboardManagerV1>();
     virtualKeyboardManagerV1_->init(display());
-}
-
-TextInputManagerV3 *Compositor::getTextInputManagerV3()
-{
-    return textInputManagerV3_.get();
-}
-
-InputMethodManagerV2 *Compositor::getInputMethodManagerV2()
-{
-    return inputMethodManagerV2_.get();
 }

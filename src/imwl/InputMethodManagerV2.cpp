@@ -5,32 +5,20 @@
 #include "InputMethodManagerV2.h"
 
 #include "InputMethodV2.h"
+#include "Seat.h"
 #include "wl/server/Seat.h"
 
-InputMethodManagerV2::InputMethodManagerV2(Core *core)
-    : core_(core)
-{
-}
+InputMethodManagerV2::InputMethodManagerV2() { }
 
 InputMethodManagerV2::~InputMethodManagerV2() { }
-
-std::shared_ptr<InputMethodV2> InputMethodManagerV2::getInputMethodV2BySeat(wl::server::Seat *seat)
-{
-    return inputmethods_.at(seat);
-}
 
 void InputMethodManagerV2::zwp_input_method_manager_v2_get_input_method(
     wl::server::Resource *resource, struct ::wl_resource *seat, uint32_t input_method)
 {
-    auto seat_ = wl::server::Seat::fromResource(seat);
-    auto iter = inputmethods_.find(seat_);
-    if (iter == inputmethods_.end()) {
-        auto im = std::make_shared<InputMethodV2>(core_, seat_);
-        auto [i, r] = inputmethods_.emplace(seat_, im);
-        iter = i;
-    }
+    auto seat_ = dynamic_cast<Seat *>(wl::server::Seat::fromResource(seat));
 
-    iter->second->add(resource->client(), input_method);
+    auto im2 = seat_->getInputMethodV2();
+    im2->add(resource->client(), input_method);
 }
 
 void InputMethodManagerV2::zwp_input_method_manager_v2_destroy(wl::server::Resource *resource)

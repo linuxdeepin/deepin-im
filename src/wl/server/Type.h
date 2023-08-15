@@ -58,7 +58,8 @@ public:
     static C *fromResource(struct wl_resource *resource)
     {
         auto *r = static_cast<Resource *>(wl_resource_get_user_data(resource));
-        return static_cast<C *>(r->object());
+        auto *t = static_cast<Type *>(r->object());
+        return dynamic_cast<C *>(t);
     }
 
 protected:

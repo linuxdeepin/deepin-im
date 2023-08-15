@@ -4,8 +4,8 @@
 
 #include "VirtualKeyboardManagerV1.h"
 
+#include "Seat.h"
 #include "VirtualKeyboardV1.h"
-#include "wl/server/Seat.h"
 
 #include <QDebug>
 
@@ -17,14 +17,8 @@ void VirtualKeyboardManagerV1::zwp_virtual_keyboard_manager_v1_create_virtual_ke
     wl::server::Resource *resource, struct ::wl_resource *seat, uint32_t id)
 {
     qWarning() << "create virtual keyboard";
-    auto *s = wl::server::Seat::fromResource(seat);
+    auto *seat_ = dynamic_cast<Seat *>(wl::server::Seat::fromResource(seat));
 
-    auto iter = virtualKeyboards_.find(seat);
-    if (iter == virtualKeyboards_.end()) {
-        auto *vk = new VirtualKeyboardV1(seat);
-        auto [i, r] = virtualKeyboards_.emplace(seat, vk);
-        iter = i;
-    }
-
-    iter->second->add(resource->client(), id);
+    auto vk1 = seat_->getVirtualKeyboardV1();
+    vk1->add(resource->client(), id);
 }

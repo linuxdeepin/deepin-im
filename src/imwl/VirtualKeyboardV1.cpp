@@ -4,15 +4,15 @@
 
 #include "VirtualKeyboardV1.h"
 
+#include "Seat.h"
 #include "wl/server/Resource.h"
-#include "wl/server/Seat.h"
 
 #include <xkbcommon/xkbcommon.h>
 
 #include <sys/mman.h>
 
-VirtualKeyboardV1::VirtualKeyboardV1(struct ::wl_resource *seat)
-    : seat_(wl::server::Seat::fromResource(seat))
+VirtualKeyboardV1::VirtualKeyboardV1(Seat *seat)
+    : seat_(seat)
     , xkbContext_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
 {
 }

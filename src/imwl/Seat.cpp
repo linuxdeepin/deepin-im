@@ -1,9 +1,16 @@
 #include "Seat.h"
 
+#include "InputMethodV2.h"
+#include "TextInputV3.h"
+#include "VirtualKeyboardV1.h"
+
 #include <QDebug>
 
 Seat::Seat()
     : wl::server::Seat()
+    , textInputV3_(std::make_shared<TextInputV3>(this))
+    , inputMethodV2_(std::make_shared<InputMethodV2>(this))
+    , virtualKeyboardV1_(std::make_shared<VirtualKeyboardV1>(this))
 {
 }
 

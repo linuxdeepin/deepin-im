@@ -22,9 +22,6 @@ protected:
     void zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(wl::server::Resource *resource,
                                                                  struct ::wl_resource *seat,
                                                                  uint32_t id) override;
-
-private:
-    std::unordered_map<struct ::wl_resource * /* seat */, VirtualKeyboardV1 *> virtualKeyboards_;
 };
 
 #endif // !VIRTUALKEYBOARDMANAGERV1_H

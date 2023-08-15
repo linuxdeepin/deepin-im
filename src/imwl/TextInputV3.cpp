@@ -4,14 +4,12 @@
 
 #include "TextInputV3.h"
 
-#include "Core.h"
-#include "InputMethodManagerV2.h"
+#include "Seat.h"
 #include "InputMethodV2.h"
 #include "wl/server/Resource.h"
 
-TextInputV3::TextInputV3(Core *core, wl::server::Seat *seat)
-    : core_(core)
-    , seat_(seat)
+TextInputV3::TextInputV3(Seat *seat)
+    : seat_(seat)
 {
 }
 
@@ -61,16 +59,16 @@ void TextInputV3::zwp_text_input_v3_enable(wl::server::Resource *resource)
 {
     m_enabled.emplace(resource);
 
-    auto im = core_->getInputMethodManagerV2()->getInputMethodV2BySeat(seat_);
-    im->sendActivate();
+    auto im2 = seat_->getInputMethodV2();
+    im2->sendActivate();
 }
 
 void TextInputV3::zwp_text_input_v3_disable(wl::server::Resource *resource)
 {
     m_enabled.erase(resource);
 
-    auto im = core_->getInputMethodManagerV2()->getInputMethodV2BySeat(seat_);
-    im->sendDeactivate();
+    auto im2 = seat_->getInputMethodV2();
+    im2->sendDeactivate();
 }
 
 void TextInputV3::zwp_text_input_v3_set_surrounding_text(wl::server::Resource *resource,

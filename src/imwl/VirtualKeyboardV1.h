@@ -11,16 +11,12 @@
 
 #include <memory>
 
-namespace wl {
-namespace server {
 class Seat;
-}
-} // namespace wl
 
 class VirtualKeyboardV1 : public wl::server::ZwpVirtualKeyboardV1
 {
 public:
-    VirtualKeyboardV1(struct ::wl_resource *seat);
+    VirtualKeyboardV1(Seat *seat);
     ~VirtualKeyboardV1();
 
 protected:
@@ -40,7 +36,7 @@ protected:
     void zwp_virtual_keyboard_v1_destroy(wl::server::Resource *resource) override;
 
 private:
-    wl::server::Seat *seat_;
+    Seat *seat_;
     std::unique_ptr<xkb_context, Deleter<xkb_context_unref>> xkbContext_;
     std::unique_ptr<xkb_keymap, Deleter<xkb_keymap_unref>> xkbKeymap_;
     std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> xkbState_;
