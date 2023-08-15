@@ -23,13 +23,13 @@ DIM_ADDON_FACTORY(WLFrontend)
 WLFrontend::WLFrontend(Dim *dim)
     : FrontendAddon(dim, "wlfrontend")
 {
-    std::string waylandDisplay = getenv("WAYLAND_DISPLAY");
-    if (waylandDisplay.empty()) {
+    QByteArray waylandDisplay = qgetenv("WAYLAND_DISPLAY");
+    if (waylandDisplay.toStdString().empty()) {
         qDebug("WAYLAND_DISPLAY is not set");
         // todo: fake wayland server
     }
 
-    wl_ = new wl::client::Connection(waylandDisplay, this);
+    wl_ = new wl::client::Connection(waylandDisplay.toStdString().c_str(), this);
 
     reloadSeats();
 }

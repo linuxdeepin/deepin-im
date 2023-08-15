@@ -16,7 +16,7 @@ TextInputManagerV3::~TextInputManagerV3() { }
 
 TextInputV3 *TextInputManagerV3::getTextInputV4BySeat(wl::server::Seat *seat)
 {
-    return textInputs_.at(seat);
+    return textInputs_.find(seat) != textInputs_.end() ? textInputs_.at(seat) : nullptr;
 }
 
 void TextInputManagerV3::zwp_text_input_manager_v3_destroy(wl::server::Resource *resource)

@@ -43,7 +43,9 @@ void InputMethodV2::zwp_input_method_v2_commit_string(wl::server::Resource *reso
                                                       const char *text)
 {
     auto *im = getTextInputV3();
-    im->sendCommitString(text);
+    if (im) {
+        im->sendCommitString(text);
+    }
 }
 
 void InputMethodV2::zwp_input_method_v2_set_preedit_string(wl::server::Resource *resource,
@@ -52,7 +54,9 @@ void InputMethodV2::zwp_input_method_v2_set_preedit_string(wl::server::Resource 
                                                            int32_t cursor_end)
 {
     auto *im = getTextInputV3();
-    im->sendPreeditString(text, cursor_begin, cursor_end);
+    if (im) {
+        im->sendPreeditString(text, cursor_begin, cursor_end);
+    }
 }
 
 void InputMethodV2::zwp_input_method_v2_delete_surrounding_text(wl::server::Resource *resource,
@@ -64,7 +68,9 @@ void InputMethodV2::zwp_input_method_v2_delete_surrounding_text(wl::server::Reso
 void InputMethodV2::zwp_input_method_v2_commit(wl::server::Resource *resource, uint32_t serial)
 {
     auto *im = getTextInputV3();
-    im->sendDone(serial);
+    if (im) {
+        im->sendDone(serial);
+    }
 }
 
 void InputMethodV2::zwp_input_method_v2_get_input_popup_surface(wl::server::Resource *resource,
