@@ -30,8 +30,6 @@ protected:
 
 private:
     static const struct zwp_virtual_keyboard_manager_v1_interface impl;
-    std::unordered_map<struct ::wl_resource * /* seat */, std::shared_ptr<ZwpVirtualKeyboardV1> *>
-        virtualKeyboards_;
 };
 
 } // namespace server

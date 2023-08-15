@@ -6,6 +6,8 @@ set(WLS_SOURCES
   Type.h
   Seat.h
   Seat.cpp
+  Keyboard.h
+  Keyboard.cpp
   ZwpTextInputManagerV3.h
   ZwpTextInputManagerV3.cpp
   ZwpTextInputV3.h

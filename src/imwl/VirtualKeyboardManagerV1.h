@@ -10,6 +10,12 @@
 #include <memory>
 #include <unordered_map>
 
+namespace wl {
+namespace server {
+class Seat;
+}
+} // namespace wl
+
 class VirtualKeyboardV1;
 
 class VirtualKeyboardManagerV1 : public wl::server::ZwpVirtualKeyboardManagerV1

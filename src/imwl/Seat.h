@@ -3,6 +3,7 @@
 
 #include "wl/server/Seat.h"
 
+class Keyboard;
 class TextInputV3;
 class InputMethodV2;
 class VirtualKeyboardV1;
@@ -12,6 +13,8 @@ class Seat : public wl::server::Seat
 public:
     Seat();
     virtual ~Seat();
+
+    std::shared_ptr<Keyboard> getKeyboard() { return keyboard_; }
 
     std::shared_ptr<TextInputV3> getTextInputV3() { return textInputV3_; }
 
@@ -26,6 +29,7 @@ protected:
     void wl_seat_release(wl::server::Resource *resource) override;
 
 private:
+    std::shared_ptr<Keyboard> keyboard_;
     std::shared_ptr<TextInputV3> textInputV3_;
     std::shared_ptr<InputMethodV2> inputMethodV2_;
     std::shared_ptr<VirtualKeyboardV1> virtualKeyboardV1_;

@@ -60,6 +60,13 @@ void VirtualKeyboardV1::zwp_virtual_keyboard_v1_modifiers(wl::server::Resource *
                                                           uint32_t mods_locked,
                                                           uint32_t group)
 {
+    auto comp = xkb_state_update_mask(xkbState_.get(),
+                                      mods_depressed,
+                                      mods_latched,
+                                      mods_locked,
+                                      0,
+                                      0,
+                                      group);
 }
 
 void VirtualKeyboardV1::zwp_virtual_keyboard_v1_destroy(wl::server::Resource *resource)
