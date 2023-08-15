@@ -15,7 +15,7 @@ struct _DimIMContextWaylandGlobal
 {
     struct wl_display *display;
     struct wl_registry *registry;
-    uint32_t text_input_manager_wl_id;
+    uint32_t text_input_manager_wl_name;
     struct zwp_text_input_manager_v3 *text_input_manager;
     struct zwp_text_input_v3 *text_input;
     struct wl_compositor *compositor;
@@ -498,37 +498,38 @@ static const struct zwp_text_input_v3_listener text_input_listener = {
     text_input_done,
 };
 
-static void registry_handle_global(
-    void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version)
+static void registry_handle_global(void *data,
+                                   struct wl_registry *registry,
+                                   uint32_t name,
+                                   const char *interface,
+                                   uint32_t version)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
     GdkSeat *gdk_seat = gdk_display_get_default_seat(gdk_display_get_default());
 
     if (strcmp(interface, "zwp_text_input_manager_v3") == 0) {
-        global->text_input_manager_wl_id = id;
-        global->text_input_manager =
-            (zwp_text_input_manager_v3 *)wl_registry_bind(global->registry,
-                                                          global->text_input_manager_wl_id,
-                                                          &zwp_text_input_manager_v3_interface,
-                                                          1);
+        global->text_input_manager_wl_name = name;
+        global->text_input_manager = (zwp_text_input_manager_v3 *)
+            wl_registry_bind(registry, name, &zwp_text_input_manager_v3_interface, 1);
         global->text_input = zwp_text_input_manager_v3_get_text_input(
             global->text_input_manager,
             global->is_use_imfakewl ? global->seat : gdk_wayland_seat_get_wl_seat(gdk_seat));
         global->serial = 0;
         zwp_text_input_v3_add_listener(global->text_input, &text_input_listener, global);
     } else if (strcmp(interface, wl_seat_interface.name) == 0) {
-        global->seat = (wl_seat *)wl_registry_bind(registry, id, &wl_seat_interface, version);
+        global->seat =
+            (wl_seat *)wl_registry_bind(registry, name, &wl_seat_interface, version);
     } else if (strcmp(interface, "wl_compositor") == 0) {
         global->compositor =
-            (wl_compositor *)wl_registry_bind(registry, id, &wl_compositor_interface, 1);
+            (wl_compositor *)wl_registry_bind(registry, name, &wl_compositor_interface, 1);
     }
 }
 
-static void registry_handle_global_remove(void *data, struct wl_registry *registry, uint32_t id)
+static void registry_handle_global_remove(void *data, struct wl_registry *registry, uint32_t name)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
-    if (id != global->text_input_manager_wl_id)
+    if (name != global->text_input_manager_wl_name)
         return;
 
     g_clear_pointer(&global->text_input, zwp_text_input_v3_destroy);
