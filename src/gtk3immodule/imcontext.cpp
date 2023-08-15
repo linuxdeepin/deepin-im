@@ -6,6 +6,7 @@
 
 #include "wayland-text-input-unstable-v3-client-protocol.h"
 
+#include <gdk/gdkprivate.h>
 #include <gdk/gdkwayland.h>
 
 #define POINT_TRANSFORM(p) (DimIMContextWaylandGlobal *)(p)
@@ -17,6 +18,9 @@ struct _DimIMContextWaylandGlobal
     uint32_t text_input_manager_wl_id;
     struct zwp_text_input_manager_v3 *text_input_manager;
     struct zwp_text_input_v3 *text_input;
+    struct wl_compositor *compositor;
+    struct wl_seat *seat;
+    bool is_use_imfakewl;
 
     GtkIMContext *current;
 
@@ -360,7 +364,6 @@ static void text_input_leave(void *data,
                              struct zwp_text_input_v3 *text_input,
                              struct wl_surface *surface)
 {
-
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
     global->focused = FALSE;
@@ -499,7 +502,7 @@ static void registry_handle_global(
     void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
-    GdkSeat *seat = gdk_display_get_default_seat(gdk_display_get_default());
+    GdkSeat *gdk_seat = gdk_display_get_default_seat(gdk_display_get_default());
 
     if (strcmp(interface, "zwp_text_input_manager_v3") == 0) {
         global->text_input_manager_wl_id = id;
@@ -508,11 +511,16 @@ static void registry_handle_global(
                                                           global->text_input_manager_wl_id,
                                                           &zwp_text_input_manager_v3_interface,
                                                           1);
-        global->text_input =
-            zwp_text_input_manager_v3_get_text_input(global->text_input_manager,
-                                                     gdk_wayland_seat_get_wl_seat(seat));
+        global->text_input = zwp_text_input_manager_v3_get_text_input(
+            global->text_input_manager,
+            global->is_use_imfakewl ? global->seat : gdk_wayland_seat_get_wl_seat(gdk_seat));
         global->serial = 0;
         zwp_text_input_v3_add_listener(global->text_input, &text_input_listener, global);
+    } else if (strcmp(interface, wl_seat_interface.name) == 0) {
+        global->seat = (wl_seat *)wl_registry_bind(registry, id, &wl_seat_interface, version);
+    } else if (strcmp(interface, "wl_compositor") == 0) {
+        global->compositor =
+            (wl_compositor *)wl_registry_bind(registry, id, &wl_compositor_interface, 1);
     }
 }
 
@@ -537,6 +545,26 @@ static void gtk_im_context_wayland_global_free(gpointer data)
     g_free(global);
 }
 
+static gboolean event_cb(GIOChannel *channel, GIOCondition cond, gpointer data)
+{
+    g_debug("handle imfake wl event");
+    wl_display *display = (wl_display *)data;
+    if (wl_display_read_events(display) < 0) {
+        g_warning("failed to read events from the Wayland socket");
+        return FALSE;
+    }
+
+    while (wl_display_prepare_read(display) != 0) {
+        if (wl_display_dispatch_pending(display) < 0) {
+            g_warning("failed to dispatch pending Wayland events");
+            return FALSE;
+        }
+    }
+
+    wl_display_flush(display);
+    return TRUE;
+}
+
 static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *display)
 {
     DimIMContextWaylandGlobal *global =
@@ -551,15 +579,34 @@ static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *
     if (wlDisplay == nullptr) {
         g_debug("it's not wayland environment, use fake wayland");
         wlDisplay = wl_display_connect("imfakewl");
+        if (!wlDisplay) {
+            g_warning("failed to connect imfakewl");
+            return nullptr;
+        }
+
+        global->is_use_imfakewl = true;
     }
 
     if (!wlDisplay) {
         return nullptr;
     }
-    global->display = wlDisplay;
-    global->registry = wl_display_get_registry(global->display);
 
+    global->display = wlDisplay;
+    global->registry = wl_display_get_registry(wlDisplay);
     wl_registry_add_listener(global->registry, &registry_listener, global);
+    if (global->is_use_imfakewl) {
+        wl_display_roundtrip(wlDisplay);
+
+        while (wl_display_prepare_read(wlDisplay) < 0) {
+            wl_display_dispatch_pending(wlDisplay);
+        }
+
+        int fd = wl_display_get_fd(wlDisplay);
+
+        GIOChannel *channel = g_io_channel_unix_new(fd);
+        g_io_add_watch(channel, (GIOCondition)(G_IO_IN), (GIOFunc)event_cb, wlDisplay);
+        g_io_channel_set_encoding(channel, NULL, NULL);
+    }
 
     g_object_set_data_full(G_OBJECT(display),
                            "dim-im-context-wayland-global",
@@ -637,7 +684,13 @@ static void dim_im_context_focus_out(GtkIMContext *context)
 
 static void dim_im_context_reset(GtkIMContext *context)
 {
-    notify_im_change(DIM_IM_CONTEXT(context), ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_OTHER);
+    DimIMContext *self = DIM_IM_CONTEXT(context);
+    DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(self);
+    if (global == nullptr)
+        return;
+    if (global->focused) {
+        notify_im_change(DIM_IM_CONTEXT(context), ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_OTHER);
+    }
 }
 
 static void dim_im_context_wayland_commit(GtkIMContext *context, const gchar *str)

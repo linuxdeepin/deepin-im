@@ -104,7 +104,7 @@ void X11KeyboardGrabber::initXinputExtension()
         xcb_input_xi_event_mask_t mask;
     } mask;
 
-    mask.head.deviceid = XCB_INPUT_DEVICE_ALL;
+    mask.head.deviceid = XCB_INPUT_DEVICE_ALL_MASTER;
     mask.head.mask_len = sizeof(mask.mask) / sizeof(uint32_t);
     mask.mask = static_cast<xcb_input_xi_event_mask_t>(XCB_INPUT_XI_EVENT_MASK_RAW_KEY_PRESS
                                                        | XCB_INPUT_XI_EVENT_MASK_RAW_KEY_RELEASE);
