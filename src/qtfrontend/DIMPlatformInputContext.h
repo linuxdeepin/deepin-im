@@ -24,7 +24,7 @@ public:
     void hideInputPanel() override;
     bool isInputPanelVisible() const override;
 
-    bool eventFilter(QObject *watched, QEvent *event) override;
+    bool filterEvent(const QEvent *event) override;
 
 public slots:
     void preedit(const QList<QString> &preedit);

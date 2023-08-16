@@ -29,7 +29,6 @@ public:
 
     void focusIn();
     void focusOut();
-    void processKeyEvent(uint keyval, uint keycode, uint state, bool isRelease, uint time);
 
 protected:
     // wayland listeners

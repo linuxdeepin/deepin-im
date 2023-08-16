@@ -12,7 +12,9 @@
 #include "wl/client/ZwpDimTextInputManagerV1.h"
 #include "wl/client/ZwpDimTextInputV1.h"
 
+#include <private/qxkbcommon_p.h>
 #include <qpa/qplatformnativeinterface.h>
+#include <qpa/qwindowsysteminterface.h>
 
 #include <QDebug>
 #include <QGuiApplication>
@@ -69,14 +71,6 @@ void InputContextProxy::focusOut()
     wl_->flush();
 }
 
-void InputContextProxy::processKeyEvent([[maybe_unused]] uint keyval,
-                                        [[maybe_unused]] uint keycode,
-                                        [[maybe_unused]] uint state,
-                                        [[maybe_unused]] bool isRelease,
-                                        [[maybe_unused]] uint time)
-{
-}
-
 void InputContextProxy::modifiers_map(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                                       struct wl_array *map)
 {
@@ -117,11 +111,30 @@ void InputContextProxy::done([[maybe_unused]] struct zwp_dim_text_input_v1 *zwp_
 }
 
 void InputContextProxy::keysym(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                                uint32_t serial,
+                               uint32_t serial,
                                uint32_t time,
                                uint32_t sym,
                                uint32_t state,
                                uint32_t modifiers)
 {
     qWarning() << "keysym";
+    if (!QGuiApplication::focusWindow()) {
+        qWarning() << "no focusWindow";
+        return;
+    }
+
+    Qt::KeyboardModifiers qtModifiers = Qt::NoModifier;
+    // Qt::KeyboardModifiers qtModifiers = modifiersToQtModifiers(modifiers);
+
+    QEvent::Type type =
+        state == WL_KEYBOARD_KEY_STATE_PRESSED ? QEvent::KeyPress : QEvent::KeyRelease;
+    QString text = QXkbCommon::lookupStringNoKeysymTransformations(sym);
+    int qtkey = QXkbCommon::keysymToQtKey(sym, qtModifiers);
+
+    QWindowSystemInterface::handleKeyEvent(QGuiApplication::focusWindow(),
+                                           time,
+                                           type,
+                                           qtkey,
+                                           qtModifiers,
+                                           text);
 }

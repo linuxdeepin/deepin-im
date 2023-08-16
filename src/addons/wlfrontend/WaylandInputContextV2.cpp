@@ -184,7 +184,7 @@ void WaylandInputContextV2::key(
                             time);
     bool res = keyEvent(ke);
     if (!res) {
-        vk_->key(getTimestamp(), key, state);
+        vk_->key(getTimestamp(), key + 8, state);
         return;
     }
 
@@ -193,7 +193,7 @@ void WaylandInputContextV2::key(
         if (std::holds_alternative<ForwardKey>(e)) {
             auto forwardKey = std::get<ForwardKey>(e);
             vk_->key(getTimestamp(),
-                     forwardKey.keycode,
+                     forwardKey.keycode + 8,
                      forwardKey.pressed ? WL_KEYBOARD_KEY_STATE_PRESSED
                                         : WL_KEYBOARD_KEY_STATE_RELEASED);
             continue;

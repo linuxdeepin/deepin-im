@@ -39,7 +39,6 @@ void DIMPlatformInputContext::setFocusObject(QObject *object)
 
     if (focusObject_) {
         proxy_->focusOut();
-        focusObject_->removeEventFilter(this);
         focusObject_ = nullptr;
     }
 
@@ -55,7 +54,6 @@ void DIMPlatformInputContext::setFocusObject(QObject *object)
     }
 
     focusObject_ = object;
-    focusObject_->installEventFilter(this);
     proxy_->focusIn();
 }
 
@@ -75,12 +73,8 @@ bool DIMPlatformInputContext::isInputPanelVisible() const
     return true;
 }
 
-bool DIMPlatformInputContext::eventFilter(QObject *object, QEvent *event)
+bool DIMPlatformInputContext::filterEvent(const QEvent *event)
 {
-    if (object != focusObject_) {
-        return false;
-    }
-
     if (event->type() != QEvent::KeyPress && event->type() != QEvent::KeyRelease) {
         return false;
     }
@@ -88,15 +82,6 @@ bool DIMPlatformInputContext::eventFilter(QObject *object, QEvent *event)
     if (!proxy_->available()) {
         return false;
     }
-
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-
-    uint keyval = keyEvent->nativeVirtualKey();
-    uint keycode = keyEvent->nativeScanCode();
-    uint state = keyEvent->nativeModifiers();
-    bool isRelease = keyEvent->type() == QEvent::KeyRelease;
-    uint time = keyEvent->timestamp();
-    proxy_->processKeyEvent(keyval, keycode, state, isRelease, time);
 
     return true;
 }
