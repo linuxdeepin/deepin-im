@@ -328,7 +328,7 @@ void DimIMContextWaylandGlobal::text_input_modifiers_map(
     // TODO
 }
 
-void text_input_keysym(void *data,
+void DimIMContextWaylandGlobal::text_input_keysym(void *data,
                        struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                        uint32_t serial,
                        uint32_t time,
