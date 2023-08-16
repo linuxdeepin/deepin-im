@@ -10,8 +10,6 @@
 
 #include <wayland-client-protocol.h>
 
-#include <QSocketNotifier>
-
 #include <memory>
 #include <set>
 #include <string>
@@ -31,10 +29,8 @@ public:
 private:
     std::unique_ptr<wl_display, Deleter<&wl_display_disconnect>> display_;
     int fd_;
-    QSocketNotifier *notifier_;
 
     void init();
-    void dispatch();
 };
 
 } // namespace client

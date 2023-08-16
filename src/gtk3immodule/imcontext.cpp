@@ -20,7 +20,6 @@
 struct _DimIMContextWaylandGlobal
 {
     GtkIMContext *current;
-    bool is_use_imfakewl;
     static const zwp_text_input_v3_listener tiListener;
     std::shared_ptr<wl::client::ZwpTextInputV3> ti;
     wl::client::ConnectionBase *wl;
@@ -513,26 +512,6 @@ static void gtk_im_context_wayland_global_free(gpointer data)
     g_free(global);
 }
 
-static gboolean event_cb(GIOChannel *channel, GIOCondition cond, gpointer data)
-{
-    g_debug("handle imfake wl event");
-    wl_display *display = (wl_display *)data;
-    if (wl_display_read_events(display) < 0) {
-        g_warning("failed to read events from the Wayland socket");
-        return FALSE;
-    }
-
-    while (wl_display_prepare_read(display) != 0) {
-        if (wl_display_dispatch_pending(display) < 0) {
-            g_warning("failed to dispatch pending Wayland events");
-            return FALSE;
-        }
-    }
-
-    wl_display_flush(display);
-    return TRUE;
-}
-
 static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *display)
 {
     DimIMContextWaylandGlobal *global =
@@ -548,7 +527,6 @@ static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *
         global->wl = new wl::client::ConnectionRaw(gdk_wayland_display);
     } else {
         global->wl = new wl::client::Connection("imfakewl");
-        global->is_use_imfakewl = true;
     }
 
     auto seats = global->wl->getGlobals<wl::client::Seat>();
@@ -561,14 +539,6 @@ static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *
     // todo: select seat
     zwp_text_input_v3_add_listener(global->ti->get(), &global->tiListener, global);
     global->wl->flush();
-
-    if (global->is_use_imfakewl) {
-        int fd = wl_display_get_fd(global->wl->display());
-
-        GIOChannel *channel = g_io_channel_unix_new(fd);
-        g_io_add_watch(channel, (GIOCondition)(G_IO_IN), (GIOFunc)event_cb, global->wl->display());
-        g_io_channel_set_encoding(channel, NULL, NULL);
-    }
 
     g_object_set_data_full(G_OBJECT(display),
                            "dim-im-context-wayland-global",

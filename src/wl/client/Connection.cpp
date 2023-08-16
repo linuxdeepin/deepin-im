@@ -6,6 +6,8 @@
 
 #include "common/common.h"
 
+#include <gtk/gtk.h>
+
 #include <QDebug>
 
 #include <poll.h>
@@ -25,6 +27,35 @@ Connection::Connection(const std::string &name, QObject *parent)
 
 Connection::~Connection() { }
 
+static bool dispatch(GIOChannel *channel, int cond, void *data)
+{
+    Q_UNUSED(channel);
+    Q_UNUSED(cond);
+
+    qDebug() << "dispatch";
+
+    auto self = (Connection *)data;
+
+    if (self->display() == nullptr) {
+        return false;
+    }
+
+    if (wl_display_read_events(self->display()) < 0) {
+        qWarning() << "failed to read events from the Wayland socket";
+        return false;
+    }
+
+    while (wl_display_prepare_read(self->display()) != 0) {
+        if (wl_display_dispatch_pending(self->display()) < 0) {
+            qWarning() << "failed to dispatch pending Wayland events";
+            return false;
+        }
+    }
+
+    self->flush();
+    return true;
+}
+
 void Connection::init()
 {
     ConnectionBase::init();
@@ -41,29 +72,6 @@ void Connection::init()
         return;
     }
 
-    notifier_ = new QSocketNotifier(fd_, QSocketNotifier::Read, this);
-    connect(notifier_, &QSocketNotifier::activated, this, &Connection::dispatch);
-}
-
-void Connection::dispatch()
-{
-    if (display_ == nullptr) {
-        return;
-    }
-
-    qDebug() << "dispatch";
-
-    if (wl_display_read_events(display()) < 0) {
-        qWarning() << "failed to read events from the Wayland socket";
-        return;
-    }
-
-    while (wl_display_prepare_read(display()) != 0) {
-        if (wl_display_dispatch_pending(display()) < 0) {
-            qWarning() << "failed to dispatch pending Wayland events";
-            return;
-        }
-    }
-
-    flush();
+    GIOChannel *channel = g_io_channel_unix_new(fd_);
+    g_io_add_watch(channel, (GIOCondition)(G_IO_IN), (GIOFunc)dispatch, this);
 }

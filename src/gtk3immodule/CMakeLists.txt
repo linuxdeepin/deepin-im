@@ -13,9 +13,11 @@ set(GTK3_IM_MODULEDIR "${CMAKE_INSTALL_LIBDIR}/gtk-3.0/${GTK3_BINARY_VERSION}/im
 set_target_properties(im-dim-gtk3 PROPERTIES PREFIX "" OUTPUT_NAME "im-dim")
 
 target_link_libraries(im-dim-gtk3
+  Qt6::Core
   PkgConfig::wayland-client
   PkgConfig::Gtk3
   wayland_protocols
+  wlc
 )
 
 install(TARGETS im-dim-gtk3 DESTINATION "${GTK3_IM_MODULEDIR}")
