@@ -5,6 +5,40 @@
 #ifndef COMMON_COMMON_H_
 #define COMMON_COMMON_H_
 
+#include <stdint.h>
+
+enum class Modifiers : uint8_t {
+    Shift,
+    Lock,
+    Control,
+    Mod1,
+    Mod2,
+    Mod3,
+    Mod4,
+    Mod5,
+    Alt,
+    Meta,
+    Super,
+    Hyper,
+
+    CNT,
+};
+
+enum ModifiersMask {
+    SHIFT_MASK = 1 << 0,
+    LOCK_MASK = 1 << 1,
+    CONTROL_MASK = 1 << 2,
+    MOD1_MASK = 1 << 3,
+    MOD2_MASK = 1 << 4,
+    MOD3_MASK = 1 << 5,
+    MOD4_MASK = 1 << 6,
+    MOD5_MASK = 1 << 7,
+    ALT_MASK = 1 << 8,
+    META_MASK = 1 << 9,
+    SUPER_MASK = 1 << 10,
+    HYPER_MASK = 1 << 11,
+};
+
 template<typename T>
 inline constexpr bool always_false_v = false;
 

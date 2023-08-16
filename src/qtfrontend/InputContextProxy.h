@@ -59,6 +59,9 @@ private:
     bool available_;
     std::shared_ptr<wl::client::ZwpDimTextInputV1> ti_;
     static const zwp_dim_text_input_v1_listener tiListener;
+
+    QList<Qt::KeyboardModifier> modifiersMap_;
+    Qt::KeyboardModifiers modifiersToQtModifiers(uint32_t modifiers);
 };
 
 #endif // !INPUTCONTEXTPROXY_H

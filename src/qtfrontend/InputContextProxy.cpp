@@ -75,6 +75,23 @@ void InputContextProxy::modifiers_map(struct zwp_dim_text_input_v1 *zwp_dim_text
                                       struct wl_array *map)
 {
     qWarning() << "modifiers_map";
+    const QList<QByteArray> modifiersMap = QByteArray::fromRawData(static_cast<const char*>(map->data), map->size).split('\0');
+
+    modifiersMap_.clear();
+    for (const QByteArray &modifier : modifiersMap) {
+        if (modifier == "Shift")
+            modifiersMap_.append(Qt::ShiftModifier);
+        else if (modifier == "Control")
+            modifiersMap_.append(Qt::ControlModifier);
+        else if (modifier == "Alt")
+            modifiersMap_.append(Qt::AltModifier);
+        else if (modifier == "Mod1")
+            modifiersMap_.append(Qt::AltModifier);
+        else if (modifier == "Mod4")
+            modifiersMap_.append(Qt::MetaModifier);
+        else
+            modifiersMap_.append(Qt::NoModifier);
+    }
 }
 
 void InputContextProxy::preedit_string(
@@ -123,8 +140,7 @@ void InputContextProxy::keysym(struct zwp_dim_text_input_v1 *zwp_dim_text_input_
         return;
     }
 
-    Qt::KeyboardModifiers qtModifiers = Qt::NoModifier;
-    // Qt::KeyboardModifiers qtModifiers = modifiersToQtModifiers(modifiers);
+    Qt::KeyboardModifiers qtModifiers = modifiersToQtModifiers(modifiers);
 
     QEvent::Type type =
         state == WL_KEYBOARD_KEY_STATE_PRESSED ? QEvent::KeyPress : QEvent::KeyRelease;
@@ -137,4 +153,15 @@ void InputContextProxy::keysym(struct zwp_dim_text_input_v1 *zwp_dim_text_input_
                                            qtkey,
                                            qtModifiers,
                                            text);
+}
+
+Qt::KeyboardModifiers InputContextProxy::modifiersToQtModifiers(uint32_t modifiers)
+{
+    Qt::KeyboardModifiers ret = Qt::NoModifier;
+    for (int i = 0; i < modifiersMap_.size(); ++i) {
+        if (modifiers & (1 << i)) {
+            ret |= modifiersMap_[i];
+        }
+    }
+    return ret;
 }

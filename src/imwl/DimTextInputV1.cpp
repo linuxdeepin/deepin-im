@@ -11,7 +11,7 @@
 DimTextInputV1::DimTextInputV1(Seat *seat)
     : seat_(seat)
 {
-    constexpr char data[] = "Shift\0Control\0Mod1\0Mod4";
+    constexpr char data[] = "Shift\0Lock\0Control\0Mod1\0Mod2\0Mod3\0Mod4";
 
     wl_array_init(&modifiersMap_);
     auto *ptr = wl_array_add(&modifiersMap_, sizeof(data));

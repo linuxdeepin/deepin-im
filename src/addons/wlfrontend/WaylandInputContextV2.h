@@ -27,22 +27,6 @@ public:
     uint32_t group = 0;
 };
 
-enum class Modifiers : uint8_t {
-    Shift,
-    Lock,
-    Control,
-    Mod1,
-    Mod2,
-    Mod3,
-    Mod4,
-    Mod5,
-    Alt,
-    Meta,
-    Super,
-    Hyper,
-
-    CNT,
-};
 
 class WaylandInputContextV2 : public InputContext
 {

@@ -65,6 +65,31 @@ void VirtualKeyboardV1::zwp_virtual_keyboard_v1_keymap(wl::server::Resource *res
         xkbKeymap_.reset();
         return;
     }
+
+    modifierMask_[static_cast<uint8_t>(Modifiers::Shift)] = 1
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Shift");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Lock)] = 1
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Lock");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Control)] = 1
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Control");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Mod1)] = 1
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod1");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Mod2)] = 1
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod2");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Mod3)] = 1
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod3");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Mod4)] = 1
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod4");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Mod5)] = 1
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod5");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Alt)] = 1
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Alt");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Meta)] = 1
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Meta");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Super)] = 1
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Super");
+    modifierMask_[static_cast<uint8_t>(Modifiers::Hyper)] = 1
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Hyper");
 }
 
 void VirtualKeyboardV1::zwp_virtual_keyboard_v1_key(wl::server::Resource *resource,
@@ -74,7 +99,7 @@ void VirtualKeyboardV1::zwp_virtual_keyboard_v1_key(wl::server::Resource *resour
 {
     xkb_keysym_t sym = xkb_state_key_get_one_sym(xkbState_.get(), key);
     auto dti = seat_->getDimTextInputV1();
-    dti->sendKeysym(nextSerial(), time, sym, state, 0);
+    dti->sendKeysym(nextSerial(), time, sym, state, state_.modifiers);
 }
 
 void VirtualKeyboardV1::zwp_virtual_keyboard_v1_modifiers(wl::server::Resource *resource,
@@ -90,6 +115,45 @@ void VirtualKeyboardV1::zwp_virtual_keyboard_v1_modifiers(wl::server::Resource *
                                       0,
                                       0,
                                       group);
+
+    xkb_mod_mask_t mask = xkb_state_serialize_mods(xkbState_.get(), comp);
+    state_.modifiers = 0;
+    if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Shift)]) {
+        state_.modifiers |= SHIFT_MASK;
+    }
+    if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Lock)]) {
+        state_.modifiers |= LOCK_MASK;
+    }
+    if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Control)]) {
+        state_.modifiers |= CONTROL_MASK;
+    }
+    if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod1)]) {
+        state_.modifiers |= MOD1_MASK;
+    }
+    if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod2)]) {
+        state_.modifiers |= MOD2_MASK;
+    }
+    if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod3)]) {
+        state_.modifiers |= MOD3_MASK;
+    }
+    if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod4)]) {
+        state_.modifiers |= MOD4_MASK;
+    }
+    if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod5)]) {
+        state_.modifiers |= MOD5_MASK;
+    }
+    if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Alt)]) {
+        state_.modifiers |= ALT_MASK;
+    }
+    if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Meta)]) {
+        state_.modifiers |= META_MASK;
+    }
+    if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Super)]) {
+        state_.modifiers |= SUPER_MASK;
+    }
+    if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Hyper)]) {
+        state_.modifiers |= HYPER_MASK;
+    }
 }
 
 void VirtualKeyboardV1::zwp_virtual_keyboard_v1_destroy(wl::server::Resource *resource)
