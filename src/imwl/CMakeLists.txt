@@ -12,6 +12,8 @@ add_executable(imwl
     VirtualKeyboardManagerV1.cpp VirtualKeyboardManagerV1.h
     VirtualKeyboardV1.cpp VirtualKeyboardV1.h
     X11KeyboardGrabber.cpp X11KeyboardGrabber.h
+    DimTextInputManagerV1.cpp DimTextInputManagerV1.h
+    DimTextInputV1.cpp DimTextInputV1.h
     shm_open_anon.c shm_open_anon.h
 )
 

@@ -1,16 +1,18 @@
 #include "Seat.h"
 
-#include "Keyboard.h"
+// #include "Keyboard.h"
 #include "InputMethodV2.h"
-#include "TextInputV3.h"
+#include "DimTextInputV1.h"
+// #include "TextInputV3.h"
 #include "VirtualKeyboardV1.h"
 
 #include <QDebug>
 
 Seat::Seat()
     : wl::server::Seat()
-    , keyboard_(std::make_shared<Keyboard>(this))
-    , textInputV3_(std::make_shared<TextInputV3>(this))
+    // , keyboard_(std::make_shared<Keyboard>(this))
+    , dimTextInputV1_(std::make_shared<DimTextInputV1>(this))
+    // , textInputV3_(std::make_shared<TextInputV3>(this))
     , inputMethodV2_(std::make_shared<InputMethodV2>(this))
     , virtualKeyboardV1_(std::make_shared<VirtualKeyboardV1>(this))
 {
@@ -26,7 +28,7 @@ void Seat::wl_seat_get_pointer(wl::server::Resource *resource, uint32_t id)
 void Seat::wl_seat_get_keyboard(wl::server::Resource *resource, uint32_t id)
 {
     qWarning() << "wl_seat_get_keybpard";
-    keyboard_->add(resource->client(), id);
+    // keyboard_->add(resource->client(), id);
 }
 
 void Seat::wl_seat_get_touch(wl::server::Resource *resource, uint32_t id)

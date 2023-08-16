@@ -58,6 +58,11 @@ ecm_add_wayland_server_protocol(wayland_protocols
   BASENAME text-input-unstable-v3
 )
 
+ecm_add_wayland_server_protocol(wayland_protocols
+  PROTOCOL misc/wayland-protocols/dim-text-input-unstable-v1.xml
+  BASENAME dim-text-input-unstable-v1
+)
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_subdirectory(src)

@@ -22,6 +22,10 @@ set(WLS_SOURCES
   ZwpVirtualKeyboardManagerV1.cpp
   ZwpVirtualKeyboardV1.h
   ZwpVirtualKeyboardV1.cpp
+  ZwpDimTextInputManagerV1.h
+  ZwpDimTextInputManagerV1.cpp
+  ZwpDimTextInputV1.h
+  ZwpDimTextInputV1.cpp
 )
 
 add_library(wls STATIC

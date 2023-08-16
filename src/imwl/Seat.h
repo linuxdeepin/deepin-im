@@ -4,6 +4,7 @@
 #include "wl/server/Seat.h"
 
 class Keyboard;
+class DimTextInputV1;
 class TextInputV3;
 class InputMethodV2;
 class VirtualKeyboardV1;
@@ -15,6 +16,8 @@ public:
     virtual ~Seat();
 
     std::shared_ptr<Keyboard> getKeyboard() { return keyboard_; }
+
+    std::shared_ptr<DimTextInputV1> getDimTextInputV1() { return dimTextInputV1_; }
 
     std::shared_ptr<TextInputV3> getTextInputV3() { return textInputV3_; }
 
@@ -30,6 +33,7 @@ protected:
 
 private:
     std::shared_ptr<Keyboard> keyboard_;
+    std::shared_ptr<DimTextInputV1> dimTextInputV1_;
     std::shared_ptr<TextInputV3> textInputV3_;
     std::shared_ptr<InputMethodV2> inputMethodV2_;
     std::shared_ptr<VirtualKeyboardV1> virtualKeyboardV1_;

@@ -4,12 +4,33 @@
 
 #include "VirtualKeyboardV1.h"
 
+#include "DimTextInputV1.h"
 #include "Seat.h"
+#include "common.h"
 #include "wl/server/Resource.h"
 
 #include <xkbcommon/xkbcommon.h>
 
 #include <sys/mman.h>
+
+// static uint32_t toModifiers(KeyStates states)
+// {
+//     uint32_t modifiers = 0;
+//     // We use Shift Control Mod1 Mod4
+//     if (states.test(KeyState::Shift)) {
+//         modifiers |= (1 << 0);
+//     }
+//     if (states.test(KeyState::Ctrl)) {
+//         modifiers |= (1 << 1);
+//     }
+//     if (states.test(KeyState::Alt)) {
+//         modifiers |= (1 << 2);
+//     }
+//     if (states.test(KeyState::Super)) {
+//         modifiers |= (1 << 3);
+//     }
+//     return modifiers;
+// }
 
 VirtualKeyboardV1::VirtualKeyboardV1(Seat *seat)
     : seat_(seat)
@@ -30,9 +51,9 @@ void VirtualKeyboardV1::zwp_virtual_keyboard_v1_keymap(wl::server::Resource *res
     }
 
     xkbKeymap_.reset(xkb_keymap_new_from_string(xkbContext_.get(),
-                                                 static_cast<const char *>(ptr),
-                                                 XKB_KEYMAP_FORMAT_TEXT_V1,
-                                                 XKB_KEYMAP_COMPILE_NO_FLAGS));
+                                                static_cast<const char *>(ptr),
+                                                XKB_KEYMAP_FORMAT_TEXT_V1,
+                                                XKB_KEYMAP_COMPILE_NO_FLAGS));
     munmap(ptr, size);
 
     if (!xkbKeymap_) {
@@ -51,7 +72,9 @@ void VirtualKeyboardV1::zwp_virtual_keyboard_v1_key(wl::server::Resource *resour
                                                     uint32_t key,
                                                     uint32_t state)
 {
-    // q->seat_->sendKeyEvent(key, state);
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(xkbState_.get(), key);
+    auto dti = seat_->getDimTextInputV1();
+    dti->sendKeysym(nextSerial(), time, sym, state, 0);
 }
 
 void VirtualKeyboardV1::zwp_virtual_keyboard_v1_modifiers(wl::server::Resource *resource,
@@ -71,5 +94,5 @@ void VirtualKeyboardV1::zwp_virtual_keyboard_v1_modifiers(wl::server::Resource *
 
 void VirtualKeyboardV1::zwp_virtual_keyboard_v1_destroy(wl::server::Resource *resource)
 {
-    // wl_resource_destroy(resource->handle);
+    resource->destroy();
 }

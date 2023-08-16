@@ -5,18 +5,18 @@
 #ifndef INPUTCONTEXTPROXY_H
 #define INPUTCONTEXTPROXY_H
 
-#include "wayland-text-input-unstable-v3-client-protocol.h"
+#include "wayland-dim-text-input-unstable-v1-client-protocol.h"
 
 #include <QObject>
 
 namespace wl {
 namespace client {
 class ConnectionBase;
-class ZwpTextInputV3;
+class ZwpDimTextInputV1;
 } // namespace client
 } // namespace wl
 
-struct zwp_text_input_v3;
+struct zwp_dim_text_input_v1;
 
 class InputContextProxy : public QObject
 {
@@ -33,17 +33,22 @@ public:
 
 protected:
     // wayland listeners
-    void enter(struct zwp_text_input_v3 *zwp_text_input_v3, struct wl_surface *surface);
-    void leave(struct zwp_text_input_v3 *zwp_text_input_v3, struct wl_surface *surface);
-    void preedit_string(struct zwp_text_input_v3 *zwp_text_input_v3,
+    void modifiers_map(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1, struct wl_array *map);
+    void preedit_string(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                         const char *text,
                         int32_t cursor_begin,
                         int32_t cursor_end);
-    void commit_string(struct zwp_text_input_v3 *zwp_text_input_v3, const char *text);
-    void delete_surrounding_text(struct zwp_text_input_v3 *zwp_text_input_v3,
+    void commit_string(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1, const char *text);
+    void delete_surrounding_text(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                                  uint32_t before_length,
                                  uint32_t after_length);
-    void done(struct zwp_text_input_v3 *zwp_text_input_v3, uint32_t serial);
+    void done(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1, uint32_t serial);
+    void keysym(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
+                uint32_t serial,
+                uint32_t time,
+                uint32_t sym,
+                uint32_t state,
+                uint32_t modifiers);
 
 signals:
     void preedit(const QList<QString> &preedit);
@@ -53,8 +58,8 @@ signals:
 private:
     wl::client::ConnectionBase *wl_;
     bool available_;
-    std::shared_ptr<wl::client::ZwpTextInputV3> ti_;
-    static const zwp_text_input_v3_listener tiListener;
+    std::shared_ptr<wl::client::ZwpDimTextInputV1> ti_;
+    static const zwp_dim_text_input_v1_listener tiListener;
 };
 
 #endif // !INPUTCONTEXTPROXY_H
