@@ -5,6 +5,12 @@
 #include "imcontext.h"
 
 #include "wayland-text-input-unstable-v3-client-protocol.h"
+#include "wl/client/Connection.h"
+#include "wl/client/ConnectionBase.h"
+#include "wl/client/ConnectionRaw.h"
+#include "wl/client/Seat.h"
+#include "wl/client/ZwpTextInputManagerV3.h"
+#include "wl/client/ZwpTextInputV3.h"
 
 #include <gdk/gdkprivate.h>
 #include <gdk/gdkwayland.h>
@@ -13,23 +19,46 @@
 
 struct _DimIMContextWaylandGlobal
 {
-    struct wl_display *display;
-    struct wl_registry *registry;
-    uint32_t text_input_manager_wl_name;
-    struct zwp_text_input_manager_v3 *text_input_manager;
-    struct zwp_text_input_v3 *text_input;
-    struct wl_compositor *compositor;
-    struct wl_seat *seat;
-    bool is_use_imfakewl;
-
     GtkIMContext *current;
-
-    /* The input-method.enter event may happen before or after GTK focus-in,
-     * so the context may not exist at the time. Same for leave and focus-out. */
-    gboolean focused;
+    bool is_use_imfakewl;
+    static const zwp_text_input_v3_listener tiListener;
+    std::shared_ptr<wl::client::ZwpTextInputV3> ti;
+    wl::client::ConnectionBase *wl;
 
     guint serial;
     guint done_serial;
+
+    // wayland listeners
+    static void text_input_enter(void *data,
+                                 struct zwp_text_input_v3 *zwp_text_input_v3,
+                                 struct wl_surface *surface);
+    static void text_input_leave(void *data,
+                                 struct zwp_text_input_v3 *text_input,
+                                 struct wl_surface *surface);
+    static void text_input_preedit(void *data,
+                                   struct zwp_text_input_v3 *zwp_text_input_v3,
+                                   const char *text,
+                                   int32_t cursor_begin,
+                                   int32_t cursor_end);
+    static void text_input_commit(void *data,
+                                  struct zwp_text_input_v3 *zwp_text_input_v3,
+                                  const char *text);
+    static void text_input_delete_surrounding_text(void *data,
+                                                   struct zwp_text_input_v3 *zwp_text_input_v3,
+                                                   uint32_t before_length,
+                                                   uint32_t after_length);
+    static void text_input_done(void *data,
+                                struct zwp_text_input_v3 *zwp_text_input_v3,
+                                uint32_t serial);
+};
+
+const zwp_text_input_v3_listener DimIMContextWaylandGlobal::tiListener = {
+    text_input_enter,
+    text_input_leave,
+    text_input_preedit,
+    text_input_commit,
+    text_input_delete_surrounding_text,
+    text_input_done,
 };
 
 struct preedit
@@ -117,8 +146,6 @@ static DimIMContextWaylandGlobal *dim_im_context_wayland_get_global(DimIMContext
 
     if (global->current != GTK_IM_CONTEXT(self))
         return nullptr;
-    if (global->text_input == nullptr)
-        return nullptr;
 
     return global;
 }
@@ -178,11 +205,8 @@ static void notify_surrounding_text(DimIMContext *context)
         str = g_strndup(start, end - start);
     }
 
-    zwp_text_input_v3_set_surrounding_text(global->text_input,
-                                           str ? str : context->surrounding.text,
-                                           cursor,
-                                           anchor);
-    zwp_text_input_v3_set_text_change_cause(global->text_input, context->surrounding_change);
+    global->ti->setSurroundingText(str ? str : context->surrounding.text, cursor, anchor);
+    global->ti->setTextChangeCause(context->surrounding_change);
     g_free(str);
 #undef MAX_LEN
 }
@@ -255,9 +279,7 @@ static void notify_content_type(DimIMContext *context)
 
     g_object_get(context, "input-hints", &hints, "input-purpose", &purpose, nullptr);
 
-    zwp_text_input_v3_set_content_type(global->text_input,
-                                       translate_hints(hints, purpose),
-                                       translate_purpose(purpose));
+    global->ti->setContentType(translate_hints(hints, purpose), translate_purpose(purpose));
 }
 
 static void commit_state(DimIMContext *context)
@@ -268,7 +290,7 @@ static void commit_state(DimIMContext *context)
         return;
 
     global->serial++;
-    zwp_text_input_v3_commit(global->text_input);
+    global->ti->commit();
     context->surrounding_change = ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD;
 }
 
@@ -281,11 +303,7 @@ static void notify_cursor_location(DimIMContext *context)
     if (context->window) {
         cairo_rectangle_int_t rect = context->cursor_rect;
         gdk_window_get_root_coords(context->window, rect.x, rect.y, &rect.x, &rect.y);
-        zwp_text_input_v3_set_cursor_rectangle(global->text_input,
-                                               rect.x,
-                                               rect.y,
-                                               rect.width,
-                                               rect.height);
+        global->ti->setCursorRectangle(rect.x, rect.y, rect.width, rect.height);
     }
 }
 
@@ -306,11 +324,11 @@ static void notify_im_change(DimIMContext *context, enum zwp_text_input_v3_chang
     commit_state(context);
 }
 
-static void text_input_preedit(void *data,
-                               struct zwp_text_input_v3 *text_input,
-                               const char *text,
-                               int cursor_begin,
-                               int cursor_end)
+void DimIMContextWaylandGlobal::text_input_preedit(void *data,
+                                                   struct zwp_text_input_v3 *text_input,
+                                                   const char *text,
+                                                   int cursor_begin,
+                                                   int cursor_end)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
@@ -327,13 +345,13 @@ static void text_input_preedit(void *data,
 
 static void enable(DimIMContext *context, DimIMContextWaylandGlobal *global)
 {
-    zwp_text_input_v3_enable(global->text_input);
+    global->ti->enable();
     notify_im_change(context, ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_OTHER);
 }
 
 static void disable(DimIMContext *context, DimIMContextWaylandGlobal *global)
 {
-    zwp_text_input_v3_disable(global->text_input);
+    global->ti->disable();
 
     /* The commit above will still count in the .done event accounting,
      * we should account for it, lest the serial gets out of sync after
@@ -343,36 +361,35 @@ static void disable(DimIMContext *context, DimIMContextWaylandGlobal *global)
 
     /* after disable, incoming state changes won't take effect anyway */
     if (context->current_preedit.text) {
-        text_input_preedit(global, global->text_input, nullptr, 0, 0);
+        global->text_input_preedit(global, global->ti->get(), nullptr, 0, 0);
         text_input_preedit_apply(global);
     }
 }
 
-static void text_input_enter(void *data,
-                             struct zwp_text_input_v3 *text_input,
-                             struct wl_surface *surface)
+void DimIMContextWaylandGlobal::text_input_enter(void *data,
+                                                 struct zwp_text_input_v3 *zwp_text_input_v3,
+                                                 struct wl_surface *surface)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
-    global->focused = TRUE;
-
     if (global->current)
+
         enable(DIM_IM_CONTEXT(global->current), global);
 }
 
-static void text_input_leave(void *data,
-                             struct zwp_text_input_v3 *text_input,
-                             struct wl_surface *surface)
+void DimIMContextWaylandGlobal::text_input_leave(void *data,
+                                                 struct zwp_text_input_v3 *text_input,
+                                                 struct wl_surface *surface)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
-
-    global->focused = FALSE;
 
     if (global->current)
         disable(DIM_IM_CONTEXT(global->current), global);
 }
 
-static void text_input_commit(void *data, struct zwp_text_input_v3 *text_input, const char *text)
+void DimIMContextWaylandGlobal::text_input_commit(void *data,
+                                                  struct zwp_text_input_v3 *text_input,
+                                                  const char *text)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
@@ -385,10 +402,8 @@ static void text_input_commit(void *data, struct zwp_text_input_v3 *text_input, 
     context->pending_commit = g_strdup(text);
 }
 
-static void text_input_delete_surrounding_text(void *data,
-                                               struct zwp_text_input_v3 *text_input,
-                                               uint32_t before_length,
-                                               uint32_t after_length)
+void DimIMContextWaylandGlobal::text_input_delete_surrounding_text(
+    void *data, struct zwp_text_input_v3 *text_input, uint32_t before_length, uint32_t after_length)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
@@ -467,7 +482,9 @@ static void text_input_preedit_apply(DimIMContextWaylandGlobal *global)
         g_signal_emit_by_name(context, "preedit-end");
 }
 
-static void text_input_done(void *data, struct zwp_text_input_v3 *text_input, uint32_t serial)
+void DimIMContextWaylandGlobal::text_input_done(void *data,
+                                                struct zwp_text_input_v3 *text_input,
+                                                uint32_t serial)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
@@ -488,56 +505,6 @@ static void text_input_done(void *data, struct zwp_text_input_v3 *text_input, ui
     if (update_im && global->serial == serial)
         notify_im_change(context, ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD);
 }
-
-static const struct zwp_text_input_v3_listener text_input_listener = {
-    text_input_enter,
-    text_input_leave,
-    text_input_preedit,
-    text_input_commit,
-    text_input_delete_surrounding_text,
-    text_input_done,
-};
-
-static void registry_handle_global(void *data,
-                                   struct wl_registry *registry,
-                                   uint32_t name,
-                                   const char *interface,
-                                   uint32_t version)
-{
-    DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
-    GdkSeat *gdk_seat = gdk_display_get_default_seat(gdk_display_get_default());
-
-    if (strcmp(interface, "zwp_text_input_manager_v3") == 0) {
-        global->text_input_manager_wl_name = name;
-        global->text_input_manager = (zwp_text_input_manager_v3 *)
-            wl_registry_bind(registry, name, &zwp_text_input_manager_v3_interface, 1);
-        global->text_input = zwp_text_input_manager_v3_get_text_input(
-            global->text_input_manager,
-            global->is_use_imfakewl ? global->seat : gdk_wayland_seat_get_wl_seat(gdk_seat));
-        global->serial = 0;
-        zwp_text_input_v3_add_listener(global->text_input, &text_input_listener, global);
-    } else if (strcmp(interface, wl_seat_interface.name) == 0) {
-        global->seat =
-            (wl_seat *)wl_registry_bind(registry, name, &wl_seat_interface, version);
-    } else if (strcmp(interface, "wl_compositor") == 0) {
-        global->compositor =
-            (wl_compositor *)wl_registry_bind(registry, name, &wl_compositor_interface, 1);
-    }
-}
-
-static void registry_handle_global_remove(void *data, struct wl_registry *registry, uint32_t name)
-{
-    DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
-
-    if (name != global->text_input_manager_wl_name)
-        return;
-
-    g_clear_pointer(&global->text_input, zwp_text_input_v3_destroy);
-    g_clear_pointer(&global->text_input_manager, zwp_text_input_manager_v3_destroy);
-}
-
-static const struct wl_registry_listener registry_listener = { registry_handle_global,
-                                                               registry_handle_global_remove };
 
 static void gtk_im_context_wayland_global_free(gpointer data)
 {
@@ -576,36 +543,30 @@ static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *
 
     global = g_new0(DimIMContextWaylandGlobal, 1);
 
-    wl_display *wlDisplay = gdk_wayland_display_get_wl_display(display);
-    if (wlDisplay == nullptr) {
-        g_debug("it's not wayland environment, use fake wayland");
-        wlDisplay = wl_display_connect("imfakewl");
-        if (!wlDisplay) {
-            g_warning("failed to connect imfakewl");
-            return nullptr;
-        }
-
+    wl_display *gdk_wayland_display = gdk_wayland_display_get_wl_display(display);
+    if (gdk_wayland_display != nullptr) {
+        global->wl = new wl::client::ConnectionRaw(gdk_wayland_display);
+    } else {
+        global->wl = new wl::client::Connection("imfakewl");
         global->is_use_imfakewl = true;
     }
 
-    if (!wlDisplay) {
-        return nullptr;
-    }
+    auto seats = global->wl->getGlobals<wl::client::Seat>();
+    auto tiManager = global->wl->getGlobal<wl::client::ZwpTextInputManagerV3>();
+    // TODO: select seat
+    auto seat = seats[0];
 
-    global->display = wlDisplay;
-    global->registry = wl_display_get_registry(wlDisplay);
-    wl_registry_add_listener(global->registry, &registry_listener, global);
+    global->ti = tiManager->getTextInput(seat);
+
+    // todo: select seat
+    zwp_text_input_v3_add_listener(global->ti->get(), &global->tiListener, global);
+    global->wl->flush();
+
     if (global->is_use_imfakewl) {
-        wl_display_roundtrip(wlDisplay);
-
-        while (wl_display_prepare_read(wlDisplay) < 0) {
-            wl_display_dispatch_pending(wlDisplay);
-        }
-
-        int fd = wl_display_get_fd(wlDisplay);
+        int fd = wl_display_get_fd(global->wl->display());
 
         GIOChannel *channel = g_io_channel_unix_new(fd);
-        g_io_add_watch(channel, (GIOCondition)(G_IO_IN), (GIOFunc)event_cb, wlDisplay);
+        g_io_add_watch(channel, (GIOCondition)(G_IO_IN), (GIOFunc)event_cb, global->wl->display());
         g_io_channel_set_encoding(channel, NULL, NULL);
     }
 
@@ -662,11 +623,9 @@ static void dim_im_context_focus_in(GtkIMContext *context)
         return;
 
     global->current = context;
-    if (!global->text_input)
+    if (!global->ti)
         return;
-
-    if (global->focused)
-        enable(self, global);
+    enable(self, global);
 }
 
 static void dim_im_context_focus_out(GtkIMContext *context)
@@ -677,8 +636,7 @@ static void dim_im_context_focus_out(GtkIMContext *context)
     if (global == nullptr)
         return;
 
-    if (global->focused)
-        disable(self, global);
+    disable(self, global);
 
     global->current = nullptr;
 }
@@ -689,9 +647,7 @@ static void dim_im_context_reset(GtkIMContext *context)
     DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(self);
     if (global == nullptr)
         return;
-    if (global->focused) {
-        notify_im_change(DIM_IM_CONTEXT(context), ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_OTHER);
-    }
+    notify_im_change(DIM_IM_CONTEXT(context), ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_OTHER);
 }
 
 static void dim_im_context_wayland_commit(GtkIMContext *context, const gchar *str)
