@@ -4,15 +4,16 @@
 
 #include "Compositor.h"
 
-#include "Seat.h"
+#include "DimTextInputManagerV1.h"
 #include "InputMethodManagerV2.h"
+#include "Seat.h"
 #include "TextInputManagerV3.h"
 #include "VirtualKeyboardManagerV1.h"
 
+#include <QAbstractEventDispatcher>
 #include <QDebug>
 #include <QSocketNotifier>
 #include <QThread>
-#include <QAbstractEventDispatcher>
 
 Compositor::Compositor()
 {
@@ -40,8 +41,11 @@ void Compositor::create()
     seat_ = std::make_unique<Seat>();
     seat_->init(display());
 
-    textInputManagerV3_ = std::make_unique<TextInputManagerV3>();
-    textInputManagerV3_->init(display());
+    dimTextInputManagerV1_ = std::make_unique<DimTextInputManagerV1>();
+    dimTextInputManagerV1_->init(display());
+
+    // textInputManagerV3_ = std::make_unique<TextInputManagerV3>();
+    // textInputManagerV3_->init(display());
 
     inputMethodManagerV2_ = std::make_unique<InputMethodManagerV2>();
     inputMethodManagerV2_->init(display());

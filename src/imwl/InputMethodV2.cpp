@@ -7,6 +7,7 @@
 #include "Seat.h"
 #include "InputMethodKeyboardGrabV2.h"
 #include "TextInputV3.h"
+#include "DimTextInputV1.h"
 
 InputMethodV2::InputMethodV2(Seat *seat)
     : seat_(seat)
@@ -35,9 +36,9 @@ void InputMethodV2::sendActivate()
 void InputMethodV2::zwp_input_method_v2_commit_string(wl::server::Resource *resource,
                                                       const char *text)
 {
-    auto ti3 = seat_->getTextInputV3();
-    if (ti3) {
-        ti3->sendCommitString(text);
+    auto dti1 = seat_->getDimTextInputV1();
+    if (dti1) {
+        dti1->sendCommitString(text);
     }
 }
 
@@ -46,9 +47,9 @@ void InputMethodV2::zwp_input_method_v2_set_preedit_string(wl::server::Resource 
                                                            int32_t cursor_begin,
                                                            int32_t cursor_end)
 {
-    auto ti3 = seat_->getTextInputV3();
-    if (ti3) {
-        ti3->sendPreeditString(text, cursor_begin, cursor_end);
+    auto dti1 = seat_->getDimTextInputV1();
+    if (dti1) {
+        dti1->sendPreeditString(text, cursor_begin, cursor_end);
     }
 }
 
@@ -60,9 +61,9 @@ void InputMethodV2::zwp_input_method_v2_delete_surrounding_text(wl::server::Reso
 
 void InputMethodV2::zwp_input_method_v2_commit(wl::server::Resource *resource, uint32_t serial)
 {
-    auto ti3 = seat_->getTextInputV3();
-    if (ti3) {
-        ti3->sendDone(serial);
+    auto dti1 = seat_->getDimTextInputV1();
+    if (dti1) {
+        dti1->sendDone(serial);
     }
 }
 
