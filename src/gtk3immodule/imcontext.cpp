@@ -4,13 +4,12 @@
 
 #include "imcontext.h"
 
-#include "wayland-text-input-unstable-v3-client-protocol.h"
+#include "wayland-dim-text-input-unstable-v1-client-protocol.h"
 #include "wl/client/Connection.h"
-#include "wl/client/ConnectionBase.h"
 #include "wl/client/ConnectionRaw.h"
 #include "wl/client/Seat.h"
-#include "wl/client/ZwpTextInputManagerV3.h"
-#include "wl/client/ZwpTextInputV3.h"
+#include "wl/client/ZwpDimTextInputManagerV1.h"
+#include "wl/client/ZwpDimTextInputV1.h"
 
 #include <gdk/gdkprivate.h>
 #include <gdk/gdkwayland.h>
@@ -20,44 +19,44 @@
 struct _DimIMContextWaylandGlobal
 {
     GtkIMContext *current;
-    static const zwp_text_input_v3_listener tiListener;
-    std::shared_ptr<wl::client::ZwpTextInputV3> ti;
+    static const zwp_dim_text_input_v1_listener tiListener;
+    std::shared_ptr<wl::client::ZwpDimTextInputV1> ti;
     wl::client::ConnectionBase *wl;
 
     guint serial;
     guint done_serial;
 
     // wayland listeners
-    static void text_input_enter(void *data,
-                                 struct zwp_text_input_v3 *zwp_text_input_v3,
-                                 struct wl_surface *surface);
-    static void text_input_leave(void *data,
-                                 struct zwp_text_input_v3 *text_input,
-                                 struct wl_surface *surface);
+    static void text_input_modifiers_map(void *data,
+                                         struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
+                                         struct wl_array *map);
     static void text_input_preedit(void *data,
-                                   struct zwp_text_input_v3 *zwp_text_input_v3,
+                                   zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                                    const char *text,
                                    int32_t cursor_begin,
                                    int32_t cursor_end);
     static void text_input_commit(void *data,
-                                  struct zwp_text_input_v3 *zwp_text_input_v3,
+                                  zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                                   const char *text);
     static void text_input_delete_surrounding_text(void *data,
-                                                   struct zwp_text_input_v3 *zwp_text_input_v3,
+                                                   zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                                                    uint32_t before_length,
                                                    uint32_t after_length);
     static void text_input_done(void *data,
-                                struct zwp_text_input_v3 *zwp_text_input_v3,
+                                zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                                 uint32_t serial);
+    static void text_input_keysym(void *data,
+                                  struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
+                                  uint32_t serial,
+                                  uint32_t time,
+                                  uint32_t sym,
+                                  uint32_t state,
+                                  uint32_t modifiers);
 };
 
-const zwp_text_input_v3_listener DimIMContextWaylandGlobal::tiListener = {
-    text_input_enter,
-    text_input_leave,
-    text_input_preedit,
-    text_input_commit,
-    text_input_delete_surrounding_text,
-    text_input_done,
+const zwp_dim_text_input_v1_listener DimIMContextWaylandGlobal::tiListener = {
+    text_input_modifiers_map,           text_input_preedit, text_input_commit,
+    text_input_delete_surrounding_text, text_input_done,    text_input_keysym
 };
 
 struct preedit
@@ -323,11 +322,28 @@ static void notify_im_change(DimIMContext *context, enum zwp_text_input_v3_chang
     commit_state(context);
 }
 
+void DimIMContextWaylandGlobal::text_input_modifiers_map(
+    void *data, struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1, struct wl_array *map)
+{
+    // TODO
+}
+
+void text_input_keysym(void *data,
+                       struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
+                       uint32_t serial,
+                       uint32_t time,
+                       uint32_t sym,
+                       uint32_t state,
+                       uint32_t modifiers)
+{
+    // TODO
+}
+
 void DimIMContextWaylandGlobal::text_input_preedit(void *data,
-                                                   struct zwp_text_input_v3 *text_input,
+                                                   zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                                                    const char *text,
-                                                   int cursor_begin,
-                                                   int cursor_end)
+                                                   int32_t cursor_begin,
+                                                   int32_t cursor_end)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
@@ -365,29 +381,8 @@ static void disable(DimIMContext *context, DimIMContextWaylandGlobal *global)
     }
 }
 
-void DimIMContextWaylandGlobal::text_input_enter(void *data,
-                                                 struct zwp_text_input_v3 *zwp_text_input_v3,
-                                                 struct wl_surface *surface)
-{
-    DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
-
-    if (global->current)
-
-        enable(DIM_IM_CONTEXT(global->current), global);
-}
-
-void DimIMContextWaylandGlobal::text_input_leave(void *data,
-                                                 struct zwp_text_input_v3 *text_input,
-                                                 struct wl_surface *surface)
-{
-    DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
-
-    if (global->current)
-        disable(DIM_IM_CONTEXT(global->current), global);
-}
-
 void DimIMContextWaylandGlobal::text_input_commit(void *data,
-                                                  struct zwp_text_input_v3 *text_input,
+                                                  zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                                                   const char *text)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
@@ -402,7 +397,10 @@ void DimIMContextWaylandGlobal::text_input_commit(void *data,
 }
 
 void DimIMContextWaylandGlobal::text_input_delete_surrounding_text(
-    void *data, struct zwp_text_input_v3 *text_input, uint32_t before_length, uint32_t after_length)
+    void *data,
+    zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
+    uint32_t before_length,
+    uint32_t after_length)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
@@ -482,7 +480,7 @@ static void text_input_preedit_apply(DimIMContextWaylandGlobal *global)
 }
 
 void DimIMContextWaylandGlobal::text_input_done(void *data,
-                                                struct zwp_text_input_v3 *text_input,
+                                                zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                                                 uint32_t serial)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
@@ -529,15 +527,14 @@ static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *
         global->wl = new wl::client::Connection("imfakewl");
     }
 
-    auto seats = global->wl->getGlobals<wl::client::Seat>();
-    auto tiManager = global->wl->getGlobal<wl::client::ZwpTextInputManagerV3>();
-    // TODO: select seat
-    auto seat = seats[0];
+    auto seat = global->wl->getGlobal<wl::client::Seat>();
+    auto tiManager = global->wl->getGlobal<wl::client::ZwpDimTextInputManagerV1>();
 
     global->ti = tiManager->getTextInput(seat);
 
-    // todo: select seat
-    zwp_text_input_v3_add_listener(global->ti->get(), &global->tiListener, global);
+    zwp_dim_text_input_v1_add_listener(global->ti->get(),
+                                       &DimIMContextWaylandGlobal::tiListener,
+                                       global);
     global->wl->flush();
 
     g_object_set_data_full(G_OBJECT(display),
