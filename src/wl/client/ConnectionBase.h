@@ -89,7 +89,7 @@ protected:
     void init();
 
 private:
-    static const wl_registry_listener registry_listener_;
+    static const wl_registry_listener registryListener_;
     std::unordered_map<std::string, globalInfo> globals_;
     std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<void>>>
         bindedGlobals_;

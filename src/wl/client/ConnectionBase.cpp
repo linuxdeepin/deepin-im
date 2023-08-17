@@ -10,7 +10,7 @@
 
 using namespace wl::client;
 
-const wl_registry_listener ConnectionBase::registry_listener_ = {
+const wl_registry_listener ConnectionBase::registryListener_ = {
     CallbackWrapper<&ConnectionBase::onGlobal>::func,
     CallbackWrapper<&ConnectionBase::onGlobalRemove>::func,
 };
@@ -22,7 +22,7 @@ ConnectionBase::~ConnectionBase() { }
 void ConnectionBase::init()
 {
     auto *registry = wl_display_get_registry(display());
-    wl_registry_add_listener(registry, &registry_listener_, this);
+    wl_registry_add_listener(registry, &registryListener_, this);
     roundtrip();
 }
 

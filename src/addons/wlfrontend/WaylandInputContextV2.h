@@ -36,17 +36,17 @@ public:
                           const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk);
 
 private:
-    static const zwp_input_method_v2_listener im_listener_;
-    static const zwp_input_method_keyboard_grab_v2_listener grab_listener_;
+    static const zwp_input_method_v2_listener imListener_;
+    static const zwp_input_method_keyboard_grab_v2_listener grabListener_;
     const std::shared_ptr<wl::client::ZwpInputMethodV2> im_;
     const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> vk_;
     std::shared_ptr<wl::client::ZwpInputMethodKeyboardGrabV2> grab_;
 
     std::unique_ptr<State> state_;
 
-    std::unique_ptr<xkb_context, Deleter<xkb_context_unref>> xkb_context_;
-    std::unique_ptr<xkb_keymap, Deleter<xkb_keymap_unref>> xkb_keymap_;
-    std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> xkb_state_;
+    std::unique_ptr<xkb_context, Deleter<xkb_context_unref>> xkbContext_;
+    std::unique_ptr<xkb_keymap, Deleter<xkb_keymap_unref>> xkbKeymap_;
+    std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> xkbState_;
 
     uint32_t modifierMask_[static_cast<uint8_t>(Modifiers::CNT)];
 

@@ -16,7 +16,7 @@
 
 using namespace org::deepin::dim;
 
-const zwp_input_method_v2_listener WaylandInputContextV2::im_listener_ = {
+const zwp_input_method_v2_listener WaylandInputContextV2::imListener_ = {
     CallbackWrapper<&WaylandInputContextV2::activate>::func,
     CallbackWrapper<&WaylandInputContextV2::deactivate>::func,
     CallbackWrapper<&WaylandInputContextV2::surroundingText>::func,
@@ -26,7 +26,7 @@ const zwp_input_method_v2_listener WaylandInputContextV2::im_listener_ = {
     CallbackWrapper<&WaylandInputContextV2::unavailable>::func,
 };
 
-const zwp_input_method_keyboard_grab_v2_listener WaylandInputContextV2::grab_listener_ = {
+const zwp_input_method_keyboard_grab_v2_listener WaylandInputContextV2::grabListener_ = {
     CallbackWrapper<&WaylandInputContextV2::keymap>::func,
     CallbackWrapper<&WaylandInputContextV2::key>::func,
     CallbackWrapper<&WaylandInputContextV2::modifiers>::func,
@@ -48,12 +48,12 @@ WaylandInputContextV2::WaylandInputContextV2(
     , im_(im)
     , vk_(vk)
     , state_(std::make_unique<State>())
-    , xkb_context_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
+    , xkbContext_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
 {
-    zwp_input_method_v2_add_listener(im_->get(), &im_listener_, this);
+    zwp_input_method_v2_add_listener(im_->get(), &imListener_, this);
 
     grab_ = im_->grabKeyboard();
-    zwp_input_method_keyboard_grab_v2_add_listener(grab_->get(), &grab_listener_, this);
+    zwp_input_method_keyboard_grab_v2_add_listener(grab_->get(), &grabListener_, this);
 }
 
 void WaylandInputContextV2::activate(
@@ -121,48 +121,48 @@ void WaylandInputContextV2::keymap(
         return;
     }
 
-    xkb_keymap_.reset(xkb_keymap_new_from_string(xkb_context_.get(),
-                                                 static_cast<const char *>(ptr),
-                                                 XKB_KEYMAP_FORMAT_TEXT_V1,
-                                                 XKB_KEYMAP_COMPILE_NO_FLAGS));
+    xkbKeymap_.reset(xkb_keymap_new_from_string(xkbContext_.get(),
+                                                static_cast<const char *>(ptr),
+                                                XKB_KEYMAP_FORMAT_TEXT_V1,
+                                                XKB_KEYMAP_COMPILE_NO_FLAGS));
     munmap(ptr, size);
 
-    if (!xkb_keymap_) {
+    if (!xkbKeymap_) {
         return;
     }
 
     vk_->keymap(format, fd, size);
 
-    xkb_state_.reset(xkb_state_new(xkb_keymap_.get()));
-    if (!xkb_state_) {
-        xkb_keymap_.reset();
+    xkbState_.reset(xkb_state_new(xkbKeymap_.get()));
+    if (!xkbState_) {
+        xkbKeymap_.reset();
         return;
     }
 
     modifierMask_[static_cast<uint8_t>(Modifiers::Shift)] = 1
-        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Shift");
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Shift");
     modifierMask_[static_cast<uint8_t>(Modifiers::Lock)] = 1
-        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Lock");
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Lock");
     modifierMask_[static_cast<uint8_t>(Modifiers::Control)] = 1
-        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Control");
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Control");
     modifierMask_[static_cast<uint8_t>(Modifiers::Mod1)] = 1
-        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Mod1");
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod1");
     modifierMask_[static_cast<uint8_t>(Modifiers::Mod2)] = 1
-        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Mod2");
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod2");
     modifierMask_[static_cast<uint8_t>(Modifiers::Mod3)] = 1
-        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Mod3");
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod3");
     modifierMask_[static_cast<uint8_t>(Modifiers::Mod4)] = 1
-        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Mod4");
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod4");
     modifierMask_[static_cast<uint8_t>(Modifiers::Mod5)] = 1
-        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Mod5");
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod5");
     modifierMask_[static_cast<uint8_t>(Modifiers::Alt)] = 1
-        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Alt");
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Alt");
     modifierMask_[static_cast<uint8_t>(Modifiers::Meta)] = 1
-        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Meta");
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Meta");
     modifierMask_[static_cast<uint8_t>(Modifiers::Super)] = 1
-        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Super");
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Super");
     modifierMask_[static_cast<uint8_t>(Modifiers::Hyper)] = 1
-        << xkb_keymap_mod_get_index(xkb_keymap_.get(), "Hyper");
+        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Hyper");
 }
 
 void WaylandInputContextV2::key(
@@ -173,9 +173,9 @@ void WaylandInputContextV2::key(
     uint32_t state)
 {
     qDebug() << "grab key:" << serial << time << key << state;
-    assert(xkb_state_);
+    assert(xkbState_);
 
-    xkb_keysym_t sym = xkb_state_key_get_one_sym(xkb_state_.get(), key);
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(xkbState_.get(), key);
     InputContextKeyEvent ke(this,
                             static_cast<uint32_t>(sym),
                             key,
@@ -230,15 +230,15 @@ void WaylandInputContextV2::modifiers(
     qDebug() << "grab modifiers:" << serial << mods_depressed << mods_latched << mods_locked
              << group;
 
-    if (xkb_state_) {
-        xkb_state_component comp = xkb_state_update_mask(xkb_state_.get(),
+    if (xkbState_) {
+        xkb_state_component comp = xkb_state_update_mask(xkbState_.get(),
                                                          mods_depressed,
                                                          mods_latched,
                                                          mods_locked,
                                                          0,
                                                          0,
                                                          group);
-        xkb_mod_mask_t mask = xkb_state_serialize_mods(xkb_state_.get(), comp);
+        xkb_mod_mask_t mask = xkb_state_serialize_mods(xkbState_.get(), comp);
         state_->modifiers = 0;
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Shift)]) {
             state_->modifiers |= SHIFT_MASK;
