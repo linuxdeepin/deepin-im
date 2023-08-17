@@ -21,8 +21,11 @@ namespace client {
 class Connection : public ConnectionBase
 {
 public:
-    Connection(const std::string &name, QObject *parent = nullptr);
+    Connection(const std::string &name);
     virtual ~Connection();
+
+    int getFd();
+    bool dispatch();
 
     struct wl_display *display() const override { return display_.get(); }
 

@@ -328,13 +328,14 @@ void DimIMContextWaylandGlobal::text_input_modifiers_map(
     // TODO
 }
 
-void DimIMContextWaylandGlobal::text_input_keysym(void *data,
-                       struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                       uint32_t serial,
-                       uint32_t time,
-                       uint32_t sym,
-                       uint32_t state,
-                       uint32_t modifiers)
+void DimIMContextWaylandGlobal::text_input_keysym(
+    void *data,
+    struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
+    uint32_t serial,
+    uint32_t time,
+    uint32_t sym,
+    uint32_t state,
+    uint32_t modifiers)
 {
     // TODO
 }
@@ -524,7 +525,17 @@ static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *
     if (gdk_wayland_display != nullptr) {
         global->wl = new wl::client::ConnectionRaw(gdk_wayland_display);
     } else {
-        global->wl = new wl::client::Connection("imfakewl");
+        auto wl = new wl::client::Connection("imfakewl");
+        global->wl = wl;
+        GIOChannel *channel = g_io_channel_unix_new(wl->getFd());
+        g_io_add_watch(
+            channel,
+            (GIOCondition)(G_IO_IN),
+            [](GIOChannel *source, GIOCondition condition, gpointer data) -> gboolean {
+                auto *conn = static_cast<wl::client::Connection *>(data);
+                return conn->dispatch();
+            },
+            wl);
     }
 
     auto seat = global->wl->getGlobal<wl::client::Seat>();

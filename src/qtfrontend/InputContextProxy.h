@@ -6,12 +6,12 @@
 #define INPUTCONTEXTPROXY_H
 
 #include "wayland-dim-text-input-unstable-v1-client-protocol.h"
+#include "wl/client/ConnectionBase.h"
 
 #include <QObject>
 
 namespace wl {
 namespace client {
-class ConnectionBase;
 class ZwpDimTextInputV1;
 } // namespace client
 } // namespace wl
@@ -55,7 +55,7 @@ signals:
     void forwardKey(uint32_t keyValue, uint32_t state, bool type);
 
 private:
-    wl::client::ConnectionBase *wl_;
+    std::unique_ptr<wl::client::ConnectionBase> wl_;
     bool available_;
     std::shared_ptr<wl::client::ZwpDimTextInputV1> ti_;
     static const zwp_dim_text_input_v1_listener tiListener;

@@ -9,11 +9,11 @@
 
 #include <wayland-client-protocol.h>
 
-#include <QSocketNotifier>
-
+#include <algorithm>
 #include <memory>
 #include <set>
 #include <string>
+#include <vector>
 #include <unordered_map>
 
 namespace wl {
@@ -25,11 +25,11 @@ struct globalInfo
     std::set<uint32_t> names;
 };
 
-class ConnectionBase : public QObject
+class ConnectionBase 
 {
 public:
-    ConnectionBase(QObject *parent);
-    ~ConnectionBase();
+    ConnectionBase();
+    virtual ~ConnectionBase();
 
     virtual struct wl_display *display() const = 0;
     void roundtrip();

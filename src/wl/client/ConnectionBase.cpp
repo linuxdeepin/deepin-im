@@ -6,8 +6,6 @@
 
 #include "common/common.h"
 
-#include <QDebug>
-
 #include <poll.h>
 
 using namespace wl::client;
@@ -17,10 +15,7 @@ const wl_registry_listener ConnectionBase::registry_listener_ = {
     CallbackWrapper<&ConnectionBase::onGlobalRemove>::func,
 };
 
-ConnectionBase::ConnectionBase(QObject *parent)
-    : QObject(parent)
-{
-}
+ConnectionBase::ConnectionBase() { }
 
 ConnectionBase::~ConnectionBase() { }
 
@@ -46,7 +41,6 @@ void ConnectionBase::onGlobal([[maybe_unused]] struct wl_registry *registry,
                               const char *interface,
                               uint32_t version)
 {
-    qWarning() << "onGlobal:" << name << interface << version;
     auto &gi = globals_[interface];
     gi.version = version;
     gi.names.emplace(name);

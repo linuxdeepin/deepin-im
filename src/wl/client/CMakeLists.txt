@@ -36,8 +36,6 @@ target_sources(wlc
 target_compile_definitions(wlc PRIVATE -DQT_NO_KEYWORDS)
 
 target_link_libraries(wlc PRIVATE
-  PkgConfig::Gtk3
-  Qt6::Core
   PkgConfig::wayland-client
   wayland_protocols
 )

@@ -9,8 +9,6 @@
 
 #include <wayland-client-protocol.h>
 
-#include <QSocketNotifier>
-
 #include <memory>
 #include <set>
 #include <string>
@@ -22,8 +20,8 @@ namespace client {
 class ConnectionRaw : public ConnectionBase
 {
 public:
-    ConnectionRaw(struct wl_display *display, QObject *parent = nullptr);
-    ~ConnectionRaw();
+    ConnectionRaw(struct wl_display *display);
+    virtual ~ConnectionRaw();
 
     struct wl_display *display() const override { return display_; }
 

@@ -15,6 +15,7 @@
 
 #include <QDBusConnection>
 #include <QDebug>
+#include <QSocketNotifier>
 
 using namespace org::deepin::dim;
 
@@ -29,7 +30,11 @@ WLFrontend::WLFrontend(Dim *dim)
         // todo: fake wayland server
     }
 
-    wl_ = new wl::client::Connection(waylandDisplay.toStdString().c_str(), this);
+    wl_.reset(new wl::client::Connection(waylandDisplay.toStdString().c_str()));
+    auto *notifier = new QSocketNotifier(wl_->getFd(), QSocketNotifier::Read, this);
+    connect(notifier, &QSocketNotifier::activated, this, [this]() {
+        wl_->dispatch();
+    });
 
     reloadSeats();
 }

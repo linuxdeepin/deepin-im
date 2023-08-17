@@ -34,7 +34,7 @@ public:
     ~WLFrontend();
 
 private:
-    wl::client::Connection *wl_;
+    std::unique_ptr<wl::client::Connection> wl_;
 
     std::vector<std::shared_ptr<WaylandInputContextV2>> ims_;
 

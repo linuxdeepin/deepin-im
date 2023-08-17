@@ -18,6 +18,7 @@
 
 #include <QDebug>
 #include <QGuiApplication>
+#include <QSocketNotifier>
 #include <QList>
 
 const zwp_dim_text_input_v1_listener InputContextProxy::tiListener = {
@@ -38,9 +39,14 @@ InputContextProxy::InputContextProxy(QObject *parent)
         struct wl_display *wl_dpy =
             (struct wl_display *)native->nativeResourceForWindow("display", NULL);
 
-        wl_ = new wl::client::ConnectionRaw(wl_dpy, this);
+        wl_.reset(new wl::client::ConnectionRaw(wl_dpy));
     } else {
-        wl_ = new wl::client::Connection("imfakewl", this);
+        auto *wl = new wl::client::Connection("imfakewl");
+        wl_.reset(wl);
+        auto *notifier = new QSocketNotifier(wl->getFd(), QSocketNotifier::Read, this);
+        connect(notifier, &QSocketNotifier::activated, this, [wl]() {
+            wl->dispatch();
+        });
     }
 
     auto seat = wl_->getGlobal<wl::client::Seat>();
@@ -75,7 +81,8 @@ void InputContextProxy::modifiers_map(struct zwp_dim_text_input_v1 *zwp_dim_text
                                       struct wl_array *map)
 {
     qWarning() << "modifiers_map";
-    const QList<QByteArray> modifiersMap = QByteArray::fromRawData(static_cast<const char*>(map->data), map->size).split('\0');
+    const QList<QByteArray> modifiersMap =
+        QByteArray::fromRawData(static_cast<const char *>(map->data), map->size).split('\0');
 
     modifiersMap_.clear();
     for (const QByteArray &modifier : modifiersMap) {

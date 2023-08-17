@@ -6,9 +6,8 @@
 
 using namespace wl::client;
 
-ConnectionRaw::ConnectionRaw(struct wl_display *display, QObject *parent)
-    : ConnectionBase(parent)
-    , display_(display)
+ConnectionRaw::ConnectionRaw(struct wl_display *display)
+    : display_(display)
 {
     init();
 }
