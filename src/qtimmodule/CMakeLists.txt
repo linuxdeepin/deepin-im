@@ -1,4 +1,4 @@
-set(QTFRONTEND_SOURCES
+set(QTIMMODULE_SOURCES
   DIMPlatformInputContextPlugin.h
   DIMPlatformInputContextPlugin.cpp
   DIMPlatformInputContext.h
@@ -8,7 +8,7 @@ set(QTFRONTEND_SOURCES
 )
 
 add_library(dimplatforminputcontextplugin MODULE
-  ${QTFRONTEND_SOURCES}
+  ${QTIMMODULE_SOURCES}
 )
 
 target_include_directories(dimplatforminputcontextplugin  PRIVATE
