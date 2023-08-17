@@ -175,7 +175,7 @@ void WaylandInputContextV2::key(
     qDebug() << "grab key:" << serial << time << key << state;
     assert(xkb_state_);
 
-    xkb_keysym_t sym = xkb_state_key_get_one_sym(xkb_state_.get(), key + 8);
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(xkb_state_.get(), key);
     InputContextKeyEvent ke(this,
                             static_cast<uint32_t>(sym),
                             key,
@@ -184,7 +184,7 @@ void WaylandInputContextV2::key(
                             time);
     bool res = keyEvent(ke);
     if (!res) {
-        vk_->key(getTimestamp(), key + 8, state);
+        vk_->key(getTimestamp(), key, state);
         return;
     }
 
@@ -193,7 +193,7 @@ void WaylandInputContextV2::key(
         if (std::holds_alternative<ForwardKey>(e)) {
             auto forwardKey = std::get<ForwardKey>(e);
             vk_->key(getTimestamp(),
-                     forwardKey.keycode + 8,
+                     forwardKey.keycode + XKB_HISTORICAL_OFFSET,
                      forwardKey.pressed ? WL_KEYBOARD_KEY_STATE_PRESSED
                                         : WL_KEYBOARD_KEY_STATE_RELEASED);
             continue;

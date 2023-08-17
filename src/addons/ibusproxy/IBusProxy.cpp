@@ -4,6 +4,7 @@
 
 #include "IBusProxy.h"
 
+#include "common/common.h"
 #include "dimcore/InputContext.h"
 
 using namespace org::deepin::dim;
@@ -250,7 +251,7 @@ bool DimIBusProxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent 
         if (isUseSyncMode()) {
             result = ibus_input_context_process_key_event(iBusICMap_[id],
                                                           keyEvent.keyValue(),
-                                                          keyEvent.keycode() - 8,
+                                                          keyEvent.keycode() - XKB_HISTORICAL_OFFSET,
                                                           keyEvent.state());
             if (result) {
                 return true;
@@ -258,7 +259,7 @@ bool DimIBusProxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent 
         } else {
             ibus_input_context_process_key_event_async(iBusICMap_[id],
                                                        keyEvent.keyValue(),
-                                                       keyEvent.keycode() - 8,
+                                                       keyEvent.keycode() - XKB_HISTORICAL_OFFSET,
                                                        keyEvent.state(),
                                                        -1,
                                                        nullptr,

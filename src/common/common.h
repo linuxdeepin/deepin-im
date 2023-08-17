@@ -7,6 +7,8 @@
 
 #include <stdint.h>
 
+constexpr int XKB_HISTORICAL_OFFSET = 8;
+
 enum class Modifiers : uint8_t {
     Shift,
     Lock,

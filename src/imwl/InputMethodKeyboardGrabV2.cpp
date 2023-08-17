@@ -38,7 +38,7 @@ InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(wl::server::Seat *seat)
                              return;
                          }
 
-                         sendKey(keycode - 8, isRelease);
+                         sendKey(keycode, isRelease);
                      });
 }
 
