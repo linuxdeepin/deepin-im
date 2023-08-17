@@ -1,5 +1,5 @@
-deepin-im (1.0.0) experimental; urgency=medium
+deepin-im (1.0.0) unstable; urgency=medium
 
   * Initial release.
 
- -- dengbo <dengbo@deepin.org>  Mon, 07 Aug 2023 13:20:35 +0800
+ -- dengbo <dengbo@deepin.org>  Thu, 17 Aug 2023 09:31:07 +0800
