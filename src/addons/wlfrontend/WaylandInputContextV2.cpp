@@ -51,15 +51,16 @@ WaylandInputContextV2::WaylandInputContextV2(
     , xkbContext_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
 {
     zwp_input_method_v2_add_listener(im_->get(), &imListener_, this);
-
-    grab_ = im_->grabKeyboard();
-    zwp_input_method_keyboard_grab_v2_add_listener(grab_->get(), &grabListener_, this);
 }
 
 void WaylandInputContextV2::activate(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
     qDebug() << "im activated:" << id();
+
+    grab_ = im_->grabKeyboard();
+    zwp_input_method_keyboard_grab_v2_add_listener(grab_->get(), &grabListener_, this);
+
     focusIn();
 }
 
@@ -67,7 +68,10 @@ void WaylandInputContextV2::deactivate(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
     qDebug() << "im deactivated:" << id();
+
     state_.reset(new State);
+    grab_.reset();
+
     focusOut();
 }
 
