@@ -6,12 +6,14 @@
 #define DIMPLATFORMINPUTCONTEXT_H
 
 #include <qpa/qplatforminputcontext.h>
+
 #include <QPointer>
 
 class QDBusPendingCallWatcher;
-class InputContextProxy;
+class DimTextInputV1;
 
-class DIMPlatformInputContext : public QPlatformInputContext {
+class DIMPlatformInputContext : public QPlatformInputContext
+{
     Q_OBJECT
 
 public:
@@ -19,6 +21,9 @@ public:
     ~DIMPlatformInputContext() = default;
 
     bool isValid() const override;
+
+    void reset() override;
+
     void setFocusObject(QObject *object) override;
     void showInputPanel() override;
     void hideInputPanel() override;
@@ -32,7 +37,7 @@ public slots:
     void forwardKey(uint32_t keyValue, uint32_t state, bool type);
 
 private:
-    InputContextProxy *proxy_;
+    DimTextInputV1 *proxy_;
     QPointer<QObject> focusObject_;
 
 private slots:

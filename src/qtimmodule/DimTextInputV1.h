@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef INPUTCONTEXTPROXY_H
-#define INPUTCONTEXTPROXY_H
+#ifndef DIMINPUTTEXTV1_H
+#define DIMINPUTTEXTV1_H
 
 #include "wayland-dim-text-input-unstable-v1-client-protocol.h"
 #include "wl/client/ConnectionBase.h"
@@ -18,17 +18,19 @@ class ZwpDimTextInputV1;
 
 struct zwp_dim_text_input_v1;
 
-class InputContextProxy : public QObject
+class DimTextInputV1 : public QObject
 {
     Q_OBJECT
 
 public:
-    InputContextProxy(QObject *parent = nullptr);
+    DimTextInputV1(QObject *parent = nullptr);
 
     bool available() const { return available_; }
 
     void focusIn();
     void focusOut();
+
+    void reset();
 
 protected:
     // wayland listeners
@@ -64,4 +66,4 @@ private:
     Qt::KeyboardModifiers modifiersToQtModifiers(uint32_t modifiers);
 };
 
-#endif // !INPUTCONTEXTPROXY_H
+#endif // !DIMINPUTTEXTV1_H

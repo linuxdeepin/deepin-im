@@ -4,7 +4,7 @@
 
 #include "DIMPlatformInputContext.h"
 
-#include "InputContextProxy.h"
+#include "DimTextInputV1.h"
 
 #include <QDBusConnection>
 #include <QDebug>
@@ -17,17 +17,21 @@ static const QString DIM_IM_PATH = "/org/freedesktop/portal/inputmethod";
 
 DIMPlatformInputContext::DIMPlatformInputContext()
     : QPlatformInputContext()
-    , proxy_(new InputContextProxy(this))
+    , proxy_(new DimTextInputV1(this))
     , focusObject_(nullptr)
 {
-    connect(proxy_, &InputContextProxy::preedit, this, &DIMPlatformInputContext::preedit);
-    connect(proxy_, &InputContextProxy::commitString, this, &DIMPlatformInputContext::commitString);
-    connect(proxy_, &InputContextProxy::forwardKey, this, &DIMPlatformInputContext::forwardKey);
+    connect(proxy_, &DimTextInputV1::preedit, this, &DIMPlatformInputContext::preedit);
+    connect(proxy_, &DimTextInputV1::commitString, this, &DIMPlatformInputContext::commitString);
+    connect(proxy_, &DimTextInputV1::forwardKey, this, &DIMPlatformInputContext::forwardKey);
 }
 
 bool DIMPlatformInputContext::isValid() const
 {
     return true;
+}
+
+void DIMPlatformInputContext::reset() {
+    QPlatformInputContext::reset();
 }
 
 void DIMPlatformInputContext::setFocusObject(QObject *object)

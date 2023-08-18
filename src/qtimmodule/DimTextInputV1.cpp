@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "InputContextProxy.h"
+#include "DimTextInputV1.h"
 
 #include "common/common.h"
 #include "wayland-dim-text-input-unstable-v1-client-protocol.h"
@@ -21,16 +21,16 @@
 #include <QSocketNotifier>
 #include <QList>
 
-const zwp_dim_text_input_v1_listener InputContextProxy::tiListener = {
-    CallbackWrapper<&InputContextProxy::modifiers_map>::func,
-    CallbackWrapper<&InputContextProxy::preedit_string>::func,
-    CallbackWrapper<&InputContextProxy::commit_string>::func,
-    CallbackWrapper<&InputContextProxy::delete_surrounding_text>::func,
-    CallbackWrapper<&InputContextProxy::done>::func,
-    CallbackWrapper<&InputContextProxy::keysym>::func,
+const zwp_dim_text_input_v1_listener DimTextInputV1::tiListener = {
+    CallbackWrapper<&DimTextInputV1::modifiers_map>::func,
+    CallbackWrapper<&DimTextInputV1::preedit_string>::func,
+    CallbackWrapper<&DimTextInputV1::commit_string>::func,
+    CallbackWrapper<&DimTextInputV1::delete_surrounding_text>::func,
+    CallbackWrapper<&DimTextInputV1::done>::func,
+    CallbackWrapper<&DimTextInputV1::keysym>::func,
 };
 
-InputContextProxy::InputContextProxy(QObject *parent)
+DimTextInputV1::DimTextInputV1(QObject *parent)
     : QObject(parent)
     , available_(true)
 {
@@ -58,7 +58,7 @@ InputContextProxy::InputContextProxy(QObject *parent)
     wl_->flush();
 }
 
-void InputContextProxy::focusIn()
+void DimTextInputV1::focusIn()
 {
     ti_->enable();
     ti_->setSurroundingText("", 0, 0);
@@ -70,14 +70,17 @@ void InputContextProxy::focusIn()
     wl_->flush();
 }
 
-void InputContextProxy::focusOut()
+void DimTextInputV1::focusOut()
 {
     ti_->disable();
     ti_->commit();
     wl_->flush();
 }
 
-void InputContextProxy::modifiers_map(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
+void DimTextInputV1::reset() {
+}
+
+void DimTextInputV1::modifiers_map(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                                       struct wl_array *map)
 {
     qWarning() << "modifiers_map";
@@ -101,7 +104,7 @@ void InputContextProxy::modifiers_map(struct zwp_dim_text_input_v1 *zwp_dim_text
     }
 }
 
-void InputContextProxy::preedit_string(
+void DimTextInputV1::preedit_string(
     [[maybe_unused]] struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
     const char *text,
     [[maybe_unused]] int32_t cursor_begin,
@@ -114,27 +117,27 @@ void InputContextProxy::preedit_string(
     emit preedit(data);
 }
 
-void InputContextProxy::commit_string(
+void DimTextInputV1::commit_string(
     [[maybe_unused]] struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1, const char *text)
 {
     qWarning() << "commit";
     emit commitString(text);
 }
 
-void InputContextProxy::delete_surrounding_text(
+void DimTextInputV1::delete_surrounding_text(
     [[maybe_unused]] struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
     [[maybe_unused]] uint32_t before_length,
     [[maybe_unused]] uint32_t after_length)
 {
 }
 
-void InputContextProxy::done([[maybe_unused]] struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
+void DimTextInputV1::done([[maybe_unused]] struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                              [[maybe_unused]] uint32_t serial)
 {
     qWarning() << "done";
 }
 
-void InputContextProxy::keysym(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
+void DimTextInputV1::keysym(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
                                uint32_t serial,
                                uint32_t time,
                                uint32_t sym,
@@ -162,7 +165,7 @@ void InputContextProxy::keysym(struct zwp_dim_text_input_v1 *zwp_dim_text_input_
                                            text);
 }
 
-Qt::KeyboardModifiers InputContextProxy::modifiersToQtModifiers(uint32_t modifiers)
+Qt::KeyboardModifiers DimTextInputV1::modifiersToQtModifiers(uint32_t modifiers)
 {
     Qt::KeyboardModifiers ret = Qt::NoModifier;
     for (int i = 0; i < modifiersMap_.size(); ++i) {

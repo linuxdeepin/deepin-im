@@ -3,8 +3,8 @@ set(QTIMMODULE_SOURCES
   DIMPlatformInputContextPlugin.cpp
   DIMPlatformInputContext.h
   DIMPlatformInputContext.cpp
-  InputContextProxy.h
-  InputContextProxy.cpp
+  DimTextInputV1.h
+  DimTextInputV1.cpp
 )
 
 add_library(dimplatforminputcontextplugin MODULE
