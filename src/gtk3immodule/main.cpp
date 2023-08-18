@@ -42,7 +42,7 @@ G_MODULE_EXPORT GtkIMContext *im_module_create(const gchar *context_id)
 {
     if (context_id != NULL && (g_strcmp0(context_id, _info.context_id) == 0)) {
         DimIMContext *context;
-        context = dim_im_context_new();
+        context = dimImContextNew();
         return (GtkIMContext *)context;
     }
     return NULL;

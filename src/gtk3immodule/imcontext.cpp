@@ -24,52 +24,52 @@ struct _DimIMContextWaylandGlobal
     wl::client::ConnectionBase *wl;
 
     guint serial;
-    guint done_serial;
+    guint doneSerial;
 
     // wayland listeners
-    static void text_input_modifiers_map(void *data,
-                                         struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                                         struct wl_array *map);
-    static void text_input_preedit(void *data,
-                                   zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                                   const char *text,
-                                   int32_t cursor_begin,
-                                   int32_t cursor_end);
-    static void text_input_commit(void *data,
-                                  zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                                  const char *text);
-    static void text_input_delete_surrounding_text(void *data,
-                                                   zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                                                   uint32_t before_length,
-                                                   uint32_t after_length);
-    static void text_input_done(void *data,
-                                zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                                uint32_t serial);
-    static void text_input_keysym(void *data,
-                                  struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                                  uint32_t serial,
-                                  uint32_t time,
-                                  uint32_t sym,
-                                  uint32_t state,
-                                  uint32_t modifiers);
+    static void textInputModifiersMap(void *data,
+                                      struct zwp_dim_text_input_v1 *zwpDimTextInputV1,
+                                      struct wl_array *map);
+    static void textInputPreedit(void *data,
+                                 zwp_dim_text_input_v1 *zwpDimTextInputV1,
+                                 const char *text,
+                                 int32_t cursorBegin,
+                                 int32_t cursorEnd);
+    static void textInputCommit(void *data,
+                                zwp_dim_text_input_v1 *zwpDimTextInputV1,
+                                const char *text);
+    static void textInputDeleteSurroundingText(void *data,
+                                               zwp_dim_text_input_v1 *zwpDimTextInputV1,
+                                               uint32_t beforeLength,
+                                               uint32_t afterLength);
+    static void textInputDone(void *data,
+                              zwp_dim_text_input_v1 *zwpDimTextInputV1,
+                              uint32_t serial);
+    static void textInputKeysym(void *data,
+                                struct zwp_dim_text_input_v1 *zwpDimTextInputV1,
+                                uint32_t serial,
+                                uint32_t time,
+                                uint32_t sym,
+                                uint32_t state,
+                                uint32_t modifiers);
 };
 
 const zwp_dim_text_input_v1_listener DimIMContextWaylandGlobal::tiListener = {
-    text_input_modifiers_map,           text_input_preedit, text_input_commit,
-    text_input_delete_surrounding_text, text_input_done,    text_input_keysym
+    textInputModifiersMap,          textInputPreedit, textInputCommit,
+    textInputDeleteSurroundingText, textInputDone,    textInputKeysym
 };
 
 struct preedit
 {
     char *text;
-    int cursor_begin;
-    int cursor_end;
+    int cursorBegin;
+    int cursorEnd;
 };
 
-struct surrounding_delete
+struct surroundingDelete
 {
-    guint before_length;
-    guint after_length;
+    guint beforeLength;
+    guint afterLength;
 };
 
 struct _DimIMContext
@@ -81,20 +81,20 @@ struct _DimIMContext
     struct
     {
         char *text;
-        int cursor_idx;
+        int cursorIdx;
     } surrounding;
 
-    enum zwp_text_input_v3_change_cause surrounding_change;
+    enum zwp_text_input_v3_change_cause surroundingChange;
 
-    struct surrounding_delete pending_surrounding_delete;
+    struct surroundingDelete pendingSurroundingDelete;
 
-    struct preedit current_preedit;
-    struct preedit pending_preedit;
+    struct preedit currentPreedit;
+    struct preedit pendingPreedit;
 
-    char *pending_commit;
+    char *pendingCommit;
 
-    cairo_rectangle_int_t cursor_rect;
-    guint use_preedit : 1;
+    cairo_rectangle_int_t cursorRect;
+    guint usePreedit : 1;
 };
 
 G_DEFINE_DYNAMIC_TYPE(DimIMContext, dim_im_context, GTK_TYPE_IM_CONTEXT);
@@ -103,40 +103,36 @@ G_DEFINE_DYNAMIC_TYPE(DimIMContext, dim_im_context, GTK_TYPE_IM_CONTEXT);
 #if GTK_CHECK_VERSION(3, 98, 4)
 static void dim_im_context_set_client_window(GtkIMContext *context, GdkWidget *client);
 #else
-static void dim_im_context_set_client_window(GtkIMContext *context, GdkWindow *client);
+static void dimImContextSetClientWindow(GtkIMContext *context, GdkWindow *client);
 #endif
-static gboolean dim_im_context_filter_keypress(GtkIMContext *context, GdkEventKey *key);
-static void dim_im_context_reset(GtkIMContext *context);
-static void dim_im_context_focus_in(GtkIMContext *context);
-static void dim_im_context_focus_out(GtkIMContext *context);
-static void dim_im_context_set_cursor_location(GtkIMContext *context, GdkRectangle *area);
-static void dim_im_context_set_use_preedit(GtkIMContext *context, gboolean use_preedit);
-static void dim_im_context_set_surrounding(GtkIMContext *context,
-                                           const gchar *text,
-                                           gint len,
-                                           gint cursor_index);
-static void dim_im_context_get_preedit_string(GtkIMContext *context,
-                                              gchar **str,
-                                              PangoAttrList **attrs,
-                                              gint *cursor_pos);
-static gboolean dim_im_context_get_surrounding(GtkIMContext *context,
-                                               gchar **text,
-                                               gint *cursor_index);
-static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *display);
-static DimIMContextWaylandGlobal *dim_im_context_wayland_get_global(DimIMContext *self);
-static void text_input_preedit_apply(DimIMContextWaylandGlobal *global);
+static gboolean dimImContextFilterKeypress(GtkIMContext *context, GdkEventKey *key);
+static void dimImContextReset(GtkIMContext *context);
+static void dimImContextFocusIn(GtkIMContext *context);
+static void dimImContextFocusOut(GtkIMContext *context);
+static void dimImContextSetCursorLocation(GtkIMContext *context, GdkRectangle *area);
+static void dimImContextSetUsePreedit(GtkIMContext *context, gboolean usePreedit);
+static void
+dimImContextSetSurrounding(GtkIMContext *context, const gchar *text, gint len, gint cursorIndex);
+static void dimImContextGetPreeditString(GtkIMContext *context,
+                                         gchar **str,
+                                         PangoAttrList **attrs,
+                                         gint *cursorPos);
+static gboolean dimImContextGetSurrounding(GtkIMContext *context, gchar **text, gint *cursorIndex);
+static DimIMContextWaylandGlobal *dimImContextWaylandGlobalGet(GdkDisplay *display);
+static DimIMContextWaylandGlobal *dimImContextWaylandGetGlobal(DimIMContext *self);
+static void textInputPreeditApply(DimIMContextWaylandGlobal *global);
 
 /* functions prototype end */
 
 // virtual functions start
 
-static DimIMContextWaylandGlobal *dim_im_context_wayland_get_global(DimIMContext *self)
+static DimIMContextWaylandGlobal *dimImContextWaylandGetGlobal(DimIMContext *self)
 {
     if (self->window == nullptr)
         return nullptr;
 
     DimIMContextWaylandGlobal *global =
-        dim_im_context_wayland_global_get(gdk_window_get_display(self->window));
+        dimImContextWaylandGlobalGet(gdk_window_get_display(self->window));
 
     if (!global) {
         return nullptr;
@@ -148,7 +144,7 @@ static DimIMContextWaylandGlobal *dim_im_context_wayland_get_global(DimIMContext
     return global;
 }
 
-static void notify_surrounding_text(DimIMContext *context)
+static void notifySurroundingText(DimIMContext *context)
 {
 #define MAX_LEN 4000
     const char *start, *end;
@@ -157,34 +153,34 @@ static void notify_surrounding_text(DimIMContext *context)
 
     if (!context->surrounding.text)
         return;
-    DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(context);
+    DimIMContextWaylandGlobal *global = dimImContextWaylandGetGlobal(context);
     if (global == nullptr)
         return;
 
     len = strlen(context->surrounding.text);
-    cursor = context->surrounding.cursor_idx;
+    cursor = context->surrounding.cursorIdx;
 
     /* The protocol specifies a maximum length of 4KiB on transfers,
      * mangle the surrounding text if it's bigger than that, and relocate
      * cursor/anchor locations as per the string being sent.
      */
     if (len > MAX_LEN) {
-        if (context->surrounding.cursor_idx < MAX_LEN) {
+        if (context->surrounding.cursorIdx < MAX_LEN) {
             start = context->surrounding.text;
             end = &context->surrounding.text[MAX_LEN];
-        } else if (context->surrounding.cursor_idx > len - MAX_LEN) {
+        } else if (context->surrounding.cursorIdx > len - MAX_LEN) {
             start = &context->surrounding.text[len - MAX_LEN];
             end = &context->surrounding.text[len];
         } else {
             int mid, a, b;
-            int cursor_len = ABS(context->surrounding.cursor_idx);
+            int cursor_len = ABS(context->surrounding.cursorIdx);
 
             if (cursor_len > MAX_LEN) {
                 g_warn_if_reached();
                 return;
             }
 
-            mid = context->surrounding.cursor_idx + (cursor_len / 2);
+            mid = context->surrounding.cursorIdx + (cursor_len / 2);
             a = MAX(0, mid - (MAX_LEN / 2));
             b = MIN(len, mid + (MAX_LEN / 2));
 
@@ -204,26 +200,26 @@ static void notify_surrounding_text(DimIMContext *context)
     }
 
     global->ti->setSurroundingText(str ? str : context->surrounding.text, cursor, anchor);
-    global->ti->setTextChangeCause(context->surrounding_change);
+    global->ti->setTextChangeCause(context->surroundingChange);
     g_free(str);
 #undef MAX_LEN
 }
 
-static uint32_t translate_hints(GtkInputHints input_hints, GtkInputPurpose purpose)
+static uint32_t translateHints(GtkInputHints inputHints, GtkInputPurpose purpose)
 {
     uint32_t hints = 0;
 
-    if (input_hints & GTK_INPUT_HINT_SPELLCHECK)
+    if (inputHints & GTK_INPUT_HINT_SPELLCHECK)
         hints |= ZWP_TEXT_INPUT_V3_CONTENT_HINT_SPELLCHECK;
-    if (input_hints & GTK_INPUT_HINT_WORD_COMPLETION)
+    if (inputHints & GTK_INPUT_HINT_WORD_COMPLETION)
         hints |= ZWP_TEXT_INPUT_V3_CONTENT_HINT_COMPLETION;
-    if (input_hints & GTK_INPUT_HINT_LOWERCASE)
+    if (inputHints & GTK_INPUT_HINT_LOWERCASE)
         hints |= ZWP_TEXT_INPUT_V3_CONTENT_HINT_LOWERCASE;
-    if (input_hints & GTK_INPUT_HINT_UPPERCASE_CHARS)
+    if (inputHints & GTK_INPUT_HINT_UPPERCASE_CHARS)
         hints |= ZWP_TEXT_INPUT_V3_CONTENT_HINT_UPPERCASE;
-    if (input_hints & GTK_INPUT_HINT_UPPERCASE_WORDS)
+    if (inputHints & GTK_INPUT_HINT_UPPERCASE_WORDS)
         hints |= ZWP_TEXT_INPUT_V3_CONTENT_HINT_TITLECASE;
-    if (input_hints & GTK_INPUT_HINT_UPPERCASE_SENTENCES)
+    if (inputHints & GTK_INPUT_HINT_UPPERCASE_SENTENCES)
         hints |= ZWP_TEXT_INPUT_V3_CONTENT_HINT_AUTO_CAPITALIZATION;
 
     if (purpose == GTK_INPUT_PURPOSE_PIN || purpose == GTK_INPUT_PURPOSE_PASSWORD) {
@@ -234,7 +230,7 @@ static uint32_t translate_hints(GtkInputHints input_hints, GtkInputPurpose purpo
     return hints;
 }
 
-static uint32_t translate_purpose(GtkInputPurpose purpose)
+static uint32_t translatePurpose(GtkInputPurpose purpose)
 {
     switch (purpose) {
     case GTK_INPUT_PURPOSE_FREE_FORM:
@@ -266,85 +262,84 @@ static uint32_t translate_purpose(GtkInputPurpose purpose)
     return ZWP_TEXT_INPUT_V3_CONTENT_PURPOSE_NORMAL;
 }
 
-static void notify_content_type(DimIMContext *context)
+static void notifyContentType(DimIMContext *context)
 {
     GtkInputHints hints;
     GtkInputPurpose purpose;
 
-    DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(context);
+    DimIMContextWaylandGlobal *global = dimImContextWaylandGetGlobal(context);
     if (global == nullptr)
         return;
 
     g_object_get(context, "input-hints", &hints, "input-purpose", &purpose, nullptr);
 
-    global->ti->setContentType(translate_hints(hints, purpose), translate_purpose(purpose));
+    global->ti->setContentType(translateHints(hints, purpose), translatePurpose(purpose));
 }
 
-static void commit_state(DimIMContext *context)
+static void commitState(DimIMContext *context)
 {
-    DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(context);
+    DimIMContextWaylandGlobal *global = dimImContextWaylandGetGlobal(context);
 
     if (global == nullptr)
         return;
 
     global->serial++;
     global->ti->commit();
-    context->surrounding_change = ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD;
+    context->surroundingChange = ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD;
 }
 
-static void notify_cursor_location(DimIMContext *context)
+static void notifyCursorLocation(DimIMContext *context)
 {
-    DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(context);
+    DimIMContextWaylandGlobal *global = dimImContextWaylandGetGlobal(context);
     if (global == nullptr)
         return;
 
     if (context->window) {
-        cairo_rectangle_int_t rect = context->cursor_rect;
+        cairo_rectangle_int_t rect = context->cursorRect;
         gdk_window_get_root_coords(context->window, rect.x, rect.y, &rect.x, &rect.y);
         global->ti->setCursorRectangle(rect.x, rect.y, rect.width, rect.height);
     }
 }
 
-static void notify_im_change(DimIMContext *context, enum zwp_text_input_v3_change_cause cause)
+static void notifyImChange(DimIMContext *context, enum zwp_text_input_v3_change_cause cause)
 {
     gboolean result;
 
-    DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(context);
+    DimIMContextWaylandGlobal *global = dimImContextWaylandGetGlobal(context);
     if (global == nullptr)
         return;
 
-    context->surrounding_change = cause;
+    context->surroundingChange = cause;
 
     g_signal_emit_by_name(global->current, "retrieve-surrounding", &result);
-    notify_surrounding_text(context);
-    notify_content_type(context);
-    notify_cursor_location(context);
-    commit_state(context);
+    notifySurroundingText(context);
+    notifyContentType(context);
+    notifyCursorLocation(context);
+    commitState(context);
 }
 
-void DimIMContextWaylandGlobal::text_input_modifiers_map(
-    void *data, struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1, struct wl_array *map)
+void DimIMContextWaylandGlobal::textInputModifiersMap(
+    void *data, struct zwp_dim_text_input_v1 *zwpDimTextInputV1, struct wl_array *map)
 {
     // TODO
 }
 
-void DimIMContextWaylandGlobal::text_input_keysym(
-    void *data,
-    struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-    uint32_t serial,
-    uint32_t time,
-    uint32_t sym,
-    uint32_t state,
-    uint32_t modifiers)
+void DimIMContextWaylandGlobal::textInputKeysym(void *data,
+                                                struct zwp_dim_text_input_v1 *zwpDimTextInputV1,
+                                                uint32_t serial,
+                                                uint32_t time,
+                                                uint32_t sym,
+                                                uint32_t state,
+                                                uint32_t modifiers)
 {
     // TODO
 }
 
-void DimIMContextWaylandGlobal::text_input_preedit(void *data,
-                                                   zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                                                   const char *text,
-                                                   int32_t cursor_begin,
-                                                   int32_t cursor_end)
+void DimIMContextWaylandGlobal::textInputPreedit(void *data,
+                                                 zwp_dim_text_input_v1 *zwpDimTextInputV1,
+                                                 const char *text,
+                                                 int32_t cursorBegin,
+                                                 int32_t cursorEnd)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
@@ -353,16 +348,16 @@ void DimIMContextWaylandGlobal::text_input_preedit(void *data,
 
     DimIMContext *context = DIM_IM_CONTEXT(global->current);
 
-    g_free(context->pending_preedit.text);
-    context->pending_preedit.text = g_strdup(text);
-    context->pending_preedit.cursor_begin = cursor_begin;
-    context->pending_preedit.cursor_end = cursor_end;
+    g_free(context->pendingPreedit.text);
+    context->pendingPreedit.text = g_strdup(text);
+    context->pendingPreedit.cursorBegin = cursorBegin;
+    context->pendingPreedit.cursorEnd = cursorEnd;
 }
 
 static void enable(DimIMContext *context, DimIMContextWaylandGlobal *global)
 {
     global->ti->enable();
-    notify_im_change(context, ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_OTHER);
+    notifyImChange(context, ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_OTHER);
 }
 
 static void disable(DimIMContext *context, DimIMContextWaylandGlobal *global)
@@ -373,18 +368,18 @@ static void disable(DimIMContext *context, DimIMContextWaylandGlobal *global)
      * we should account for it, lest the serial gets out of sync after
      * a future focus_in/enable.
      */
-    global->done_serial++;
+    global->doneSerial++;
 
     /* after disable, incoming state changes won't take effect anyway */
-    if (context->current_preedit.text) {
-        global->text_input_preedit(global, global->ti->get(), nullptr, 0, 0);
-        text_input_preedit_apply(global);
+    if (context->currentPreedit.text) {
+        global->textInputPreedit(global, global->ti->get(), nullptr, 0, 0);
+        textInputPreeditApply(global);
     }
 }
 
-void DimIMContextWaylandGlobal::text_input_commit(void *data,
-                                                  zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                                                  const char *text)
+void DimIMContextWaylandGlobal::textInputCommit(void *data,
+                                                zwp_dim_text_input_v1 *zwpDimTextInputV1,
+                                                const char *text)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
@@ -393,15 +388,15 @@ void DimIMContextWaylandGlobal::text_input_commit(void *data,
 
     DimIMContext *context = DIM_IM_CONTEXT(global->current);
 
-    g_free(context->pending_commit);
-    context->pending_commit = g_strdup(text);
+    g_free(context->pendingCommit);
+    context->pendingCommit = g_strdup(text);
 }
 
-void DimIMContextWaylandGlobal::text_input_delete_surrounding_text(
+void DimIMContextWaylandGlobal::textInputDeleteSurroundingText(
     void *data,
-    zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-    uint32_t before_length,
-    uint32_t after_length)
+    zwp_dim_text_input_v1 *zwpDimTextInputV1,
+    uint32_t beforeLength,
+    uint32_t afterLength)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
@@ -413,47 +408,47 @@ void DimIMContextWaylandGlobal::text_input_delete_surrounding_text(
     /* We already got byte lengths from text_input_v3, but GTK uses char lengths
      * for delete_surrounding, So convert it here.
      */
-    char *cursor_pointer = context->surrounding.text + context->surrounding.cursor_idx;
+    char *cursor_pointer = context->surrounding.text + context->surrounding.cursorIdx;
     uint32_t char_before_length =
-        g_utf8_pointer_to_offset(cursor_pointer - before_length, cursor_pointer);
+        g_utf8_pointer_to_offset(cursor_pointer - beforeLength, cursor_pointer);
     uint32_t char_after_length =
-        g_utf8_pointer_to_offset(cursor_pointer, cursor_pointer + after_length);
+        g_utf8_pointer_to_offset(cursor_pointer, cursor_pointer + afterLength);
 
-    context->pending_surrounding_delete.before_length = char_before_length;
-    context->pending_surrounding_delete.after_length = char_after_length;
+    context->pendingSurroundingDelete.beforeLength = char_before_length;
+    context->pendingSurroundingDelete.afterLength = char_after_length;
 }
 
-static void text_input_commit_apply(DimIMContextWaylandGlobal *global)
+static void textInputCommitApply(DimIMContextWaylandGlobal *global)
 {
     DimIMContext *context = DIM_IM_CONTEXT(global->current);
-    if (context->pending_commit)
-        g_signal_emit_by_name(global->current, "commit", context->pending_commit);
-    g_free(context->pending_commit);
-    context->pending_commit = nullptr;
+    if (context->pendingCommit)
+        g_signal_emit_by_name(global->current, "commit", context->pendingCommit);
+    g_free(context->pendingCommit);
+    context->pendingCommit = nullptr;
 }
 
-static void text_input_delete_surrounding_text_apply(DimIMContextWaylandGlobal *global)
+static void textInputDeleteSurroundingTextApply(DimIMContextWaylandGlobal *global)
 {
     gboolean retval;
-    struct surrounding_delete defaults = { 0 };
+    struct surroundingDelete defaults = { 0 };
 
     DimIMContext *context = DIM_IM_CONTEXT(global->current);
 
-    gint len = context->pending_surrounding_delete.after_length
-        + context->pending_surrounding_delete.before_length;
+    gint len = context->pendingSurroundingDelete.afterLength
+        + context->pendingSurroundingDelete.beforeLength;
     if (len > 0) {
         g_signal_emit_by_name(global->current,
                               "delete-surrounding",
-                              -context->pending_surrounding_delete.before_length,
+                              -context->pendingSurroundingDelete.beforeLength,
                               len,
                               &retval);
-        notify_im_change(DIM_IM_CONTEXT(context), ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD);
+        notifyImChange(DIM_IM_CONTEXT(context), ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD);
     }
 
-    context->pending_surrounding_delete = defaults;
+    context->pendingSurroundingDelete = defaults;
 }
 
-static void text_input_preedit_apply(DimIMContextWaylandGlobal *global)
+static void textInputPreeditApply(DimIMContextWaylandGlobal *global)
 {
     struct preedit defaults = { 0 };
 
@@ -461,57 +456,57 @@ static void text_input_preedit_apply(DimIMContextWaylandGlobal *global)
         return;
 
     DimIMContext *context = DIM_IM_CONTEXT(global->current);
-    if (context->pending_preedit.text == nullptr && context->current_preedit.text == nullptr)
+    if (context->pendingPreedit.text == nullptr && context->currentPreedit.text == nullptr)
         return;
 
     gboolean state_change =
-        ((context->pending_preedit.text == nullptr) != (context->current_preedit.text == nullptr));
+        ((context->pendingPreedit.text == nullptr) != (context->currentPreedit.text == nullptr));
 
-    if (state_change && !context->current_preedit.text)
+    if (state_change && !context->currentPreedit.text)
         g_signal_emit_by_name(context, "preedit-start");
 
-    g_free(context->current_preedit.text);
-    context->current_preedit = context->pending_preedit;
-    context->pending_preedit = defaults;
+    g_free(context->currentPreedit.text);
+    context->currentPreedit = context->pendingPreedit;
+    context->pendingPreedit = defaults;
 
     g_signal_emit_by_name(context, "preedit-changed");
 
-    if (state_change && !context->current_preedit.text)
+    if (state_change && !context->currentPreedit.text)
         g_signal_emit_by_name(context, "preedit-end");
 }
 
-void DimIMContextWaylandGlobal::text_input_done(void *data,
-                                                zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                                                uint32_t serial)
+void DimIMContextWaylandGlobal::textInputDone(void *data,
+                                              zwp_dim_text_input_v1 *zwpDimTextInputV1,
+                                              uint32_t serial)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
-    global->done_serial = serial;
+    global->doneSerial = serial;
 
     if (!global->current)
         return;
 
     DimIMContext *context = DIM_IM_CONTEXT(global->current);
     gboolean update_im =
-        (context->pending_commit != nullptr
-         || g_strcmp0(context->pending_preedit.text, context->current_preedit.text) != 0);
+        (context->pendingCommit != nullptr
+         || g_strcmp0(context->pendingPreedit.text, context->currentPreedit.text) != 0);
 
-    text_input_delete_surrounding_text_apply(global);
-    text_input_commit_apply(global);
-    text_input_preedit_apply(global);
+    textInputDeleteSurroundingTextApply(global);
+    textInputCommitApply(global);
+    textInputPreeditApply(global);
 
     if (update_im && global->serial == serial)
-        notify_im_change(context, ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD);
+        notifyImChange(context, ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD);
 }
 
-static void gtk_im_context_wayland_global_free(gpointer data)
+static void gtkImContextWaylandGlobalFree(gpointer data)
 {
     DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
 
     g_free(global);
 }
 
-static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *display)
+static DimIMContextWaylandGlobal *dimImContextWaylandGlobalGet(GdkDisplay *display)
 {
     DimIMContextWaylandGlobal *global =
         (DimIMContextWaylandGlobal *)g_object_get_data(G_OBJECT(display),
@@ -551,7 +546,7 @@ static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *
     g_object_set_data_full(G_OBJECT(display),
                            "dim-im-context-wayland-global",
                            global,
-                           gtk_im_context_wayland_global_free);
+                           gtkImContextWaylandGlobalFree);
 
     return global;
 }
@@ -559,30 +554,30 @@ static DimIMContextWaylandGlobal *dim_im_context_wayland_global_get(GdkDisplay *
 #if GTK_CHECK_VERSION(3, 98, 4)
 static void dim_im_context_set_client_window(GtkIMContext *context, GdkWidget *client)
 #else
-static void dim_im_context_set_client_window(GtkIMContext *context, GdkWindow *client)
+static void dimImContextSetClientWindow(GtkIMContext *context, GdkWindow *client)
 #endif
 {
     g_return_if_fail(GTK_IS_IM_CONTEXT(context));
     g_return_if_fail(client);
 
-    DimIMContext *context_wayland = DIM_IM_CONTEXT(context);
+    DimIMContext *contextWayland = DIM_IM_CONTEXT(context);
 
-    if (client == context_wayland->window)
+    if (client == contextWayland->window)
         return;
 
-    if (context_wayland->window)
-        dim_im_context_focus_out(context);
+    if (contextWayland->window)
+        dimImContextFocusOut(context);
 
-    g_set_object(&context_wayland->window, client);
+    g_set_object(&contextWayland->window, client);
 }
 
-static gboolean dim_im_context_filter_keypress(GtkIMContext *context, GdkEventKey *event)
+static gboolean dimImContextFilterKeypress(GtkIMContext *context, GdkEventKey *event)
 {
     /* This is done by the compositor */
     return GTK_IM_CONTEXT_CLASS(dim_im_context_parent_class)->filter_keypress(context, event);
 }
 
-static void dim_im_context_focus_in(GtkIMContext *context)
+static void dimImContextFocusIn(GtkIMContext *context)
 {
     g_return_if_fail(GTK_IS_IM_CONTEXT(context));
 
@@ -592,7 +587,7 @@ static void dim_im_context_focus_in(GtkIMContext *context)
         return;
 
     DimIMContextWaylandGlobal *global =
-        dim_im_context_wayland_global_get(gdk_window_get_display(self->window));
+        dimImContextWaylandGlobalGet(gdk_window_get_display(self->window));
     if (!global) {
         return;
     }
@@ -606,11 +601,11 @@ static void dim_im_context_focus_in(GtkIMContext *context)
     enable(self, global);
 }
 
-static void dim_im_context_focus_out(GtkIMContext *context)
+static void dimImContextFocusOut(GtkIMContext *context)
 {
     DimIMContext *self = DIM_IM_CONTEXT(context);
 
-    DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(self);
+    DimIMContextWaylandGlobal *global = dimImContextWaylandGetGlobal(self);
     if (global == nullptr)
         return;
 
@@ -619,67 +614,65 @@ static void dim_im_context_focus_out(GtkIMContext *context)
     global->current = nullptr;
 }
 
-static void dim_im_context_reset(GtkIMContext *context)
+static void dimImContextReset(GtkIMContext *context)
 {
     DimIMContext *self = DIM_IM_CONTEXT(context);
-    DimIMContextWaylandGlobal *global = dim_im_context_wayland_get_global(self);
+    DimIMContextWaylandGlobal *global = dimImContextWaylandGetGlobal(self);
     if (global == nullptr)
         return;
-    notify_im_change(DIM_IM_CONTEXT(context), ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_OTHER);
+    notifyImChange(DIM_IM_CONTEXT(context), ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_OTHER);
 }
 
-static void dim_im_context_wayland_commit(GtkIMContext *context, const gchar *str)
+static void dimImContextWaylandCommit(GtkIMContext *context, const gchar *str)
 {
     if (GTK_IM_CONTEXT_CLASS(dim_im_context_parent_class)->commit)
         GTK_IM_CONTEXT_CLASS(dim_im_context_parent_class)->commit(context, str);
 
-    notify_im_change(DIM_IM_CONTEXT(context), ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD);
+    notifyImChange(DIM_IM_CONTEXT(context), ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD);
 }
 
-static void dim_im_context_set_cursor_location(GtkIMContext *context, GdkRectangle *area)
+static void dimImContextSetCursorLocation(GtkIMContext *context, GdkRectangle *area)
 {
-    DimIMContext *context_wayland = DIM_IM_CONTEXT(context);
+    DimIMContext *contextWayland = DIM_IM_CONTEXT(context);
 
-    if (context_wayland->cursor_rect.x == area->x && context_wayland->cursor_rect.y == area->y
-        && context_wayland->cursor_rect.width == area->width
-        && context_wayland->cursor_rect.height == area->height)
+    if (contextWayland->cursorRect.x == area->x && contextWayland->cursorRect.y == area->y
+        && contextWayland->cursorRect.width == area->width
+        && contextWayland->cursorRect.height == area->height)
         return;
 
-    int side = context_wayland->cursor_rect.height;
-    context_wayland->cursor_rect = *area;
+    int side = contextWayland->cursorRect.height;
+    contextWayland->cursorRect = *area;
 }
 
-static void dim_im_context_set_use_preedit(GtkIMContext *context, gboolean use_preedit)
+static void dimImContextSetUsePreedit(GtkIMContext *context, gboolean usePreedit)
 {
-    DimIMContext *context_wayland = DIM_IM_CONTEXT(context);
+    DimIMContext *contextWayland = DIM_IM_CONTEXT(context);
 
-    context_wayland->use_preedit = !!use_preedit;
+    contextWayland->usePreedit = !!usePreedit;
 }
 
-static void dim_im_context_set_surrounding(GtkIMContext *context,
-                                           const gchar *text,
-                                           gint len,
-                                           gint cursor_index)
+static void
+dimImContextSetSurrounding(GtkIMContext *context, const gchar *text, gint len, gint cursorIndex)
 {
-    DimIMContext *context_wayland = DIM_IM_CONTEXT(context);
+    DimIMContext *contextWayland = DIM_IM_CONTEXT(context);
 
-    if (context_wayland->surrounding.text && text
-        && (len < 0 || len == strlen(context_wayland->surrounding.text))
-        && strncmp(context_wayland->surrounding.text, text, len) == 0
-        && context_wayland->surrounding.cursor_idx == cursor_index)
+    if (contextWayland->surrounding.text && text
+        && (len < 0 || len == strlen(contextWayland->surrounding.text))
+        && strncmp(contextWayland->surrounding.text, text, len) == 0
+        && contextWayland->surrounding.cursorIdx == cursorIndex)
         return;
 
-    g_free(context_wayland->surrounding.text);
-    context_wayland->surrounding.text = g_strndup(text, len);
-    context_wayland->surrounding.cursor_idx = cursor_index;
+    g_free(contextWayland->surrounding.text);
+    contextWayland->surrounding.text = g_strndup(text, len);
+    contextWayland->surrounding.cursorIdx = cursorIndex;
 }
 
-static void dim_im_context_get_preedit_string(GtkIMContext *context,
-                                              gchar **str,
-                                              PangoAttrList **attrs,
-                                              gint *cursor_pos)
+static void dimImContextGetPreeditString(GtkIMContext *context,
+                                         gchar **str,
+                                         PangoAttrList **attrs,
+                                         gint *cursor_pos)
 {
-    DimIMContext *context_wayland = DIM_IM_CONTEXT(context);
+    DimIMContext *contextWayland = DIM_IM_CONTEXT(context);
 
     if (attrs)
         *attrs = nullptr;
@@ -696,10 +689,10 @@ static void dim_im_context_get_preedit_string(GtkIMContext *context,
     }
 
     const char *preedit_str =
-        context_wayland->current_preedit.text ? context_wayland->current_preedit.text : "";
+        contextWayland->currentPreedit.text ? contextWayland->currentPreedit.text : "";
 
     if (cursor_pos)
-        *cursor_pos = g_utf8_strlen(preedit_str, context_wayland->current_preedit.cursor_begin);
+        *cursor_pos = g_utf8_strlen(preedit_str, contextWayland->currentPreedit.cursorBegin);
 
     if (str)
         *str = g_strdup(preedit_str);
@@ -721,28 +714,26 @@ static void dim_im_context_get_preedit_string(GtkIMContext *context,
         attr->end_index = len;
         pango_attr_list_insert(*attrs, attr);
 
-        if (context_wayland->current_preedit.cursor_begin
-            != context_wayland->current_preedit.cursor_end) {
+        if (contextWayland->currentPreedit.cursorBegin
+            != contextWayland->currentPreedit.cursorEnd) {
             /* FIXME: Oh noes, how to highlight while taking into account user preferences? */
             PangoAttribute *cursor = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
-            cursor->start_index = context_wayland->current_preedit.cursor_begin;
-            cursor->end_index = context_wayland->current_preedit.cursor_end;
+            cursor->start_index = contextWayland->currentPreedit.cursorBegin;
+            cursor->end_index = contextWayland->currentPreedit.cursorEnd;
             pango_attr_list_insert(*attrs, cursor);
         }
     }
 }
 
-static gboolean dim_im_context_get_surrounding(GtkIMContext *context,
-                                               gchar **text,
-                                               gint *cursor_index)
+static gboolean dimImContextGetSurrounding(GtkIMContext *context, gchar **text, gint *cursorIndex)
 {
-    DimIMContext *context_wayland = DIM_IM_CONTEXT(context);
+    DimIMContext *contextWayland = DIM_IM_CONTEXT(context);
 
-    if (!context_wayland->surrounding.text)
+    if (!contextWayland->surrounding.text)
         return FALSE;
 
-    *text = context_wayland->surrounding.text;
-    *cursor_index = context_wayland->surrounding.cursor_idx;
+    *text = contextWayland->surrounding.text;
+    *cursorIndex = contextWayland->surrounding.cursorIdx;
     return TRUE;
 }
 
@@ -750,13 +741,13 @@ static void dim_im_context_finalize(GObject *obj)
 {
     DimIMContext *context = DIM_IM_CONTEXT(obj);
 
-    dim_im_context_focus_out(GTK_IM_CONTEXT(context));
+    dimImContextFocusOut(GTK_IM_CONTEXT(context));
 
     g_clear_object(&context->window);
     g_free(context->surrounding.text);
-    g_free(context->current_preedit.text);
-    g_free(context->pending_preedit.text);
-    g_free(context->pending_commit);
+    g_free(context->currentPreedit.text);
+    g_free(context->pendingPreedit.text);
+    g_free(context->pendingCommit);
 
     G_OBJECT_CLASS(dim_im_context_parent_class)->finalize(obj);
 }
@@ -771,45 +762,45 @@ static void dim_im_context_class_init(DimIMContextClass *klass)
 #if GTK_CHECK_VERSION(3, 98, 4)
     im_context_class->set_client_widget = dim_im_context_set_client_window;
 #else
-    im_context_class->set_client_window = dim_im_context_set_client_window;
+    im_context_class->set_client_window = dimImContextSetClientWindow;
 #endif
-    im_context_class->get_preedit_string = dim_im_context_get_preedit_string;
-    im_context_class->filter_keypress = dim_im_context_filter_keypress;
-    im_context_class->focus_in = dim_im_context_focus_in;
-    im_context_class->focus_out = dim_im_context_focus_out;
-    im_context_class->reset = dim_im_context_reset;
-    im_context_class->commit = dim_im_context_wayland_commit;
-    im_context_class->set_cursor_location = dim_im_context_set_cursor_location;
-    im_context_class->set_use_preedit = dim_im_context_set_use_preedit;
-    im_context_class->set_surrounding = dim_im_context_set_surrounding;
-    im_context_class->get_surrounding = dim_im_context_get_surrounding;
+    im_context_class->get_preedit_string = dimImContextGetPreeditString;
+    im_context_class->filter_keypress = dimImContextFilterKeypress;
+    im_context_class->focus_in = dimImContextFocusIn;
+    im_context_class->focus_out = dimImContextFocusOut;
+    im_context_class->reset = dimImContextReset;
+    im_context_class->commit = dimImContextWaylandCommit;
+    im_context_class->set_cursor_location = dimImContextSetCursorLocation;
+    im_context_class->set_use_preedit = dimImContextSetUsePreedit;
+    im_context_class->set_surrounding = dimImContextSetSurrounding;
+    im_context_class->get_surrounding = dimImContextGetSurrounding;
 
     gobject_class->finalize = dim_im_context_finalize;
 }
 
 static void dim_im_context_class_finalize(DimIMContextClass *klass) { }
 
-static void on_content_type_changed(DimIMContext *context)
+static void onContentTypeChanged(DimIMContext *context)
 {
-    notify_content_type(context);
-    commit_state(context);
+    notifyContentType(context);
+    commitState(context);
 }
 
 static void dim_im_context_init(DimIMContext *context)
 {
-    context->use_preedit = TRUE;
+    context->usePreedit = TRUE;
 
     g_signal_connect_swapped(context,
                              "notify::input-purpose",
-                             G_CALLBACK(on_content_type_changed),
+                             G_CALLBACK(onContentTypeChanged),
                              context);
     g_signal_connect_swapped(context,
                              "notify::input-hints",
-                             G_CALLBACK(on_content_type_changed),
+                             G_CALLBACK(onContentTypeChanged),
                              context);
 }
 
-DimIMContext *dim_im_context_new(void)
+DimIMContext *dimImContextNew(void)
 {
     GObject *obj = (GObject *)g_object_new(DIM_TYPE_IM_CONTEXT, nullptr);
     return DIM_IM_CONTEXT(obj);

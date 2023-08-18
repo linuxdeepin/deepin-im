@@ -24,7 +24,7 @@ struct _DimIMContextClass
 
 G_BEGIN_DECLS
 GType dim_im_context_get_type(void) G_GNUC_CONST;
-DimIMContext *dim_im_context_new(void);
+DimIMContext *dimImContextNew(void);
 void dim_im_context_register(GTypeModule *type_module);
 G_END_DECLS
 
