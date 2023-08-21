@@ -18,8 +18,8 @@
 
 #include <QDebug>
 #include <QGuiApplication>
-#include <QSocketNotifier>
 #include <QList>
+#include <QSocketNotifier>
 
 const zwp_dim_text_input_v1_listener DimTextInputV1::tiListener = {
     CallbackWrapper<&DimTextInputV1::modifiers_map>::func,
@@ -42,6 +42,9 @@ DimTextInputV1::DimTextInputV1(QObject *parent)
         wl_.reset(new wl::client::ConnectionRaw(wl_dpy));
     } else {
         auto *wl = new wl::client::Connection("imfakewl");
+        if (wl->display() == nullptr) {
+            return;
+        }
         wl_.reset(wl);
         auto *notifier = new QSocketNotifier(wl->getFd(), QSocketNotifier::Read, this);
         connect(notifier, &QSocketNotifier::activated, this, [wl]() {
@@ -60,6 +63,8 @@ DimTextInputV1::DimTextInputV1(QObject *parent)
 
 void DimTextInputV1::focusIn()
 {
+    if (!ti_)
+        return;
     ti_->enable();
     ti_->setSurroundingText("", 0, 0);
     ti_->setTextChangeCause(ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD);
@@ -72,16 +77,17 @@ void DimTextInputV1::focusIn()
 
 void DimTextInputV1::focusOut()
 {
+    if (!ti_)
+        return;
     ti_->disable();
     ti_->commit();
     wl_->flush();
 }
 
-void DimTextInputV1::reset() {
-}
+void DimTextInputV1::reset() { }
 
 void DimTextInputV1::modifiers_map(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                                      struct wl_array *map)
+                                   struct wl_array *map)
 {
     qWarning() << "modifiers_map";
     const QList<QByteArray> modifiersMap =
@@ -132,17 +138,17 @@ void DimTextInputV1::delete_surrounding_text(
 }
 
 void DimTextInputV1::done([[maybe_unused]] struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                             [[maybe_unused]] uint32_t serial)
+                          [[maybe_unused]] uint32_t serial)
 {
     qWarning() << "done";
 }
 
 void DimTextInputV1::keysym(struct zwp_dim_text_input_v1 *zwp_dim_text_input_v1,
-                               uint32_t serial,
-                               uint32_t time,
-                               uint32_t sym,
-                               uint32_t state,
-                               uint32_t modifiers)
+                            uint32_t serial,
+                            uint32_t time,
+                            uint32_t sym,
+                            uint32_t state,
+                            uint32_t modifiers)
 {
     qWarning() << "keysym";
     if (!QGuiApplication::focusWindow()) {

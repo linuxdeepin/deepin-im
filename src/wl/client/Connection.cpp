@@ -11,7 +11,9 @@ Connection::Connection(const std::string &name)
     , display_(wl_display_connect(name.empty() ? nullptr : name.c_str()))
 {
     if (!display_) {
-        fprintf(stderr, "Failed to connect to Wayland server: %d", wl_display_get_error(display()));
+        const char * errorMsg = "empty wayland display\r\n";
+        fprintf(stderr, "Failed to connect to Wayland server: %s", errorMsg);
+        return;
     }
 
     init();

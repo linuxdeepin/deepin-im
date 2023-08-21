@@ -547,6 +547,11 @@ static DimIMContextWaylandGlobal *dimImContextWaylandGlobalGet(GdkDisplay *displ
         global->wl = new wl::client::ConnectionRaw(gdk_wayland_display);
     } else {
         auto wl = new wl::client::Connection("imfakewl");
+        if (wl->display() == nullptr) {
+            const char *errMsg = "empty wayland display";
+            g_warning("failed to connect imfakewl: %s", errMsg);
+            return nullptr;
+        }
         global->wl = wl;
         GIOChannel *channel = g_io_channel_unix_new(wl->getFd());
         g_io_add_watch(
