@@ -75,7 +75,7 @@ struct surroundingDelete
 struct _DimIMContext
 {
     GtkIMContextSimple parent;
-
+    GtkIMContext *slave;
     GdkWindow *window;
 
     struct
@@ -85,9 +85,7 @@ struct _DimIMContext
     } surrounding;
 
     enum zwp_text_input_v3_change_cause surroundingChange;
-
     struct surroundingDelete pendingSurroundingDelete;
-
     struct preedit currentPreedit;
     struct preedit pendingPreedit;
 
@@ -96,6 +94,13 @@ struct _DimIMContext
     cairo_rectangle_int_t cursorRect;
     guint usePreedit : 1;
 };
+
+static guint _signalCommitId = 0;
+static guint _signalPreeditChangedId = 0;
+static guint _signalPreeditStartId = 0;
+static guint _signalPreeditEndId = 0;
+static guint _signalDeleteSurroundingId = 0;
+static guint _signalRetrieveSurroundingId = 0;
 
 G_DEFINE_DYNAMIC_TYPE(DimIMContext, dim_im_context, GTK_TYPE_IM_CONTEXT);
 
@@ -321,7 +326,6 @@ static void notifyImChange(DimIMContext *context, enum zwp_text_input_v3_change_
 void DimIMContextWaylandGlobal::textInputModifiersMap(
     void *data, struct zwp_dim_text_input_v1 *zwpDimTextInputV1, struct wl_array *map)
 {
-    // TODO
 }
 
 void DimIMContextWaylandGlobal::textInputKeysym(void *data,
@@ -332,7 +336,29 @@ void DimIMContextWaylandGlobal::textInputKeysym(void *data,
                                                 uint32_t state,
                                                 uint32_t modifiers)
 {
-    // TODO
+    DimIMContextWaylandGlobal *global = POINT_TRANSFORM(data);
+
+    if (!global->current)
+        return;
+    GdkEvent *gdk_event = gdk_event_new(state ? GDK_KEY_PRESS : GDK_KEY_RELEASE);
+    GdkEventKey *gdk_event_key = reinterpret_cast<GdkEventKey *>(gdk_event);
+
+    DimIMContext *contextWayland = DIM_IM_CONTEXT(global->current);
+
+    gdk_event_key->type = state ? GDK_KEY_PRESS : GDK_KEY_RELEASE;
+    gdk_event_key->window = g_object_ref(contextWayland->window);
+    gdk_event_key->send_event = TRUE;
+    gdk_event_key->time = time;
+    gdk_event_key->keyval = sym;
+    gdk_event_key->length = 1;
+    gdk_event_key->string = nullptr;
+    gdk_event_key->state = modifiers;
+
+    gdk_event_key->send_event = TRUE;
+    gdk_event_key->time = time;
+
+    auto handled = gtk_im_context_filter_keypress(contextWayland->slave, &gdk_event->key);
+    gdk_event_free(gdk_event);
 }
 
 void DimIMContextWaylandGlobal::textInputPreedit(void *data,
@@ -562,13 +588,16 @@ static void dimImContextSetClientWindow(GtkIMContext *context, GdkWindow *client
 
     DimIMContext *contextWayland = DIM_IM_CONTEXT(context);
 
-    if (client == contextWayland->window)
-        return;
+    if (contextWayland->window) {
+        g_object_unref(contextWayland->window);
+        contextWayland->window = nullptr;
+    }
 
-    if (contextWayland->window)
-        dimImContextFocusOut(context);
+    if (client != NULL)
+        contextWayland->window = g_object_ref(client);
 
-    g_set_object(&contextWayland->window, client);
+    if (contextWayland->slave)
+        gtk_im_context_set_client_window(contextWayland->slave, client);
 }
 
 static gboolean dimImContextFilterKeypress(GtkIMContext *context, GdkEventKey *event)
@@ -776,6 +805,25 @@ static void dim_im_context_class_init(DimIMContextClass *klass)
     im_context_class->get_surrounding = dimImContextGetSurrounding;
 
     gobject_class->finalize = dim_im_context_finalize;
+
+    _signalCommitId = g_signal_lookup("commit", G_TYPE_FROM_CLASS(klass));
+    g_assert(_signalCommitId != 0);
+
+    _signalPreeditChangedId = g_signal_lookup("preedit-changed", G_TYPE_FROM_CLASS(klass));
+    g_assert(_signalPreeditChangedId != 0);
+
+    _signalPreeditStartId = g_signal_lookup("preedit-start", G_TYPE_FROM_CLASS(klass));
+    g_assert(_signalPreeditStartId != 0);
+
+    _signalPreeditEndId = g_signal_lookup("preedit-end", G_TYPE_FROM_CLASS(klass));
+    g_assert(_signalPreeditEndId != 0);
+
+    _signalDeleteSurroundingId = g_signal_lookup("delete-surrounding", G_TYPE_FROM_CLASS(klass));
+    g_assert(_signalDeleteSurroundingId != 0);
+
+    _signalRetrieveSurroundingId =
+        g_signal_lookup("retrieve-surrounding", G_TYPE_FROM_CLASS(klass));
+    g_assert(_signalRetrieveSurroundingId != 0);
 }
 
 static void dim_im_context_class_finalize(DimIMContextClass *klass) { }
@@ -786,9 +834,71 @@ static void onContentTypeChanged(DimIMContext *context)
     commitState(context);
 }
 
+static void _slave_commit_cb(GtkIMContext *slave, gchar *string, DimIMContext *context)
+{
+    g_signal_emit(context, _signalCommitId, 0, string);
+}
+
+static void _slave_preedit_start_cb(GtkIMContext *slave, DimIMContext *context)
+{
+    g_signal_emit(context, _signalPreeditStartId, 0);
+}
+
+static void _slave_preedit_end_cb(GtkIMContext *slave, DimIMContext *context)
+{
+    g_signal_emit(context, _signalPreeditEndId, 0);
+}
+
+static void _slave_preedit_changed_cb(GtkIMContext *slave, DimIMContext *context)
+{
+    g_signal_emit(context, _signalPreeditChangedId, 0);
+}
+
+static gboolean _slave_retrieve_surrounding_cb(GtkIMContext *slave, DimIMContext *context)
+{
+    gboolean ret;
+
+    g_signal_emit(context, _signalRetrieveSurroundingId, 0, &ret);
+    return ret;
+}
+
+static gboolean _slave_delete_surrounding_cb(GtkIMContext *slave,
+                                             gint offset_from_cursor,
+                                             guint nchars,
+                                             DimIMContext *context)
+{
+    gboolean return_value;
+
+    g_signal_emit(context,
+                  _signalDeleteSurroundingId,
+                  0,
+                  offset_from_cursor,
+                  nchars,
+                  &return_value);
+    return return_value;
+}
+
 static void dim_im_context_init(DimIMContext *context)
 {
     context->usePreedit = TRUE;
+
+    context->slave = gtk_im_context_simple_new();
+
+    g_signal_connect(context->slave, "commit", G_CALLBACK(_slave_commit_cb), context);
+    g_signal_connect(context->slave, "preedit-start", G_CALLBACK(_slave_preedit_start_cb), context);
+    g_signal_connect(context->slave, "preedit-end", G_CALLBACK(_slave_preedit_end_cb), context);
+    g_signal_connect(context->slave,
+                     "preedit-changed",
+                     G_CALLBACK(_slave_preedit_changed_cb),
+                     context);
+    g_signal_connect(context->slave,
+                     "retrieve-surrounding",
+                     G_CALLBACK(_slave_retrieve_surrounding_cb),
+                     context);
+    g_signal_connect(context->slave,
+                     "delete-surrounding",
+                     G_CALLBACK(_slave_delete_surrounding_cb),
+                     context);
 
     g_signal_connect_swapped(context,
                              "notify::input-purpose",
