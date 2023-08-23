@@ -11,7 +11,7 @@ void registerBatchEventQtDBusTypes()
     qRegisterMetaType<BatchEvent>("BatchEvent");
     qRegisterMetaType<QList<BatchEvent>>("QList<BatchEvent>");
     qRegisterMetaType<PreeditKeyData>("PreeditKeyData");
-    qRegisterMetaType<QList<PreeditKeyData>>("PreeditKeyData");
+    qRegisterMetaType<QList<PreeditKeyData>>("QList<PreeditKeyData>");
     qRegisterMetaType<PreeditKey>("PreeditKey");
 
     qDBusRegisterMetaType<BatchEvent>();
