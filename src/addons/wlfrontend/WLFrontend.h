@@ -5,7 +5,7 @@
 #ifndef DBUSFRONTEND_H
 #define DBUSFRONTEND_H
 
-#include "WaylandInputContextV2.h"
+#include "DimTextInputV1.h"
 
 #include <dimcore/FrontendAddon.h>
 
@@ -36,7 +36,7 @@ public:
 private:
     std::unique_ptr<wl::client::Connection> wl_;
 
-    std::vector<std::shared_ptr<WaylandInputContextV2>> ims_;
+    std::vector<std::shared_ptr<DimTextInputV1>> ims_;
 
     void init();
     void reloadSeats();

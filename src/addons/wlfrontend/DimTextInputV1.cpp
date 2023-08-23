@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "WaylandInputContextV2.h"
+#include "DimTextInputV1.h"
 
 #include "common/common.h"
 #include "wayland-input-method-unstable-v2-client-protocol.h"
@@ -16,21 +16,21 @@
 
 using namespace org::deepin::dim;
 
-const zwp_input_method_v2_listener WaylandInputContextV2::imListener_ = {
-    CallbackWrapper<&WaylandInputContextV2::activate>::func,
-    CallbackWrapper<&WaylandInputContextV2::deactivate>::func,
-    CallbackWrapper<&WaylandInputContextV2::surroundingText>::func,
-    CallbackWrapper<&WaylandInputContextV2::textChangeCause>::func,
-    CallbackWrapper<&WaylandInputContextV2::contentType>::func,
-    CallbackWrapper<&WaylandInputContextV2::done>::func,
-    CallbackWrapper<&WaylandInputContextV2::unavailable>::func,
+const zwp_input_method_v2_listener DimTextInputV1::imListener_ = {
+    CallbackWrapper<&DimTextInputV1::activate>::func,
+    CallbackWrapper<&DimTextInputV1::deactivate>::func,
+    CallbackWrapper<&DimTextInputV1::surroundingText>::func,
+    CallbackWrapper<&DimTextInputV1::textChangeCause>::func,
+    CallbackWrapper<&DimTextInputV1::contentType>::func,
+    CallbackWrapper<&DimTextInputV1::done>::func,
+    CallbackWrapper<&DimTextInputV1::unavailable>::func,
 };
 
-const zwp_input_method_keyboard_grab_v2_listener WaylandInputContextV2::grabListener_ = {
-    CallbackWrapper<&WaylandInputContextV2::keymap>::func,
-    CallbackWrapper<&WaylandInputContextV2::key>::func,
-    CallbackWrapper<&WaylandInputContextV2::modifiers>::func,
-    CallbackWrapper<&WaylandInputContextV2::repeatInfo>::func,
+const zwp_input_method_keyboard_grab_v2_listener DimTextInputV1::grabListener_ = {
+    CallbackWrapper<&DimTextInputV1::keymap>::func,
+    CallbackWrapper<&DimTextInputV1::key>::func,
+    CallbackWrapper<&DimTextInputV1::modifiers>::func,
+    CallbackWrapper<&DimTextInputV1::repeatInfo>::func,
 };
 
 static int32_t getTimestamp()
@@ -40,7 +40,7 @@ static int32_t getTimestamp()
     return time.tv_sec * 1000 + time.tv_nsec / (1000 * 1000);
 }
 
-WaylandInputContextV2::WaylandInputContextV2(
+DimTextInputV1::DimTextInputV1(
     Dim *dim,
     const std::shared_ptr<wl::client::ZwpInputMethodV2> &im,
     const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk)
@@ -53,7 +53,7 @@ WaylandInputContextV2::WaylandInputContextV2(
     zwp_input_method_v2_add_listener(im_->get(), &imListener_, this);
 }
 
-void WaylandInputContextV2::activate(
+void DimTextInputV1::activate(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
     qDebug() << "im activated:" << id();
@@ -64,7 +64,7 @@ void WaylandInputContextV2::activate(
     focusIn();
 }
 
-void WaylandInputContextV2::deactivate(
+void DimTextInputV1::deactivate(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
     qDebug() << "im deactivated:" << id();
@@ -75,7 +75,7 @@ void WaylandInputContextV2::deactivate(
     focusOut();
 }
 
-void WaylandInputContextV2::surroundingText(
+void DimTextInputV1::surroundingText(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
     [[maybe_unused]] const char *text,
     [[maybe_unused]] uint32_t cursor,
@@ -84,14 +84,14 @@ void WaylandInputContextV2::surroundingText(
     qDebug() << "im surroundingText:" << id();
 }
 
-void WaylandInputContextV2::textChangeCause(
+void DimTextInputV1::textChangeCause(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
     [[maybe_unused]] uint32_t cause)
 {
     qDebug() << "im textChangeCause:" << id();
 }
 
-void WaylandInputContextV2::contentType(
+void DimTextInputV1::contentType(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
     [[maybe_unused]] uint32_t hint,
     [[maybe_unused]] uint32_t purpose)
@@ -99,16 +99,16 @@ void WaylandInputContextV2::contentType(
     qDebug() << "im contentType:" << id();
 }
 
-void WaylandInputContextV2::done([[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
+void DimTextInputV1::done([[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
 }
 
-void WaylandInputContextV2::unavailable(
+void DimTextInputV1::unavailable(
     [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
 }
 
-void WaylandInputContextV2::keymap(
+void DimTextInputV1::keymap(
     [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
     uint32_t format,
     int32_t fd,
@@ -169,7 +169,7 @@ void WaylandInputContextV2::keymap(
         << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Hyper");
 }
 
-void WaylandInputContextV2::key(
+void DimTextInputV1::key(
     [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
     uint32_t serial,
     uint32_t time,
@@ -223,7 +223,7 @@ void WaylandInputContextV2::key(
     }
 }
 
-void WaylandInputContextV2::modifiers(
+void DimTextInputV1::modifiers(
     [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
     uint32_t serial,
     uint32_t mods_depressed,
@@ -287,7 +287,7 @@ void WaylandInputContextV2::modifiers(
     }
 }
 
-void WaylandInputContextV2::repeatInfo(
+void DimTextInputV1::repeatInfo(
     [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
     int32_t rate,
     int32_t delay)

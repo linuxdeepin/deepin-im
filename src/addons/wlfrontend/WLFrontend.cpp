@@ -56,7 +56,7 @@ void WLFrontend::reloadSeats()
         auto vk = vkManager->createVirtualKeyboard(seat);
         auto im = imManager->getInputMethod(seat);
 
-        ims_.emplace_back(std::make_shared<WaylandInputContextV2>(dim(), im, vk));
+        ims_.emplace_back(std::make_shared<DimTextInputV1>(dim(), im, vk));
     }
 
     wl_->flush();

@@ -1,8 +1,8 @@
 set(WLFRONTEND_SOURCES
   WLFrontend.h
   WLFrontend.cpp
-  WaylandInputContextV2.h
-  WaylandInputContextV2.cpp
+  DimTextInputV1.h
+  DimTextInputV1.cpp
 )
 
 add_library(wlfrontend SHARED

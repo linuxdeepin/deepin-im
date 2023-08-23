@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef WAYLANDINPUTCONTEXTV1
-#define WAYLANDINPUTCONTEXTV1
+#ifndef DIMTEXTINPUTV1_H
+#define DIMTEXTINPUTV1_H
 
 #include "common/common.h"
 #include "wayland-input-method-unstable-v2-client-protocol.h"
@@ -28,10 +28,10 @@ public:
 };
 
 
-class WaylandInputContextV2 : public InputContext
+class DimTextInputV1 : public InputContext
 {
 public:
-    WaylandInputContextV2(Dim *dim,
+    DimTextInputV1(Dim *dim,
                           const std::shared_ptr<wl::client::ZwpInputMethodV2> &im,
                           const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk);
 
@@ -87,4 +87,4 @@ private:
 } // namespace deepin
 } // namespace org
 
-#endif // !WAYLANDINPUTCONTEXTV1
+#endif // !DIMTEXTINPUTV1_H
