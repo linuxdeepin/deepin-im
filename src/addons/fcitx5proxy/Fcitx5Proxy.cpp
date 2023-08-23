@@ -173,9 +173,8 @@ void Fcitx5Proxy::destroyed(uint32_t id)
     }
 }
 
-bool Fcitx5Proxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
+bool Fcitx5Proxy::keyEvent(InputContextKeyEvent &keyEvent)
 {
-    Q_UNUSED(entry);
     auto id = keyEvent.ic()->id();
 
     if (!isICDBusInterfaceValid(id)) {

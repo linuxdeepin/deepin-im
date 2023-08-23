@@ -235,9 +235,8 @@ void DimIBusProxy::destroyed(uint32_t id)
     }
 }
 
-bool DimIBusProxy::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
+bool DimIBusProxy::keyEvent(InputContextKeyEvent &keyEvent)
 {
-    Q_UNUSED(entry);
     bool result = false;
 
     auto id = keyEvent.ic()->id();

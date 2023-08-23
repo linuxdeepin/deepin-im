@@ -20,11 +20,11 @@ class InputState
 public:
     InputState(Dim *dim);
 
-    inline const QString &currentIM() const { return current_im_; }
+    inline const QString &currentIMAddon() const { return current_im_addon_; }
 
 private:
     Dim *dim_;
-    QString current_im_;
+    QString current_im_addon_;
 };
 
 } // namespace dim

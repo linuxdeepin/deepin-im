@@ -22,7 +22,7 @@ public:
 
     QList<InputMethodEntry> getInputMethods() override;
     void initInputMethods() override;
-    bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
+    bool keyEvent(InputContextKeyEvent &keyEvent) override;
     void createFcitxInputContext(InputContext *ic) override;
     void focusIn(uint32_t id) override;
     void focusOut(uint32_t id) override;

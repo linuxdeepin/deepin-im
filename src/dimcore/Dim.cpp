@@ -28,7 +28,6 @@ static const QMap<QString, AddonType> AddonsType = {
 Dim::Dim(QObject *parent)
     : QObject(parent)
     , focusedIC_(0)
-    , enabledIMs_({ "pinyin", "Pinyin"})
 {
     loadAddons();
 }
@@ -140,14 +139,8 @@ bool Dim::postEvent(Event &event)
     return false;
 }
 
-const QMap<QString, InputMethodEntry> &Dim::ims() const
-{
-    return ims_;
-}
-
-const QList<QString> &Dim::enabledIMs() const
-{
-    return enabledIMs_;
+QList<QString> Dim::imAddons() const {
+    return inputMethodAddons_.keys();
 }
 
 void Dim::postInputContextCreated(Event &event)
@@ -204,15 +197,8 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
 
     const auto &inputState = event.ic()->inputState();
 
-    const QString &currentIMKey = inputState.currentIM();
-    auto i = ims_.find(currentIMKey);
-    if (i == ims_.end()) {
-        // TODO:
-        return false;
-    }
-    const auto &im = i.value();
+    const QString &addonKey = inputState.currentIMAddon();
 
-    const auto &addonKey = im.addon();
     auto j = inputMethodAddons_.find(addonKey);
     if (j == inputMethodAddons_.end()) {
         // TODO:
@@ -220,5 +206,5 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
     }
     auto *addon = j.value();
 
-    return addon->keyEvent(im, event);
+    return addon->keyEvent(event);
 }

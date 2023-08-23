@@ -38,8 +38,7 @@ public:
 
     InputContext *getInputContext(uint32_t id) { return inputContexts_.value(id); }
 
-    const QMap<QString, InputMethodEntry> &ims() const;
-    const QList<QString> &enabledIMs() const;
+    QList<QString> imAddons() const;
 
     bool postEvent(Event &event);
 
@@ -50,7 +49,6 @@ private:
     QSet<FrontendAddon *> frontends_;
 
     QMap<QString, InputMethodEntry> ims_;
-    QList<QString> enabledIMs_;
 
     void loadAddons();
     void loadAddon(const QString &infoFile);
