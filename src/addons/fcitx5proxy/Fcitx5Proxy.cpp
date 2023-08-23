@@ -207,13 +207,16 @@ bool Fcitx5Proxy::keyEvent(InputContextKeyEvent &keyEvent)
             break;
         }
         case BATCHED_PREEDIT: {
-            if (v.canConvert<PreeditKey>()) {
-                auto strs = v.value<PreeditKey>().info;
-                auto cursor = v.value<PreeditKey>().cursor;
-                for (auto &str : strs) {
-                    ic->updatePreedit(str.text, cursor, cursor);
-                }
+            auto preeditKey = qdbus_cast<PreeditKey>(v.value<QDBusArgument>());
+
+            auto dataList = preeditKey.info;
+            auto cursor = preeditKey.cursor;
+            QString text;
+            for (auto &data : dataList) {
+                text.append(data.text);
             }
+
+            ic->updatePreedit(text, cursor, cursor);
             break;
         }
         case BATCHED_FORWARD_KEY: {

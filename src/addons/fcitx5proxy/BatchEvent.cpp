@@ -10,9 +10,15 @@ void registerBatchEventQtDBusTypes()
 {
     qRegisterMetaType<BatchEvent>("BatchEvent");
     qRegisterMetaType<QList<BatchEvent>>("QList<BatchEvent>");
+    qRegisterMetaType<PreeditKeyData>("PreeditKeyData");
+    qRegisterMetaType<QList<PreeditKeyData>>("PreeditKeyData");
+    qRegisterMetaType<PreeditKey>("PreeditKey");
 
     qDBusRegisterMetaType<BatchEvent>();
     qDBusRegisterMetaType<QList<BatchEvent>>();
+    qDBusRegisterMetaType<PreeditKeyData>();
+    qDBusRegisterMetaType<QList<PreeditKeyData>>();
+    qDBusRegisterMetaType<PreeditKey>();
 }
 
 QDBusArgument &operator<<(QDBusArgument &argument, const BatchEvent &event)
@@ -30,6 +36,56 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, BatchEvent &event
     argument.beginStructure();
     argument >> event.type;
     argument >> event.data;
+    argument.endStructure();
+
+    return argument;
+}
+
+QDBusArgument &operator<<(QDBusArgument &argument, const PreeditKeyData &event)
+{
+    argument.beginStructure();
+    argument << event.text;
+    argument << event.format;
+    argument.endStructure();
+
+    return argument;
+}
+
+const QDBusArgument &operator>>(const QDBusArgument &argument, PreeditKeyData &event)
+{
+    argument.beginStructure();
+    argument >> event.text;
+    argument >> event.format;
+    argument.endStructure();
+
+    return argument;
+}
+
+QDBusArgument &operator<<(QDBusArgument &argument, const PreeditKey &event)
+{
+    argument.beginStructure();
+    argument.beginArray(qMetaTypeId<PreeditKeyData>());
+    for (const auto &element : event.info) {
+        argument << element;
+    }
+    argument.endArray();
+    argument << event.cursor;
+    argument.endStructure();
+
+    return argument;
+}
+
+const QDBusArgument &operator>>(const QDBusArgument &argument, PreeditKey &event)
+{
+    argument.beginStructure();
+    argument.beginArray();
+    while (!argument.atEnd()) {
+        PreeditKeyData element;
+        argument >> element;
+        event.info.append(element);
+    }
+    argument.endArray();
+    argument >> event.cursor;
     argument.endStructure();
 
     return argument;
