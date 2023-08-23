@@ -13,5 +13,5 @@ ZwpInputMethodKeyboardGrabV2::ZwpInputMethodKeyboardGrabV2(zwp_input_method_keyb
 
 ZwpInputMethodKeyboardGrabV2::~ZwpInputMethodKeyboardGrabV2()
 {
-    zwp_input_method_keyboard_grab_v2_destroy(get());
+    zwp_input_method_keyboard_grab_v2_release(get());
 }
