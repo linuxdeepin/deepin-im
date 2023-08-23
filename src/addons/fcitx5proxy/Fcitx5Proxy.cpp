@@ -220,10 +220,8 @@ bool Fcitx5Proxy::keyEvent(InputContextKeyEvent &keyEvent)
             break;
         }
         case BATCHED_FORWARD_KEY: {
-            if (v.canConvert<DBusForwardKey>()) {
-                ic->forwardKey(v.value<DBusForwardKey>().keysym,
-                               v.value<DBusForwardKey>().isRelease);
-            }
+            auto forwardKey = qdbus_cast<DBusForwardKey>(v.value<QDBusArgument>());
+            ic->forwardKey(forwardKey.keysym, forwardKey.isRelease);
             break;
         }
         default:

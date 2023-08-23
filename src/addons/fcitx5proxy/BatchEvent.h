@@ -45,6 +45,9 @@ void registerBatchEventQtDBusTypes();
 QDBusArgument &operator<<(QDBusArgument &argument, const BatchEvent &event);
 const QDBusArgument &operator>>(const QDBusArgument &argument, BatchEvent &event);
 
+QDBusArgument &operator<<(QDBusArgument &argument, const DBusForwardKey &event);
+const QDBusArgument &operator>>(const QDBusArgument &argument, DBusForwardKey &event);
+
 QDBusArgument &operator<<(QDBusArgument &argument, const PreeditKeyData &event);
 const QDBusArgument &operator>>(const QDBusArgument &argument, PreeditKeyData &event);
 QDBusArgument &operator<<(QDBusArgument &argument, const PreeditKey &event);

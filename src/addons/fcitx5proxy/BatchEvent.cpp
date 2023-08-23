@@ -24,8 +24,7 @@ void registerBatchEventQtDBusTypes()
 QDBusArgument &operator<<(QDBusArgument &argument, const BatchEvent &event)
 {
     argument.beginStructure();
-    argument << event.type;
-    argument << QDBusVariant(event.data);
+    argument << event.type << QDBusVariant(event.data);
     argument.endStructure();
 
     return argument;
@@ -34,8 +33,7 @@ QDBusArgument &operator<<(QDBusArgument &argument, const BatchEvent &event)
 const QDBusArgument &operator>>(const QDBusArgument &argument, BatchEvent &event)
 {
     argument.beginStructure();
-    argument >> event.type;
-    argument >> event.data;
+    argument >> event.type >> event.data;
     argument.endStructure();
 
     return argument;
@@ -44,8 +42,23 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, BatchEvent &event
 QDBusArgument &operator<<(QDBusArgument &argument, const PreeditKeyData &event)
 {
     argument.beginStructure();
-    argument << event.text;
-    argument << event.format;
+    argument << event.text << event.format;
+    argument.endStructure();
+
+    return argument;
+}
+
+QDBusArgument &operator<<(QDBusArgument &argument, const DBusForwardKey &event) {
+    argument.beginStructure();
+    argument << event.keysym << event.keystate << event.isRelease;
+    argument.endStructure();
+
+    return argument;
+}
+
+const QDBusArgument &operator>>(const QDBusArgument &argument, DBusForwardKey &event) {
+    argument.beginStructure();
+    argument >> event.keysym >> event.keystate >> event.isRelease;
     argument.endStructure();
 
     return argument;
@@ -54,8 +67,7 @@ QDBusArgument &operator<<(QDBusArgument &argument, const PreeditKeyData &event)
 const QDBusArgument &operator>>(const QDBusArgument &argument, PreeditKeyData &event)
 {
     argument.beginStructure();
-    argument >> event.text;
-    argument >> event.format;
+    argument >> event.text >> event.format;
     argument.endStructure();
 
     return argument;
