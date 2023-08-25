@@ -18,8 +18,7 @@ public:
 
     void keymap(uint32_t format, int32_t fd, uint32_t size);
     void key(uint32_t time, uint32_t key, uint32_t state);
-    void
-    modifiers(uint32_t modsDepressed, uint32_t modsLatched, uint32_t modsLocked, uint32_t group);
+    void modifiers(uint32_t modsDepressed, uint32_t modsLatched, uint32_t modsLocked, uint32_t group);
 };
 
 } // namespace client

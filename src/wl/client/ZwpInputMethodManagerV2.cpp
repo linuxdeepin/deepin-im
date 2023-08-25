@@ -20,7 +20,7 @@ ZwpInputMethodManagerV2::~ZwpInputMethodManagerV2()
 }
 
 std::shared_ptr<ZwpInputMethodV2>
-ZwpInputMethodManagerV2::getInputMethod(const std::shared_ptr<Seat> &seat)
+ZwpInputMethodManagerV2::get_input_method(const std::shared_ptr<Seat> &seat)
 {
     return std::make_shared<ZwpInputMethodV2>(static_cast<zwp_input_method_v2 *>(
         zwp_input_method_manager_v2_get_input_method(get(), seat->get())));

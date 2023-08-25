@@ -5,7 +5,6 @@
 #include "ZwpDimTextInputManagerV1.h"
 
 #include "Seat.h"
-#include "ZwpDimTextInputV1.h"
 
 using namespace wl::client;
 
@@ -19,9 +18,8 @@ ZwpDimTextInputManagerV1::~ZwpDimTextInputManagerV1()
     zwp_dim_text_input_manager_v1_destroy(get());
 }
 
-std::shared_ptr<ZwpDimTextInputV1>
-ZwpDimTextInputManagerV1::getTextInput(const std::shared_ptr<Seat> &seat)
+struct zwp_dim_text_input_v1 *
+ZwpDimTextInputManagerV1::get_text_tnput(const std::shared_ptr<Seat> &seat)
 {
-    return std::make_shared<ZwpDimTextInputV1>(
-        zwp_dim_text_input_manager_v1_get_text_input(get(), seat->get()));
+    return zwp_dim_text_input_manager_v1_get_text_input(get(), seat->get());
 }

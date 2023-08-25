@@ -20,7 +20,7 @@ ZwpTextInputManagerV3::~ZwpTextInputManagerV3()
 }
 
 std::shared_ptr<ZwpTextInputV3>
-ZwpTextInputManagerV3::getTextInput(const std::shared_ptr<Seat> &seat)
+ZwpTextInputManagerV3::get_text_input(const std::shared_ptr<Seat> &seat)
 {
     return std::make_shared<ZwpTextInputV3>(
         zwp_text_input_manager_v3_get_text_input(get(), seat->get()));

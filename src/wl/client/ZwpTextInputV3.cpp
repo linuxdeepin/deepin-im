@@ -26,22 +26,22 @@ void ZwpTextInputV3::disable()
     zwp_text_input_v3_disable(get());
 }
 
-void ZwpTextInputV3::setSurroundingText(const char *text, int32_t cursor, int32_t anchor)
+void ZwpTextInputV3::set_surrounding_text(const char *text, int32_t cursor, int32_t anchor)
 {
     zwp_text_input_v3_set_surrounding_text(get(), text, cursor, anchor);
 }
 
-void ZwpTextInputV3::setTextChangeCause(uint32_t cause)
+void ZwpTextInputV3::set_text_change_cause(uint32_t cause)
 {
     zwp_text_input_v3_set_text_change_cause(get(), cause);
 }
 
-void ZwpTextInputV3::setContentType(uint32_t hint, uint32_t purpose)
+void ZwpTextInputV3::set_content_type(uint32_t hint, uint32_t purpose)
 {
     zwp_text_input_v3_set_content_type(get(), hint, purpose);
 }
 
-void ZwpTextInputV3::setCursorRectangle(int32_t x, int32_t y, int32_t width, int32_t height)
+void ZwpTextInputV3::set_cursor_rectangle(int32_t x, int32_t y, int32_t width, int32_t height)
 {
     zwp_text_input_v3_set_cursor_rectangle(get(), x, y, width, height);
 }

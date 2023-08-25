@@ -27,13 +27,12 @@ public:
     uint32_t group = 0;
 };
 
-
 class DimTextInputV1 : public InputContext
 {
 public:
     DimTextInputV1(Dim *dim,
-                          const std::shared_ptr<wl::client::ZwpInputMethodV2> &im,
-                          const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk);
+                   const std::shared_ptr<wl::client::ZwpInputMethodV2> &im,
+                   const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk);
 
 private:
     static const zwp_input_method_v2_listener imListener_;

@@ -204,8 +204,8 @@ static void notifySurroundingText(DimIMContext *context)
         str = g_strndup(start, end - start);
     }
 
-    global->ti->setSurroundingText(str ? str : context->surrounding.text, cursor, anchor);
-    global->ti->setTextChangeCause(context->surroundingChange);
+    global->ti->set_surrounding_text(str ? str : context->surrounding.text, cursor, anchor);
+    global->ti->set_text_change_cause(context->surroundingChange);
     g_free(str);
 #undef MAX_LEN
 }
@@ -278,7 +278,7 @@ static void notifyContentType(DimIMContext *context)
 
     g_object_get(context, "input-hints", &hints, "input-purpose", &purpose, nullptr);
 
-    global->ti->setContentType(translateHints(hints, purpose), translatePurpose(purpose));
+    global->ti->set_content_type(translateHints(hints, purpose), translatePurpose(purpose));
 }
 
 static void commitState(DimIMContext *context)
@@ -302,7 +302,7 @@ static void notifyCursorLocation(DimIMContext *context)
     if (context->window) {
         cairo_rectangle_int_t rect = context->cursorRect;
         gdk_window_get_root_coords(context->window, rect.x, rect.y, &rect.x, &rect.y);
-        global->ti->setCursorRectangle(rect.x, rect.y, rect.width, rect.height);
+        global->ti->set_cursor_rectangle(rect.x, rect.y, rect.width, rect.height);
     }
 }
 
@@ -567,7 +567,7 @@ static DimIMContextWaylandGlobal *dimImContextWaylandGlobalGet(GdkDisplay *displ
     auto seat = global->wl->getGlobal<wl::client::Seat>();
     auto tiManager = global->wl->getGlobal<wl::client::ZwpDimTextInputManagerV1>();
 
-    global->ti = tiManager->getTextInput(seat);
+    global->ti = std::make_shared<wl::client::ZwpDimTextInputV1>(tiManager->get_text_tnput(seat));
 
     zwp_dim_text_input_v1_add_listener(global->ti->get(),
                                        &DimIMContextWaylandGlobal::tiListener,

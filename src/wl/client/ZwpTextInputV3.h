@@ -19,10 +19,10 @@ public:
 
     void enable();
     void disable();
-    void setSurroundingText(const char *text, int32_t cursor, int32_t anchor);
-    void setTextChangeCause(uint32_t cause);
-    void setContentType(uint32_t hint, uint32_t purpose);
-    void setCursorRectangle(int32_t x, int32_t y, int32_t width, int32_t height);
+    void set_surrounding_text(const char *text, int32_t cursor, int32_t anchor);
+    void set_text_change_cause(uint32_t cause);
+    void set_content_type(uint32_t hint, uint32_t purpose);
+    void set_cursor_rectangle(int32_t x, int32_t y, int32_t width, int32_t height);
     void commit();
 };
 

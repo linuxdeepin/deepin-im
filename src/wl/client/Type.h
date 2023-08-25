@@ -33,6 +33,20 @@ private:
     T *val_;
 };
 
+template<auto F>
+struct ListenerCallbackWrapper;
+
+template<typename C, typename R, typename... Args, R (C::*F)(Args...)>
+struct ListenerCallbackWrapper<F>
+{
+    template<typename T>
+    static R func(void *userdata, T *, Args... args)
+    {
+        auto *p = static_cast<C *>(userdata);
+        return (p->*F)(args...);
+    }
+};
+
 } // namespace client
 } // namespace wl
 

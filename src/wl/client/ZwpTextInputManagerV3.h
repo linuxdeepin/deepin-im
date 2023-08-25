@@ -22,7 +22,7 @@ public:
     ZwpTextInputManagerV3(zwp_text_input_manager_v3 *val);
     ~ZwpTextInputManagerV3();
 
-    std::shared_ptr<ZwpTextInputV3> getTextInput(const std::shared_ptr<Seat> &seat);
+    std::shared_ptr<ZwpTextInputV3> get_text_input(const std::shared_ptr<Seat> &seat);
 
 private:
 };

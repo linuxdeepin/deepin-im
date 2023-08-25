@@ -6,6 +6,13 @@
 
 using namespace wl::client;
 
+// const zwp_input_method_keyboard_grab_v2_listener ZwpInputMethodKeyboardGrabV2::listener_ = {
+//     ListenerCallbackWrapper<&ZwpInputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_keymap>::func,
+//     ListenerCallbackWrapper<&ZwpInputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_key>::func,
+//     ListenerCallbackWrapper<&ZwpInputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_modifiers>::func,
+//     ListenerCallbackWrapper<&ZwpInputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_repeat_info>::func,
+// };
+
 ZwpInputMethodKeyboardGrabV2::ZwpInputMethodKeyboardGrabV2(zwp_input_method_keyboard_grab_v2 *val)
     : Type(val)
 {

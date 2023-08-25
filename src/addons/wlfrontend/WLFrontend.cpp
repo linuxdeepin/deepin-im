@@ -53,8 +53,8 @@ void WLFrontend::reloadSeats()
     auto vkManager = wl_->getGlobal<wl::client::ZwpVirtualKeyboardManagerV1>();
 
     for (auto &seat : seats) {
-        auto vk = vkManager->createVirtualKeyboard(seat);
-        auto im = imManager->getInputMethod(seat);
+        auto vk = vkManager->create_virtual_keyboard(seat);
+        auto im = imManager->get_input_method(seat);
 
         ims_.emplace_back(std::make_shared<DimTextInputV1>(dim(), im, vk));
     }

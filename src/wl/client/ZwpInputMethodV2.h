@@ -22,8 +22,8 @@ public:
 
     std::shared_ptr<ZwpInputMethodKeyboardGrabV2> grabKeyboard();
 
-    void commitString(const char *text);
-    void setPreeditString(const char *text, int32_t cursorBegin, int32_t cursorEnd);
+    void commit_string(const char *text);
+    void set_preedit_string(const char *text, int32_t cursorBegin, int32_t cursorEnd);
     void commit(uint32_t serial);
 };
 

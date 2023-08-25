@@ -5,6 +5,10 @@ set(QTIMMODULE_SOURCES
   DIMPlatformInputContext.cpp
   DimTextInputV1.h
   DimTextInputV1.cpp
+
+  QWaylandTextInputInterface.h
+  QWaylandInputMethodEventBuilder.h
+  QWaylandInputMethodEventBuilder.cpp
 )
 
 add_library(dimplatforminputcontextplugin MODULE
