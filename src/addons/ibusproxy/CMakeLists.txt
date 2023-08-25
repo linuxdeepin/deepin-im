@@ -3,11 +3,18 @@ set(CMAKE_C_STANDARD 99)
 set(IBUSPROXY_SOURCES
     IBusProxy.h
     IBusProxy.cpp
+    ibustypes.h
+    ibustypes.cpp
 )
 
 qt_add_dbus_interface(IC_SOURCES
-    ${CMAKE_SOURCE_DIR}/misc/ibus-inputcontext.xml
+    ${CMAKE_SOURCE_DIR}/misc/org.freedesktop.IBus.InputContext.xml
     IBUSInputContextIface
+)
+
+qt_add_dbus_interface(IC_SOURCES
+    ${CMAKE_SOURCE_DIR}/misc/org.freedesktop.IBus.Portal.xml
+    IBUSPortIface
 )
 
 add_library(ibusproxy MODULE
@@ -18,11 +25,10 @@ add_library(ibusproxy MODULE
 target_compile_definitions(ibusproxy PRIVATE -DQT_NO_KEYWORDS)
 
 target_link_libraries(ibusproxy PRIVATE
-    GLIB2::GLIB2
-    PkgConfig::IBUS
-    PkgConfig::GOBJECT
     Qt::Core
     Qt::DBus
+    Qt::Gui
+    Qt::GuiPrivate
 )
 
 install(TARGETS ibusproxy
