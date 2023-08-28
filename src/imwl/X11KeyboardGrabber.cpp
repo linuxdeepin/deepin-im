@@ -8,17 +8,9 @@
 
 #include <QDebug>
 
-#define XCB_REPLY_CONNECTION_ARG(connection, ...) connection
-#define XCB_REPLY(call, ...)       \
-  std::unique_ptr<call##_reply_t>( \
-      call##_reply(XCB_REPLY_CONNECTION_ARG(__VA_ARGS__), call(__VA_ARGS__), nullptr))
-
 X11KeyboardGrabber::X11KeyboardGrabber()
     : XCB()
 {
-    setup_ = xcb_get_setup(xconn_.get());
-    screen_ = screenOfDisplay(defaultScreenNbr_);
-
     initXinputExtension();
 }
 
@@ -26,7 +18,7 @@ X11KeyboardGrabber::~X11KeyboardGrabber() { }
 
 void X11KeyboardGrabber::xcbEvent(const std::unique_ptr<xcb_generic_event_t> &event)
 {
-    auto responseType = event->response_type & ~0x80;
+    auto responseType = XCB_EVENT_RESPONSE_TYPE(event);
     if (responseType != XCB_GE_GENERIC) {
         return;
     }
@@ -44,18 +36,6 @@ void X11KeyboardGrabber::xcbEvent(const std::unique_ptr<xcb_generic_event_t> &ev
     auto *ke = reinterpret_cast<xcb_input_raw_key_press_event_t *>(event.get());
 
     emit keyEvent(ke->detail, isRelease);
-}
-
-xcb_screen_t *X11KeyboardGrabber::screenOfDisplay(int screen)
-{
-    xcb_screen_iterator_t iter = xcb_setup_roots_iterator(setup_);
-    for (; iter.rem; --screen, xcb_screen_next(&iter)) {
-        if (screen == 0) {
-            return iter.data;
-        }
-    }
-
-    return nullptr;
 }
 
 void X11KeyboardGrabber::initXinputExtension()
@@ -91,7 +71,7 @@ void X11KeyboardGrabber::initXinputExtension()
     mask.head.mask_len = sizeof(mask.mask) / sizeof(uint32_t);
     mask.mask = static_cast<xcb_input_xi_event_mask_t>(XCB_INPUT_XI_EVENT_MASK_RAW_KEY_PRESS
                                                        | XCB_INPUT_XI_EVENT_MASK_RAW_KEY_RELEASE);
-    auto cookie = xcb_input_xi_select_events(xconn_.get(), screen_->root, 1, &mask.head);
+    auto cookie = xcb_input_xi_select_events(xconn_.get(), screen()->root, 1, &mask.head);
     auto err = xcb_request_check(xconn_.get(), cookie);
     if (err) {
         throw std::runtime_error("xcb_input_xi_select_events failed");

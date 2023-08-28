@@ -11,8 +11,9 @@ add_executable(imwl
     InputMethodKeyboardGrabV2.cpp InputMethodKeyboardGrabV2.h
     VirtualKeyboardManagerV1.cpp VirtualKeyboardManagerV1.h
     VirtualKeyboardV1.cpp VirtualKeyboardV1.h
-    XCB.h XCB.cpp
+    XCB.cpp XCB.h
     X11KeyboardGrabber.cpp X11KeyboardGrabber.h
+    X11ActiveWindowMonitor.cpp X11ActiveWindowMonitor.h
     DimTextInputManagerV1.cpp DimTextInputManagerV1.h
     DimTextInputV1.cpp DimTextInputV1.h
     shm_open_anon.c shm_open_anon.h

@@ -17,6 +17,9 @@ XCB::XCB()
         return;
     }
 
+    setup_ = xcb_get_setup(xconn_.get());
+    screen_ = screenOfDisplay(defaultScreenNbr_);
+
     xcbFd_ = xcb_get_file_descriptor(xconn_.get());
     socketNotifier_ = new QSocketNotifier(xcbFd_, QSocketNotifier::Type::Read, this);
     connect(socketNotifier_, &QSocketNotifier::activated, this, &XCB::onXCBEvent);
@@ -24,6 +27,17 @@ XCB::XCB()
 
 XCB::~XCB() { }
 
+xcb_screen_t *XCB::screenOfDisplay(int screen)
+{
+    xcb_screen_iterator_t iter = xcb_setup_roots_iterator(setup_);
+    for (; iter.rem; --screen, xcb_screen_next(&iter)) {
+        if (screen == 0) {
+            return iter.data;
+        }
+    }
+
+    return nullptr;
+}
 void XCB::onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationEvent)
 {
     std::unique_ptr<xcb_generic_event_t> event;

@@ -28,11 +28,8 @@ protected:
 
 private:
     int xcbFd_;
-    const xcb_setup_t *setup_;
-    xcb_screen_t *screen_;
     uint8_t xinput2OPCode_;
 
-    xcb_screen_t *screenOfDisplay(int screen);
     void onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationEvent);
     void initXinputExtension();
 };
