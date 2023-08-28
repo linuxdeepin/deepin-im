@@ -3,95 +3,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "imcontext.h"
+#include "DimGtkTextInputV1.h"
 
-#include "wayland-dim-text-input-unstable-v1-client-protocol.h"
 #include "wl/client/Connection.h"
 #include "wl/client/ConnectionRaw.h"
 #include "wl/client/Seat.h"
 #include "wl/client/ZwpDimTextInputManagerV1.h"
-#include "wl/client/ZwpDimTextInputV1.h"
 
 #include <gdk/gdkprivate.h>
 #include <gdk/gdkwayland.h>
 
 #define POINT_TRANSFORM(p) (DimIMContextWaylandGlobal *)(p)
-
-class DimTextInputV1;
-
-struct _DimIMContextWaylandGlobal
-{
-    GtkIMContext *current;
-    std::shared_ptr<DimTextInputV1> ti;
-    wl::client::ConnectionBase *wl;
-
-    guint serial;
-    guint doneSerial;
-};
-
-struct preedit
-{
-    char *text;
-    int cursorBegin;
-    int cursorEnd;
-};
-
-struct surroundingDelete
-{
-    guint beforeLength;
-    guint afterLength;
-};
-
-struct _DimIMContext
-{
-    GtkIMContextSimple parent;
-    GtkIMContext *slave;
-    GdkWindow *window;
-
-    struct
-    {
-        char *text;
-        int cursorIdx;
-    } surrounding;
-
-    enum zwp_text_input_v3_change_cause surroundingChange;
-    struct surroundingDelete pendingSurroundingDelete;
-    struct preedit currentPreedit;
-    struct preedit pendingPreedit;
-
-    char *pendingCommit;
-
-    cairo_rectangle_int_t cursorRect;
-    guint usePreedit : 1;
-};
-
-class DimTextInputV1 : public wl::client::ZwpDimTextInputV1
-{
-public:
-    DimTextInputV1(struct ::zwp_dim_text_input_v1 *text_input, DimIMContextWaylandGlobal *global);
-    ~DimTextInputV1() override;
-
-protected:
-    void zwp_dim_text_input_v1_modifiers_map(struct wl_array *map) override;
-    void zwp_dim_text_input_v1_preedit_string(const char *text,
-                                              int32_t cursor_begin,
-                                              int32_t cursor_end) override;
-    void zwp_dim_text_input_v1_commit_string(const char *text) override;
-    void zwp_dim_text_input_v1_delete_surrounding_text(uint32_t before_length,
-                                                       uint32_t after_length) override;
-    void zwp_dim_text_input_v1_done(uint32_t serial) override;
-    void zwp_dim_text_input_v1_keysym(
-        uint32_t serial, uint32_t time, uint32_t sym, uint32_t state, uint32_t modifiers) override;
-
-private:
-    DimIMContextWaylandGlobal *global_;
-};
-
-DimTextInputV1::DimTextInputV1(struct ::zwp_dim_text_input_v1 *text_input,
-                               DimIMContextWaylandGlobal *global)
-    : wl::client::ZwpDimTextInputV1(text_input)
-    , global_(global)
-{
-}
 
 static guint _signalCommitId = 0;
 static guint _signalPreeditChangedId = 0;
@@ -123,7 +45,6 @@ static void dimImContextGetPreeditString(GtkIMContext *context,
 static gboolean dimImContextGetSurrounding(GtkIMContext *context, gchar **text, gint *cursorIndex);
 static DimIMContextWaylandGlobal *dimImContextWaylandGlobalGet(GdkDisplay *display);
 static DimIMContextWaylandGlobal *dimImContextWaylandGetGlobal(DimIMContext *self);
-static void textInputPreeditApply(DimIMContextWaylandGlobal *global);
 
 /* functions prototype end */
 
@@ -304,7 +225,7 @@ static void notifyCursorLocation(DimIMContext *context)
     }
 }
 
-static void notifyImChange(DimIMContext *context, enum zwp_text_input_v3_change_cause cause)
+void notifyImChange(DimIMContext *context, enum zwp_text_input_v3_change_cause cause)
 {
     gboolean result;
 
@@ -343,7 +264,7 @@ static void disable(DimIMContext *context, DimIMContextWaylandGlobal *global)
     }
 }
 
-static void textInputCommitApply(DimIMContextWaylandGlobal *global)
+void textInputCommitApply(DimIMContextWaylandGlobal *global)
 {
     DimIMContext *context = DIM_IM_CONTEXT(global->current);
     if (context->pendingCommit)
@@ -352,10 +273,10 @@ static void textInputCommitApply(DimIMContextWaylandGlobal *global)
     context->pendingCommit = nullptr;
 }
 
-static void textInputDeleteSurroundingTextApply(DimIMContextWaylandGlobal *global)
+void textInputDeleteSurroundingTextApply(DimIMContextWaylandGlobal *global)
 {
     gboolean retval;
-    struct surroundingDelete defaults = { 0 };
+    surroundingDelete defaults = { 0 };
 
     DimIMContext *context = DIM_IM_CONTEXT(global->current);
 
@@ -373,9 +294,9 @@ static void textInputDeleteSurroundingTextApply(DimIMContextWaylandGlobal *globa
     context->pendingSurroundingDelete = defaults;
 }
 
-static void textInputPreeditApply(DimIMContextWaylandGlobal *global)
+void textInputPreeditApply(DimIMContextWaylandGlobal *global)
 {
-    struct preedit defaults = { 0 };
+    preedit defaults = { 0 };
 
     if (!global->current)
         return;
@@ -398,101 +319,6 @@ static void textInputPreeditApply(DimIMContextWaylandGlobal *global)
 
     if (state_change && !context->currentPreedit.text)
         g_signal_emit_by_name(context, "preedit-end");
-}
-
-void DimTextInputV1::zwp_dim_text_input_v1_modifiers_map(struct wl_array *map) { }
-
-void DimTextInputV1::zwp_dim_text_input_v1_preedit_string(const char *text,
-                                                          int32_t cursor_begin,
-                                                          int32_t cursor_end)
-{
-    if (!global_->current)
-        return;
-
-    DimIMContext *context = DIM_IM_CONTEXT(global_->current);
-
-    g_free(context->pendingPreedit.text);
-    context->pendingPreedit.text = g_strdup(text);
-    context->pendingPreedit.cursorBegin = cursor_begin;
-    context->pendingPreedit.cursorEnd = cursor_end;
-}
-
-void DimTextInputV1::zwp_dim_text_input_v1_commit_string(const char *text)
-{
-    if (!global_->current)
-        return;
-
-    DimIMContext *context = DIM_IM_CONTEXT(global_->current);
-
-    g_free(context->pendingCommit);
-    context->pendingCommit = g_strdup(text);
-}
-
-void DimTextInputV1::zwp_dim_text_input_v1_delete_surrounding_text(uint32_t before_length,
-                                                                   uint32_t after_length)
-{
-    if (!global_->current)
-        return;
-
-    DimIMContext *context = DIM_IM_CONTEXT(global_->current);
-
-    /* We already got byte lengths from text_input_v3, but GTK uses char lengths
-     * for delete_surrounding, So convert it here.
-     */
-    char *cursor_pointer = context->surrounding.text + context->surrounding.cursorIdx;
-    uint32_t char_before_length =
-        g_utf8_pointer_to_offset(cursor_pointer - before_length, cursor_pointer);
-    uint32_t char_after_length =
-        g_utf8_pointer_to_offset(cursor_pointer, cursor_pointer + after_length);
-
-    context->pendingSurroundingDelete.beforeLength = char_before_length;
-    context->pendingSurroundingDelete.afterLength = char_after_length;
-}
-
-void DimTextInputV1::zwp_dim_text_input_v1_done(uint32_t serial)
-{
-    global_->doneSerial = serial;
-
-    if (!global_->current)
-        return;
-
-    DimIMContext *context = DIM_IM_CONTEXT(global_->current);
-    gboolean update_im =
-        (context->pendingCommit != nullptr
-         || g_strcmp0(context->pendingPreedit.text, context->currentPreedit.text) != 0);
-
-    textInputDeleteSurroundingTextApply(global_);
-    textInputCommitApply(global_);
-    textInputPreeditApply(global_);
-
-    if (update_im && global_->serial == serial)
-        notifyImChange(context, ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD);
-}
-
-void DimTextInputV1::zwp_dim_text_input_v1_keysym(
-    uint32_t serial, uint32_t time, uint32_t sym, uint32_t state, uint32_t modifiers)
-{
-    if (!global_->current)
-        return;
-    GdkEvent *gdk_event = gdk_event_new(state ? GDK_KEY_PRESS : GDK_KEY_RELEASE);
-    GdkEventKey *gdk_event_key = reinterpret_cast<GdkEventKey *>(gdk_event);
-
-    DimIMContext *contextWayland = DIM_IM_CONTEXT(global_->current);
-
-    gdk_event_key->type = state ? GDK_KEY_PRESS : GDK_KEY_RELEASE;
-    gdk_event_key->window = g_object_ref(contextWayland->window);
-    gdk_event_key->send_event = TRUE;
-    gdk_event_key->time = time;
-    gdk_event_key->keyval = sym;
-    gdk_event_key->length = 1;
-    gdk_event_key->string = nullptr;
-    gdk_event_key->state = modifiers;
-
-    gdk_event_key->send_event = TRUE;
-    gdk_event_key->time = time;
-
-    auto handled = gtk_im_context_filter_keypress(contextWayland->slave, &gdk_event->key);
-    gdk_event_free(gdk_event);
 }
 
 static void gtkImContextWaylandGlobalFree(gpointer data)
@@ -537,7 +363,7 @@ static DimIMContextWaylandGlobal *dimImContextWaylandGlobalGet(GdkDisplay *displ
     auto seat = global->wl->getGlobal<wl::client::Seat>();
     auto tiManager = global->wl->getGlobal<wl::client::ZwpDimTextInputManagerV1>();
 
-    global->ti = std::make_shared<DimTextInputV1>(tiManager->get_text_tnput(seat), global);
+    global->ti = std::make_shared<DimGtkTextInputV1>(tiManager->get_text_tnput(seat), global);
 
     global->wl->flush();
 
