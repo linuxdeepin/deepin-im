@@ -5,27 +5,29 @@
 #ifndef X11KEYBOARDGRABBER_H
 #define X11KEYBOARDGRABBER_H
 
-#include "common/common.h"
+#include "XCB.h"
 
 #include <xcb/xcb.h>
 
 #include <QObject>
 #include <QSocketNotifier>
 
-class X11KeyboardGrabber : public QObject
+class X11KeyboardGrabber : public XCB
 {
     Q_OBJECT
+
 public:
     X11KeyboardGrabber();
-    ~X11KeyboardGrabber();
+    virtual ~X11KeyboardGrabber();
 
 signals:
     void keyEvent(int keycode, bool isRelease);
 
+protected:
+    void xcbEvent(const std::unique_ptr<xcb_generic_event_t> &event) override;
+
 private:
-    std::unique_ptr<xcb_connection_t, Deleter<xcb_disconnect>> xconn_;
     int xcbFd_;
-    QSocketNotifier *socketNotifier_;
     const xcb_setup_t *setup_;
     xcb_screen_t *screen_;
     uint8_t xinput2OPCode_;

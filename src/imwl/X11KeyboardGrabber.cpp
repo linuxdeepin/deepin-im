@@ -7,7 +7,6 @@
 #include <xcb/xinput.h>
 
 #include <QDebug>
-#include <QSocketNotifier>
 
 #define XCB_REPLY_CONNECTION_ARG(connection, ...) connection
 #define XCB_REPLY(call, ...)       \
@@ -15,52 +14,36 @@
       call##_reply(XCB_REPLY_CONNECTION_ARG(__VA_ARGS__), call(__VA_ARGS__), nullptr))
 
 X11KeyboardGrabber::X11KeyboardGrabber()
-    : QObject()
+    : XCB()
 {
-    int screenDefaultNbr;
-    xconn_.reset(xcb_connect(nullptr, &screenDefaultNbr));
-
-    if (int err = xcb_connection_has_error(xconn_.get())) {
-        qWarning() << "xcb connect failed";
-        return;
-    }
-
-    xcbFd_ = xcb_get_file_descriptor(xconn_.get());
-    socketNotifier_ = new QSocketNotifier(xcbFd_, QSocketNotifier::Type::Read, this);
-    connect(socketNotifier_, &QSocketNotifier::activated, this, &X11KeyboardGrabber::onXCBEvent);
-
     setup_ = xcb_get_setup(xconn_.get());
-    screen_ = screenOfDisplay(screenDefaultNbr);
+    screen_ = screenOfDisplay(defaultScreenNbr_);
 
     initXinputExtension();
 }
 
 X11KeyboardGrabber::~X11KeyboardGrabber() { }
 
-void X11KeyboardGrabber::onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationEvent)
+void X11KeyboardGrabber::xcbEvent(const std::unique_ptr<xcb_generic_event_t> &event)
 {
-    std::unique_ptr<xcb_generic_event_t> event;
-    while (event.reset(xcb_poll_for_event(xconn_.get())), event) {
-        auto responseType = event->response_type & ~0x80;
-        if (responseType != XCB_GE_GENERIC) {
-            continue;
-        }
-
-        auto *ge = reinterpret_cast<xcb_ge_generic_event_t *>(event.get());
-        if (ge->extension != xinput2OPCode_) {
-            continue;
-        }
-
-        if (ge->event_type != XCB_INPUT_RAW_KEY_PRESS
-            && ge->event_type != XCB_INPUT_RAW_KEY_RELEASE) {
-            continue;
-        }
-
-        bool isRelease = ge->event_type == XCB_INPUT_RAW_KEY_RELEASE;
-        auto *ke = reinterpret_cast<xcb_input_raw_key_press_event_t *>(event.get());
-
-        emit keyEvent(ke->detail, isRelease);
+    auto responseType = event->response_type & ~0x80;
+    if (responseType != XCB_GE_GENERIC) {
+        return;
     }
+
+    auto *ge = reinterpret_cast<xcb_ge_generic_event_t *>(event.get());
+    if (ge->extension != xinput2OPCode_) {
+        return;
+    }
+
+    if (ge->event_type != XCB_INPUT_RAW_KEY_PRESS && ge->event_type != XCB_INPUT_RAW_KEY_RELEASE) {
+        return;
+    }
+
+    bool isRelease = ge->event_type == XCB_INPUT_RAW_KEY_RELEASE;
+    auto *ke = reinterpret_cast<xcb_input_raw_key_press_event_t *>(event.get());
+
+    emit keyEvent(ke->detail, isRelease);
 }
 
 xcb_screen_t *X11KeyboardGrabber::screenOfDisplay(int screen)
