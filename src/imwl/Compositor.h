@@ -5,6 +5,7 @@
 #ifndef COMPOSITOR_H
 #define COMPOSITOR_H
 
+#include "X11ActiveWindowMonitor.h"
 #include "wl/server/Server.h"
 
 #include <memory>
@@ -26,6 +27,7 @@ public:
     void create();
 
 private:
+    std::unique_ptr<X11ActiveWindowMonitor> activeWindowMonitor_;
     std::unique_ptr<QSocketNotifier> noti_;
 
     std::unique_ptr<Seat> seat_;
@@ -33,6 +35,8 @@ private:
     // std::unique_ptr<TextInputManagerV3> textInputManagerV3_;
     std::unique_ptr<InputMethodManagerV2> inputMethodManagerV2_;
     std::unique_ptr<VirtualKeyboardManagerV1> virtualKeyboardManagerV1_;
+
+    void activeWindowChanged(uint32_t pid);
 };
 
 #endif // COMPOSITOR_H

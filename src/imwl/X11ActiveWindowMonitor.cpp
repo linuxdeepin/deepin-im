@@ -1,21 +1,15 @@
 #include "X11ActiveWindowMonitor.h"
 
+#include <xcb/xproto.h>
+
 #include <QDebug>
 
 X11ActiveWindowMonitor::X11ActiveWindowMonitor()
     : XCB()
 {
-    const char *activeWindowAtomName = "_NET_ACTIVE_WINDOW";
-    auto reply = XCB_REPLY(xcb_intern_atom,
-                           xconn_.get(),
-                           0,
-                           strlen(activeWindowAtomName),
-                           activeWindowAtomName);
-    if (!reply) {
-        throw std::runtime_error("xcb_intern_atom failed");
-    }
+    activeWindowAtom_ = getAtom("_NET_ACTIVE_WINDOW");
+    wmPidAtom_ = getAtom("_NET_WM_PID");
 
-    activeWindowAtom_ = reply->atom;
     uint32_t values[] = { XCB_EVENT_MASK_PROPERTY_CHANGE };
     xcb_change_window_attributes(xconn_.get(), screen()->root, XCB_CW_EVENT_MASK, values);
 
@@ -36,5 +30,20 @@ void X11ActiveWindowMonitor::xcbEvent(const std::unique_ptr<xcb_generic_event_t>
         return;
     }
 
-    qWarning() << "active window================";
+    auto data = getProperty(screen()->root, activeWindowAtom_, sizeof(xcb_window_t));
+    if (data.size() == 0) {
+        qWarning() << "failed to get active window id";
+        return;
+    }
+    xcb_window_t windowId = *reinterpret_cast<xcb_window_t *>(data.data());
+
+    auto data1 = getProperty(windowId, wmPidAtom_, sizeof(uint32_t));
+    if (data1.size() == 0) {
+        qWarning() << "failed to get pid of active window";
+        return;
+    }
+
+    uint32_t pid = *reinterpret_cast<uint32_t *>(data1.data());
+
+    emit activeWindowChanged(pid);
 }

@@ -27,8 +27,8 @@
  * generated. See the X11R6 protocol specification for details.
  */
 #define XCB_EVENT_RESPONSE_TYPE_MASK (0x7f)
-#define XCB_EVENT_RESPONSE_TYPE(e)   (e->response_type &  XCB_EVENT_RESPONSE_TYPE_MASK)
-#define XCB_EVENT_SENT(e)            (e->response_type & ~XCB_EVENT_RESPONSE_TYPE_MASK)
+#define XCB_EVENT_RESPONSE_TYPE(e) (e->response_type & XCB_EVENT_RESPONSE_TYPE_MASK)
+#define XCB_EVENT_SENT(e) (e->response_type & ~XCB_EVENT_RESPONSE_TYPE_MASK)
 
 class XCB : public QObject
 {
@@ -37,6 +37,10 @@ class XCB : public QObject
 public:
     XCB();
     virtual ~XCB();
+
+    xcb_atom_t getAtom(const char *atomName);
+    std::vector<char> getProperty(xcb_window_t window, xcb_atom_t property, uint32_t size);
+    std::vector<char> getProperty(xcb_window_t window, xcb_atom_t property);
 
 protected:
     std::unique_ptr<xcb_connection_t, Deleter<xcb_disconnect>> xconn_;
@@ -54,6 +58,8 @@ private:
 
     xcb_screen_t *screenOfDisplay(int screen);
     void onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationEvent);
+
+    std::tuple<uint32_t, uint32_t> getPropertyAux(std::vector<char> &buff, xcb_window_t window, xcb_atom_t property, uint32_t offset, uint32_t size);
 };
 
 #endif // !XCB_H

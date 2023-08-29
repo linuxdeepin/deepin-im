@@ -9,6 +9,7 @@
 #include "Seat.h"
 #include "TextInputManagerV3.h"
 #include "VirtualKeyboardManagerV1.h"
+#include "X11ActiveWindowMonitor.h"
 
 #include <QAbstractEventDispatcher>
 #include <QDebug>
@@ -16,6 +17,7 @@
 #include <QThread>
 
 Compositor::Compositor()
+    : activeWindowMonitor_(std::make_unique<X11ActiveWindowMonitor>())
 {
     auto *loop = wl_display_get_event_loop(display());
     int fd = wl_event_loop_get_fd(loop);
@@ -32,6 +34,12 @@ Compositor::Compositor()
 
     QAbstractEventDispatcher *dispatcher = QThread::currentThread()->eventDispatcher();
     QObject::connect(dispatcher, &QAbstractEventDispatcher::aboutToBlock, processWaylandEvents);
+
+    QObject::connect(activeWindowMonitor_.get(),
+                     &X11ActiveWindowMonitor::activeWindowChanged,
+                     [this](uint32_t pid) {
+                         activeWindowChanged(pid);
+                     });
 }
 
 Compositor::~Compositor() { }
@@ -52,4 +60,9 @@ void Compositor::create()
 
     virtualKeyboardManagerV1_ = std::make_unique<VirtualKeyboardManagerV1>();
     virtualKeyboardManagerV1_->init(display());
+}
+
+void Compositor::activeWindowChanged(uint32_t pid) {
+    // todo:
+    qWarning() << "active window changed, pid:" << pid;
 }
