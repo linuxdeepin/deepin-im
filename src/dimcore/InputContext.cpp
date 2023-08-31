@@ -46,16 +46,19 @@ bool InputContext::keyEvent(InputContextKeyEvent &event)
 void InputContext::updatePreedit(const QString &text, int32_t cursorBegin, int32_t cursorEnd)
 {
     batchList_.emplace_back(PreeditInfo{ text, cursorBegin, cursorEnd });
+    Q_EMIT processKeyEventFinished();
 }
 
 void InputContext::updateCommitString(const QString &text)
 {
     batchList_.emplace_back(CommitString{ text });
+    Q_EMIT processKeyEventFinished();
 }
 
 void InputContext::forwardKey(uint32_t keycode, bool pressed)
 {
     batchList_.emplace_back(ForwardKey{ keycode, pressed });
+    Q_EMIT processKeyEventFinished();
 }
 
 std::list<std::variant<ForwardKey, PreeditInfo, CommitString>> InputContext::getAndClearBatchList()

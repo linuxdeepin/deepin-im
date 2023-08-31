@@ -185,35 +185,37 @@ void DimTextInputV1::key(
         return;
     }
 
-    auto list = getAndClearBatchList();
-    for (auto &e : list) {
-        if (std::holds_alternative<ForwardKey>(e)) {
-            auto forwardKey = std::get<ForwardKey>(e);
-            vk_->key(getTimestamp(),
-                     forwardKey.keycode + XKB_HISTORICAL_OFFSET,
-                     forwardKey.pressed ? WL_KEYBOARD_KEY_STATE_PRESSED
-                                        : WL_KEYBOARD_KEY_STATE_RELEASED);
-            continue;
+    connect(this, &InputContext::processKeyEventFinished, this, [=]() {
+        auto list = getAndClearBatchList();
+        for (auto &e : list) {
+            if (std::holds_alternative<ForwardKey>(e)) {
+                auto forwardKey = std::get<ForwardKey>(e);
+                vk_->key(getTimestamp(),
+                         forwardKey.keycode + XKB_HISTORICAL_OFFSET,
+                         forwardKey.pressed ? WL_KEYBOARD_KEY_STATE_PRESSED
+                                            : WL_KEYBOARD_KEY_STATE_RELEASED);
+                continue;
+            }
+
+            if (std::holds_alternative<PreeditInfo>(e)) {
+                auto preeditInfo = std::get<PreeditInfo>(e);
+                im_->set_preedit_string(preeditInfo.text.toStdString().c_str(),
+                                        preeditInfo.cursorBegin,
+                                        preeditInfo.cursorEnd);
+                continue;
+            }
+
+            if (std::holds_alternative<CommitString>(e)) {
+                auto text = std::get<CommitString>(e).text;
+                im_->commit_string(text.toStdString().c_str());
+                continue;
+            }
         }
 
-        if (std::holds_alternative<PreeditInfo>(e)) {
-            auto preeditInfo = std::get<PreeditInfo>(e);
-            im_->set_preedit_string(preeditInfo.text.toStdString().c_str(),
-                                    preeditInfo.cursorBegin,
-                                    preeditInfo.cursorEnd);
-            continue;
+        if (!list.empty()) {
+            im_->commit(state_->serial++);
         }
-
-        if (std::holds_alternative<CommitString>(e)) {
-            auto text = std::get<CommitString>(e).text;
-            im_->commit_string(text.toStdString().c_str());
-            continue;
-        }
-    }
-
-    if (!list.empty()) {
-        im_->commit(state_->serial++);
-    }
+    });
 }
 
 void DimTextInputV1::modifiers(

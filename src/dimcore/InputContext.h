@@ -57,6 +57,9 @@ public:
     void updateCommitString(const QString &text);
     void forwardKey(uint32_t keycode, bool pressed);
 
+Q_SIGNALS:
+    void processKeyEventFinished();
+
 protected:
     std::list<std::variant<ForwardKey, PreeditInfo, CommitString>> getAndClearBatchList();
 

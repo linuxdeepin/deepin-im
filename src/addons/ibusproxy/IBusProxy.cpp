@@ -35,6 +35,7 @@ DimIBusProxy::DimIBusProxy(Dim *dim)
         if (ok && enableSync == 1)
             useSyncMode_ = true;
     }
+
     init();
 }
 
@@ -182,8 +183,6 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
             this,
             [ic](const QDBusVariant &text) {
                 const QDBusArgument arg = qvariant_cast<QDBusArgument>(text.variant());
-                qInfo() << "MY_TEJJSJGJJS01";
-
                 IBusText t;
                 arg >> t;
 
@@ -193,7 +192,6 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
             &OrgFreedesktopIBusInputContextInterface::UpdatePreeditText,
             this,
             [ic](const QDBusVariant &text, uint cursorPos, bool visible) {
-                qInfo() << "MY_TEJJSJGJJS02";
                 const QDBusArgument arg = qvariant_cast<QDBusArgument>(text.variant());
 
                 IBusText t;
@@ -205,7 +203,6 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
             &OrgFreedesktopIBusInputContextInterface::ForwardKeyEvent,
             this,
             [ic](uint keyval, uint keycode, uint state) {
-                qInfo() << "MY_TEJJSJGJJS03" << keyval << keycode << state;
                 ic->forwardKey(keycode, state);
             });
 }
