@@ -84,6 +84,11 @@ QList<InputMethodEntry> Fcitx5Proxy::getInputMethods()
     return inputMethods_;
 }
 
+bool Fcitx5Proxy::useAsyncMode()
+{
+    return false;
+}
+
 void Fcitx5Proxy::createFcitxInputContext(InputContext *ic)
 {
     if (!ic) {

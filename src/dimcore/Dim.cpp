@@ -10,6 +10,7 @@
 #include "InputMethodAddon.h"
 #include "ProxyAddon.h"
 #include "config.h"
+#include "common/common.h"
 
 #include <QDebug>
 #include <QDir>
@@ -17,6 +18,8 @@
 #include <QSettings>
 
 #include <dlfcn.h>
+
+#define DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE (SHIFT_MASK + CONTROL_MASK)
 
 using namespace org::deepin::dim;
 
@@ -167,6 +170,13 @@ void Dim::postInputContextDestroyed([[maybe_unused]] Event &event)
     }
 }
 
+ProxyAddon *Dim::getCurrentImAddon()
+{
+    ProxyAddon *addon = qobject_cast<ProxyAddon *>(currentImAddon);
+
+    return addon != nullptr ? addon : nullptr;
+}
+
 void Dim::postInputContextFocused(Event &event)
 {
     focusedIC_ = event.ic()->id();
@@ -193,7 +203,9 @@ void Dim::postInputContextUnfocused([[maybe_unused]] Event &event)
 
 bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
 {
-    // TODO: check shortcuts (switch im etc.)
+    if (event.isRelease() && event.state() == DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE) {
+        Q_EMIT imChanged();
+    }
 
     const auto &inputState = event.ic()->inputState();
 
@@ -205,6 +217,7 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
         return false;
     }
     auto *addon = j.value();
+    currentImAddon = addon;
 
     return addon->keyEvent(event);
 }

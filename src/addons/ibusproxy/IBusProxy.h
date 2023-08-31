@@ -23,6 +23,7 @@ public:
     QList<InputMethodEntry> getInputMethods() override;
     void initInputMethods() override;
     bool keyEvent(InputContextKeyEvent &keyEvent) override;
+    bool useAsyncMode() override;
     void createFcitxInputContext(InputContext *ic) override;
     void focusIn(uint32_t id) override;
     void focusOut(uint32_t id) override;

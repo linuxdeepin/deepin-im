@@ -23,6 +23,7 @@ public:
     explicit ProxyAddon(Dim *dim, const QString &key);
     virtual ~ProxyAddon();
 
+    virtual bool useAsyncMode() = 0;
     virtual void focusIn(uint32_t id) = 0;
     virtual void focusOut(uint32_t id) = 0;
     virtual void destroyed(uint32_t id) = 0;

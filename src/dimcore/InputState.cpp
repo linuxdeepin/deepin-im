@@ -10,10 +10,24 @@ using namespace org::deepin::dim;
 
 InputState::InputState(Dim *dim)
     : dim_(dim)
+    , ims_(dim_->imAddons())
 {
-    auto ims = dim_->imAddons();
-    if (ims.isEmpty()) {
+    if (ims_.isEmpty()) {
         return;
     }
-    current_im_addon_ = ims[0];
+
+    connect(dim_, &Dim::imChanged, this, &InputState::handleImChanged);
+    current_im_addon_ = ims_[0];
+}
+
+void InputState::handleImChanged()
+{
+    for (const auto im : ims_) {
+        if (im == current_im_addon_ || im == "keyboard") {
+            continue;
+        }
+
+        current_im_addon_ = im;
+        break;
+    }
 }

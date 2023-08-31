@@ -5,6 +5,8 @@
 #ifndef INPUTSTATE_H
 #define INPUTSTATE_H
 
+#include <QObject>
+
 #include <QString>
 
 namespace org {
@@ -15,15 +17,21 @@ class Dim;
 class InputMethodAddon;
 class InputMethodEntry;
 
-class InputState
+class InputState: public QObject
 {
+    Q_OBJECT
+
 public:
     InputState(Dim *dim);
 
     inline const QString &currentIMAddon() const { return current_im_addon_; }
 
+private Q_SLOTS:
+    void handleImChanged();
+
 private:
     Dim *dim_;
+    QList<QString> ims_;
     QString current_im_addon_;
 };
 

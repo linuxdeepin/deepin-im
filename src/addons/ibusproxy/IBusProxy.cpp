@@ -141,6 +141,11 @@ QList<InputMethodEntry> DimIBusProxy::getInputMethods()
     return inputMethods_;
 }
 
+bool DimIBusProxy::useAsyncMode()
+{
+    return true;
+}
+
 void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 {
     if (!ic || !portalBus_) {

@@ -50,6 +50,10 @@ DimTextInputV1::DimTextInputV1(Dim *dim,
     , xkbContext_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
 {
     zwp_input_method_v2_add_listener(im_->get(), &imListener_, this);
+
+    connect(this, &InputContext::processKeyEventFinished, this, [=]() {
+        keyEventDispatch();
+    });
 }
 
 void DimTextInputV1::activate([[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
@@ -162,6 +166,39 @@ void DimTextInputV1::keymap(
         << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Hyper");
 }
 
+void DimTextInputV1::keyEventDispatch()
+{
+    auto list = getAndClearBatchList();
+    for (auto &e : list) {
+        if (std::holds_alternative<ForwardKey>(e)) {
+            auto forwardKey = std::get<ForwardKey>(e);
+            vk_->key(getTimestamp(),
+                     forwardKey.keycode + XKB_HISTORICAL_OFFSET,
+                     forwardKey.pressed ? WL_KEYBOARD_KEY_STATE_PRESSED
+                                        : WL_KEYBOARD_KEY_STATE_RELEASED);
+            continue;
+        }
+
+        if (std::holds_alternative<PreeditInfo>(e)) {
+            auto preeditInfo = std::get<PreeditInfo>(e);
+            im_->set_preedit_string(preeditInfo.text.toStdString().c_str(),
+                                    preeditInfo.cursorBegin,
+                                    preeditInfo.cursorEnd);
+            continue;
+        }
+
+        if (std::holds_alternative<CommitString>(e)) {
+            auto text = std::get<CommitString>(e).text;
+            im_->commit_string(text.toStdString().c_str());
+            continue;
+        }
+    }
+
+    if (!list.empty()) {
+        im_->commit(state_->serial++);
+    }
+}
+
 void DimTextInputV1::key(
     [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
     uint32_t serial,
@@ -185,37 +222,9 @@ void DimTextInputV1::key(
         return;
     }
 
-    connect(this, &InputContext::processKeyEventFinished, this, [=]() {
-        auto list = getAndClearBatchList();
-        for (auto &e : list) {
-            if (std::holds_alternative<ForwardKey>(e)) {
-                auto forwardKey = std::get<ForwardKey>(e);
-                vk_->key(getTimestamp(),
-                         forwardKey.keycode + XKB_HISTORICAL_OFFSET,
-                         forwardKey.pressed ? WL_KEYBOARD_KEY_STATE_PRESSED
-                                            : WL_KEYBOARD_KEY_STATE_RELEASED);
-                continue;
-            }
-
-            if (std::holds_alternative<PreeditInfo>(e)) {
-                auto preeditInfo = std::get<PreeditInfo>(e);
-                im_->set_preedit_string(preeditInfo.text.toStdString().c_str(),
-                                        preeditInfo.cursorBegin,
-                                        preeditInfo.cursorEnd);
-                continue;
-            }
-
-            if (std::holds_alternative<CommitString>(e)) {
-                auto text = std::get<CommitString>(e).text;
-                im_->commit_string(text.toStdString().c_str());
-                continue;
-            }
-        }
-
-        if (!list.empty()) {
-            im_->commit(state_->serial++);
-        }
-    });
+    if (!isAsyncMode()) {
+        keyEventDispatch();
+    }
 }
 
 void DimTextInputV1::modifiers(

@@ -16,7 +16,7 @@ namespace org {
 namespace deepin {
 namespace dim {
 
-enum AddonType{
+enum AddonType {
     Frontend,
     InputMethod,
     Proxy,
@@ -32,6 +32,7 @@ class InputContextKeyEvent;
 
 class Dim : public QObject
 {
+    Q_OBJECT
 public:
     Dim(QObject *parent = nullptr);
     ~Dim();
@@ -42,9 +43,15 @@ public:
 
     bool postEvent(Event &event);
 
+    ProxyAddon *getCurrentImAddon();
+
+Q_SIGNALS:
+    void imChanged();
+
 private:
     QMap<uint32_t, InputContext *> inputContexts_;
     uint32_t focusedIC_;
+    InputMethodAddon *currentImAddon;
     QMap<QString, InputMethodAddon *> inputMethodAddons_;
     QSet<FrontendAddon *> frontends_;
 
@@ -52,7 +59,7 @@ private:
 
     void loadAddons();
     void loadAddon(const QString &infoFile);
-    void initInputMethodAddon(InputMethodAddon * imAddon);
+    void initInputMethodAddon(InputMethodAddon *imAddon);
     void postInputContextCreated(Event &event);
     void postInputContextDestroyed(Event &event);
     void postInputContextFocused(Event &event);
