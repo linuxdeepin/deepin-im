@@ -15,8 +15,10 @@ public:
     X11ActiveWindowMonitor();
     ~X11ActiveWindowMonitor();
 
+    pid_t activeWindowPid();
+
 signals:
-    void activeWindowChanged(uint32_t pid);
+    void activeWindowChanged();
 
 protected:
     void xcbEvent(const std::unique_ptr<xcb_generic_event_t> &event) override;

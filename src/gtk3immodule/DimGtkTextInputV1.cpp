@@ -7,17 +7,21 @@
 #include "imcontext.h"
 
 DimGtkTextInputV1::DimGtkTextInputV1(struct ::zwp_dim_text_input_v1 *text_input,
-                               DimIMContextWaylandGlobal *global)
+                                     DimIMContextWaylandGlobal *global)
     : wl::client::ZwpDimTextInputV1(text_input)
     , global_(global)
 {
 }
 
+void DimGtkTextInputV1::zwp_dim_text_input_v1_enter() { }
+
+void DimGtkTextInputV1::zwp_dim_text_input_v1_leave() { }
+
 void DimGtkTextInputV1::zwp_dim_text_input_v1_modifiers_map(struct wl_array *map) { }
 
 void DimGtkTextInputV1::zwp_dim_text_input_v1_preedit_string(const char *text,
-                                                          int32_t cursor_begin,
-                                                          int32_t cursor_end)
+                                                             int32_t cursor_begin,
+                                                             int32_t cursor_end)
 {
     if (!global_->current)
         return;
@@ -42,7 +46,7 @@ void DimGtkTextInputV1::zwp_dim_text_input_v1_commit_string(const char *text)
 }
 
 void DimGtkTextInputV1::zwp_dim_text_input_v1_delete_surrounding_text(uint32_t before_length,
-                                                                   uint32_t after_length)
+                                                                      uint32_t after_length)
 {
     if (!global_->current)
         return;

@@ -30,43 +30,43 @@ const Qt::InputMethodQueries supportedQueries4 = Qt::ImEnabled | Qt::ImSurroundi
     | Qt::ImCursorPosition | Qt::ImAnchorPosition | Qt::ImHints | Qt::ImCursorRectangle;
 }
 
-// void QWaylandTextInputv4::zwp_dim_text_input_v1_enter(struct ::wl_surface *surface)
-// {
-//     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO;
+void DimTextInputV1::zwp_dim_text_input_v1_enter()
+{
+    qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO;
 
-//     m_surface = surface;
+    // m_surface = surface;
 
-//     m_pendingPreeditString.clear();
-//     m_pendingCommitString.clear();
-//     m_pendingDeleteBeforeText = 0;
-//     m_pendingDeleteAfterText = 0;
+    m_pendingPreeditString.clear();
+    m_pendingCommitString.clear();
+    m_pendingDeleteBeforeText = 0;
+    m_pendingDeleteAfterText = 0;
 
-//     enable();
-//     updateState(supportedQueries4, update_state_enter);
-// }
+    enable();
+    updateState(supportedQueries4, update_state_enter);
+}
 
-// void QWaylandTextInputv4::zwp_dim_text_input_v1_leave(struct ::wl_surface *surface)
-// {
-//     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO;
+void DimTextInputV1::zwp_dim_text_input_v1_leave()
+{
+    qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO;
 
-//     if (m_surface != surface) {
-//         qCWarning(qLcQpaWaylandTextInput()) << Q_FUNC_INFO << "Got leave event for surface"
-//                                             << surface << "focused surface" << m_surface;
-//         return;
-//     }
+    // if (m_surface != surface) {
+    //     qCWarning(qLcQpaWaylandTextInput()) << Q_FUNC_INFO << "Got leave event for surface"
+    //                                         << surface << "focused surface" << m_surface;
+    //     return;
+    // }
 
-//     // QTBUG-97248: check commit_mode
-//     // Currently text-input-unstable-v4-wip is implemented with preedit_commit_mode
-//     // 'commit'
+    // QTBUG-97248: check commit_mode
+    // Currently text-input-unstable-v4-wip is implemented with preedit_commit_mode
+    // 'commit'
 
-//     m_currentPreeditString.clear();
+    m_currentPreeditString.clear();
 
-//     m_surface = nullptr;
-//     m_currentSerial = 0U;
+    // m_surface = nullptr;
+    m_currentSerial = 0U;
 
-//     disable();
-//     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO << "Done";
-// }
+    disable();
+    qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO << "Done";
+}
 
 void DimTextInputV1::zwp_dim_text_input_v1_modifiers_map(struct wl_array *map)
 {

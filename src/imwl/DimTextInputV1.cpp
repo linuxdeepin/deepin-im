@@ -8,6 +8,8 @@
 #include "Seat.h"
 #include "wl/server/Resource.h"
 
+#include <experimental/unordered_map>
+
 DimTextInputV1::DimTextInputV1(Seat *seat)
     : seat_(seat)
 {
@@ -21,6 +23,26 @@ DimTextInputV1::DimTextInputV1(Seat *seat)
 DimTextInputV1::~DimTextInputV1()
 {
     wl_array_release(&modifiersMap_);
+}
+
+void DimTextInputV1::enterPid(pid_t pid)
+{
+    auto i = pidMap_.find(pid);
+    if (i == pidMap_.end()) {
+        return;
+    }
+
+    send_enter(i->second->handle);
+}
+
+void DimTextInputV1::leavePid(pid_t pid)
+{
+    auto i = pidMap_.find(pid);
+    if (i == pidMap_.end()) {
+        return;
+    }
+
+    send_leave(i->second->handle);
 }
 
 void DimTextInputV1::sendPreeditString(const char *text, int32_t cursor_begin, int32_t cursor_end)
@@ -70,11 +92,21 @@ void DimTextInputV1::sendKeysym(
 
 void DimTextInputV1::resource_bind(wl::server::Resource *resource)
 {
+    auto *client = resource->client();
+    pid_t pid;
+    wl_client_get_credentials(client, &pid, nullptr, nullptr);
+    pidMap_.emplace(pid, resource);
+
     send_modifiers_map(resource->handle, &modifiersMap_);
 }
 
 void DimTextInputV1::zwp_dim_text_input_v1_destroy(wl::server::Resource *resource)
 {
+    std::experimental::erase_if(pidMap_, [resource](const auto &item) {
+        const auto &[key, value] = item;
+        return value == resource;
+    });
+
     m_enabled.erase(resource);
 
     resource->destroy();

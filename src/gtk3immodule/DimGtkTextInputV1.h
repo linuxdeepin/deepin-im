@@ -15,6 +15,8 @@ public:
     ~DimGtkTextInputV1() override;
 
 protected:
+    void zwp_dim_text_input_v1_enter() override;
+    void zwp_dim_text_input_v1_leave() override;
     void zwp_dim_text_input_v1_modifiers_map(struct wl_array *map) override;
     void zwp_dim_text_input_v1_preedit_string(const char *text,
                                               int32_t cursor_begin,

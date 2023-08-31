@@ -18,6 +18,8 @@ class ZwpDimTextInputV1 : public Type<ZwpDimTextInputV1, zwp_dim_text_input_v1>
 public:
     ZwpDimTextInputV1();
 
+    void send_enter(struct wl_resource *resource);
+    void send_leave(struct wl_resource *resource);
     void send_modifiers_map(struct wl_resource *resource, struct wl_array *map);
     void send_preedit_string(struct wl_resource *resource, const char *text, int32_t cursor_begin, int32_t cursor_end);
     void send_commit_string(struct wl_resource *resource, const char *text);

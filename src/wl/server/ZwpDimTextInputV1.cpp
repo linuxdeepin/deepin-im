@@ -22,7 +22,18 @@ ZwpDimTextInputV1::ZwpDimTextInputV1()
 {
 }
 
-void ZwpDimTextInputV1::send_modifiers_map(struct wl_resource *resource, struct wl_array *map) { 
+void ZwpDimTextInputV1::send_enter(struct wl_resource *resource)
+{
+    zwp_dim_text_input_v1_send_enter(resource);
+}
+
+void ZwpDimTextInputV1::send_leave(struct wl_resource *resource)
+{
+    zwp_dim_text_input_v1_send_leave(resource);
+}
+
+void ZwpDimTextInputV1::send_modifiers_map(struct wl_resource *resource, struct wl_array *map)
+{
     zwp_dim_text_input_v1_send_modifiers_map(resource, map);
 }
 

@@ -7,6 +7,8 @@
 using namespace wl::client;
 
 const zwp_dim_text_input_v1_listener ZwpDimTextInputV1::listener_ = {
+    ListenerCallbackWrapper<&ZwpDimTextInputV1::zwp_dim_text_input_v1_enter>::func,
+    ListenerCallbackWrapper<&ZwpDimTextInputV1::zwp_dim_text_input_v1_leave>::func,
     ListenerCallbackWrapper<&ZwpDimTextInputV1::zwp_dim_text_input_v1_modifiers_map>::func,
     ListenerCallbackWrapper<&ZwpDimTextInputV1::zwp_dim_text_input_v1_preedit_string>::func,
     ListenerCallbackWrapper<&ZwpDimTextInputV1::zwp_dim_text_input_v1_commit_string>::func,

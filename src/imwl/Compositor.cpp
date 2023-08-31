@@ -5,9 +5,9 @@
 #include "Compositor.h"
 
 #include "DimTextInputManagerV1.h"
+#include "DimTextInputV1.h"
 #include "InputMethodManagerV2.h"
 #include "Seat.h"
-#include "TextInputManagerV3.h"
 #include "VirtualKeyboardManagerV1.h"
 #include "X11ActiveWindowMonitor.h"
 
@@ -37,8 +37,8 @@ Compositor::Compositor()
 
     QObject::connect(activeWindowMonitor_.get(),
                      &X11ActiveWindowMonitor::activeWindowChanged,
-                     [this](uint32_t pid) {
-                         activeWindowChanged(pid);
+                     [this]() {
+                         activeWindowChanged(activeWindowMonitor_->activeWindowPid());
                      });
 }
 
@@ -60,9 +60,14 @@ void Compositor::create()
 
     virtualKeyboardManagerV1_ = std::make_unique<VirtualKeyboardManagerV1>();
     virtualKeyboardManagerV1_->init(display());
+
+    activeWindowChanged(activeWindowMonitor_->activeWindowPid());
 }
 
-void Compositor::activeWindowChanged(uint32_t pid) {
-    // todo:
+void Compositor::activeWindowChanged(pid_t pid)
+{
     qWarning() << "active window changed, pid:" << pid;
+    seat_->getDimTextInputV1()->leavePid(activePid_);
+    seat_->getDimTextInputV1()->enterPid(pid);
+    activePid_ = pid;
 }

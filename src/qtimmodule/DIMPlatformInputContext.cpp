@@ -172,10 +172,6 @@ void DIMPlatformInputContext::setFocusObject(QObject *object)
 {
     qCDebug(qLcQpaInputMethods) << Q_FUNC_INFO;
 
-    if (m_focusObject) {
-        textInput()->disable();
-    }
-
     m_focusObject = object;
 
     if (!textInput()) {
@@ -187,7 +183,6 @@ void DIMPlatformInputContext::setFocusObject(QObject *object)
     if (window && window->handle() && inputMethodAccepted()) {
         textInput()->updateState(Qt::ImQueryAll,
                                  QtWaylandClient::QWaylandTextInputInterface::update_state_enter);
-        textInput()->enable();
     }
 }
 

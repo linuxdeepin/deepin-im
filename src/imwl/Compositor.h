@@ -36,7 +36,9 @@ private:
     std::unique_ptr<InputMethodManagerV2> inputMethodManagerV2_;
     std::unique_ptr<VirtualKeyboardManagerV1> virtualKeyboardManagerV1_;
 
-    void activeWindowChanged(uint32_t pid);
+    pid_t activePid_;
+
+    void activeWindowChanged(pid_t pid);
 };
 
 #endif // COMPOSITOR_H
