@@ -66,7 +66,7 @@ void Compositor::create()
 
 void Compositor::activeWindowChanged(pid_t pid)
 {
-    qWarning() << "active window changed, pid:" << pid;
+    qDebug() << "active window changed, pid:" << pid;
     seat_->getDimTextInputV1()->leavePid(activePid_);
     seat_->getDimTextInputV1()->enterPid(pid);
     activePid_ = pid;
