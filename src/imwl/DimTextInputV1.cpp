@@ -27,6 +27,7 @@ DimTextInputV1::~DimTextInputV1()
 
 void DimTextInputV1::enterPid(pid_t pid)
 {
+    enteredPid_ = pid;
     auto i = pidMap_.find(pid);
     if (i == pidMap_.end()) {
         return;
@@ -96,6 +97,10 @@ void DimTextInputV1::resource_bind(wl::server::Resource *resource)
     pid_t pid;
     wl_client_get_credentials(client, &pid, nullptr, nullptr);
     pidMap_.emplace(pid, resource);
+
+    if (pid == enteredPid_) {
+        send_enter(resource->handle);
+    }
 
     send_modifiers_map(resource->handle, &modifiersMap_);
 }

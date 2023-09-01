@@ -50,6 +50,7 @@ protected:
 private:
     Seat *seat_;
     std::unordered_map<pid_t, wl::server::Resource *> pidMap_;
+    pid_t enteredPid_;
     std::set<wl::server::Resource *> m_enabled;
     struct wl_array modifiersMap_;
 };
