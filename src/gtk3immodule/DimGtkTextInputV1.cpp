@@ -13,9 +13,21 @@ DimGtkTextInputV1::DimGtkTextInputV1(struct ::zwp_dim_text_input_v1 *text_input,
 {
 }
 
-void DimGtkTextInputV1::zwp_dim_text_input_v1_enter() { }
+void DimGtkTextInputV1::zwp_dim_text_input_v1_enter()
+{
+    if (global_->current) {
+        DimIMContext *context = DIM_IM_CONTEXT(global_->current);
+        ::enable(context, global_);
+    }
+}
 
-void DimGtkTextInputV1::zwp_dim_text_input_v1_leave() { }
+void DimGtkTextInputV1::zwp_dim_text_input_v1_leave()
+{
+    if (global_->current) {
+        DimIMContext *context = DIM_IM_CONTEXT(global_->current);
+        ::disable(context, global_);
+    }
+}
 
 void DimGtkTextInputV1::zwp_dim_text_input_v1_modifiers_map(struct wl_array *map) { }
 

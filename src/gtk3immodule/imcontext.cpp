@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "imcontext.h"
-#include "DimGtkTextInputV1.h"
 
+#include "DimGtkTextInputV1.h"
 #include "wl/client/Connection.h"
 #include "wl/client/ConnectionRaw.h"
 #include "wl/client/Seat.h"
@@ -242,15 +242,16 @@ void notifyImChange(DimIMContext *context, enum zwp_text_input_v3_change_cause c
     commitState(context);
 }
 
-static void enable(DimIMContext *context, DimIMContextWaylandGlobal *global)
+void enable(DimIMContext *context, DimIMContextWaylandGlobal *global)
 {
     global->ti->enable();
     notifyImChange(context, ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_OTHER);
 }
 
-static void disable(DimIMContext *context, DimIMContextWaylandGlobal *global)
+void disable(DimIMContext *context, DimIMContextWaylandGlobal *global)
 {
     global->ti->disable();
+    commitState(context);
 
     /* The commit above will still count in the .done event accounting,
      * we should account for it, lest the serial gets out of sync after
@@ -260,6 +261,7 @@ static void disable(DimIMContext *context, DimIMContextWaylandGlobal *global)
 
     /* after disable, incoming state changes won't take effect anyway */
     if (context->currentPreedit.text) {
+        global->ti->text_input_preedit(NULL, 0, 0);
         textInputPreeditApply(global);
     }
 }
@@ -425,7 +427,6 @@ static void dimImContextFocusIn(GtkIMContext *context)
     global->current = context;
     if (!global->ti)
         return;
-    enable(self, global);
 }
 
 static void dimImContextFocusOut(GtkIMContext *context)
@@ -435,8 +436,6 @@ static void dimImContextFocusOut(GtkIMContext *context)
     DimIMContextWaylandGlobal *global = dimImContextWaylandGetGlobal(self);
     if (global == nullptr)
         return;
-
-    disable(self, global);
 
     global->current = nullptr;
 }

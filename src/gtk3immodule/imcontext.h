@@ -73,6 +73,8 @@ void textInputDeleteSurroundingTextApply(DimIMContextWaylandGlobal *global);
 void textInputCommitApply(DimIMContextWaylandGlobal *global);
 void textInputPreeditApply(DimIMContextWaylandGlobal *global);
 void notifyImChange(DimIMContext *context, enum zwp_text_input_v3_change_cause cause);
+void enable(DimIMContext *context, DimIMContextWaylandGlobal *global);
+void disable(DimIMContext *context, DimIMContextWaylandGlobal *global);
 
 G_BEGIN_DECLS
 GType dim_im_context_get_type(void) G_GNUC_CONST;
