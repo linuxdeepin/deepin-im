@@ -31,6 +31,7 @@ static const QMap<QString, AddonType> AddonsType = {
 Dim::Dim(QObject *parent)
     : QObject(parent)
     , focusedIC_(0)
+    , currentImAddon(nullptr)
 {
     loadAddons();
 }
