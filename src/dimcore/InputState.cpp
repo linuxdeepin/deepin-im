@@ -11,23 +11,27 @@ using namespace org::deepin::dim;
 InputState::InputState(Dim *dim)
     : dim_(dim)
     , ims_(dim_->imAddons())
+    , currentImIdx_(-1)
 {
     if (ims_.isEmpty()) {
         return;
     }
 
-    connect(dim_, &Dim::imChanged, this, &InputState::handleImChanged);
-    current_im_addon_ = ims_[0];
+    currentImIdx_ = 0;
+    currentImAddon_ = ims_[currentImIdx_];
 }
 
-void InputState::handleImChanged()
+void InputState::switchIMAddon()
 {
-    for (const auto im : ims_) {
-        if (im == current_im_addon_ || im == "keyboard") {
-            continue;
-        }
-
-        current_im_addon_ = im;
-        break;
+    if (ims_.isEmpty()) {
+        return;
     }
+
+    auto nextIdx = currentImIdx_ + 1;
+    if (nextIdx >= ims_.size()) {
+        nextIdx = 0;
+    }
+
+    currentImIdx_ = nextIdx;
+    currentImAddon_ = ims_[currentImIdx_];
 }

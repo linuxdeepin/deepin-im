@@ -6,7 +6,6 @@
 #define INPUTSTATE_H
 
 #include <QObject>
-
 #include <QString>
 
 namespace org {
@@ -17,22 +16,22 @@ class Dim;
 class InputMethodAddon;
 class InputMethodEntry;
 
-class InputState: public QObject
+class InputState : public QObject
 {
     Q_OBJECT
 
 public:
     InputState(Dim *dim);
 
-    inline const QString &currentIMAddon() const { return current_im_addon_; }
+    inline const QString &currentIMAddon() const { return currentImAddon_; }
 
-private Q_SLOTS:
-    void handleImChanged();
+    void switchIMAddon();
 
 private:
     Dim *dim_;
     QList<QString> ims_;
-    QString current_im_addon_;
+    int currentImIdx_;
+    QString currentImAddon_;
 };
 
 } // namespace dim
