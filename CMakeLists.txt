@@ -63,4 +63,5 @@ ecm_add_wayland_server_protocol(wayland_protocols
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_subdirectory(src)
+add_subdirectory(misc)
 add_subdirectory(demo)

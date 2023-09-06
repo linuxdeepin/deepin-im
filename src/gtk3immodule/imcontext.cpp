@@ -344,7 +344,12 @@ static DimIMContextWaylandGlobal *dimImContextWaylandGlobalGet(GdkDisplay *displ
     if (gdk_wayland_display != nullptr) {
         global->wl = new wl::client::ConnectionRaw(gdk_wayland_display);
     } else {
-        auto wl = new wl::client::Connection("imfakewl");
+        const char *display_name = getenv("DIM_WAYLAND_DISPLAY");
+        if (display_name == nullptr) {
+            g_warning("failed to get display env");
+            return nullptr;
+        }
+        auto wl = new wl::client::Connection(display_name);
         if (wl->display() == nullptr) {
             const char *errMsg = "empty wayland display";
             g_warning("failed to connect imfakewl: %s", errMsg);

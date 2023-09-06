@@ -5,17 +5,22 @@
 #include "WLFrontend.h"
 
 #include "wl/client/Connection.h"
+#include "wl/client/ConnectionRaw.h"
 #include "wl/client/Seat.h"
 #include "wl/client/ZwpInputMethodManagerV2.h"
 #include "wl/client/ZwpVirtualKeyboardManagerV1.h"
 
 #include <dimcore/Dim.h>
+#include <qpa/qplatformnativeinterface.h>
 #include <wayland-client-core.h>
 #include <wayland-input-method-unstable-v2-client-protocol.h>
 
+#include <QAbstractEventDispatcher>
 #include <QDBusConnection>
 #include <QDebug>
 #include <QSocketNotifier>
+#include <QThread>
+#include <QtGui/QGuiApplication>
 
 using namespace org::deepin::dim;
 
@@ -24,17 +29,35 @@ DIM_ADDON_FACTORY(WLFrontend)
 WLFrontend::WLFrontend(Dim *dim)
     : FrontendAddon(dim, "wlfrontend")
 {
-    QByteArray waylandDisplay = qgetenv("WAYLAND_DISPLAY");
-    if (waylandDisplay.toStdString().empty()) {
-        qDebug("WAYLAND_DISPLAY is not set");
-        // todo: fake wayland server
-    }
+    if (QGuiApplication::platformName() == "wayland") {
+        QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
+        struct wl_display *wl_dpy =
+            (struct wl_display *)native->nativeResourceForWindow("display", NULL);
 
-    wl_.reset(new wl::client::Connection(waylandDisplay.toStdString().c_str()));
-    auto *notifier = new QSocketNotifier(wl_->getFd(), QSocketNotifier::Read, this);
-    connect(notifier, &QSocketNotifier::activated, this, [this]() {
-        wl_->dispatch();
-    });
+        wl_.reset(new wl::client::ConnectionRaw(wl_dpy));
+    } else {
+        QByteArray waylandDisplay = qgetenv("DIM_WAYLAND_DISPLAY");
+        const auto displayName = waylandDisplay.toStdString();
+        if (displayName.empty()) {
+            qWarning("failed to get display env");
+            return;
+        }
+
+        auto *wl = new wl::client::Connection(displayName);
+        if (wl->display() == nullptr) {
+            return;
+        }
+        auto *notifier = new QSocketNotifier(wl->getFd(), QSocketNotifier::Read, this);
+        connect(notifier, &QSocketNotifier::activated, this, [wl]() {
+            wl->dispatch();
+        });
+
+        wl_.reset(wl);
+        QAbstractEventDispatcher *dispatcher = QThread::currentThread()->eventDispatcher();
+        QObject::connect(dispatcher, &QAbstractEventDispatcher::aboutToBlock, this, [this]() {
+            wl_->flush();
+        });
+    }
 
     reloadSeats();
 }
