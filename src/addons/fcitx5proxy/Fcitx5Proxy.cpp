@@ -84,11 +84,6 @@ QList<InputMethodEntry> Fcitx5Proxy::getInputMethods()
     return inputMethods_;
 }
 
-bool Fcitx5Proxy::useAsyncMode()
-{
-    return false;
-}
-
 void Fcitx5Proxy::createFcitxInputContext(InputContext *ic)
 {
     if (!ic) {
@@ -185,6 +180,8 @@ bool Fcitx5Proxy::keyEvent(InputContextKeyEvent &keyEvent)
     if (!isICDBusInterfaceValid(id)) {
         return false;
     }
+
+    keyEvent.ic()->setAsyncMode(false);
 
     auto response = icMap_[id]->ProcessKeyEventBatch(keyEvent.keyValue(),
                                                      keyEvent.keycode(),

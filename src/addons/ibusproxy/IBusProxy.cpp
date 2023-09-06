@@ -140,11 +140,6 @@ QList<InputMethodEntry> DimIBusProxy::getInputMethods()
     return inputMethods_;
 }
 
-bool DimIBusProxy::useAsyncMode()
-{
-    return true;
-}
-
 void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 {
     if (!ic || !portalBus_) {
@@ -244,6 +239,7 @@ bool DimIBusProxy::keyEvent(InputContextKeyEvent &keyEvent)
     auto id = keyEvent.ic()->id();
 
     if (isICDBusInterfaceValid(id)) {
+        keyEvent.ic()->setAsyncMode(true);
         auto reply =
             iBusICMap_[id]->ProcessKeyEvent(keyEvent.keyValue(), keyEvent.keycode(), ibusState);
         reply.waitForFinished();

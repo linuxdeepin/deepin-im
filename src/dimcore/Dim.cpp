@@ -9,13 +9,14 @@
 #include "InputContext.h"
 #include "InputMethodAddon.h"
 #include "ProxyAddon.h"
-#include "config.h"
 #include "common/common.h"
+#include "config.h"
 
 #include <QDebug>
 #include <QDir>
 #include <QPluginLoader>
 #include <QSettings>
+#include <QTimer>
 
 #include <dlfcn.h>
 
@@ -31,7 +32,6 @@ static const QMap<QString, AddonType> AddonsType = {
 Dim::Dim(QObject *parent)
     : QObject(parent)
     , focusedIC_(0)
-    , currentImAddon(nullptr)
 {
     loadAddons();
 }
@@ -99,7 +99,7 @@ void Dim::loadAddon(const QString &infoFile)
     }
     case AddonType::InputMethod: {
         auto *imAddon = qobject_cast<InputMethodAddon *>(addon);
-        connect(imAddon, &InputMethodAddon::addonInitFinished, this , &Dim::initInputMethodAddon);
+        connect(imAddon, &InputMethodAddon::addonInitFinished, this, &Dim::initInputMethodAddon);
         imAddon->initInputMethods();
         inputMethodAddons_.insert(imAddon->key(), imAddon);
         break;
@@ -143,7 +143,8 @@ bool Dim::postEvent(Event &event)
     return false;
 }
 
-QList<QString> Dim::imAddons() const {
+QList<QString> Dim::imAddons() const
+{
     return inputMethodAddons_.keys();
 }
 
@@ -169,13 +170,6 @@ void Dim::postInputContextDestroyed([[maybe_unused]] Event &event)
             addon->destroyed(event.ic()->id());
         }
     }
-}
-
-ProxyAddon *Dim::getCurrentImAddon()
-{
-    ProxyAddon *addon = qobject_cast<ProxyAddon *>(currentImAddon);
-
-    return addon != nullptr ? addon : nullptr;
 }
 
 void Dim::postInputContextFocused(Event &event)
@@ -204,11 +198,13 @@ void Dim::postInputContextUnfocused([[maybe_unused]] Event &event)
 
 bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
 {
-    if (event.isRelease() && event.state() == DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE) {
-        Q_EMIT imChanged();
-    }
+    auto &inputState = event.ic()->inputState();
 
-    const auto &inputState = event.ic()->inputState();
+    if (event.isRelease() && event.state() == DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE) {
+        QTimer::singleShot(0, [&inputState]() {
+            inputState.switchIMAddon();
+        });
+    }
 
     const QString &addonKey = inputState.currentIMAddon();
 
@@ -218,7 +214,6 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
         return false;
     }
     auto *addon = j.value();
-    currentImAddon = addon;
 
     return addon->keyEvent(event);
 }

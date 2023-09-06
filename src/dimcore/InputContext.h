@@ -51,12 +51,15 @@ public:
     void focusOut();
     bool keyEvent(InputContextKeyEvent &event);
 
-    const InputState &inputState() const;
+    InputState &inputState();
+
+    void setAsyncMode(bool enable) { asyncMode_ = enable; }
+
+    bool isAsyncMode() { return asyncMode_; }
 
     void updatePreedit(const QString &text, int32_t cursorBegin, int32_t cursorEnd);
     void updateCommitString(const QString &text);
     void forwardKey(uint32_t keycode, bool pressed);
-    bool isAsyncMode();
 
 Q_SIGNALS:
     void processKeyEventFinished();
@@ -67,6 +70,7 @@ protected:
 private:
     Dim *dim_;
     InputState inputState_;
+    bool asyncMode_;
 
     std::list<std::variant<ForwardKey, PreeditInfo, CommitString>> batchList_;
 };

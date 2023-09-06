@@ -5,7 +5,6 @@
 #include "InputContext.h"
 
 #include "Dim.h"
-#include "ProxyAddon.h"
 
 using namespace org::deepin::dim;
 
@@ -14,19 +13,10 @@ InputContext::InputContext(Dim *dim, QObject *parent)
     , ObjectId()
     , dim_(dim)
     , inputState_(dim)
+    , asyncMode_(false)
 {
     Event e(EventType::InputContextCreated, this);
     dim_->postEvent(e);
-}
-
-bool InputContext::isAsyncMode()
-{
-    auto im = dim_->getCurrentImAddon();
-    if (im && im->useAsyncMode()) {
-        return true;
-    }
-
-    return false;
 }
 
 void InputContext::destroy()
@@ -86,7 +76,7 @@ std::list<std::variant<ForwardKey, PreeditInfo, CommitString>> InputContext::get
     return tmp;
 }
 
-const InputState &InputContext::inputState() const
+InputState &InputContext::inputState()
 {
     return inputState_;
 }

@@ -43,15 +43,9 @@ public:
 
     bool postEvent(Event &event);
 
-    ProxyAddon *getCurrentImAddon();
-
-Q_SIGNALS:
-    void imChanged();
-
 private:
     QMap<uint32_t, InputContext *> inputContexts_;
     uint32_t focusedIC_;
-    InputMethodAddon *currentImAddon;
     QMap<QString, InputMethodAddon *> inputMethodAddons_;
     QSet<FrontendAddon *> frontends_;
 
