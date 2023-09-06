@@ -93,16 +93,15 @@ void DimIBusProxy::init()
                                                        this);
 
     timer_.setSingleShot(true);
-    connect(&timer_, SIGNAL(timeout()), this, SLOT(connectToBus()));
-
-    QObject::connect(serviceWatcher_,
-                     SIGNAL(serviceRegistered(QString)),
-                     this,
-                     SLOT(busRegistered(QString)));
-    QObject::connect(serviceWatcher_,
-                     SIGNAL(serviceUnregistered(QString)),
-                     this,
-                     SLOT(busUnregistered(QString)));
+    connect(&timer_, &QTimer::timeout, this, &DimIBusProxy::connectToBus);
+    connect(serviceWatcher_,
+            &QDBusServiceWatcher::serviceRegistered,
+            this,
+            &DimIBusProxy::busRegistered);
+    connect(serviceWatcher_,
+            &QDBusServiceWatcher::serviceUnregistered,
+            this,
+            &DimIBusProxy::busUnregistered);
 }
 
 void DimIBusProxy::connectToBus()
