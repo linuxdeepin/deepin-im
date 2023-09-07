@@ -20,7 +20,7 @@ class ProxyAddon : public InputMethodAddon
     Q_OBJECT
 
 public:
-    explicit ProxyAddon(Dim *dim, const QString &key);
+    explicit ProxyAddon(Dim *dim, const QString &key, const QString &iconName);
     virtual ~ProxyAddon();
 
     virtual void focusIn(uint32_t id) = 0;

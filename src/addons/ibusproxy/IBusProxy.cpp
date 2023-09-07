@@ -23,7 +23,7 @@ using namespace org::deepin::dim;
 DIM_ADDON_FACTORY(DimIBusProxy);
 
 DimIBusProxy::DimIBusProxy(Dim *dim)
-    : ProxyAddon(dim, "ibusproxy")
+    : ProxyAddon(dim, "ibusproxy", "ibus")
     , useSyncMode_(false)
     , dbusConn_(QDBusConnection::sessionBus())
     , serviceWatcher_(new QDBusServiceWatcher(

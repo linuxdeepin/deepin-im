@@ -19,15 +19,20 @@ class InputMethodAddon : public Addon
     Q_OBJECT
 
 public:
-    explicit InputMethodAddon(Dim *dim, const QString &key);
+    explicit InputMethodAddon(Dim *dim, const QString &key, const QString &iconName);
     virtual ~InputMethodAddon();
 
     virtual QList<InputMethodEntry> getInputMethods() = 0;
     virtual void initInputMethods() = 0;
     virtual bool keyEvent(InputContextKeyEvent &keyEvent) = 0;
 
+    const QString &iconName() { return iconName_; }
+
 Q_SIGNALS:
     void addonInitFinished(InputMethodAddon *imAddon);
+
+private:
+    const QString iconName_;
 };
 
 } // namespace dim

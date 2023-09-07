@@ -40,6 +40,7 @@ struct ForwardKey
 class InputContext : public QObject, public ObjectId<InputContext>
 {
     Q_OBJECT
+    friend class InputState;
 
 public:
     InputContext(Dim *dim, QObject *parent = nullptr);
@@ -62,6 +63,7 @@ public:
     void forwardKey(uint32_t keycode, bool pressed);
 
 Q_SIGNALS:
+    void imAddonSwitched(const QString &imAddon);
     void processKeyEventFinished();
 
 protected:

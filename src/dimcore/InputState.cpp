@@ -5,12 +5,13 @@
 #include "InputState.h"
 
 #include "Dim.h"
+#include "InputContext.h"
 
 using namespace org::deepin::dim;
 
-InputState::InputState(Dim *dim)
-    : dim_(dim)
-    , ims_(dim_->imAddons())
+InputState::InputState(InputContext *ic)
+    : ic_(ic)
+    , ims_(ic_->dim_->imAddonNames())
     , currentImIdx_(-1)
 {
     if (ims_.isEmpty()) {
@@ -34,4 +35,5 @@ void InputState::switchIMAddon()
 
     currentImIdx_ = nextIdx;
     currentImAddon_ = ims_[currentImIdx_];
+    emit ic_->imAddonSwitched(currentImAddon_);
 }

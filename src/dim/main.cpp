@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <QCoreApplication>
+#include <QGuiApplication>
 
 #include "dimcore/Dim.h"
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QGuiApplication a(argc, argv);
 
     org::deepin::dim::Dim dim;
 

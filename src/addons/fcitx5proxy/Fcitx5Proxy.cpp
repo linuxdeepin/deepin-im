@@ -54,7 +54,7 @@ enum FcitxTextFormatFlag : int {
 DIM_ADDON_FACTORY(Fcitx5Proxy);
 
 Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
-    : ProxyAddon(dim, "fcitx5proxy")
+    : ProxyAddon(dim, "fcitx5proxy", "org.fcitx.Fcitx5")
     , dbusProvider_(new DBusProvider(this))
     , available_(dbusProvider_->available())
 {

@@ -12,7 +12,7 @@ InputContext::InputContext(Dim *dim, QObject *parent)
     : QObject(parent)
     , ObjectId()
     , dim_(dim)
-    , inputState_(dim)
+    , inputState_(this)
     , asyncMode_(false)
 {
     Event e(EventType::InputContextCreated, this);
