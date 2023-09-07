@@ -6,8 +6,8 @@
 
 using namespace org::deepin::dim;
 
-ProxyAddon::ProxyAddon(Dim *dim, const QString &key)
-    : InputMethodAddon(dim, key)
+ProxyAddon::ProxyAddon(Dim *dim, const QString &key, const QString &iconName)
+    : InputMethodAddon(dim, key, iconName)
 {
 }
 

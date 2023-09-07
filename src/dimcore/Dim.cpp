@@ -31,7 +31,7 @@ static const QMap<QString, AddonType> AddonsType = {
 
 Dim::Dim(QObject *parent)
     : QObject(parent)
-    , focusedIC_(0)
+    , focusedInputContext_(0)
 {
     loadAddons();
 }
@@ -143,9 +143,14 @@ bool Dim::postEvent(Event &event)
     return false;
 }
 
-QList<QString> Dim::imAddons() const
+QList<QString> Dim::imAddonNames() const
 {
     return inputMethodAddons_.keys();
+}
+
+QMap<QString, InputMethodAddon *> Dim::imAddons() const
+{
+    return inputMethodAddons_;
 }
 
 void Dim::postInputContextCreated(Event &event)
@@ -174,19 +179,21 @@ void Dim::postInputContextDestroyed([[maybe_unused]] Event &event)
 
 void Dim::postInputContextFocused(Event &event)
 {
-    focusedIC_ = event.ic()->id();
+    focusedInputContext_ = event.ic()->id();
+    emit focusedInputContextChanged(focusedInputContext_);
 
     for (auto it = inputMethodAddons_.begin(); it != inputMethodAddons_.end(); ++it) {
         ProxyAddon *addon = qobject_cast<ProxyAddon *>(it.value());
         if (addon) {
-            addon->focusIn(focusedIC_);
+            addon->focusIn(focusedInputContext_);
         }
     }
 }
 
 void Dim::postInputContextUnfocused([[maybe_unused]] Event &event)
 {
-    focusedIC_ = 0;
+    focusedInputContext_ = 0;
+    emit focusedInputContextChanged(focusedInputContext_);
 
     for (auto it = inputMethodAddons_.begin(); it != inputMethodAddons_.end(); ++it) {
         ProxyAddon *addon = qobject_cast<ProxyAddon *>(it.value());

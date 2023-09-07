@@ -6,8 +6,9 @@
 
 using namespace org::deepin::dim;
 
-InputMethodAddon::InputMethodAddon(Dim *dim, const QString &key)
+InputMethodAddon::InputMethodAddon(Dim *dim, const QString &key, const QString &iconName)
     : Addon(dim, key)
+    , iconName_(iconName)
 {
 }
 

@@ -33,19 +33,26 @@ class InputContextKeyEvent;
 class Dim : public QObject
 {
     Q_OBJECT
+
 public:
     Dim(QObject *parent = nullptr);
     ~Dim();
 
     InputContext *getInputContext(uint32_t id) { return inputContexts_.value(id); }
 
-    QList<QString> imAddons() const;
+    QList<QString> imAddonNames() const;
+    QMap<QString, InputMethodAddon *> imAddons() const;
 
     bool postEvent(Event &event);
 
+    int focusedInputContext() { return focusedInputContext_; }
+
+signals:
+    void focusedInputContextChanged(int focusedInputContext);
+
 private:
     QMap<uint32_t, InputContext *> inputContexts_;
-    uint32_t focusedIC_;
+    uint32_t focusedInputContext_;
     QMap<QString, InputMethodAddon *> inputMethodAddons_;
     QSet<FrontendAddon *> frontends_;
 

@@ -13,6 +13,7 @@ namespace deepin {
 namespace dim {
 
 class Dim;
+class InputContext;
 class InputMethodAddon;
 class InputMethodEntry;
 
@@ -21,14 +22,14 @@ class InputState : public QObject
     Q_OBJECT
 
 public:
-    InputState(Dim *dim);
+    InputState(InputContext *ic);
 
     inline const QString &currentIMAddon() const { return currentImAddon_; }
 
     void switchIMAddon();
 
 private:
-    Dim *dim_;
+    InputContext *ic_;
     QList<QString> ims_;
     int currentImIdx_;
     QString currentImAddon_;
