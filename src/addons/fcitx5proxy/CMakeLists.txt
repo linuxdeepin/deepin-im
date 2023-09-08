@@ -7,11 +7,11 @@ set(FCITX5PROXY_SOURCES
   BatchEvent.cpp
 )
 
-set_source_files_properties(${CMAKE_SOURCE_DIR}/misc/fcitx5-inputcontext.xml
+set_source_files_properties(${CMAKE_SOURCE_DIR}/misc/interfaces/fcitx5-inputcontext.xml
   PROPERTIES INCLUDE "BatchEvent.h"
 )
 qt_add_dbus_interface(IC_SOURCES
-  ${CMAKE_SOURCE_DIR}/misc/fcitx5-inputcontext.xml
+  ${CMAKE_SOURCE_DIR}/misc/interfaces/fcitx5-inputcontext.xml
   Fcitx5InputContextIface
 )
 

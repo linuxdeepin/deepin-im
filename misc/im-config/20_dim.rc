@@ -1,0 +1,33 @@
+# start dim
+# vim: set sts=4 expandtab:
+
+if [ "$IM_CONFIG_PHASE" = 2 ]; then
+    # start dim
+    if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+        /usr/bin/dim &
+    elif [ "$XDG_SESSION_TYPE" = "x11" ]; then
+        export DIM_WAYLAND_DISPLAY=imfakewl
+        /usr/bin/imwl &
+        /usr/bin/dim &
+    fi
+fi
+
+IM="dim"
+
+if [ -f "/usr/bin/fcitx5" ]; then
+    IM="fcitx5"
+elif [ -f "/usr/bin/ibus" ]; then
+    IM="ibus"
+fi
+
+if [ "$IM_CONFIG_PHASE" = 1 ]; then
+# set variables for the plain XIM
+XMODIFIERS=@im=${IM}
+
+# Let's assume all required modules are installed
+GTK_IM_MODULE=dim
+QT_IM_MODULE=dim
+CLUTTER_IM_MODULE=${IM}
+SDL_IM_MODULE=${IM}
+
+fi

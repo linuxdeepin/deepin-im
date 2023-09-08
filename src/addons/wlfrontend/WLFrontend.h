@@ -15,7 +15,7 @@
 
 namespace wl {
 namespace client {
-class Connection;
+class ConnectionBase;
 }
 } // namespace wl
 
@@ -34,8 +34,7 @@ public:
     ~WLFrontend();
 
 private:
-    std::unique_ptr<wl::client::Connection> wl_;
-
+    std::unique_ptr<wl::client::ConnectionBase> wl_;
     std::vector<std::shared_ptr<DimTextInputV1>> ims_;
 
     void init();

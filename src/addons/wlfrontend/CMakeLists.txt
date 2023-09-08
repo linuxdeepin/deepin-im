@@ -13,6 +13,7 @@ target_link_libraries(wlfrontend PRIVATE
   dimcore
   Qt6::Core
   Qt6::DBus
+  Qt6::GuiPrivate
   PkgConfig::wayland-client
   PkgConfig::xkbcommon
   wlc

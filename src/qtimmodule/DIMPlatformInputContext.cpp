@@ -39,7 +39,13 @@ DIMPlatformInputContext::DIMPlatformInputContext()
 
         wl_.reset(new wl::client::ConnectionRaw(wl_dpy));
     } else {
-        auto *wl = new wl::client::Connection("imfakewl");
+        QByteArray waylandDisplay = qgetenv("DIM_WAYLAND_DISPLAY");
+        const auto displayName = waylandDisplay.toStdString();
+        if (displayName.empty()) {
+            qWarning() << "failed to get display env";
+            return;
+        }
+        auto *wl = new wl::client::Connection(displayName);
         if (wl->display() == nullptr) {
             return;
         }

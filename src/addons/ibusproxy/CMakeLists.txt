@@ -8,12 +8,12 @@ set(IBUSPROXY_SOURCES
 )
 
 qt_add_dbus_interface(IC_SOURCES
-    ${CMAKE_SOURCE_DIR}/misc/org.freedesktop.IBus.InputContext.xml
+    ${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.IBus.InputContext.xml
     IBUSInputContextIface
 )
 
 qt_add_dbus_interface(IC_SOURCES
-    ${CMAKE_SOURCE_DIR}/misc/org.freedesktop.IBus.Portal.xml
+    ${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.IBus.Portal.xml
     IBUSPortIface
 )
 
