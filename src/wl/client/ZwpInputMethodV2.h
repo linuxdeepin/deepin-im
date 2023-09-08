@@ -18,13 +18,25 @@ class ZwpInputMethodV2 : public Type<zwp_input_method_v2>
 {
 public:
     ZwpInputMethodV2(zwp_input_method_v2 *val);
-    ~ZwpInputMethodV2();
+    virtual ~ZwpInputMethodV2();
 
-    std::shared_ptr<ZwpInputMethodKeyboardGrabV2> grabKeyboard();
+    zwp_input_method_keyboard_grab_v2 *grabKeyboard();
 
     void commit_string(const char *text);
     void set_preedit_string(const char *text, int32_t cursorBegin, int32_t cursorEnd);
     void commit(uint32_t serial);
+
+protected:
+    virtual void zwp_input_method_v2_activate() = 0;
+    virtual void zwp_input_method_v2_deactivate() = 0;
+    virtual void zwp_input_method_v2_surrounding_text(const char *text, uint32_t cursor, uint32_t anchor) = 0;
+    virtual void zwp_input_method_v2_text_change_cause(uint32_t cause) = 0;
+    virtual void zwp_input_method_v2_content_type(uint32_t hint, uint32_t purpose) = 0;
+    virtual void zwp_input_method_v2_done() = 0;
+    virtual void zwp_input_method_v2_unavailable() = 0;
+
+private:
+    static const zwp_input_method_v2_listener listener_;
 };
 
 } // namespace client

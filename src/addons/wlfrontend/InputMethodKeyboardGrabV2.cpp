@@ -4,9 +4,11 @@
 
 #include "InputMethodKeyboardGrabV2.h"
 
+#include "InputMethodV2.h"
+#include "WlInputContext.h"
 #include "common/common.h"
-#include "wayland-input-method-unstable-v2-client-protocol.h"
 #include "wl/client/ZwpInputMethodKeyboardGrabV2.h"
+#include "wl/client/ZwpVirtualKeyboardV1.h"
 
 #include <linux/input.h>
 
@@ -23,79 +25,15 @@ static int32_t getTimestamp()
     return time.tv_sec * 1000 + time.tv_nsec / (1000 * 1000);
 }
 
-InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(
-    Dim *dim,
-    const std::shared_ptr<wl::client::ZwpInputMethodV2> &im,
-    const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk)
-    : wl::client::ZwpInputMethodKeyboardGrabV2(im->get())
+InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(zwp_input_method_keyboard_grab_v2 *val, InputMethodV2* im)
+    : wl::client::ZwpInputMethodKeyboardGrabV2(val)
     , im_(im)
-    , vk_(vk)
-    , xkbContext_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
-{
-    zwp_input_method_v2_add_listener(im_->get(), &imListener_, this);
-}
-
-void InputMethodKeyboardGrabV2::activate(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
-{
-    qDebug() << "im activated:" << id();
-
-    grab_ = im_->grabKeyboard();
-    zwp_input_method_keyboard_grab_v2_add_listener(grab_->get(), &grabListener_, this);
-
-    focusIn();
-}
-
-void InputMethodKeyboardGrabV2::deactivate(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
-{
-    qDebug() << "im deactivated:" << id();
-
-    state_.reset(new State);
-    grab_.reset();
-
-    focusOut();
-}
-
-void InputMethodKeyboardGrabV2::surroundingText(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
-    [[maybe_unused]] const char *text,
-    [[maybe_unused]] uint32_t cursor,
-    [[maybe_unused]] uint32_t anchor)
-{
-    qDebug() << "im surroundingText:" << id();
-}
-
-void InputMethodKeyboardGrabV2::textChangeCause(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
-    [[maybe_unused]] uint32_t cause)
-{
-    qDebug() << "im textChangeCause:" << id();
-}
-
-void InputMethodKeyboardGrabV2::contentType(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2,
-    [[maybe_unused]] uint32_t hint,
-    [[maybe_unused]] uint32_t purpose)
-{
-    qDebug() << "im contentType:" << id();
-}
-
-void InputMethodKeyboardGrabV2::done(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
 {
 }
 
-void InputMethodKeyboardGrabV2::unavailable(
-    [[maybe_unused]] struct zwp_input_method_v2 *zwp_input_method_v2)
-{
-}
-
-void InputMethodKeyboardGrabV2::keymap(
-    [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
-    uint32_t format,
-    int32_t fd,
-    uint32_t size)
+void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_keymap(uint32_t format,
+                                                                         int32_t fd,
+                                                                         uint32_t size)
 {
     qDebug() << "grab keymap:" << format << fd << size;
 
@@ -108,172 +46,140 @@ void InputMethodKeyboardGrabV2::keymap(
         return;
     }
 
-    xkbKeymap_.reset(xkb_keymap_new_from_string(xkbContext_.get(),
+    im_->ic_->xkbKeymap_.reset(xkb_keymap_new_from_string(im_->ic_->xkbContext_.get(),
                                                 static_cast<const char *>(ptr),
                                                 XKB_KEYMAP_FORMAT_TEXT_V1,
                                                 XKB_KEYMAP_COMPILE_NO_FLAGS));
     munmap(ptr, size);
 
-    if (!xkbKeymap_) {
+    if (!im_->ic_->xkbKeymap_) {
         return;
     }
 
-    vk_->keymap(format, fd, size);
+    im_->vk_->keymap(format, fd, size);
 
-    xkbState_.reset(xkb_state_new(xkbKeymap_.get()));
-    if (!xkbState_) {
-        xkbKeymap_.reset();
+    im_->ic_->xkbState_.reset(xkb_state_new(im_->ic_->xkbKeymap_.get()));
+    if (!im_->ic_->xkbState_) {
+        im_->ic_->xkbKeymap_.reset();
         return;
     }
 
     modifierMask_[static_cast<uint8_t>(Modifiers::Shift)] = 1
-        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Shift");
+        << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Shift");
     modifierMask_[static_cast<uint8_t>(Modifiers::Lock)] = 1
-        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Lock");
+        << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Lock");
     modifierMask_[static_cast<uint8_t>(Modifiers::Control)] = 1
-        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Control");
+        << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Control");
     modifierMask_[static_cast<uint8_t>(Modifiers::Mod1)] = 1
-        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod1");
+        << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Mod1");
     modifierMask_[static_cast<uint8_t>(Modifiers::Mod2)] = 1
-        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod2");
+        << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Mod2");
     modifierMask_[static_cast<uint8_t>(Modifiers::Mod3)] = 1
-        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod3");
+        << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Mod3");
     modifierMask_[static_cast<uint8_t>(Modifiers::Mod4)] = 1
-        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod4");
+        << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Mod4");
     modifierMask_[static_cast<uint8_t>(Modifiers::Mod5)] = 1
-        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Mod5");
+        << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Mod5");
     modifierMask_[static_cast<uint8_t>(Modifiers::Alt)] = 1
-        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Alt");
+        << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Alt");
     modifierMask_[static_cast<uint8_t>(Modifiers::Meta)] = 1
-        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Meta");
+        << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Meta");
     modifierMask_[static_cast<uint8_t>(Modifiers::Super)] = 1
-        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Super");
+        << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Super");
     modifierMask_[static_cast<uint8_t>(Modifiers::Hyper)] = 1
-        << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Hyper");
+        << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Hyper");
 }
 
-void InputMethodKeyboardGrabV2::key(
-    [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
-    uint32_t serial,
-    uint32_t time,
-    uint32_t key,
-    uint32_t state)
+void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_key(uint32_t serial,
+                                                                      uint32_t time,
+                                                                      uint32_t key,
+                                                                      uint32_t state)
 {
     qDebug() << "grab key:" << serial << time << key << state;
-    assert(xkbState_);
+    assert(im_->ic_->xkbState_);
 
-    xkb_keysym_t sym = xkb_state_key_get_one_sym(xkbState_.get(), key);
-    InputContextKeyEvent ke(this,
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(im_->ic_->xkbState_.get(), key);
+    InputContextKeyEvent ke(im_->ic_.get(),
                             static_cast<uint32_t>(sym),
                             key,
-                            state_->modifiers,
+                            im_->ic_->state_->modifiers,
                             state == WL_KEYBOARD_KEY_STATE_RELEASED,
                             time);
-    bool res = keyEvent(ke);
+    bool res = im_->ic_->keyEvent(ke);
     if (!res) {
-        vk_->key(getTimestamp(), key, state);
+        im_->vk_->key(getTimestamp(), key, state);
         return;
     }
 
-    auto list = getAndClearBatchList();
-    for (auto &e : list) {
-        if (std::holds_alternative<ForwardKey>(e)) {
-            auto forwardKey = std::get<ForwardKey>(e);
-            vk_->key(getTimestamp(),
-                     forwardKey.keycode + XKB_HISTORICAL_OFFSET,
-                     forwardKey.pressed ? WL_KEYBOARD_KEY_STATE_PRESSED
-                                        : WL_KEYBOARD_KEY_STATE_RELEASED);
-            continue;
-        }
-
-        if (std::holds_alternative<PreeditInfo>(e)) {
-            auto preeditInfo = std::get<PreeditInfo>(e);
-            im_->set_preedit_string(preeditInfo.text.toStdString().c_str(),
-                                    preeditInfo.cursorBegin,
-                                    preeditInfo.cursorEnd);
-            continue;
-        }
-
-        if (std::holds_alternative<CommitString>(e)) {
-            auto text = std::get<CommitString>(e).text;
-            im_->commit_string(text.toStdString().c_str());
-            continue;
-        }
-    }
-
-    if (!list.empty()) {
-        im_->commit(state_->serial++);
+    if (!im_->ic_->isAsyncMode()) {
+        im_->ic_->keyEventDispatch();
     }
 }
 
-void InputMethodKeyboardGrabV2::modifiers(
-    [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
-    uint32_t serial,
-    uint32_t mods_depressed,
-    uint32_t mods_latched,
-    uint32_t mods_locked,
-    uint32_t group)
+void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_modifiers(uint32_t serial,
+                                                                            uint32_t mods_depressed,
+                                                                            uint32_t mods_latched,
+                                                                            uint32_t mods_locked,
+                                                                            uint32_t group)
 {
     qDebug() << "grab modifiers:" << serial << mods_depressed << mods_latched << mods_locked
              << group;
 
-    if (xkbState_) {
-        xkb_state_component comp = xkb_state_update_mask(xkbState_.get(),
+    if (im_->ic_->xkbState_) {
+        xkb_state_component comp = xkb_state_update_mask(im_->ic_->xkbState_.get(),
                                                          mods_depressed,
                                                          mods_latched,
                                                          mods_locked,
                                                          0,
                                                          0,
                                                          group);
-        xkb_mod_mask_t mask = xkb_state_serialize_mods(xkbState_.get(), comp);
-        state_->modifiers = 0;
+        xkb_mod_mask_t mask = xkb_state_serialize_mods(im_->ic_->xkbState_.get(), comp);
+        im_->ic_->state_->modifiers = 0;
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Shift)]) {
-            state_->modifiers |= SHIFT_MASK;
+            im_->ic_->state_->modifiers |= SHIFT_MASK;
         }
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Lock)]) {
-            state_->modifiers |= LOCK_MASK;
+            im_->ic_->state_->modifiers |= LOCK_MASK;
         }
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Control)]) {
-            state_->modifiers |= CONTROL_MASK;
+            im_->ic_->state_->modifiers |= CONTROL_MASK;
         }
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod1)]) {
-            state_->modifiers |= MOD1_MASK;
+            im_->ic_->state_->modifiers |= MOD1_MASK;
         }
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod2)]) {
-            state_->modifiers |= MOD2_MASK;
+            im_->ic_->state_->modifiers |= MOD2_MASK;
         }
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod3)]) {
-            state_->modifiers |= MOD3_MASK;
+            im_->ic_->state_->modifiers |= MOD3_MASK;
         }
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod4)]) {
-            state_->modifiers |= MOD4_MASK;
+            im_->ic_->state_->modifiers |= MOD4_MASK;
         }
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Mod5)]) {
-            state_->modifiers |= MOD5_MASK;
+            im_->ic_->state_->modifiers |= MOD5_MASK;
         }
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Alt)]) {
-            state_->modifiers |= ALT_MASK;
+            im_->ic_->state_->modifiers |= ALT_MASK;
         }
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Meta)]) {
-            state_->modifiers |= META_MASK;
+            im_->ic_->state_->modifiers |= META_MASK;
         }
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Super)]) {
-            state_->modifiers |= SUPER_MASK;
+            im_->ic_->state_->modifiers |= SUPER_MASK;
         }
         if (mask & modifierMask_[static_cast<uint8_t>(Modifiers::Hyper)]) {
-            state_->modifiers |= HYPER_MASK;
+            im_->ic_->state_->modifiers |= HYPER_MASK;
         }
     }
 
-    if (vk_) {
-        vk_->modifiers(mods_depressed, mods_latched, mods_locked, group);
+    if (im_->vk_) {
+        im_->vk_->modifiers(mods_depressed, mods_latched, mods_locked, group);
     }
 }
 
-void InputMethodKeyboardGrabV2::repeatInfo(
-    [[maybe_unused]] struct zwp_input_method_keyboard_grab_v2 *zwp_input_method_keyboard_grab_v2,
-    int32_t rate,
-    int32_t delay)
+void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_repeat_info(int32_t rate,
+                                                                              int32_t delay)
 {
     qDebug() << "grab repeatInfo:" << rate << delay;
 }

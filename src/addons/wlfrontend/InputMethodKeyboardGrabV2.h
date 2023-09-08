@@ -8,8 +8,6 @@
 #include "common/common.h"
 #include "wayland-input-method-unstable-v2-client-protocol.h"
 #include "wl/client/ZwpInputMethodKeyboardGrabV2.h"
-#include "wl/client/ZwpInputMethodV2.h"
-#include "wl/client/ZwpVirtualKeyboardV1.h"
 
 #include <dimcore/InputContext.h>
 #include <xkbcommon/xkbcommon.h>
@@ -20,12 +18,12 @@ namespace org {
 namespace deepin {
 namespace dim {
 
+class InputMethodV2;
+
 class InputMethodKeyboardGrabV2 : public wl::client::ZwpInputMethodKeyboardGrabV2
 {
 public:
-    InputMethodKeyboardGrabV2(Dim *dim,
-                              const std::shared_ptr<wl::client::ZwpInputMethodV2> &im,
-                              const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk);
+    InputMethodKeyboardGrabV2(zwp_input_method_keyboard_grab_v2 *val, InputMethodV2 *im);
 
 protected:
     void zwp_input_method_keyboard_grab_v2_keymap(uint32_t format, int32_t fd, uint32_t size) override;
@@ -34,15 +32,7 @@ protected:
     void zwp_input_method_keyboard_grab_v2_repeat_info(int32_t rate, int32_t delay) override;
 
 private:
-    static const zwp_input_method_v2_listener imListener_;
-    static const zwp_input_method_keyboard_grab_v2_listener grabListener_;
-    const std::shared_ptr<wl::client::ZwpInputMethodV2> im_;
-    const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> vk_;
-    std::shared_ptr<wl::client::ZwpInputMethodKeyboardGrabV2> grab_;
-
-    std::unique_ptr<xkb_context, Deleter<xkb_context_unref>> xkbContext_;
-    std::unique_ptr<xkb_keymap, Deleter<xkb_keymap_unref>> xkbKeymap_;
-    std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> xkbState_;
+    InputMethodV2 *im_;
 
     uint32_t modifierMask_[static_cast<uint8_t>(Modifiers::CNT)];
 };
