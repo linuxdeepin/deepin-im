@@ -1,8 +1,12 @@
 set(WLFRONTEND_SOURCES
   WLFrontend.h
   WLFrontend.cpp
-  DimTextInputV1.h
-  DimTextInputV1.cpp
+  WlInputContext.h
+  WlInputContext.cpp
+  InputMethodV2.h
+  InputMethodV2.cpp
+  InputMethodKeyboardGrabV2.h
+  InputMethodKeyboardGrabV2.cpp
 )
 
 add_library(wlfrontend SHARED

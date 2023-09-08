@@ -21,7 +21,7 @@ public:
     ZwpVirtualKeyboardManagerV1(zwp_virtual_keyboard_manager_v1 *val);
     ~ZwpVirtualKeyboardManagerV1();
 
-    std::shared_ptr<ZwpVirtualKeyboardV1> create_virtual_keyboard(const std::shared_ptr<Seat> &seat);
+    zwp_virtual_keyboard_v1 *create_virtual_keyboard(const std::shared_ptr<Seat> &seat);
 };
 
 } // namespace client

@@ -8,9 +8,20 @@
 
 using namespace wl::client;
 
+const zwp_input_method_v2_listener ZwpInputMethodV2::listener_ = {
+    ListenerCallbackWrapper<&ZwpInputMethodV2::zwp_input_method_v2_activate>::func,
+    ListenerCallbackWrapper<&ZwpInputMethodV2::zwp_input_method_v2_deactivate>::func,
+    ListenerCallbackWrapper<&ZwpInputMethodV2::zwp_input_method_v2_surrounding_text>::func,
+    ListenerCallbackWrapper<&ZwpInputMethodV2::zwp_input_method_v2_text_change_cause>::func,
+    ListenerCallbackWrapper<&ZwpInputMethodV2::zwp_input_method_v2_content_type>::func,
+    ListenerCallbackWrapper<&ZwpInputMethodV2::zwp_input_method_v2_done>::func,
+    ListenerCallbackWrapper<&ZwpInputMethodV2::zwp_input_method_v2_unavailable>::func,
+};
+
 ZwpInputMethodV2::ZwpInputMethodV2(zwp_input_method_v2 *val)
     : Type(val)
 {
+    zwp_input_method_v2_add_listener(get(), &listener_, this);
 }
 
 ZwpInputMethodV2::~ZwpInputMethodV2()
@@ -18,9 +29,9 @@ ZwpInputMethodV2::~ZwpInputMethodV2()
     zwp_input_method_v2_destroy(get());
 }
 
-std::shared_ptr<ZwpInputMethodKeyboardGrabV2> ZwpInputMethodV2::grabKeyboard()
+zwp_input_method_keyboard_grab_v2 *ZwpInputMethodV2::grabKeyboard()
 {
-    return std::make_shared<ZwpInputMethodKeyboardGrabV2>(zwp_input_method_v2_grab_keyboard(get()));
+    return zwp_input_method_v2_grab_keyboard(get());
 }
 
 void ZwpInputMethodV2::commit_string(const char *text)

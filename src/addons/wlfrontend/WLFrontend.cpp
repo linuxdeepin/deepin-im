@@ -4,11 +4,13 @@
 
 #include "WLFrontend.h"
 
+#include "InputMethodV2.h"
 #include "wl/client/Connection.h"
 #include "wl/client/ConnectionRaw.h"
 #include "wl/client/Seat.h"
 #include "wl/client/ZwpInputMethodManagerV2.h"
 #include "wl/client/ZwpVirtualKeyboardManagerV1.h"
+#include "wl/client/ZwpVirtualKeyboardV1.h"
 
 #include <dimcore/Dim.h>
 #include <qpa/qplatformnativeinterface.h>
@@ -76,10 +78,10 @@ void WLFrontend::reloadSeats()
     auto vkManager = wl_->getGlobal<wl::client::ZwpVirtualKeyboardManagerV1>();
 
     for (auto &seat : seats) {
-        auto vk = vkManager->create_virtual_keyboard(seat);
-        auto im = imManager->get_input_method(seat);
+        auto vk = std::make_shared<wl::client::ZwpVirtualKeyboardV1>(vkManager->create_virtual_keyboard(seat));
+        auto im = std::make_shared<InputMethodV2>(imManager->get_input_method(seat), dim(), vk);
 
-        ims_.emplace_back(std::make_shared<DimTextInputV1>(dim(), im, vk));
+        ims_.emplace(seat, im);
     }
 
     wl_->flush();

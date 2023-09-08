@@ -21,7 +21,7 @@ public:
     ZwpInputMethodManagerV2(zwp_input_method_manager_v2 *val);
     ~ZwpInputMethodManagerV2();
 
-    std::shared_ptr<ZwpInputMethodV2> get_input_method(const std::shared_ptr<Seat> &seat);
+    zwp_input_method_v2 *get_input_method(const std::shared_ptr<Seat> &seat);
 };
 
 } // namespace client
