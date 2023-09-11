@@ -25,6 +25,7 @@ add_library(ibusproxy MODULE
 target_compile_definitions(ibusproxy PRIVATE -DQT_NO_KEYWORDS)
 
 target_link_libraries(ibusproxy PRIVATE
+    dimcore
     Qt::Core
     Qt::DBus
     Qt::Gui

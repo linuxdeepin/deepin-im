@@ -4,6 +4,7 @@
 
 #include "IBusProxy.h"
 
+#include "dimcore/Dim.h"
 #include "dimcore/InputContext.h"
 #include "ibustypes.h"
 
@@ -28,6 +29,8 @@ DimIBusProxy::DimIBusProxy(Dim *dim)
     , dbusConn_(QDBusConnection::sessionBus())
     , serviceWatcher_(new QDBusServiceWatcher(
           IBUS_PORTAL_SERVICE, dbusConn_, QDBusServiceWatcher::WatchForOwnerChange, this))
+    , portalBus_(nullptr)
+
 {
     if (qEnvironmentVariableIsSet("IBUS_ENABLE_SYNC_MODE")) {
         bool ok;
@@ -36,7 +39,18 @@ DimIBusProxy::DimIBusProxy(Dim *dim)
             useSyncMode_ = true;
     }
 
-    init();
+    connectToBus();
+
+    timer_.setSingleShot(true);
+    connect(&timer_, &QTimer::timeout, this, &DimIBusProxy::connectToBus);
+    connect(serviceWatcher_,
+            &QDBusServiceWatcher::serviceRegistered,
+            this,
+            &DimIBusProxy::busRegistered);
+    connect(serviceWatcher_,
+            &QDBusServiceWatcher::serviceUnregistered,
+            this,
+            &DimIBusProxy::busUnregistered);
 }
 
 QString DimIBusProxy::getSocketPath()
@@ -73,7 +87,7 @@ QString DimIBusProxy::getSocketPath()
         + QString::fromLocal8Bit(displayNumber);
 }
 
-void DimIBusProxy::init()
+void DimIBusProxy::connectToBus()
 {
     if (socketWatcher_.files().size() == 0) {
         QString socketPath = getSocketPath();
@@ -81,32 +95,19 @@ void DimIBusProxy::init()
         if (file.open(QFile::ReadOnly)) {
             socketWatcher_.addPath(socketPath);
             connect(&socketWatcher_,
-                    SIGNAL(fileChanged(QString)),
+                    &QFileSystemWatcher::fileChanged,
                     this,
-                    SLOT(socketChanged(QString)));
+                    &DimIBusProxy::socketChanged);
         }
     }
 
-    portalBus_ = new OrgFreedesktopIBusPortalInterface(IBUS_PORTAL_SERVICE,
-                                                       IBUS_PORTAL_SERVICE_PATH,
-                                                       dbusConn_,
-                                                       this);
-
-    timer_.setSingleShot(true);
-    connect(&timer_, &QTimer::timeout, this, &DimIBusProxy::connectToBus);
-    connect(serviceWatcher_,
-            &QDBusServiceWatcher::serviceRegistered,
-            this,
-            &DimIBusProxy::busRegistered);
-    connect(serviceWatcher_,
-            &QDBusServiceWatcher::serviceUnregistered,
-            this,
-            &DimIBusProxy::busUnregistered);
-}
-
-void DimIBusProxy::connectToBus()
-{
-    init();
+    auto ibusPort = new OrgFreedesktopIBusPortalInterface(IBUS_PORTAL_SERVICE,
+                                                          IBUS_PORTAL_SERVICE_PATH,
+                                                          dbusConn_,
+                                                          this);
+    if (ibusPort->isValid()) {
+        portalBus_ = ibusPort;
+    }
 }
 
 void DimIBusProxy::socketChanged(const QString &str)
@@ -121,6 +122,10 @@ void DimIBusProxy::busRegistered(const QString &str)
 {
     Q_UNUSED(str);
     connectToBus();
+    const auto &inputContexts = dim()->getInputContexts();
+    for (auto i = inputContexts.begin(); i != inputContexts.end(); ++i) {
+        createFcitxInputContext(i.value());
+    }
 }
 
 void DimIBusProxy::busUnregistered(const QString &str)
@@ -128,7 +133,10 @@ void DimIBusProxy::busUnregistered(const QString &str)
     Q_UNUSED(str);
 }
 
-DimIBusProxy::~DimIBusProxy() { }
+DimIBusProxy::~DimIBusProxy()
+{
+    iBusICMap_.clear();
+}
 
 void DimIBusProxy::initInputMethods()
 {
@@ -142,7 +150,7 @@ QList<InputMethodEntry> DimIBusProxy::getInputMethods()
 
 void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 {
-    if (!ic || !portalBus_) {
+    if (!ic || !isIBusPortalInterfaceValid()) {
         return;
     }
 

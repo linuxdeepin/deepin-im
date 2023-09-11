@@ -6,6 +6,7 @@
 
 #include "BatchEvent.h"
 #include "DBusProvider.h"
+#include "dimcore/Dim.h"
 #include "dimcore/Events.h"
 #include "dimcore/InputContext.h"
 
@@ -60,11 +61,19 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
 {
     registerBatchEventQtDBusTypes();
 
-    connect(dbusProvider_, &DBusProvider::availabilityChanged, this, [this](bool available) {
+    connect(dbusProvider_, &DBusProvider::availabilityChanged, this, [dim, this](bool available) {
         if (available_ != available) {
             available_ = available;
 
             updateInputMethods();
+
+            if (available_) {
+                const auto &inputContexts = dim->getInputContexts();
+
+                for (auto i = inputContexts.begin(); i != inputContexts.end(); ++i) {
+                    createFcitxInputContext(i.value());
+                }
+            }
         }
     });
 }
