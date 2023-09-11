@@ -38,6 +38,8 @@ public:
     Dim(QObject *parent = nullptr);
     ~Dim();
 
+    QMap<uint32_t, InputContext *> getInputContexts() { return inputContexts_; }
+
     InputContext *getInputContext(uint32_t id) { return inputContexts_.value(id); }
 
     QList<QString> imAddonNames() const;
@@ -47,7 +49,7 @@ public:
 
     int focusedInputContext() { return focusedInputContext_; }
 
-signals:
+Q_SIGNALS:
     void focusedInputContextChanged(int focusedInputContext);
 
 private:

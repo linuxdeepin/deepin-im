@@ -31,13 +31,14 @@ public:
 private:
     QString getSocketPath();
 
+    inline bool isIBusPortalInterfaceValid() { return portalBus_ && portalBus_->isValid(); }
+
     inline bool isICDBusInterfaceValid(uint32_t id)
     {
         return !iBusICMap_.isEmpty() && iBusICMap_.contains(id) && iBusICMap_[id]->isValid();
     }
 
 public Q_SLOTS:
-    void init();
     void connectToBus();
     void socketChanged(const QString &str);
     void busRegistered(const QString &str);

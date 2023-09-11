@@ -41,13 +41,13 @@ private:
         return !icMap_.isEmpty() && icMap_.contains(id) && icMap_[id]->isValid();
     }
 
+    void updateInputMethods();
+
 private:
     DBusProvider *dbusProvider_;
     bool available_;
     QMap<uint32_t, org::fcitx::Fcitx::InputContext1 *> icMap_;
     QList<InputMethodEntry> inputMethods_;
-
-    void updateInputMethods();
 };
 
 } // namespace dim
