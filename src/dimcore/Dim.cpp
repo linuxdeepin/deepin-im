@@ -138,6 +138,10 @@ bool Dim::postEvent(Event &event)
     case EventType::InputContextCursorRectChanged:
         // TODO:
         break;
+    case EventType::InputContextSetSurroundingText:
+        postInputContextSetSurroundingTextEvent(
+            reinterpret_cast<InputContextSetSurroundingTextEvent &>(event));
+        break;
     }
 
     return false;
@@ -223,4 +227,18 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
     auto *addon = j.value();
 
     return addon->keyEvent(event);
+}
+
+void Dim::postInputContextSetSurroundingTextEvent(InputContextSetSurroundingTextEvent &event)
+{
+
+    auto &inputState = event.ic()->inputState();
+    const QString &addonKey = inputState.currentIMAddon();
+    auto j = inputMethodAddons_.find(addonKey);
+    if (j == inputMethodAddons_.end()) {
+        return;
+    }
+    auto *addon = j.value();
+
+    addon->setSurroundingText(event);
 }

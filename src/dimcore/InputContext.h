@@ -61,6 +61,7 @@ public:
     void updatePreedit(const QString &text, int32_t cursorBegin, int32_t cursorEnd);
     void updateCommitString(const QString &text);
     void forwardKey(uint32_t keycode, bool pressed);
+    void setSurroundingText(const QString &text, uint32_t cursor, uint32_t anchor);
 
 Q_SIGNALS:
     void imAddonSwitched(const QString &imAddon);

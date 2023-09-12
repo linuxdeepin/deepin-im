@@ -34,13 +34,26 @@ void ZwpInputMethodV2::send_deactivate(struct wl_resource *resource)
     zwp_input_method_v2_send_deactivate(resource);
 }
 
-void ZwpInputMethodV2::send_surrounding_text(struct wl_resource *resource, const char *text, uint32_t cursor, uint32_t anchor) {}
+void ZwpInputMethodV2::send_surrounding_text(struct wl_resource *resource, const char *text, uint32_t cursor, uint32_t anchor) {
+    zwp_input_method_v2_send_surrounding_text(resource, text, cursor, anchor);
+}
 
-void ZwpInputMethodV2::send_text_change_cause(struct wl_resource *resource, uint32_t cause) {}
+void ZwpInputMethodV2::send_text_change_cause(struct wl_resource *resource, uint32_t cause) {
+    zwp_input_method_v2_send_text_change_cause(resource, cause);
+}
 
-void ZwpInputMethodV2::send_content_type(struct wl_resource *resource, uint32_t hint, uint32_t purpose) {}
+void ZwpInputMethodV2::send_content_type(struct wl_resource *resource, uint32_t hint, uint32_t purpose) {
+    zwp_input_method_v2_send_content_type(resource, hint, purpose);
 
-void ZwpInputMethodV2::send_done(struct wl_resource *resource) {}
+}
 
-void ZwpInputMethodV2::send_unavailable(struct wl_resource *resource) {}
+void ZwpInputMethodV2::send_done(struct wl_resource *resource) {
+
+    zwp_input_method_v2_send_done(resource);
+}
+
+void ZwpInputMethodV2::send_unavailable(struct wl_resource *resource) {
+
+    zwp_input_method_v2_send_unavailable(resource);
+}
 

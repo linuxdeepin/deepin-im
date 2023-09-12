@@ -244,6 +244,17 @@ bool Fcitx5Proxy::keyEvent(InputContextKeyEvent &keyEvent)
     return true;
 }
 
+void Fcitx5Proxy::setSurroundingText(InputContextSetSurroundingTextEvent &event)
+{
+    auto id = event.ic()->id();
+
+    if (!isICDBusInterfaceValid(id)) {
+        return;
+    }
+
+    icMap_[id]->SetSurroundingText(event.text, event.cursor, event.anchor);
+}
+
 void Fcitx5Proxy::updateInputMethods()
 {
     if (!available_) {

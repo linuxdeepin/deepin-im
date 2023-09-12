@@ -258,3 +258,15 @@ bool DimIBusProxy::keyEvent(InputContextKeyEvent &keyEvent)
 
     return result;
 }
+
+void DimIBusProxy::setSurroundingText(InputContextSetSurroundingTextEvent &event)
+{
+    auto id = event.ic()->id();
+    if (!isICDBusInterfaceValid(id)) {
+        return;
+    }
+
+    iBusICMap_[id]->SetSurroundingText(QDBusVariant(QVariant::fromValue(event.text)),
+                                       event.cursor,
+                                       event.anchor);
+}

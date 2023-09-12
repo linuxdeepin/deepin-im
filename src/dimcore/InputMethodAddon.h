@@ -14,6 +14,8 @@ namespace org {
 namespace deepin {
 namespace dim {
 
+class InputContextSetSurroundingTextEvent;
+
 class InputMethodAddon : public Addon
 {
     Q_OBJECT
@@ -25,6 +27,7 @@ public:
     virtual QList<InputMethodEntry> getInputMethods() = 0;
     virtual void initInputMethods() = 0;
     virtual bool keyEvent(InputContextKeyEvent &keyEvent) = 0;
+    virtual void setSurroundingText(InputContextSetSurroundingTextEvent &event) = 0;
 
     const QString &iconName() { return iconName_; }
 
