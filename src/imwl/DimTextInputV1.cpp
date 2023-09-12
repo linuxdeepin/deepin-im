@@ -10,6 +10,8 @@
 
 #include <experimental/unordered_map>
 
+#include <QDebug>
+
 DimTextInputV1::DimTextInputV1(Seat *seat)
     : seat_(seat)
 {
@@ -138,17 +140,23 @@ void DimTextInputV1::zwp_dim_text_input_v1_set_surrounding_text(wl::server::Reso
                                                                 int32_t cursor,
                                                                 int32_t anchor)
 {
+    auto im2 = seat_->getInputMethodV2();
+    im2->sendSurroundingText(text, cursor, anchor);
 }
 
 void DimTextInputV1::zwp_dim_text_input_v1_set_text_change_cause(wl::server::Resource *resource,
                                                                  uint32_t cause)
 {
+    auto im2 = seat_->getInputMethodV2();
+    im2->sendTextChangeCause(cause);
 }
 
 void DimTextInputV1::zwp_dim_text_input_v1_set_content_type(wl::server::Resource *resource,
                                                             uint32_t hint,
                                                             uint32_t purpose)
 {
+    auto im2 = seat_->getInputMethodV2();
+    im2->sendContentType(hint, purpose);
 }
 
 void DimTextInputV1::zwp_dim_text_input_v1_set_cursor_rectangle(
@@ -156,4 +164,8 @@ void DimTextInputV1::zwp_dim_text_input_v1_set_cursor_rectangle(
 {
 }
 
-void DimTextInputV1::zwp_dim_text_input_v1_commit(wl::server::Resource *resource) { }
+void DimTextInputV1::zwp_dim_text_input_v1_commit(wl::server::Resource *resource)
+{
+    auto im2 = seat_->getInputMethodV2();
+    im2->sendDone();
+}

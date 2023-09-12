@@ -45,12 +45,27 @@ void InputMethodV2::zwp_input_method_v2_surrounding_text(const char *text,
                                                          uint32_t cursor,
                                                          uint32_t anchor)
 {
+    penddingEvents_.emplace_back(SurroundingText{ QString::fromUtf8(text), cursor, anchor });
 }
 
-void InputMethodV2::zwp_input_method_v2_text_change_cause(uint32_t cause) { }
+void InputMethodV2::zwp_input_method_v2_text_change_cause(uint32_t cause)
+{
+    penddingEvents_.emplace_back(TextChangeCause{ cause });
+}
 
-void InputMethodV2::zwp_input_method_v2_content_type(uint32_t hint, uint32_t purpose) { }
+void InputMethodV2::zwp_input_method_v2_content_type(uint32_t hint, uint32_t purpose)
+{
+    penddingEvents_.emplace_back(ContentType{ hint, purpose });
+}
 
-void InputMethodV2::zwp_input_method_v2_done() { }
+void InputMethodV2::zwp_input_method_v2_done()
+{
+    for (auto &event : penddingEvents_) {
+        if (std::holds_alternative<SurroundingText>(event)) {
+            auto e = std::get<SurroundingText>(event);
+            ic_->setSurroundingText(e.text, e.cursor, e.anchor);
+        }
+    }
+}
 
 void InputMethodV2::zwp_input_method_v2_unavailable() { }

@@ -4,10 +4,9 @@
 
 #include "InputMethodV2.h"
 
-#include "Seat.h"
-#include "InputMethodKeyboardGrabV2.h"
-#include "TextInputV3.h"
 #include "DimTextInputV1.h"
+#include "InputMethodKeyboardGrabV2.h"
+#include "Seat.h"
 
 InputMethodV2::InputMethodV2(Seat *seat)
     : seat_(seat)
@@ -30,6 +29,37 @@ void InputMethodV2::sendActivate()
     const auto resources = resourceMap();
     for (auto &[client, resource] : resources) {
         send_activate(resource->handle);
+    }
+}
+
+void InputMethodV2::sendSurroundingText(const char *text, int32_t cursor, int32_t anchor)
+{
+    const auto resources = resourceMap();
+    for (auto &[client, resource] : resources) {
+        send_surrounding_text(resource->handle, text, cursor, anchor);
+    }
+}
+
+void InputMethodV2::sendTextChangeCause(uint32_t cause)
+{
+    const auto resources = resourceMap();
+    for (auto &[client, resource] : resources) {
+        send_text_change_cause(resource->handle, cause);
+    }
+}
+
+void InputMethodV2::sendContentType(uint32_t hint, uint32_t purpose)
+{
+    const auto resources = resourceMap();
+    for (auto &[client, resource] : resources) {
+        send_content_type(resource->handle, hint, purpose);
+    }
+}
+
+void InputMethodV2::sendDone() {
+    const auto resources = resourceMap();
+    for (auto &[client, resource] : resources) {
+        send_done(resource->handle);
     }
 }
 

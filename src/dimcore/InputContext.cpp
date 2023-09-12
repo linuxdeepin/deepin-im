@@ -68,6 +68,12 @@ void InputContext::forwardKey(uint32_t keycode, bool pressed)
     }
 }
 
+void InputContext::setSurroundingText(const QString &text, uint32_t cursor, uint32_t anchor)
+{
+    InputContextSetSurroundingTextEvent event(this, text, cursor, anchor);
+    dim_->postEvent(event);
+}
+
 std::list<std::variant<ForwardKey, PreeditInfo, CommitString>> InputContext::getAndClearBatchList()
 {
     decltype(batchList_) tmp;

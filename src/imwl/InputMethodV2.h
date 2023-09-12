@@ -27,6 +27,10 @@ public:
 
     void sendDeactivate();
     void sendActivate();
+    void sendSurroundingText(const char *text, int32_t cursor, int32_t anchor);
+    void sendTextChangeCause(uint32_t cause);
+    void sendContentType(uint32_t hint, uint32_t purpose);
+    void sendDone();
 
 protected:
     void zwp_input_method_v2_commit_string(wl::server::Resource *resource,

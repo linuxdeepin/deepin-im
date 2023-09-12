@@ -5,6 +5,8 @@
 #ifndef EVENTS_H
 #define EVENTS_H
 
+#include <QString>
+
 #include <stdint.h>
 
 namespace org {
@@ -20,6 +22,7 @@ enum class EventType {
     InputContextUnfocused,
     InputContextKeyEvent,
     InputContextCursorRectChanged,
+    InputContextSetSurroundingText,
 };
 
 class Event
@@ -65,6 +68,19 @@ private:
     uint32_t state_;
     bool isRelease_;
     uint32_t time_;
+};
+
+class InputContextSetSurroundingTextEvent : public Event
+{
+public:
+    InputContextSetSurroundingTextEvent(InputContext *ic,
+                                        const QString &surroundingText,
+                                        uint32_t cursor,
+                                        uint32_t anchor);
+
+    const QString text;
+    const uint32_t cursor;
+    const uint32_t anchor;
 };
 
 } // namespace dim

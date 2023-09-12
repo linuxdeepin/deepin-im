@@ -29,6 +29,7 @@ class FrontendAddon;
 class Addon;
 class Event;
 class InputContextKeyEvent;
+class InputContextSetSurroundingTextEvent;
 
 class Dim : public QObject
 {
@@ -66,6 +67,7 @@ private:
     void postInputContextFocused(Event &event);
     void postInputContextUnfocused(Event &event);
     bool postInputContextKeyEvent(InputContextKeyEvent &event);
+    void postInputContextSetSurroundingTextEvent(InputContextSetSurroundingTextEvent &event);
 };
 
 } // namespace dim
