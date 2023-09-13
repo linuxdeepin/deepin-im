@@ -2,14 +2,7 @@
 # vim: set sts=4 expandtab:
 
 if [ "$IM_CONFIG_PHASE" = 2 ]; then
-    # start dim
-    if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
-        /usr/bin/dim &
-    elif [ "$XDG_SESSION_TYPE" = "x11" ]; then
-        export DIM_WAYLAND_DISPLAY=imfakewl
-        /usr/bin/imwl &
-        /usr/bin/dim &
-    fi
+    /usr/bin/dim &
 fi
 
 IM="dim"
@@ -29,5 +22,12 @@ GTK_IM_MODULE=dim
 QT_IM_MODULE=dim
 CLUTTER_IM_MODULE=${IM}
 SDL_IM_MODULE=${IM}
+
+if [ "$XDG_SESSION_TYPE" = "x11" ]; then
+    # set x11 env variables for IM
+    export DIM_WAYLAND_DISPLAY=imfakewl
+    # launch dim fake wayland daemon
+    /usr/bin/imwl &
+fi
 
 fi
