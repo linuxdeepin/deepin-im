@@ -16,6 +16,7 @@ public:
     ~X11ActiveWindowMonitor();
 
     pid_t activeWindowPid();
+    std::tuple<uint16_t, uint16_t> activeWindowPosition();
 
 signals:
     void activeWindowChanged();
