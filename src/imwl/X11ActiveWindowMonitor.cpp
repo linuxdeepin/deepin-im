@@ -22,7 +22,8 @@ X11ActiveWindowMonitor::X11ActiveWindowMonitor()
 
 X11ActiveWindowMonitor::~X11ActiveWindowMonitor() { }
 
-pid_t X11ActiveWindowMonitor::activeWindowPid() {
+pid_t X11ActiveWindowMonitor::activeWindowPid()
+{
     auto data = getProperty(screen()->root, activeWindowAtom_, sizeof(xcb_window_t));
     if (data.size() == 0) {
         qWarning() << "failed to get active window id";
@@ -38,6 +39,25 @@ pid_t X11ActiveWindowMonitor::activeWindowPid() {
 
     uint32_t pid = *reinterpret_cast<uint32_t *>(data1.data());
     return pid;
+}
+
+std::tuple<uint16_t, uint16_t> X11ActiveWindowMonitor::activeWindowPosition()
+{
+    auto data = getProperty(screen()->root, activeWindowAtom_, sizeof(xcb_window_t));
+    if (data.size() == 0) {
+        qWarning() << "failed to get active window id";
+        return {};
+    }
+    xcb_window_t windowId = *reinterpret_cast<xcb_window_t *>(data.data());
+
+    auto geom = XCB_REPLY(xcb_get_geometry, xconn_.get(), windowId);
+    auto offset = XCB_REPLY(xcb_translate_coordinates,
+                            xconn_.get(),
+                            windowId,
+                            screen()->root,
+                            geom->x,
+                            geom->y);
+    return { offset->dst_x, offset->dst_y };
 }
 
 void X11ActiveWindowMonitor::xcbEvent(const std::unique_ptr<xcb_generic_event_t> &event)
