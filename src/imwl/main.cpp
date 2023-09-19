@@ -4,11 +4,18 @@
 
 #include "Compositor.h"
 
+#include <DLog>
+
 #include <QCoreApplication>
+
+using Dtk::Core::DLogManager;
 
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
+
+    DLogManager::registerJournalAppender();
+    DLogManager::registerConsoleAppender();
 
     Compositor compositor;
     compositor.addSocket("imfakewl");

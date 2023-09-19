@@ -35,8 +35,6 @@ void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_keymap(uint32_
                                                                          int32_t fd,
                                                                          uint32_t size)
 {
-    qDebug() << "grab keymap:" << format << fd << size;
-
     if (format == WL_KEYBOARD_KEYMAP_FORMAT_NO_KEYMAP) {
         return;
     }
@@ -95,7 +93,6 @@ void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_key(uint32_t s
                                                                       uint32_t key,
                                                                       uint32_t state)
 {
-    qDebug() << "grab key:" << serial << time << key << state;
     assert(im_->ic_->xkbState_);
 
     xkb_keysym_t sym = xkb_state_key_get_one_sym(im_->ic_->xkbState_.get(), key);
@@ -122,9 +119,6 @@ void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_modifiers(uint
                                                                             uint32_t mods_locked,
                                                                             uint32_t group)
 {
-    qDebug() << "grab modifiers:" << serial << mods_depressed << mods_latched << mods_locked
-             << group;
-
     if (im_->ic_->xkbState_) {
         xkb_state_component comp = xkb_state_update_mask(im_->ic_->xkbState_.get(),
                                                          mods_depressed,
@@ -181,5 +175,5 @@ void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_modifiers(uint
 void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_repeat_info(int32_t rate,
                                                                               int32_t delay)
 {
-    qDebug() << "grab repeatInfo:" << rate << delay;
+    // TODO
 }

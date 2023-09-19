@@ -3,7 +3,7 @@
 #include "IconProvider.h"
 #include "dimcore/Dim.h"
 #include "dimcore/InputContext.h"
-#include "dimcore/ProxyAddon.h"
+#include "dimcore/InputMethodAddon.h"
 
 #include <QQmlContext>
 
