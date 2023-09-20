@@ -7,6 +7,8 @@
 
 #include "wl/server/ZwpInputMethodV2.h"
 
+#include <QtWaylandCompositor/QWaylandSeat>
+
 #include <memory>
 
 namespace wl {
@@ -22,7 +24,7 @@ class InputMethodKeyboardGrabV2;
 class InputMethodV2 : public wl::server::ZwpInputMethodV2
 {
 public:
-    InputMethodV2(Seat *seat);
+    InputMethodV2(QWaylandSeat *seat);
     ~InputMethodV2();
 
     void sendDeactivate();
@@ -51,7 +53,7 @@ protected:
     void zwp_input_method_v2_destroy(wl::server::Resource *resource) override;
 
 private:
-    Seat *seat_;
+    QWaylandSeat *seat_;
 
     std::unique_ptr<InputMethodKeyboardGrabV2> grab_;
 };

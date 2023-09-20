@@ -4,8 +4,6 @@
 
 #include "Keyboard.h"
 
-#include "Seat.h"
-
 Keyboard::Keyboard(Seat *seat)
     : seat_(seat)
 {

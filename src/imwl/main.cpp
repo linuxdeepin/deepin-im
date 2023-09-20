@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     QCoreApplication app(argc, argv);
 
     Compositor compositor;
-    compositor.addSocket("imfakewl");
+    compositor.setSocketName(qgetenv("DIM_WAYLAND_DISPLAY"));
     compositor.create();
 
     return app.exec();

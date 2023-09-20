@@ -7,14 +7,14 @@
 
 #include "wl/server/ZwpTextInputV3.h"
 
-#include <set>
+#include <QWaylandSeat>
 
-class Seat;
+#include <set>
 
 class TextInputV3 : public wl::server::ZwpTextInputV3
 {
 public:
-    TextInputV3(Seat *seat);
+    TextInputV3(QWaylandSeat *seat);
     ~TextInputV3();
 
     void sendPreeditString(const char *text, int32_t cursor_begin, int32_t cursor_end);
@@ -42,7 +42,7 @@ protected:
     void zwp_text_input_v3_commit(wl::server::Resource *resource) override;
 
 private:
-    Seat *seat_;
+    QWaylandSeat *seat_;
     std::set<wl::server::Resource *> m_enabled;
 };
 

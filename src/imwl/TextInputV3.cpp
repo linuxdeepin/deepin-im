@@ -4,11 +4,11 @@
 
 #include "TextInputV3.h"
 
-#include "Seat.h"
+#include "Compositor.h"
 #include "InputMethodV2.h"
 #include "wl/server/Resource.h"
 
-TextInputV3::TextInputV3(Seat *seat)
+TextInputV3::TextInputV3(QWaylandSeat *seat)
     : seat_(seat)
 {
 }
@@ -59,7 +59,7 @@ void TextInputV3::zwp_text_input_v3_enable(wl::server::Resource *resource)
 {
     m_enabled.emplace(resource);
 
-    auto im2 = seat_->getInputMethodV2();
+    auto im2 = dynamic_cast<Compositor *>(seat_->compositor())->getInputMethodV2();
     im2->sendActivate();
 }
 
@@ -67,7 +67,7 @@ void TextInputV3::zwp_text_input_v3_disable(wl::server::Resource *resource)
 {
     m_enabled.erase(resource);
 
-    auto im2 = seat_->getInputMethodV2();
+    auto im2 = dynamic_cast<Compositor *>(seat_->compositor())->getInputMethodV2();
     im2->sendDeactivate();
 }
 

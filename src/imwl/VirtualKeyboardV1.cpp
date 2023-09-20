@@ -4,8 +4,8 @@
 
 #include "VirtualKeyboardV1.h"
 
+#include "Compositor.h"
 #include "DimTextInputV1.h"
-#include "Seat.h"
 #include "common.h"
 #include "wl/server/Resource.h"
 
@@ -32,7 +32,7 @@
 //     return modifiers;
 // }
 
-VirtualKeyboardV1::VirtualKeyboardV1(Seat *seat)
+VirtualKeyboardV1::VirtualKeyboardV1(QWaylandSeat *seat)
     : seat_(seat)
     , xkbContext_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
 {
@@ -98,7 +98,7 @@ void VirtualKeyboardV1::zwp_virtual_keyboard_v1_key(wl::server::Resource *resour
                                                     uint32_t state)
 {
     xkb_keysym_t sym = xkb_state_key_get_one_sym(xkbState_.get(), key);
-    auto dti = seat_->getDimTextInputV1();
+    auto dti = dynamic_cast<Compositor *>(seat_->compositor())->getDimTextInputV1();
     dti->sendKeysym(nextSerial(), time, sym, state, state_.modifiers);
 }
 

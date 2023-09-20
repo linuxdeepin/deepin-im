@@ -4,15 +4,15 @@
 
 #include "DimTextInputV1.h"
 
+#include "Compositor.h"
 #include "InputMethodV2.h"
-#include "Seat.h"
 #include "wl/server/Resource.h"
 
 #include <experimental/unordered_map>
 
 #include <QDebug>
 
-DimTextInputV1::DimTextInputV1(Seat *seat)
+DimTextInputV1::DimTextInputV1(QWaylandSeat *seat)
     : seat_(seat)
 {
     constexpr char data[] = "Shift\0Lock\0Control\0Mod1\0Mod2\0Mod3\0Mod4";
@@ -123,7 +123,7 @@ void DimTextInputV1::zwp_dim_text_input_v1_enable(wl::server::Resource *resource
 {
     m_enabled.emplace(resource);
 
-    auto im2 = seat_->getInputMethodV2();
+    auto im2 = dynamic_cast<Compositor *>(seat_->compositor())->getInputMethodV2();
     im2->sendActivate();
 }
 
@@ -131,7 +131,7 @@ void DimTextInputV1::zwp_dim_text_input_v1_disable(wl::server::Resource *resourc
 {
     m_enabled.erase(resource);
 
-    auto im2 = seat_->getInputMethodV2();
+    auto im2 = dynamic_cast<Compositor *>(seat_->compositor())->getInputMethodV2();
     im2->sendDeactivate();
 }
 
@@ -140,14 +140,14 @@ void DimTextInputV1::zwp_dim_text_input_v1_set_surrounding_text(wl::server::Reso
                                                                 int32_t cursor,
                                                                 int32_t anchor)
 {
-    auto im2 = seat_->getInputMethodV2();
+    auto im2 = dynamic_cast<Compositor *>(seat_->compositor())->getInputMethodV2();
     im2->sendSurroundingText(text, cursor, anchor);
 }
 
 void DimTextInputV1::zwp_dim_text_input_v1_set_text_change_cause(wl::server::Resource *resource,
                                                                  uint32_t cause)
 {
-    auto im2 = seat_->getInputMethodV2();
+    auto im2 = dynamic_cast<Compositor *>(seat_->compositor())->getInputMethodV2();
     im2->sendTextChangeCause(cause);
 }
 
@@ -155,7 +155,7 @@ void DimTextInputV1::zwp_dim_text_input_v1_set_content_type(wl::server::Resource
                                                             uint32_t hint,
                                                             uint32_t purpose)
 {
-    auto im2 = seat_->getInputMethodV2();
+    auto im2 = dynamic_cast<Compositor *>(seat_->compositor())->getInputMethodV2();
     im2->sendContentType(hint, purpose);
 }
 
@@ -166,6 +166,6 @@ void DimTextInputV1::zwp_dim_text_input_v1_set_cursor_rectangle(
 
 void DimTextInputV1::zwp_dim_text_input_v1_commit(wl::server::Resource *resource)
 {
-    auto im2 = seat_->getInputMethodV2();
+    auto im2 = dynamic_cast<Compositor *>(seat_->compositor())->getInputMethodV2();
     im2->sendDone();
 }

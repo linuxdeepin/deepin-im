@@ -4,11 +4,11 @@
 
 #include "InputMethodV2.h"
 
+#include "Compositor.h"
 #include "DimTextInputV1.h"
 #include "InputMethodKeyboardGrabV2.h"
-#include "Seat.h"
 
-InputMethodV2::InputMethodV2(Seat *seat)
+InputMethodV2::InputMethodV2(QWaylandSeat *seat)
     : seat_(seat)
     , grab_(std::make_unique<InputMethodKeyboardGrabV2>(seat))
 {
@@ -56,7 +56,8 @@ void InputMethodV2::sendContentType(uint32_t hint, uint32_t purpose)
     }
 }
 
-void InputMethodV2::sendDone() {
+void InputMethodV2::sendDone()
+{
     const auto resources = resourceMap();
     for (auto &[client, resource] : resources) {
         send_done(resource->handle);
@@ -66,7 +67,7 @@ void InputMethodV2::sendDone() {
 void InputMethodV2::zwp_input_method_v2_commit_string(wl::server::Resource *resource,
                                                       const char *text)
 {
-    auto dti1 = seat_->getDimTextInputV1();
+    auto dti1 = dynamic_cast<Compositor *>(seat_->compositor())->getDimTextInputV1();
     if (dti1) {
         dti1->sendCommitString(text);
     }
@@ -77,7 +78,7 @@ void InputMethodV2::zwp_input_method_v2_set_preedit_string(wl::server::Resource 
                                                            int32_t cursor_begin,
                                                            int32_t cursor_end)
 {
-    auto dti1 = seat_->getDimTextInputV1();
+    auto dti1 = dynamic_cast<Compositor *>(seat_->compositor())->getDimTextInputV1();
     if (dti1) {
         dti1->sendPreeditString(text, cursor_begin, cursor_end);
     }
@@ -91,7 +92,7 @@ void InputMethodV2::zwp_input_method_v2_delete_surrounding_text(wl::server::Reso
 
 void InputMethodV2::zwp_input_method_v2_commit(wl::server::Resource *resource, uint32_t serial)
 {
-    auto dti1 = seat_->getDimTextInputV1();
+    auto dti1 = dynamic_cast<Compositor *>(seat_->compositor())->getDimTextInputV1();
     if (dti1) {
         dti1->sendDone(serial);
     }

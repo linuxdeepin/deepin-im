@@ -8,13 +8,12 @@
 #include "wl/server/ZwpDimTextInputV1.h"
 
 #include <set>
-
-class Seat;
+#include <QtWaylandCompositor/QWaylandSeat>
 
 class DimTextInputV1 : public wl::server::ZwpDimTextInputV1
 {
 public:
-    DimTextInputV1(Seat *seat);
+    DimTextInputV1(QWaylandSeat *seat);
     ~DimTextInputV1();
 
     void enterPid(pid_t pid);
@@ -48,7 +47,7 @@ protected:
     void zwp_dim_text_input_v1_commit(wl::server::Resource *resource) override;
 
 private:
-    Seat *seat_;
+    QWaylandSeat *seat_;
     std::unordered_map<pid_t, wl::server::Resource *> pidMap_;
     pid_t enteredPid_;
     std::set<wl::server::Resource *> m_enabled;

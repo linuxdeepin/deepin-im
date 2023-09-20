@@ -4,9 +4,10 @@
 
 #include "TextInputManagerV3.h"
 
-#include "Seat.h"
+#include "Compositor.h"
 #include "TextInputV3.h"
-#include "wl/server/Seat.h"
+
+#include <QtWaylandCompositor/QWaylandSeat>
 
 TextInputManagerV3::TextInputManagerV3() { }
 
@@ -21,8 +22,8 @@ void TextInputManagerV3::zwp_text_input_manager_v3_get_text_input(wl::server::Re
                                                                   uint32_t id,
                                                                   struct ::wl_resource *seat)
 {
-    auto seat_ = dynamic_cast<Seat *>(wl::server::Seat::fromResource(seat));
+    auto *seat_ = QWaylandSeat::fromSeatResource(seat);
 
-    auto ti3 = seat_->getTextInputV3();
+    auto ti3 = dynamic_cast<Compositor *>(seat_->compositor())->getTextInputV3();
     ti3->add(resource->client(), id);
 }

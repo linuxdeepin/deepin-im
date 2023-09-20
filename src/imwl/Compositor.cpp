@@ -7,34 +7,20 @@
 #include "DimTextInputManagerV1.h"
 #include "DimTextInputV1.h"
 #include "InputMethodManagerV2.h"
-#include "Seat.h"
+#include "InputMethodV2.h"
 #include "VirtualKeyboardManagerV1.h"
+#include "VirtualKeyboardV1.h"
 #include "X11ActiveWindowMonitor.h"
 
 #include <QAbstractEventDispatcher>
 #include <QDebug>
 #include <QSocketNotifier>
 #include <QThread>
+#include <QtWaylandCompositor/QWaylandSeat>
 
 Compositor::Compositor()
     : activeWindowMonitor_(std::make_unique<X11ActiveWindowMonitor>())
 {
-    auto *loop = wl_display_get_event_loop(display());
-    int fd = wl_event_loop_get_fd(loop);
-
-    auto processWaylandEvents = [this, loop] {
-        int ret = wl_event_loop_dispatch(loop, 0);
-        if (ret)
-            qWarning() << "wl_event_loop_dispatch error:" << ret;
-        wl_display_flush_clients(display());
-    };
-
-    noti_.reset(new QSocketNotifier(fd, QSocketNotifier::Read));
-    QObject::connect(noti_.get(), &QSocketNotifier::activated, processWaylandEvents);
-
-    QAbstractEventDispatcher *dispatcher = QThread::currentThread()->eventDispatcher();
-    QObject::connect(dispatcher, &QAbstractEventDispatcher::aboutToBlock, processWaylandEvents);
-
     QObject::connect(activeWindowMonitor_.get(),
                      &X11ActiveWindowMonitor::activeWindowChanged,
                      [this]() {
@@ -46,8 +32,7 @@ Compositor::~Compositor() { }
 
 void Compositor::create()
 {
-    seat_ = std::make_unique<Seat>();
-    seat_->init(display());
+    QWaylandCompositor::create();
 
     dimTextInputManagerV1_ = std::make_unique<DimTextInputManagerV1>();
     dimTextInputManagerV1_->init(display());
@@ -61,13 +46,18 @@ void Compositor::create()
     virtualKeyboardManagerV1_ = std::make_unique<VirtualKeyboardManagerV1>();
     virtualKeyboardManagerV1_->init(display());
 
+    dimTextInputV1_ = std::make_shared<DimTextInputV1>(defaultSeat());
+    // textInputV3_ = std::make_shared<TextInputV3>(defaultSeat());
+    inputMethodV2_ = std::make_shared<InputMethodV2>(defaultSeat());
+    virtualKeyboardV1_ = std::make_shared<VirtualKeyboardV1>(defaultSeat());
+
     activeWindowChanged(activeWindowMonitor_->activeWindowPid());
 }
 
 void Compositor::activeWindowChanged(pid_t pid)
 {
     qDebug() << "active window changed, pid:" << pid;
-    seat_->getDimTextInputV1()->leavePid(activePid_);
-    seat_->getDimTextInputV1()->enterPid(pid);
+    dimTextInputV1_->leavePid(activePid_);
+    dimTextInputV1_->enterPid(pid);
     activePid_ = pid;
 }

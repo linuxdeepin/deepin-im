@@ -11,7 +11,7 @@
 
 #include <memory>
 
-class Seat;
+class QWaylandSeat;
 
 class State
 {
@@ -21,11 +21,10 @@ public:
     uint32_t group = 0;
 };
 
-
 class VirtualKeyboardV1 : public wl::server::ZwpVirtualKeyboardV1
 {
 public:
-    VirtualKeyboardV1(Seat *seat);
+    VirtualKeyboardV1(QWaylandSeat *seat);
     ~VirtualKeyboardV1();
 
 protected:
@@ -45,7 +44,7 @@ protected:
     void zwp_virtual_keyboard_v1_destroy(wl::server::Resource *resource) override;
 
 private:
-    Seat *seat_;
+    QWaylandSeat *seat_;
     std::unique_ptr<xkb_context, Deleter<xkb_context_unref>> xkbContext_;
     std::unique_ptr<xkb_keymap, Deleter<xkb_keymap_unref>> xkbKeymap_;
     std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> xkbState_;

@@ -9,13 +9,9 @@
 
 #include <xkbcommon/xkbcommon.h>
 
-#include <memory>
+#include <QtWaylandCompositor/QWaylandSeat>
 
-namespace wl {
-namespace server {
-class Seat;
-}
-} // namespace wl
+#include <memory>
 
 class X11KeyboardGrabber;
 
@@ -30,7 +26,8 @@ class InputMethodKeyboardGrabV2 : public wl::server::ZwpInputMethodKeyboardGrabV
         uint32_t group;
     };
 
-    public : InputMethodKeyboardGrabV2(wl::server::Seat *seat);
+public:
+    InputMethodKeyboardGrabV2(QWaylandSeat *seat);
 
     ~InputMethodKeyboardGrabV2();
 
@@ -41,7 +38,7 @@ protected:
     void zwp_input_method_keyboard_grab_v2_release(wl::server::Resource *resource) override;
 
 private:
-    wl::server::Seat *seat_;
+    QWaylandSeat *seat_;
     std::unique_ptr<X11KeyboardGrabber> grabber_;
 
     std::unique_ptr<xkb_context, Deleter<xkb_context_unref>> xkbContext_;

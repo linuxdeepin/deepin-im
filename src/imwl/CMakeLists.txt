@@ -2,7 +2,6 @@ add_executable(imwl
     main.cpp
     common.cpp common.h
     Compositor.cpp Compositor.h
-    Seat.cpp Seat.h
     Keyboard.cpp Keyboard.h
     TextInputManagerV3.cpp TextInputManagerV3.h
     TextInputV3.cpp TextInputV3.h
@@ -20,7 +19,8 @@ add_executable(imwl
 )
 
 target_link_libraries(imwl PUBLIC
-    Qt::Core
+    Qt::Gui
+    Qt::WaylandCompositor
     wls
     PkgConfig::xcb
     PkgConfig::xcb-xinput

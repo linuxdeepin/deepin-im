@@ -14,7 +14,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(wl::server::Seat *seat)
+InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(QWaylandSeat *seat)
     : seat_(seat)
     , grabber_(std::make_unique<X11KeyboardGrabber>())
     , xkbContext_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
