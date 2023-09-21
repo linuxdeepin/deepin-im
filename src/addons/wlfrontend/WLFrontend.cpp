@@ -31,7 +31,7 @@ DIM_ADDON_FACTORY(WLFrontend)
 WLFrontend::WLFrontend(Dim *dim)
     : FrontendAddon(dim, "wlfrontend")
 {
-    if (QGuiApplication::platformName() == "wayland") {
+    if (QGuiApplication::platformName().contains("wayland")) {
         QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
         struct wl_display *wl_dpy =
             (struct wl_display *)native->nativeResourceForWindow("display", NULL);

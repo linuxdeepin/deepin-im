@@ -32,7 +32,7 @@ Q_LOGGING_CATEGORY(qLcQpaInputMethods, "qt.qpa.input.methods")
 DIMPlatformInputContext::DIMPlatformInputContext()
     : m_XkbContext(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
 {
-    if (QGuiApplication::platformName() == "wayland") {
+    if (QGuiApplication::platformName().contains("wayland")) {
         QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
         struct wl_display *wl_dpy =
             (struct wl_display *)native->nativeResourceForWindow("display", NULL);
