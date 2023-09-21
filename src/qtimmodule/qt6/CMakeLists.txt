@@ -5,6 +5,8 @@ set(QTIMMODULE_SOURCES
   DIMPlatformInputContext.cpp
   DimTextInputV1.h
   DimTextInputV1.cpp
+  Key.h
+  Key.cpp
 
   QWaylandTextInputInterface.h
   QWaylandInputMethodEventBuilder.h
