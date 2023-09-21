@@ -20,6 +20,7 @@ Build-Depends:
  qt6-base-private-dev,
  qt6-declarative-dev,
  qt6-wayland-dev,
+ qtbase5-private-dev,
  xkb-data,
 Standards-Version: 4.6.2
 Homepage: https://www.deepin.org
