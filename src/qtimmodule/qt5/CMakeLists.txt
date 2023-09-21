@@ -25,6 +25,7 @@ target_link_libraries(dimplatforminputcontextplugin PRIVATE
   Qt5::DBus
   Qt5::Gui
   Qt5::XkbCommonSupport
+  Qt5::Widgets
   wlc
 )
 

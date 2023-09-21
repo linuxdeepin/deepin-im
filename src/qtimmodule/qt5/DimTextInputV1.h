@@ -48,6 +48,9 @@ public:
     void enable() override;
     void disable() override;
 
+private:
+    QObject *focusObjectWrapper(QObject *object) const;
+
 protected:
     void zwp_dim_text_input_v1_enter() override;
     void zwp_dim_text_input_v1_leave() override;

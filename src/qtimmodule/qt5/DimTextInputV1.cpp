@@ -10,6 +10,7 @@
 #include <qpa/qwindowsysteminterface.h>
 
 #include <QTextCharFormat>
+#include <QWidget>
 #include <QtCore/qloggingcategory.h>
 #include <QtGui/qevent.h>
 #include <QtGui/qguiapplication.h>
@@ -268,6 +269,19 @@ void DimTextInputV1::commit()
     ZwpDimTextInputV1::commit();
 }
 
+QObject *DimTextInputV1::focusObjectWrapper(QObject *object) const
+{
+    auto *widget = qobject_cast<QWidget *>(object);
+    if (!widget) {
+        return object;
+    }
+
+    while (auto *proxy = widget->focusProxy()) {
+        widget = proxy;
+    }
+    return widget;
+}
+
 void DimTextInputV1::updateState(Qt::InputMethodQueries queries, uint32_t flags)
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO << queries << flags;
@@ -286,7 +300,14 @@ void DimTextInputV1::updateState(Qt::InputMethodQueries queries, uint32_t flags)
     bool needsCommit = false;
 
     QInputMethodQueryEvent event(queries);
-    QCoreApplication::sendEvent(QGuiApplication::focusObject(), &event);
+
+    const auto object = qGuiApp->focusObject();
+    QObject *realFocusObject = focusObjectWrapper(object);
+
+    // Make sure we don't query same object twice.
+    if (realFocusObject && realFocusObject != object) {
+        QGuiApplication::sendEvent(realFocusObject, &event);
+    }
 
     // For some reason, a query for Qt::ImSurroundingText gives an empty string even though it is
     // not.

@@ -27,6 +27,7 @@ target_link_libraries(dimplatforminputcontextplugin-qt6 PRIVATE
   PkgConfig::wayland-client
   Qt6::GuiPrivate
   Qt6::DBus
+  Qt6::Widgets
   wlc
 )
 
