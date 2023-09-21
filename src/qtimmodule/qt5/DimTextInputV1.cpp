@@ -6,6 +6,8 @@
 
 #include "DimTextInputV1.h"
 
+#include "Key.h"
+
 #include <private/qxkbcommon_p.h>
 #include <qpa/qwindowsysteminterface.h>
 
@@ -218,7 +220,7 @@ void DimTextInputV1::zwp_dim_text_input_v1_keysym(
     QEvent::Type type =
         state == WL_KEYBOARD_KEY_STATE_PRESSED ? QEvent::KeyPress : QEvent::KeyRelease;
     QString text = QXkbCommon::lookupStringNoKeysymTransformations(sym);
-    int qtkey = QXkbCommon::keysymToQtKey(sym, qtModifiers);
+    int qtkey = keySymToQtKey(sym, text);
 
     QWindowSystemInterface::handleKeyEvent(QGuiApplication::focusWindow(),
                                            time,

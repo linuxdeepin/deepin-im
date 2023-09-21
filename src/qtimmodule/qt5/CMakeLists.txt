@@ -5,6 +5,8 @@ set(QTIMMODULE_SOURCES
   DIMPlatformInputContext.cpp
   DimTextInputV1.h
   DimTextInputV1.cpp
+  Key.h
+  Key.cpp
 
   QWaylandTextInputInterface.h
   QWaylandInputMethodEventBuilder.h
@@ -18,13 +20,11 @@ add_library(dimplatforminputcontextplugin MODULE
   ${QTIMMODULE_SOURCES}
 )
 
-target_include_directories(dimplatforminputcontextplugin PRIVATE ${Qt5Gui_PRIVATE_INCLUDE_DIRS} ${Qt5XkbCommonSupport_PRIVATE_INCLUDE_DIRS})
-
 target_link_libraries(dimplatforminputcontextplugin PRIVATE
   PkgConfig::wayland-client
   Qt5::DBus
-  Qt5::Gui
-  Qt5::XkbCommonSupport
+  Qt5::GuiPrivate
+  Qt5::XkbCommonSupportPrivate
   wlc
 )
 
