@@ -14,6 +14,8 @@
 namespace wl {
 namespace client {
 class ConnectionBase;
+class Compositor;
+class Surface;
 class Seat;
 } // namespace client
 } // namespace wl
@@ -34,7 +36,8 @@ public:
 
 private:
     std::unique_ptr<wl::client::ConnectionBase> wl_;
-
+    std::shared_ptr<wl::client::Compositor> compositor_;
+    std::shared_ptr<wl::client::Surface> surface_;
     std::unordered_map<std::shared_ptr<wl::client::Seat>, std::shared_ptr<InputMethodV2>> ims_;
 
     void init();

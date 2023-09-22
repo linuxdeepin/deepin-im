@@ -5,9 +5,12 @@
 #include "WLFrontend.h"
 
 #include "InputMethodV2.h"
+#include "InputPopupSurfaceV2.h"
+#include "wl/client/Compositor.h"
 #include "wl/client/Connection.h"
 #include "wl/client/ConnectionRaw.h"
 #include "wl/client/Seat.h"
+#include "wl/client/Surface.h"
 #include "wl/client/ZwpInputMethodManagerV2.h"
 #include "wl/client/ZwpVirtualKeyboardManagerV1.h"
 #include "wl/client/ZwpVirtualKeyboardV1.h"
@@ -61,6 +64,9 @@ WLFrontend::WLFrontend(Dim *dim)
         });
     }
 
+    compositor_ = wl_->getGlobal<wl::client::Compositor>();
+    surface_ = std::make_shared<wl::client::Surface>(compositor_->create_surface());
+
     reloadSeats();
 }
 
@@ -78,8 +84,9 @@ void WLFrontend::reloadSeats()
     auto vkManager = wl_->getGlobal<wl::client::ZwpVirtualKeyboardManagerV1>();
 
     for (auto &seat : seats) {
-        auto vk = std::make_shared<wl::client::ZwpVirtualKeyboardV1>(vkManager->create_virtual_keyboard(seat));
-        auto im = std::make_shared<InputMethodV2>(imManager->get_input_method(seat), dim(), vk);
+        auto vk = std::make_shared<wl::client::ZwpVirtualKeyboardV1>(
+            vkManager->create_virtual_keyboard(seat));
+        auto im = std::make_shared<InputMethodV2>(imManager->get_input_method(seat), vk, surface_, dim());
 
         ims_.emplace(seat, im);
     }

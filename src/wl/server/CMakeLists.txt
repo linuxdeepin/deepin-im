@@ -6,6 +6,10 @@ set(WLS_SOURCES
   Type.h
   Seat.h
   Seat.cpp
+  Compositor.h
+  Compositor.cpp
+  Surface.h
+  Surface.cpp
   Keyboard.h
   Keyboard.cpp
   ZwpTextInputManagerV3.h
@@ -18,6 +22,8 @@ set(WLS_SOURCES
   ZwpInputMethodV2.cpp
   ZwpInputMethodKeyboardGrabV2.h
   ZwpInputMethodKeyboardGrabV2.cpp
+  ZwpInputPopupSurfaceV2.h
+  ZwpInputPopupSurfaceV2.cpp
   ZwpVirtualKeyboardManagerV1.h
   ZwpVirtualKeyboardManagerV1.cpp
   ZwpVirtualKeyboardV1.h

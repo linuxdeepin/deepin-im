@@ -1,7 +1,9 @@
 add_executable(imwl
     main.cpp
     common.cpp common.h
+    Server.cpp Server.h
     Compositor.cpp Compositor.h
+    Surface.cpp Surface.h
     Seat.cpp Seat.h
     Keyboard.cpp Keyboard.h
     TextInputManagerV3.cpp TextInputManagerV3.h
@@ -9,6 +11,7 @@ add_executable(imwl
     InputMethodManagerV2.cpp InputMethodManagerV2.h
     InputMethodV2.cpp InputMethodV2.h
     InputMethodKeyboardGrabV2.cpp InputMethodKeyboardGrabV2.h
+    InputPopupSurfaceV2.cpp InputPopupSurfaceV2.h
     VirtualKeyboardManagerV1.cpp VirtualKeyboardManagerV1.h
     VirtualKeyboardV1.cpp VirtualKeyboardV1.h
     XCB.cpp XCB.h

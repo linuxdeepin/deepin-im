@@ -51,6 +51,7 @@ public:
 
     void add(struct wl_client *client, uint32_t id)
     {
+        assert(this->wl_interface != nullptr);
         auto resource = bind(client, this->wl_interface->version, id);
         resourceMap_.emplace(client, resource);
     }

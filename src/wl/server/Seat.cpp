@@ -17,3 +17,5 @@ Seat::Seat()
     : Type()
 {
 }
+
+Seat::~Seat() = default;

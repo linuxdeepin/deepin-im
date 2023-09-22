@@ -34,10 +34,13 @@ public:
   template<>                                              \
   inline const struct wl_interface *Type<type>::wl_interface = &type##_interface;
 
+INIT_WL_TYPE(wl_compositor);
+INIT_WL_TYPE(wl_surface);
 INIT_WL_TYPE(wl_seat);
 INIT_WL_TYPE(wl_keyboard);
 INIT_WL_TYPE(zwp_input_method_manager_v2);
 INIT_WL_TYPE(zwp_input_method_v2);
+INIT_WL_TYPE(zwp_input_popup_surface_v2);
 INIT_WL_TYPE(zwp_virtual_keyboard_manager_v1);
 INIT_WL_TYPE(zwp_virtual_keyboard_v1);
 INIT_WL_TYPE(zwp_input_method_keyboard_grab_v2);

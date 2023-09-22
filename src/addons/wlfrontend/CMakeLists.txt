@@ -7,6 +7,8 @@ set(WLFRONTEND_SOURCES
   InputMethodV2.cpp
   InputMethodKeyboardGrabV2.h
   InputMethodKeyboardGrabV2.cpp
+  InputPopupSurfaceV2.h
+  InputPopupSurfaceV2.cpp
 )
 
 add_library(wlfrontend SHARED

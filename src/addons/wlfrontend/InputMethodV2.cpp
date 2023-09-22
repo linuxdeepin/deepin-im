@@ -5,6 +5,7 @@
 #include "InputMethodV2.h"
 
 #include "InputMethodKeyboardGrabV2.h"
+#include "InputPopupSurfaceV2.h"
 #include "WlInputContext.h"
 
 #include <QDebug>
@@ -12,10 +13,13 @@
 using namespace org::deepin::dim;
 
 InputMethodV2::InputMethodV2(zwp_input_method_v2 *val,
-                             Dim *dim,
-                             const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk)
+                             const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk,
+                             const std::shared_ptr<wl::client::Surface> &surface,
+                             Dim *dim)
     : wl::client::ZwpInputMethodV2(val)
     , vk_(vk)
+    , surface_(surface)
+    , popup_(std::make_shared<InputPopupSurfaceV2>(get_input_popup_surface(surface_)))
     , ic_(std::make_unique<WlInputContext>(dim, this))
 {
 }

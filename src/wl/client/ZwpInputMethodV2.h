@@ -12,6 +12,7 @@
 namespace wl {
 namespace client {
 
+class Surface;
 class ZwpInputMethodKeyboardGrabV2;
 
 class ZwpInputMethodV2 : public Type<zwp_input_method_v2>
@@ -25,6 +26,7 @@ public:
     void commit_string(const char *text);
     void set_preedit_string(const char *text, int32_t cursorBegin, int32_t cursorEnd);
     void commit(uint32_t serial);
+    zwp_input_popup_surface_v2 *get_input_popup_surface(const std::shared_ptr<Surface> &surface);
 
 protected:
     virtual void zwp_input_method_v2_activate() = 0;

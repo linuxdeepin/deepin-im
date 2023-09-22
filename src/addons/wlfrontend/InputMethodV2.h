@@ -8,6 +8,7 @@
 #include "wl/client/ZwpInputMethodV2.h"
 
 #include <QString>
+
 #include <list>
 
 namespace wl {
@@ -23,6 +24,7 @@ namespace dim {
 class Dim;
 class WlInputContext;
 class InputMethodKeyboardGrabV2;
+class InputPopupSurfaceV2;
 
 struct SurroundingText
 {
@@ -49,8 +51,9 @@ class InputMethodV2 : public wl::client::ZwpInputMethodV2
 
 public:
     InputMethodV2(zwp_input_method_v2 *val,
-                  Dim *dim,
-                  const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk);
+                  const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk,
+                  const std::shared_ptr<wl::client::Surface> &surface,
+                  Dim *dim);
     ~InputMethodV2() override;
 
 protected:
@@ -67,6 +70,8 @@ protected:
 private:
     std::shared_ptr<InputMethodKeyboardGrabV2> grab_;
     std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> vk_;
+    std::shared_ptr<wl::client::Surface> surface_;
+    std::shared_ptr<InputPopupSurfaceV2> popup_;
     std::unique_ptr<WlInputContext> ic_;
 
     std::list<std::variant<SurroundingText, TextChangeCause, ContentType>> penddingEvents_;
