@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "Compositor.h"
+#include "Server.h"
 
 #include <DLog>
 
@@ -17,9 +17,9 @@ int main(int argc, char *argv[])
     DLogManager::registerJournalAppender();
     DLogManager::registerConsoleAppender();
 
-    Compositor compositor;
-    compositor.addSocket("imfakewl");
-    compositor.create();
+    Server server;
+    server.addSocket("imfakewl");
+    server.create();
 
     return app.exec();
 }

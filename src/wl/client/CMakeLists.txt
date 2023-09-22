@@ -5,6 +5,8 @@ set(WLC_SOURCES
   ConnectionRaw.cpp
   Connection.h
   Connection.cpp
+  Compositor.h Compositor.cpp
+  Surface.h Surface.cpp
   Seat.h
   Seat.cpp
   ZwpInputMethodManagerV2.h
@@ -13,6 +15,8 @@ set(WLC_SOURCES
   ZwpInputMethodV2.cpp
   ZwpInputMethodKeyboardGrabV2.h
   ZwpInputMethodKeyboardGrabV2.cpp
+  ZwpInputPopupSurfaceV2.h
+  ZwpInputPopupSurfaceV2.cpp
   ZwpVirtualKeyboardManagerV1.h
   ZwpVirtualKeyboardManagerV1.cpp
   ZwpVirtualKeyboardV1.h

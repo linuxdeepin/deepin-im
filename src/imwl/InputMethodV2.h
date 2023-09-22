@@ -17,6 +17,7 @@ class Seat;
 
 class Seat;
 class TextInputV3;
+class InputPopupSurfaceV2;
 class InputMethodKeyboardGrabV2;
 
 class InputMethodV2 : public wl::server::ZwpInputMethodV2
@@ -24,6 +25,8 @@ class InputMethodV2 : public wl::server::ZwpInputMethodV2
 public:
     InputMethodV2(Seat *seat);
     ~InputMethodV2();
+
+    std::shared_ptr<InputPopupSurfaceV2> getInputPopupSurfaceV2() { return popupSurface_; }
 
     void sendDeactivate();
     void sendActivate();
@@ -52,6 +55,7 @@ protected:
 
 private:
     Seat *seat_;
+    std::shared_ptr<InputPopupSurfaceV2> popupSurface_;
 
     std::unique_ptr<InputMethodKeyboardGrabV2> grab_;
 };

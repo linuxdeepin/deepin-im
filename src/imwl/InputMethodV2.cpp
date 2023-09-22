@@ -6,10 +6,12 @@
 
 #include "DimTextInputV1.h"
 #include "InputMethodKeyboardGrabV2.h"
+#include "InputPopupSurfaceV2.h"
 #include "Seat.h"
 
 InputMethodV2::InputMethodV2(Seat *seat)
     : seat_(seat)
+    , popupSurface_(std::make_shared<InputPopupSurfaceV2>())
     , grab_(std::make_unique<InputMethodKeyboardGrabV2>(seat))
 {
 }
@@ -56,7 +58,8 @@ void InputMethodV2::sendContentType(uint32_t hint, uint32_t purpose)
     }
 }
 
-void InputMethodV2::sendDone() {
+void InputMethodV2::sendDone()
+{
     const auto resources = resourceMap();
     for (auto &[client, resource] : resources) {
         send_done(resource->handle);
@@ -101,6 +104,7 @@ void InputMethodV2::zwp_input_method_v2_get_input_popup_surface(wl::server::Reso
                                                                 uint32_t id,
                                                                 struct ::wl_resource *surface)
 {
+    popupSurface_->add(resource->client(), id);
 }
 
 void InputMethodV2::zwp_input_method_v2_grab_keyboard(wl::server::Resource *resource,

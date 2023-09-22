@@ -5,6 +5,7 @@
 #include "DimTextInputV1.h"
 
 #include "InputMethodV2.h"
+#include "InputPopupSurfaceV2.h"
 #include "Seat.h"
 #include "wl/server/Resource.h"
 
@@ -162,6 +163,9 @@ void DimTextInputV1::zwp_dim_text_input_v1_set_content_type(wl::server::Resource
 void DimTextInputV1::zwp_dim_text_input_v1_set_cursor_rectangle(
     wl::server::Resource *resource, int32_t x, int32_t y, int32_t width, int32_t height)
 {
+    auto im2 = seat_->getInputMethodV2();
+    auto ips2 = im2->getInputPopupSurfaceV2();
+    ips2->sendTextInputRectangle(x, y, width, height);
 }
 
 void DimTextInputV1::zwp_dim_text_input_v1_commit(wl::server::Resource *resource)

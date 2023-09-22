@@ -4,7 +4,7 @@
 
 #include "ZwpInputMethodV2.h"
 
-#include "ZwpInputMethodKeyboardGrabV2.h"
+#include "Surface.h"
 
 using namespace wl::client;
 
@@ -47,4 +47,10 @@ void ZwpInputMethodV2::set_preedit_string(const char *text, int32_t cursorBegin,
 void ZwpInputMethodV2::commit(uint32_t serial)
 {
     zwp_input_method_v2_commit(get(), serial);
+}
+
+zwp_input_popup_surface_v2 *
+ZwpInputMethodV2::get_input_popup_surface(const std::shared_ptr<Surface> &surface)
+{
+    return zwp_input_method_v2_get_input_popup_surface(get(), surface->get());
 }

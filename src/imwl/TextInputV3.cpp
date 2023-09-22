@@ -4,8 +4,9 @@
 
 #include "TextInputV3.h"
 
-#include "Seat.h"
 #include "InputMethodV2.h"
+#include "InputPopupSurfaceV2.h"
+#include "Seat.h"
 #include "wl/server/Resource.h"
 
 TextInputV3::TextInputV3(Seat *seat)
@@ -92,6 +93,9 @@ void TextInputV3::zwp_text_input_v3_set_content_type(wl::server::Resource *resou
 void TextInputV3::zwp_text_input_v3_set_cursor_rectangle(
     wl::server::Resource *resource, int32_t x, int32_t y, int32_t width, int32_t height)
 {
+    auto im2 = seat_->getInputMethodV2();
+    auto ips2 = im2->getInputPopupSurfaceV2();
+    ips2->sendTextInputRectangle(x, y, width, height);
 }
 
 void TextInputV3::zwp_text_input_v3_commit(wl::server::Resource *resource) { }

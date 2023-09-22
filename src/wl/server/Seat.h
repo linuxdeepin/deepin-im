@@ -22,6 +22,7 @@ class Seat : public Type<Seat, wl_seat>
 
 public:
     Seat();
+    ~Seat() override;
 
 protected:
     virtual void wl_seat_get_pointer(Resource *resource, uint32_t id) = 0;
