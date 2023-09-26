@@ -7,6 +7,25 @@
 #include <gtk/gtk.h>
 #include <gtk/gtkimmodule.h>
 
+extern "C" {
+#if GTK_CHECK_VERSION(4,0,0)
+
+G_MODULE_EXPORT void g_io_im_dim_load(GIOModule *module)
+{
+    g_type_module_use(G_TYPE_MODULE(module));
+    dim_im_context_register(G_TYPE_MODULE(module));
+
+    g_io_extension_point_implement(GTK_IM_MODULE_EXTENSION_POINT_NAME,
+                                   DIM_TYPE_IM_CONTEXT,
+                                   "dim",
+                                   10);
+}
+
+G_MODULE_EXPORT void g_io_im_dim_unload(GIOModule *module)
+{
+    g_type_module_unuse(G_TYPE_MODULE(module));
+}
+#else
 static const GtkIMContextInfo _info = {
     .context_id = "dim",
     .context_name = "DIM (deepin IM)",
@@ -16,8 +35,6 @@ static const GtkIMContextInfo _info = {
 };
 
 static const GtkIMContextInfo *_infos[] = { &_info };
-
-extern "C" {
 
 G_MODULE_EXPORT const gchar *g_module_check_init(G_GNUC_UNUSED GModule *module)
 {
@@ -47,4 +64,7 @@ G_MODULE_EXPORT GtkIMContext *im_module_create(const gchar *context_id)
     }
     return NULL;
 }
+#endif
+
+
 }

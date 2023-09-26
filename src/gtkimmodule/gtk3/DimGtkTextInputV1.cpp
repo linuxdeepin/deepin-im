@@ -104,6 +104,9 @@ void DimGtkTextInputV1::zwp_dim_text_input_v1_keysym(
 {
     if (!global_->current)
         return;
+
+#if GTK_CHECK_VERSION(4,0,0)
+#else
     GdkEvent *gdk_event = gdk_event_new(state ? GDK_KEY_PRESS : GDK_KEY_RELEASE);
     GdkEventKey *gdk_event_key = reinterpret_cast<GdkEventKey *>(gdk_event);
 
@@ -123,6 +126,11 @@ void DimGtkTextInputV1::zwp_dim_text_input_v1_keysym(
 
     auto handled = gtk_im_context_filter_keypress(contextWayland->slave, &gdk_event->key);
     gdk_event_free(gdk_event);
+
+    if (!handled) {
+        g_debug("failed to handle keypress");
+    }
+#endif
 }
 
 DimGtkTextInputV1::~DimGtkTextInputV1() { }

@@ -11,7 +11,7 @@ add_executable(gtk_im_demo
 )
 
 target_link_libraries(gtk_im_demo
-  PkgConfig::Gtk3
+  PkgConfig::Gtk4
 )
 
 install(TARGETS gtk_im_demo

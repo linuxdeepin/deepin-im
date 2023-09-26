@@ -5,8 +5,9 @@
 #ifndef _DIM_IM_CONTEXT_H
 #define _DIM_IM_CONTEXT_H
 
-#include <gtk/gtk.h>
 #include "wl/client/ConnectionBase.h"
+
+#include <gtk/gtk.h>
 
 class DimGtkTextInputV1;
 
@@ -43,7 +44,12 @@ struct DimIMContext
 {
     GtkIMContextSimple parent;
     GtkIMContext *slave;
+
+#if GTK_CHECK_VERSION(4, 0, 0)
+    GtkWidget *window;
+#else
     GdkWindow *window;
+#endif
 
     struct
     {
