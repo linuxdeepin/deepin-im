@@ -7,13 +7,24 @@
 
 #include "wl/client/ZwpInputPopupSurfaceV2.h"
 
+#include <QObject>
 #include <QString>
-
-#include <list>
 
 namespace org {
 namespace deepin {
 namespace dim {
+
+class InputPopupSurfaceV2QObj : public QObject
+{
+    Q_OBJECT
+
+public:
+    InputPopupSurfaceV2QObj();
+    ~InputPopupSurfaceV2QObj();
+
+signals:
+    void textInputRectangle(int32_t x, int32_t y, int32_t width, int32_t height);
+};
 
 class InputPopupSurfaceV2 : public wl::client::ZwpInputPopupSurfaceV2
 {
@@ -21,11 +32,16 @@ public:
     InputPopupSurfaceV2(zwp_input_popup_surface_v2 *val);
     virtual ~InputPopupSurfaceV2();
 
+    InputPopupSurfaceV2QObj *qobject();
+
 protected:
     void zwp_input_popup_surface_v2_text_input_rectangle(int32_t x,
                                                          int32_t y,
                                                          int32_t width,
                                                          int32_t height) override;
+
+private:
+    std::unique_ptr<InputPopupSurfaceV2QObj> qobject_;
 };
 
 } // namespace dim

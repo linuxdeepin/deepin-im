@@ -68,6 +68,8 @@ Q_SIGNALS:
     void processKeyEventFinished();
 
 protected:
+    Dim *dim() { return dim_; }
+
     std::list<std::variant<ForwardKey, PreeditInfo, CommitString>> getAndClearBatchList();
 
 private:

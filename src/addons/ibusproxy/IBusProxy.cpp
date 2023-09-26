@@ -259,6 +259,17 @@ bool DimIBusProxy::keyEvent(InputContextKeyEvent &keyEvent)
     return result;
 }
 
+void DimIBusProxy::cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event)
+{
+    auto id = event.ic()->id();
+
+    if (!isICDBusInterfaceValid(id)) {
+        return;
+    }
+
+    iBusICMap_[id]->SetCursorLocationRelative(event.x, event.y, event.w, event.h);
+}
+
 void DimIBusProxy::setSurroundingText(InputContextSetSurroundingTextEvent &event)
 {
     auto id = event.ic()->id();

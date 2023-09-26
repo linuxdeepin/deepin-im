@@ -27,8 +27,18 @@ InputContextKeyEvent::InputContextKeyEvent(InputContext *ic,
 {
 }
 
-InputContextSetSurroundingTextEvent::InputContextSetSurroundingTextEvent(InputContext *ic,
-    const QString &surroundingText, uint32_t cursor, uint32_t anchor)
+InputContextCursorRectChangeEvent::InputContextCursorRectChangeEvent(
+    InputContext *ic, int32_t x, int32_t y, int32_t w, int32_t h)
+    : Event(EventType::InputContextCursorRectChanged, ic)
+    , x(x)
+    , y(y)
+    , w(w)
+    , h(h)
+{
+}
+
+InputContextSetSurroundingTextEvent::InputContextSetSurroundingTextEvent(
+    InputContext *ic, const QString &surroundingText, uint32_t cursor, uint32_t anchor)
     : Event(EventType::InputContextSetSurroundingText, ic)
     , text(surroundingText)
     , cursor(cursor)

@@ -136,7 +136,8 @@ bool Dim::postEvent(Event &event)
         return postInputContextKeyEvent(reinterpret_cast<InputContextKeyEvent &>(event));
         break;
     case EventType::InputContextCursorRectChanged:
-        // TODO:
+        postInputContextCursorRectChanged(
+            reinterpret_cast<InputContextCursorRectChangeEvent &>(event));
         break;
     case EventType::InputContextSetSurroundingText:
         postInputContextSetSurroundingTextEvent(
@@ -217,28 +218,37 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
         });
     }
 
-    const QString &addonKey = inputState.currentIMAddon();
-
-    auto j = inputMethodAddons_.find(addonKey);
-    if (j == inputMethodAddons_.end()) {
-        // TODO:
-        return false;
-    }
-    auto *addon = j.value();
+    auto *addon = getInputMethodAddon(inputState);
 
     return addon->keyEvent(event);
+}
+
+void Dim::postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &event)
+{
+    auto &inputState = event.ic()->inputState();
+
+    auto *imAddon = getInputMethodAddon(inputState);
+    ProxyAddon *addon = qobject_cast<ProxyAddon *>(imAddon);
+    if (addon) {
+        addon->cursorRectangleChangeEvent(event);
+    }
 }
 
 void Dim::postInputContextSetSurroundingTextEvent(InputContextSetSurroundingTextEvent &event)
 {
 
     auto &inputState = event.ic()->inputState();
-    const QString &addonKey = inputState.currentIMAddon();
-    auto j = inputMethodAddons_.find(addonKey);
-    if (j == inputMethodAddons_.end()) {
-        return;
-    }
-    auto *addon = j.value();
+
+    auto *addon = getInputMethodAddon(inputState);
 
     addon->setSurroundingText(event);
+}
+
+InputMethodAddon *Dim::getInputMethodAddon(InputState &inputState)
+{
+    const QString &addonKey = inputState.currentIMAddon();
+    auto j = inputMethodAddons_.find(addonKey);
+    assert(j != inputMethodAddons_.end());
+
+    return j.value();
 }
