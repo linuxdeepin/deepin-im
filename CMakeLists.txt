@@ -23,7 +23,11 @@ find_package(Qt6Gui ${REQUIRED_QT6_VERSION} REQUIRED Private)
 find_package(Fcitx5Qt6DBusAddons REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(WaylandScanner REQUIRED)
-find_package(Dtk6Core REQUIRED)
+find_package(Dtk6Core QUIET)
+
+if (Dtk6Core_FOUND)
+  add_definitions(Dtk6Core_FOUND)
+endif()
 
 pkg_check_modules(xcb REQUIRED IMPORTED_TARGET xcb)
 pkg_check_modules(xcb-xinput REQUIRED IMPORTED_TARGET xcb-xinput)

@@ -28,7 +28,7 @@ target_link_libraries(imwl PUBLIC
     PkgConfig::xcb
     PkgConfig::xcb-xinput
     PkgConfig::xkbcommon
-    Dtk6::Core
+    $<$<BOOL:${Dtk6Core_FOUND}>:Dtk6::Core>
 )
 
 install(TARGETS imwl

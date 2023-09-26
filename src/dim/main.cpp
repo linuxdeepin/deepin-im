@@ -4,18 +4,22 @@
 
 #include "dimcore/Dim.h"
 
-#include <DLog>
-
 #include <QGuiApplication>
 
+#ifdef Dtk6Core_FOUND
+#  include <DLog>
+
 using Dtk::Core::DLogManager;
+#endif
 
 int main(int argc, char *argv[])
 {
     QGuiApplication a(argc, argv);
 
+#ifdef Dtk6Core_FOUND
     DLogManager::registerJournalAppender();
     DLogManager::registerConsoleAppender();
+#endif
 
     org::deepin::dim::Dim dim;
 
