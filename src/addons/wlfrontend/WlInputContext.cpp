@@ -6,6 +6,7 @@
 
 #include "InputMethodV2.h"
 #include "common/common.h"
+#include "dimcore/Dim.h"
 #include "wl/client/ZwpVirtualKeyboardV1.h"
 
 #include <linux/input.h>
@@ -32,6 +33,12 @@ WlInputContext::WlInputContext(Dim *dim, InputMethodV2 *im)
     connect(this, &InputContext::processKeyEventFinished, this, [=]() {
         keyEventDispatch();
     });
+}
+
+void WlInputContext::textInputRectangle(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    InputContextCursorRectChangeEvent e(this, x, y, width, height);
+    dim()->postEvent(e);
 }
 
 void WlInputContext::keyEventDispatch()

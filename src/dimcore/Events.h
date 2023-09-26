@@ -70,6 +70,17 @@ private:
     uint32_t time_;
 };
 
+class InputContextCursorRectChangeEvent : public Event
+{
+public:
+    InputContextCursorRectChangeEvent(InputContext *ic, int32_t x, int32_t y, int32_t w, int32_t h);
+
+    const int32_t x;
+    const int32_t y;
+    const int32_t w;
+    const int32_t h;
+};
+
 class InputContextSetSurroundingTextEvent : public Event
 {
 public:

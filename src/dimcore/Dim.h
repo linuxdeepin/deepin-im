@@ -23,12 +23,14 @@ enum AddonType {
 };
 
 class InputContext;
+class InputState;
 class InputMethodAddon;
 class ProxyAddon;
 class FrontendAddon;
 class Addon;
 class Event;
 class InputContextKeyEvent;
+class InputContextCursorRectChangeEvent;
 class InputContextSetSurroundingTextEvent;
 
 class Dim : public QObject
@@ -69,7 +71,10 @@ private:
     void postInputContextFocused(Event &event);
     void postInputContextUnfocused(Event &event);
     bool postInputContextKeyEvent(InputContextKeyEvent &event);
+    void postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &event);
     void postInputContextSetSurroundingTextEvent(InputContextSetSurroundingTextEvent &event);
+
+    InputMethodAddon *getInputMethodAddon(InputState &state);
 };
 
 } // namespace dim

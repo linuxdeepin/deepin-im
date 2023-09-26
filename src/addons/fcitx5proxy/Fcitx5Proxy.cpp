@@ -244,6 +244,16 @@ bool Fcitx5Proxy::keyEvent(InputContextKeyEvent &keyEvent)
     return true;
 }
 
+void Fcitx5Proxy::cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) {
+    auto id = event.ic()->id();
+    if (!isICDBusInterfaceValid(id)) {
+        return;
+    }
+
+
+    auto response = icMap_[id]->SetCursorRectV2(event.x, event.y, event.w, event.h, 1);
+}
+
 void Fcitx5Proxy::setSurroundingText(InputContextSetSurroundingTextEvent &event)
 {
     auto id = event.ic()->id();

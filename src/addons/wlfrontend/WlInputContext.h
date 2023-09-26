@@ -34,6 +34,9 @@ class WlInputContext : public InputContext
 public:
     WlInputContext(Dim *dim, InputMethodV2 *im);
 
+public slots:
+    void textInputRectangle(int32_t x, int32_t y, int32_t width, int32_t height);
+
 private:
     InputMethodV2 *im_;
 

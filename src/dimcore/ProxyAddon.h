@@ -14,6 +14,7 @@ namespace deepin {
 namespace dim {
 
 class InputContext;
+class InputContextCursorRectChangeEvent;
 
 class ProxyAddon : public InputMethodAddon
 {
@@ -27,6 +28,7 @@ public:
     virtual void focusOut(uint32_t id) = 0;
     virtual void destroyed(uint32_t id) = 0;
     virtual void createFcitxInputContext(InputContext *) = 0;
+    virtual void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) = 0;
 };
 
 } // namespace dim

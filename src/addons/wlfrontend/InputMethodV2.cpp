@@ -22,6 +22,10 @@ InputMethodV2::InputMethodV2(zwp_input_method_v2 *val,
     , popup_(std::make_shared<InputPopupSurfaceV2>(get_input_popup_surface(surface_)))
     , ic_(std::make_unique<WlInputContext>(dim, this))
 {
+    QObject::connect(popup_->qobject(),
+                     &InputPopupSurfaceV2QObj::textInputRectangle,
+                     ic_.get(),
+                     &WlInputContext::textInputRectangle);
 }
 
 InputMethodV2::~InputMethodV2() = default;

@@ -28,6 +28,7 @@ public:
     void initInputMethods() override;
     QList<InputMethodEntry> getInputMethods() override;
     bool keyEvent(InputContextKeyEvent &keyEvent) override;
+    void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) override;
     void setSurroundingText(InputContextSetSurroundingTextEvent &event) override;
     void createFcitxInputContext(InputContext *ic) override;
     void focusIn(uint32_t id) override;
