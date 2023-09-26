@@ -4,18 +4,22 @@
 
 #include "Server.h"
 
-#include <DLog>
-
 #include <QCoreApplication>
 
+#ifdef Dtk6Core_FOUND
+#  include <DLog>
+
 using Dtk::Core::DLogManager;
+#endif
 
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
 
+#ifdef Dtk6Core_FOUND
     DLogManager::registerJournalAppender();
     DLogManager::registerConsoleAppender();
+#endif
 
     Server server;
     server.addSocket("imfakewl");

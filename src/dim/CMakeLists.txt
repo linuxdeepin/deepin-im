@@ -9,7 +9,7 @@ add_executable(dim
 target_link_libraries(dim PRIVATE
   dimcore
   Qt6::Gui
-  Dtk6::Core
+  $<$<BOOL:${Dtk6Core_FOUND}>:Dtk6::Core>
 )
 
 install(TARGETS dim
