@@ -10,8 +10,12 @@
 #include "wl/client/Seat.h"
 #include "wl/client/ZwpDimTextInputManagerV1.h"
 
-#include <gdk/gdkprivate.h>
-#include <gdk/gdkwayland.h>
+#if GTK_CHECK_VERSION(4, 0, 0)
+#  include <gdk/wayland/gdkwayland.h>
+#else
+#  include <gdk/gdkprivate.h>
+#  include <gdk/gdkwayland.h>
+#endif
 
 #define POINT_TRANSFORM(p) (DimIMContextWaylandGlobal *)(p)
 
@@ -25,12 +29,13 @@ static guint _signalRetrieveSurroundingId = 0;
 G_DEFINE_DYNAMIC_TYPE(DimIMContext, dim_im_context, GTK_TYPE_IM_CONTEXT);
 
 /* functions prototype start */
-#if GTK_CHECK_VERSION(3, 98, 4)
-static void dim_im_context_set_client_window(GtkIMContext *context, GdkWidget *client);
+#if GTK_CHECK_VERSION(4, 0, 0)
+static void dim_im_context_set_client_window(GtkIMContext *context, GtkWidget *client);
+static gboolean dimImContextFilterKeypress(GtkIMContext *context, GdkEvent *key);
 #else
 static void dimImContextSetClientWindow(GtkIMContext *context, GdkWindow *client);
-#endif
 static gboolean dimImContextFilterKeypress(GtkIMContext *context, GdkEventKey *key);
+#endif
 static void dimImContextReset(GtkIMContext *context);
 static void dimImContextFocusIn(GtkIMContext *context);
 static void dimImContextFocusOut(GtkIMContext *context);
@@ -55,9 +60,13 @@ static DimIMContextWaylandGlobal *dimImContextWaylandGetGlobal(DimIMContext *sel
     if (self->window == nullptr)
         return nullptr;
 
+#if GTK_CHECK_VERSION(4, 0, 0)
+    DimIMContextWaylandGlobal *global =
+        dimImContextWaylandGlobalGet(gtk_widget_get_display(self->window));
+#else
     DimIMContextWaylandGlobal *global =
         dimImContextWaylandGlobalGet(gdk_window_get_display(self->window));
-
+#endif
     if (!global) {
         return nullptr;
     }
@@ -220,7 +229,36 @@ static void notifyCursorLocation(DimIMContext *context)
 
     if (context->window) {
         cairo_rectangle_int_t rect = context->cursorRect;
+#if GTK_CHECK_VERSION(4, 0, 0)
+        auto *native = gtk_widget_get_native(context->window);
+
+        if (!native) {
+            return;
+        }
+
+        auto surface = gtk_native_get_surface(native);
+        if (!surface) {
+            return;
+        }
+        // Get coordinate against the current window.
+        double px, py;
+        gtk_widget_translate_coordinates(context->window,
+                                         GTK_WIDGET(native),
+                                         rect.x,
+                                         rect.y,
+                                         &px,
+                                         &py);
+        rect.x = px;
+        rect.y = py;
+
+        // Add frame.
+        double offsetX = 0, offsetY = 0;
+        gtk_native_get_surface_transform(native, &offsetX, &offsetY);
+        rect.x += offsetX;
+        rect.y += offsetY;
+#else
         gdk_window_get_root_coords(context->window, rect.x, rect.y, &rect.x, &rect.y);
+#endif
         global->ti->set_cursor_rectangle(rect.x, rect.y, rect.width, rect.height);
     }
 }
@@ -382,8 +420,8 @@ static DimIMContextWaylandGlobal *dimImContextWaylandGlobalGet(GdkDisplay *displ
     return global;
 }
 
-#if GTK_CHECK_VERSION(3, 98, 4)
-static void dim_im_context_set_client_window(GtkIMContext *context, GdkWidget *client)
+#if GTK_CHECK_VERSION(4, 0, 0)
+static void dim_im_context_set_client_window(GtkIMContext *context, GtkWidget *client)
 #else
 static void dimImContextSetClientWindow(GtkIMContext *context, GdkWindow *client)
 #endif
@@ -402,10 +440,18 @@ static void dimImContextSetClientWindow(GtkIMContext *context, GdkWindow *client
         contextWayland->window = g_object_ref(client);
 
     if (contextWayland->slave)
+#if GTK_CHECK_VERSION(4, 0, 0)
+        gtk_im_context_set_client_widget(contextWayland->slave, client);
+#else
         gtk_im_context_set_client_window(contextWayland->slave, client);
+#endif
 }
 
+#if GTK_CHECK_VERSION(4, 0, 0)
+static gboolean dimImContextFilterKeypress(GtkIMContext *context, GdkEvent *event)
+#else
 static gboolean dimImContextFilterKeypress(GtkIMContext *context, GdkEventKey *event)
+#endif
 {
     /* This is done by the compositor */
     return GTK_IM_CONTEXT_CLASS(dim_im_context_parent_class)->filter_keypress(context, event);
@@ -420,8 +466,14 @@ static void dimImContextFocusIn(GtkIMContext *context)
     if (self->window == nullptr)
         return;
 
+#if GTK_CHECK_VERSION(4, 0, 0)
+    DimIMContextWaylandGlobal *global =
+        dimImContextWaylandGlobalGet(gtk_widget_get_display(self->window));
+#else
     DimIMContextWaylandGlobal *global =
         dimImContextWaylandGlobalGet(gdk_window_get_display(self->window));
+#endif
+
     if (!global) {
         return;
     }

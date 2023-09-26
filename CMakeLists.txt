@@ -14,6 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+option(ENABLE_GTK3_IM_MODULE "Enable GTK3 IM Module" ON)
+option(ENABLE_GTK4_IM_MODULE "Enable GTK4 IM Module" ON)
 
 find_package(ECM 1.4.0 REQUIRED)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
@@ -38,10 +40,18 @@ pkg_check_modules(wayland-server REQUIRED IMPORTED_TARGET wayland-server)
 pkg_check_modules(libudev REQUIRED IMPORTED_TARGET libudev)
 pkg_check_modules(libinput REQUIRED IMPORTED_TARGET libinput)
 
-pkg_check_modules(Gtk3 REQUIRED IMPORTED_TARGET "gtk+-3.0")
-pkg_check_modules(Gdk3 REQUIRED IMPORTED_TARGET "gdk-3.0")
-pkg_get_variable(GTK3_BINARY_VERSION "gtk+-3.0" "gtk_binary_version")
-pkg_get_variable(GTK3_TARGETS "gtk+-3.0" "targets")
+if (ENABLE_GTK3_IM_MODULE)
+    pkg_check_modules(Gtk3 REQUIRED IMPORTED_TARGET "gtk+-3.0")
+    pkg_check_modules(Gdk3 REQUIRED IMPORTED_TARGET "gdk-3.0")
+    pkg_get_variable(GTK3_BINARY_VERSION "gtk+-3.0" "gtk_binary_version")
+    pkg_get_variable(GTK3_TARGETS "gtk+-3.0" "targets")
+endif()
+
+if (ENABLE_GTK4_IM_MODULE)
+    pkg_check_modules(Gtk4 REQUIRED IMPORTED_TARGET "gtk4>=4.2")
+    pkg_get_variable(GTK4_BINARY_VERSION "gtk4" "gtk_binary_version")
+    pkg_get_variable(GTK4_TARGETS "gtk4" "targets")
+endif()
 
 add_library(wayland_protocols OBJECT)
 
