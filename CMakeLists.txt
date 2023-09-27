@@ -28,7 +28,7 @@ find_package(WaylandScanner REQUIRED)
 find_package(Dtk6Core QUIET)
 
 if (Dtk6Core_FOUND)
-  add_definitions(Dtk6Core_FOUND)
+  add_definitions(-DDtk6Core_FOUND)
 endif()
 
 pkg_check_modules(xcb REQUIRED IMPORTED_TARGET xcb)
