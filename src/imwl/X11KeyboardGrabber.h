@@ -5,14 +5,14 @@
 #ifndef X11KEYBOARDGRABBER_H
 #define X11KEYBOARDGRABBER_H
 
-#include "XCB.h"
+#include "Xcb.h"
 
 #include <xcb/xcb.h>
 
 #include <QObject>
 #include <QSocketNotifier>
 
-class X11KeyboardGrabber : public XCB
+class X11KeyboardGrabber : public Xcb
 {
     Q_OBJECT
 

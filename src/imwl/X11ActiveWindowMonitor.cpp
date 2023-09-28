@@ -9,7 +9,7 @@
 #include <QDebug>
 
 X11ActiveWindowMonitor::X11ActiveWindowMonitor()
-    : XCB()
+    : Xcb()
 {
     activeWindowAtom_ = getAtom("_NET_ACTIVE_WINDOW");
     wmPidAtom_ = getAtom("_NET_WM_PID");

@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "XCB.h"
+#include "Xcb.h"
 
 #include <QDebug>
 #include <QSocketNotifier>
 
-XCB::XCB()
+Xcb::Xcb()
     : QObject()
 {
     xconn_.reset(xcb_connect(nullptr, &defaultScreenNbr_));
@@ -22,12 +22,12 @@ XCB::XCB()
 
     xcbFd_ = xcb_get_file_descriptor(xconn_.get());
     socketNotifier_ = new QSocketNotifier(xcbFd_, QSocketNotifier::Type::Read, this);
-    connect(socketNotifier_, &QSocketNotifier::activated, this, &XCB::onXCBEvent);
+    connect(socketNotifier_, &QSocketNotifier::activated, this, &Xcb::onXCBEvent);
 }
 
-XCB::~XCB() { }
+Xcb::~Xcb() { }
 
-xcb_atom_t XCB::getAtom(const char *atomName)
+xcb_atom_t Xcb::getAtom(const char *atomName)
 {
     auto reply = XCB_REPLY(xcb_intern_atom, xconn_.get(), 0, strlen(atomName), atomName);
     if (!reply) {
@@ -38,14 +38,15 @@ xcb_atom_t XCB::getAtom(const char *atomName)
     return reply->atom;
 }
 
-std::vector<char> XCB::getProperty(xcb_window_t window, xcb_atom_t property, uint32_t size) {
+std::vector<char> Xcb::getProperty(xcb_window_t window, xcb_atom_t property, uint32_t size)
+{
     std::vector<char> buff(size);
     getPropertyAux(buff, window, property, 0, size);
 
     return buff;
 }
 
-std::vector<char> XCB::getProperty(xcb_window_t window, xcb_atom_t property)
+std::vector<char> Xcb::getProperty(xcb_window_t window, xcb_atom_t property)
 {
     // Don't read anything, just get the size of the property data
     auto reply = XCB_REPLY(xcb_get_property,
@@ -67,14 +68,13 @@ std::vector<char> XCB::getProperty(xcb_window_t window, xcb_atom_t property)
     std::vector<char> buff(bytesLeft);
 
     while (bytesLeft > 0) {
-        std::tie(offset, bytesLeft) =
-            getPropertyAux(buff, window, property, offset, UINT_MAX);
+        std::tie(offset, bytesLeft) = getPropertyAux(buff, window, property, offset, UINT_MAX);
     }
 
     return buff;
 }
 
-xcb_screen_t *XCB::screenOfDisplay(int screen)
+xcb_screen_t *Xcb::screenOfDisplay(int screen)
 {
     xcb_screen_iterator_t iter = xcb_setup_roots_iterator(setup_);
     for (; iter.rem; --screen, xcb_screen_next(&iter)) {
@@ -86,7 +86,7 @@ xcb_screen_t *XCB::screenOfDisplay(int screen)
     return nullptr;
 }
 
-void XCB::onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationEvent)
+void Xcb::onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationEvent)
 {
     std::unique_ptr<xcb_generic_event_t> event;
     while (event.reset(xcb_poll_for_event(xconn_.get())), event) {
@@ -94,7 +94,7 @@ void XCB::onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationE
     }
 }
 
-std::tuple<uint32_t, uint32_t> XCB::getPropertyAux(std::vector<char> &buff,
+std::tuple<uint32_t, uint32_t> Xcb::getPropertyAux(std::vector<char> &buff,
                                                    xcb_window_t window,
                                                    xcb_atom_t property,
                                                    uint32_t offset,
