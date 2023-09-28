@@ -11,6 +11,10 @@
 
 #include <set>
 
+#ifdef Dtk6Core_FOUND
+#  include <DConfig>
+#endif
+
 namespace org {
 namespace deepin {
 namespace dim {
@@ -92,6 +96,9 @@ private:
     void launchFcitx5Daemon();
     void launchIbusDaemon();
     void launchInputMethodProxyDaemon(uint32_t modifier);
+#ifdef Dtk6Core_FOUND
+    void initDConfig();
+#endif
 
 private:
     std::unordered_map<uint32_t, InputContext *> inputContexts_;
@@ -100,6 +107,9 @@ private:
     std::vector<InputMethodEntry> imEntries_;
     std::set<std::pair<std::string, std::string>> activeInputMethodEntries_;
     std::set<FrontendAddon *> frontends_;
+#ifdef Dtk6Core_FOUND
+    DTK_CORE_NAMESPACE::DConfig *dimConf_;
+#endif
 };
 
 } // namespace dim

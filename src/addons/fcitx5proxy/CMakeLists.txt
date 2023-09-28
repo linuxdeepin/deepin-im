@@ -26,6 +26,7 @@ target_link_libraries(fcitx5proxy PRIVATE
   Qt6::DBus
   Qt6::GuiPrivate
   Fcitx5Qt6::DBusAddons
+  $<$<BOOL:${Dtk6Core_FOUND}>:Dtk6::Core>
 )
 
 install(TARGETS fcitx5proxy

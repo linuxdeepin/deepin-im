@@ -4,3 +4,4 @@
 
 add_subdirectory(im-config)
 add_subdirectory(systemd)
+add_subdirectory(dsg)
