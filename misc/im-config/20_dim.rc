@@ -1,10 +1,6 @@
 # start dim
 # vim: set sts=4 expandtab:
 
-if [ "$IM_CONFIG_PHASE" = 2 ]; then
-    /usr/bin/dim &
-fi
-
 IM="dim"
 
 if [ -f "/usr/bin/fcitx5" ]; then
@@ -14,6 +10,9 @@ elif [ -f "/usr/bin/ibus" ]; then
 fi
 
 if [ "$IM_CONFIG_PHASE" = 1 ]; then
+# export DISPLAY env for app in x11 or xwayland
+export DIM_WAYLAND_DISPLAY=imfakewl
+
 # set variables for the plain XIM
 XMODIFIERS=@im=${IM}
 
@@ -22,13 +21,5 @@ GTK_IM_MODULE=dim
 QT_IM_MODULE=dim
 CLUTTER_IM_MODULE=${IM}
 SDL_IM_MODULE=${IM}
-
-# export DISPLAY env for app in x11 or xwayland
-export DIM_WAYLAND_DISPLAY=imfakewl
-
-if [ "$XDG_SESSION_TYPE" = "x11" ]; then
-    # launch dim fake wayland daemon
-    /usr/bin/imwl &
-fi
 
 fi
