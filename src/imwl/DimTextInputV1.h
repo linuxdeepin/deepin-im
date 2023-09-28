@@ -14,8 +14,8 @@ class Seat;
 class DimTextInputV1 : public wl::server::ZwpDimTextInputV1
 {
 public:
-    DimTextInputV1(Seat *seat);
-    ~DimTextInputV1();
+    explicit DimTextInputV1(Seat *seat);
+    ~DimTextInputV1() override;
 
     void enterPid(pid_t pid);
     void leavePid(pid_t pid);

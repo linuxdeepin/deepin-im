@@ -22,7 +22,7 @@ class InputState : public QObject
     Q_OBJECT
 
 public:
-    InputState(InputContext *ic);
+    explicit InputState(InputContext *ic);
 
     inline const QString &currentIMAddon() const { return currentImAddon_; }
 

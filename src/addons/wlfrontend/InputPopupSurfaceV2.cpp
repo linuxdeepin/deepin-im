@@ -13,16 +13,11 @@ InputPopupSurfaceV2QObj::~InputPopupSurfaceV2QObj() = default;
 
 InputPopupSurfaceV2::InputPopupSurfaceV2(zwp_input_popup_surface_v2 *val)
     : wl::client::ZwpInputPopupSurfaceV2(val)
-    , qobject_(std::make_unique<InputPopupSurfaceV2QObj>())
+    , qObject_(std::make_unique<InputPopupSurfaceV2QObj>())
 {
 }
 
 InputPopupSurfaceV2::~InputPopupSurfaceV2() = default;
-
-InputPopupSurfaceV2QObj *InputPopupSurfaceV2::qobject()
-{
-    return qobject_.get();
-}
 
 void InputPopupSurfaceV2::zwp_input_popup_surface_v2_text_input_rectangle(int32_t x,
                                                                           int32_t y,
@@ -30,5 +25,5 @@ void InputPopupSurfaceV2::zwp_input_popup_surface_v2_text_input_rectangle(int32_
                                                                           int32_t height)
 {
     qWarning() << "zwp_input_popup_surface_v2_text_input_rectangle";
-    emit qobject_->textInputRectangle(x, y, width, height);
+    emit qObject_->textInputRectangle(x, y, width, height);
 }

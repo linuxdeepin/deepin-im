@@ -11,7 +11,7 @@
 class DimGtkTextInputV1 : public wl::client::ZwpDimTextInputV1
 {
 public:
-    DimGtkTextInputV1(struct ::zwp_dim_text_input_v1 *text_input, DimIMContextWaylandGlobal *global);
+    explicit DimGtkTextInputV1(struct ::zwp_dim_text_input_v1 *text_input, DimIMContextWaylandGlobal *global);
     ~DimGtkTextInputV1() override;
 
     inline void text_input_preedit(const char *text, int32_t cursor_begin, int32_t cursor_end)

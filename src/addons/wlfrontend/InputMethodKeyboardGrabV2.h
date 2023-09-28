@@ -23,12 +23,21 @@ class InputMethodV2;
 class InputMethodKeyboardGrabV2 : public wl::client::ZwpInputMethodKeyboardGrabV2
 {
 public:
-    InputMethodKeyboardGrabV2(zwp_input_method_keyboard_grab_v2 *val, InputMethodV2 *im);
+    explicit InputMethodKeyboardGrabV2(zwp_input_method_keyboard_grab_v2 *val, InputMethodV2 *im);
 
 protected:
-    void zwp_input_method_keyboard_grab_v2_keymap(uint32_t format, int32_t fd, uint32_t size) override;
-    void zwp_input_method_keyboard_grab_v2_key(uint32_t serial, uint32_t time, uint32_t key, uint32_t state) override;
-    void zwp_input_method_keyboard_grab_v2_modifiers(uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group) override;
+    void zwp_input_method_keyboard_grab_v2_keymap(uint32_t format,
+                                                  int32_t fd,
+                                                  uint32_t size) override;
+    void zwp_input_method_keyboard_grab_v2_key(uint32_t serial,
+                                               uint32_t time,
+                                               uint32_t key,
+                                               uint32_t state) override;
+    void zwp_input_method_keyboard_grab_v2_modifiers(uint32_t serial,
+                                                     uint32_t mods_depressed,
+                                                     uint32_t mods_latched,
+                                                     uint32_t mods_locked,
+                                                     uint32_t group) override;
     void zwp_input_method_keyboard_grab_v2_repeat_info(int32_t rate, int32_t delay) override;
 
 private:

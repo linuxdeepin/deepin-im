@@ -50,10 +50,10 @@ class InputMethodV2 : public wl::client::ZwpInputMethodV2
     friend class WlInputContext;
 
 public:
-    InputMethodV2(zwp_input_method_v2 *val,
-                  const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk,
-                  const std::shared_ptr<wl::client::Surface> &surface,
-                  Dim *dim);
+    explicit InputMethodV2(zwp_input_method_v2 *val,
+                           const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk,
+                           const std::shared_ptr<wl::client::Surface> &surface,
+                           Dim *dim);
     ~InputMethodV2() override;
 
 protected:

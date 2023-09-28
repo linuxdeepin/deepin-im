@@ -5,7 +5,6 @@
 #include "WLFrontend.h"
 
 #include "InputMethodV2.h"
-#include "InputPopupSurfaceV2.h"
 #include "wl/client/Compositor.h"
 #include "wl/client/Connection.h"
 #include "wl/client/ConnectionRaw.h"
@@ -41,7 +40,7 @@ WLFrontend::WLFrontend(Dim *dim)
 
         wl_.reset(new wl::client::ConnectionRaw(wl_dpy));
     } else {
-        QByteArray waylandDisplay = qgetenv("DIM_WAYLAND_DISPLAY");
+        const QByteArray waylandDisplay = qgetenv("DIM_WAYLAND_DISPLAY");
         const auto displayName = waylandDisplay.toStdString();
         if (displayName.empty()) {
             qWarning("failed to get display env");
@@ -72,18 +71,13 @@ WLFrontend::WLFrontend(Dim *dim)
 
 WLFrontend::~WLFrontend() { }
 
-void WLFrontend::init()
-{
-    reloadSeats();
-}
-
 void WLFrontend::reloadSeats()
 {
-    auto seats = wl_->getGlobals<wl::client::Seat>();
-    auto imManager = wl_->getGlobal<wl::client::ZwpInputMethodManagerV2>();
-    auto vkManager = wl_->getGlobal<wl::client::ZwpVirtualKeyboardManagerV1>();
+    const auto seats = wl_->getGlobals<wl::client::Seat>();
+    const auto imManager = wl_->getGlobal<wl::client::ZwpInputMethodManagerV2>();
+    const auto vkManager = wl_->getGlobal<wl::client::ZwpVirtualKeyboardManagerV1>();
 
-    for (auto &seat : seats) {
+    for (const auto &seat : seats) {
         auto vk = std::make_shared<wl::client::ZwpVirtualKeyboardV1>(
             vkManager->create_virtual_keyboard(seat));
         auto im =

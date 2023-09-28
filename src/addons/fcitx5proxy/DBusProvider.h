@@ -21,8 +21,8 @@ class DBusProvider : public QObject
     Q_OBJECT
 
 public:
-    DBusProvider(QObject *parent = nullptr);
-    ~DBusProvider();
+    explicit DBusProvider(QObject *parent = nullptr);
+    ~DBusProvider() override;
 
     inline bool available() const { return controller_ != nullptr; }
 

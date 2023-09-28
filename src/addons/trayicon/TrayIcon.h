@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef TRAYICON_TRAYICON_H
 #define TRAYICON_TRAYICON_H
 
@@ -17,7 +21,7 @@ class TrayIcon : public FrontendAddon
 
 public:
     explicit TrayIcon(Dim *dim);
-    ~TrayIcon();
+    ~TrayIcon() override;
 
 signals:
     void imAddonIconChanged(const QString &imAddonIcon);

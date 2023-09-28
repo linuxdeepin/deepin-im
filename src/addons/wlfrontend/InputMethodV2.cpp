@@ -22,7 +22,7 @@ InputMethodV2::InputMethodV2(zwp_input_method_v2 *val,
     , popup_(std::make_shared<InputPopupSurfaceV2>(get_input_popup_surface(surface_)))
     , ic_(std::make_unique<WlInputContext>(dim, this))
 {
-    QObject::connect(popup_->qobject(),
+    QObject::connect(popup_->getQObject(),
                      &InputPopupSurfaceV2QObj::textInputRectangle,
                      ic_.get(),
                      &WlInputContext::textInputRectangle);
@@ -68,7 +68,7 @@ void InputMethodV2::zwp_input_method_v2_content_type(uint32_t hint, uint32_t pur
 
 void InputMethodV2::zwp_input_method_v2_done()
 {
-    for (auto &event : penddingEvents_) {
+    for (const auto &event : penddingEvents_) {
         if (std::holds_alternative<SurroundingText>(event)) {
             auto e = std::get<SurroundingText>(event);
             ic_->setSurroundingText(e.text, e.cursor, e.anchor);

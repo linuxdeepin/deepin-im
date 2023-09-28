@@ -35,7 +35,7 @@ class DimTextInputV1 : public wl::client::ZwpDimTextInputV1,
                        public QtWaylandClient::QWaylandTextInputInterface
 {
 public:
-    DimTextInputV1(struct ::zwp_dim_text_input_v1 *text_input);
+    explicit DimTextInputV1(struct ::zwp_dim_text_input_v1 *text_input);
     ~DimTextInputV1() override;
 
     void reset() override;

@@ -80,7 +80,9 @@ std::pair<int, size_t> InputMethodKeyboardGrabV2::genKeymapData(xkb_keymap *keym
     }
     auto size = strlen(keymapStr.get());
     int fd = shm_open_anon();
-    ftruncate(fd, size);
+    if (ftruncate(fd, size) != 0) {
+        qWarning() << "ftruncate failed";
+    }
 
     void *tmp = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (tmp == MAP_FAILED) {
