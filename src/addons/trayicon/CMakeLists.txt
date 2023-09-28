@@ -15,6 +15,7 @@ target_link_libraries(trayicon PRIVATE
   Qt6::Core
   Qt6::Quick
   Qt6::Widgets
+  $<$<BOOL:${Dtk6Core_FOUND}>:Dtk6::Core>
 )
 
 install(TARGETS trayicon

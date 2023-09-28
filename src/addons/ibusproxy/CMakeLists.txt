@@ -40,6 +40,7 @@ target_link_libraries(ibusproxy PRIVATE
     Qt::Gui
     Qt::GuiPrivate
     PkgConfig::gio
+    $<$<BOOL:${Dtk6Core_FOUND}>:Dtk6::Core>
 )
 
 install(TARGETS ibusproxy

@@ -5,6 +5,7 @@
 #include "Dim.h"
 
 #include "Addon.h"
+#include "Dconfig.h"
 #include "FrontendAddon.h"
 #include "InputContext.h"
 #include "InputMethodAddon.h"
@@ -24,6 +25,15 @@
 
 constexpr uint32_t DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE = SHIFT_MASK | CONTROL_MASK;
 
+#ifdef Dtk6Core_FOUND
+const QString DimDConfigAppID = QStringLiteral("org.deepin.dde.dim");
+const QString DimDConfigJson = QStringLiteral("org.deepin.dde.dim");
+const QString KeyPerWindow = QStringLiteral("Per_Window");
+const QString KeyCurrentInputSource = QStringLiteral("Current_Input_Source");
+const QString KeyAllInputSources = QStringLiteral("All_Input_Sources");
+const QString KeyCurrentUserInputSources = QStringLiteral("Current_User_Input_Sources");
+#endif
+
 using namespace org::deepin::dim;
 
 static const QMap<QString, AddonType> AddonsType = {
@@ -40,15 +50,35 @@ Dim::Dim(QObject *parent)
     : QObject(parent)
     , focusedInputContext_(0)
     , activeInputMethodEntries_({ { "keyboard", "us" } }) // todo: load from config file
+#ifdef Dtk6Core_FOUND
+    , dimConf_(DconfigSettings::ConfigPtr(DimDConfigAppID, DimDConfigJson))
+#endif
 {
     launchInputMethodProxyDaemon(Fcitx5DaemonMask | IBusDaemonMask);
     loadAddons();
 
     // TODO: read current active ims(currentActiveIMEntries_) and current active
     // im(currentActiveIM_) from config file, and to start daemon of ims
+#ifdef Dtk6Core_FOUND
+    initDConfig();
+#endif
 }
 
 Dim::~Dim() { }
+
+#ifdef Dtk6Core_FOUND
+void Dim::initDConfig()
+{
+    // 绑定dsg属性
+    if (dimConf_) {
+        connect(dimConf_, &DConfig::valueChanged, this, [&](const QString &key) {
+            if (key == KeyPerWindow) {
+                // TODO:
+            }
+        });
+    }
+}
+#endif
 
 void Dim::loadAddons()
 {

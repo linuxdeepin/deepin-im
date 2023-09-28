@@ -13,6 +13,7 @@ set(DIMCORE_SOURCES
   InputState.cpp
   Events.cpp
   ProxyAddon.cpp
+  Dconfig.cpp
 )
 
 set(DIMCORE_HEADERS
@@ -26,6 +27,7 @@ set(DIMCORE_HEADERS
   InputState.h
   Events.h
   ProxyAddon.h
+  Dconfig.h
 )
 
 add_library(dimcore SHARED
@@ -38,6 +40,7 @@ target_link_libraries(dimcore PRIVATE
   Qt6::Quick
   Qt6::DBus
   ${CMAKE_DL_LIBS}
+  $<$<BOOL:${Dtk6Core_FOUND}>:Dtk6::Core>
 )
 
 install(TARGETS dimcore
