@@ -43,7 +43,7 @@ class InputContext : public QObject, public ObjectId<InputContext>
     friend class InputState;
 
 public:
-    InputContext(Dim *dim, QObject *parent = nullptr);
+    explicit InputContext(Dim *dim, QObject *parent = nullptr);
     ~InputContext() = default;
 
 public:

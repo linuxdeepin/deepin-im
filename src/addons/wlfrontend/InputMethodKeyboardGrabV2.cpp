@@ -25,7 +25,8 @@ static int32_t getTimestamp()
     return time.tv_sec * 1000 + time.tv_nsec / (1000 * 1000);
 }
 
-InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(zwp_input_method_keyboard_grab_v2 *val, InputMethodV2* im)
+InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(zwp_input_method_keyboard_grab_v2 *val,
+                                                     InputMethodV2 *im)
     : wl::client::ZwpInputMethodKeyboardGrabV2(val)
     , im_(im)
 {
@@ -45,9 +46,9 @@ void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_keymap(uint32_
     }
 
     im_->ic_->xkbKeymap_.reset(xkb_keymap_new_from_string(im_->ic_->xkbContext_.get(),
-                                                static_cast<const char *>(ptr),
-                                                XKB_KEYMAP_FORMAT_TEXT_V1,
-                                                XKB_KEYMAP_COMPILE_NO_FLAGS));
+                                                          static_cast<const char *>(ptr),
+                                                          XKB_KEYMAP_FORMAT_TEXT_V1,
+                                                          XKB_KEYMAP_COMPILE_NO_FLAGS));
     munmap(ptr, size);
 
     if (!im_->ic_->xkbKeymap_) {
@@ -88,10 +89,8 @@ void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_keymap(uint32_
         << xkb_keymap_mod_get_index(im_->ic_->xkbKeymap_.get(), "Hyper");
 }
 
-void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_key(uint32_t serial,
-                                                                      uint32_t time,
-                                                                      uint32_t key,
-                                                                      uint32_t state)
+void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_key(
+    [[maybe_unused]] uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
 {
     assert(im_->ic_->xkbState_);
 
@@ -113,11 +112,12 @@ void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_key(uint32_t s
     }
 }
 
-void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_modifiers(uint32_t serial,
-                                                                            uint32_t mods_depressed,
-                                                                            uint32_t mods_latched,
-                                                                            uint32_t mods_locked,
-                                                                            uint32_t group)
+void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_modifiers(
+    [[maybe_unused]] uint32_t serial,
+    uint32_t mods_depressed,
+    uint32_t mods_latched,
+    uint32_t mods_locked,
+    uint32_t group)
 {
     if (im_->ic_->xkbState_) {
         xkb_state_component comp = xkb_state_update_mask(im_->ic_->xkbState_.get(),
@@ -172,8 +172,8 @@ void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_modifiers(uint
     }
 }
 
-void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_repeat_info(int32_t rate,
-                                                                              int32_t delay)
+void InputMethodKeyboardGrabV2::zwp_input_method_keyboard_grab_v2_repeat_info([[maybe_unused]] int32_t rate,
+                                                                              [[maybe_unused]] int32_t delay)
 {
     // TODO
 }

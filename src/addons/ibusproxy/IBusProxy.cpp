@@ -90,7 +90,7 @@ QString DimIBusProxy::getSocketPath()
 void DimIBusProxy::connectToBus()
 {
     if (socketWatcher_.files().size() == 0) {
-        QString socketPath = getSocketPath();
+        const QString socketPath = getSocketPath();
         QFile file(socketPath);
         if (file.open(QFile::ReadOnly)) {
             socketWatcher_.addPath(socketPath);
@@ -165,7 +165,7 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 
     context_ = new OrgFreedesktopIBusInputContextInterface(IBUS_PORTAL_SERVICE,
                                                            reply.value().path(),
-                                                           dbusConn_);
+                                                           dbusConn_, this);
 
     if (!context_->isValid()) {
         qWarning("invalid input context");
@@ -235,7 +235,8 @@ void DimIBusProxy::destroyed(uint32_t id)
     }
 }
 
-bool DimIBusProxy::keyEvent(InputContextKeyEvent &keyEvent)
+bool DimIBusProxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
+                           InputContextKeyEvent &keyEvent)
 {
     bool result = false;
 

@@ -36,7 +36,7 @@ struct Layout
 };
 
 Keyboard::Keyboard(Dim *dim)
-    : InputMethodAddon(dim, "keyboard")
+    : InputMethodAddon(dim, "keyboard", "keyboard")
 {
     ctx_.reset(xkb_context_new(XKB_CONTEXT_NO_FLAGS));
 
@@ -55,7 +55,10 @@ Keyboard::Keyboard(Dim *dim)
     parseRule(extraRules);
 }
 
-Keyboard::~Keyboard() { }
+Keyboard::~Keyboard()
+{
+    keyboards_.clear();
+}
 
 QList<InputMethodEntry> Keyboard::getInputMethods()
 {
@@ -98,6 +101,8 @@ bool Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &key
     return true;
 }
 
+void setSurroundingText([[maybe_unused]] InputContextSetSurroundingTextEvent &event) { }
+
 // static QList<QString> parseLanguageList(const QDomElement &languageListEle) {
 //     QList<QString> languageList;
 //     for (auto language = languageListEle.firstChildElement("iso639Id"); !language.isNull();
@@ -115,9 +120,9 @@ void Keyboard::parseLayoutList(const QDomElement &layoutListEle)
          layoutEle = layoutEle.nextSiblingElement("layout")) {
         auto configItemEle = layoutEle.firstChildElement("configItem");
 
-        QString name = configItemEle.firstChildElement("name").text();
-        QString shortDescription = configItemEle.firstChildElement("shortDescription").text();
-        QString description = configItemEle.firstChildElement("description").text();
+        const QString name = configItemEle.firstChildElement("name").text();
+        const QString shortDescription = configItemEle.firstChildElement("shortDescription").text();
+        const QString description = configItemEle.firstChildElement("description").text();
         // QString languageList =
         // parseLanguageList(configItemEle.firstChildElement("languageList"));
 
@@ -135,13 +140,13 @@ void Keyboard::parseVariantList(const QString &layoutName, const QDomElement &va
          variantEle = variantEle.nextSiblingElement("variant")) {
         auto configItemEle = variantEle.firstChildElement("configItem");
 
-        QString name = configItemEle.firstChildElement("name").text();
-        QString shortDescription = configItemEle.firstChildElement("shortDescription").text();
-        QString description = configItemEle.firstChildElement("description").text();
+        const QString name = configItemEle.firstChildElement("name").text();
+        const QString shortDescription = configItemEle.firstChildElement("shortDescription").text();
+        const QString description = configItemEle.firstChildElement("description").text();
         // QString languageList =
         // parseLanguageList(configItemEle.firstChildElement("languageList"));
 
-        QString fullname = layoutName + "_" + name;
+        const QString fullname = layoutName + "_" + name;
 
         keyboards_.append({ key(),
                             QString("keyboard-%1").arg(fullname),

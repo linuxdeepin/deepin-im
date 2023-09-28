@@ -10,6 +10,7 @@
 #include "wl/server/Resource.h"
 
 #include <experimental/unordered_map>
+#include <qglobal.h>
 
 #include <QDebug>
 
@@ -52,7 +53,7 @@ void DimTextInputV1::leavePid(pid_t pid)
 void DimTextInputV1::sendPreeditString(const char *text, int32_t cursor_begin, int32_t cursor_end)
 {
     const auto resources = resourceMap();
-    for (auto &[client, resource] : resources) {
+    for (auto &[_, resource] : resources) {
         if (m_enabled.find(resource.get()) == m_enabled.end()) {
             continue;
         }
@@ -63,7 +64,7 @@ void DimTextInputV1::sendPreeditString(const char *text, int32_t cursor_begin, i
 void DimTextInputV1::sendCommitString(const char *text)
 {
     const auto resources = resourceMap();
-    for (auto &[client, resource] : resources) {
+    for (auto &[_, resource] : resources) {
         if (m_enabled.find(resource.get()) == m_enabled.end()) {
             continue;
         }

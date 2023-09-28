@@ -17,12 +17,12 @@ namespace dim {
 class DimIBusProxy : public ProxyAddon
 {
 public:
-    DimIBusProxy(Dim *dim);
-    virtual ~DimIBusProxy();
+    explicit DimIBusProxy(Dim *dim);
+    ~DimIBusProxy() override;
 
     QList<InputMethodEntry> getInputMethods() override;
     void initInputMethods() override;
-    bool keyEvent(InputContextKeyEvent &keyEvent) override;
+    bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
     void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) override;
     void setSurroundingText(InputContextSetSurroundingTextEvent &event) override;
     void createFcitxInputContext(InputContext *ic) override;

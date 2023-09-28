@@ -182,7 +182,8 @@ void Fcitx5Proxy::destroyed(uint32_t id)
     }
 }
 
-bool Fcitx5Proxy::keyEvent(InputContextKeyEvent &keyEvent)
+bool Fcitx5Proxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
+                           InputContextKeyEvent &keyEvent)
 {
     auto id = keyEvent.ic()->id();
 
@@ -244,14 +245,17 @@ bool Fcitx5Proxy::keyEvent(InputContextKeyEvent &keyEvent)
     return true;
 }
 
-void Fcitx5Proxy::cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) {
+void Fcitx5Proxy::cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event)
+{
     auto id = event.ic()->id();
     if (!isICDBusInterfaceValid(id)) {
         return;
     }
 
-
     auto response = icMap_[id]->SetCursorRectV2(event.x, event.y, event.w, event.h, 1);
+    if (response.isError()) {
+        qWarning() << "failed to set cursor rect";
+    }
 }
 
 void Fcitx5Proxy::setSurroundingText(InputContextSetSurroundingTextEvent &event)

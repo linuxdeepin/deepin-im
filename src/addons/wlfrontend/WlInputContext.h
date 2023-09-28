@@ -32,7 +32,8 @@ class WlInputContext : public InputContext
     friend class InputMethodKeyboardGrabV2;
 
 public:
-    WlInputContext(Dim *dim, InputMethodV2 *im);
+    explicit WlInputContext(Dim *dim, InputMethodV2 *im);
+    ~WlInputContext() override;
 
 public slots:
     void textInputRectangle(int32_t x, int32_t y, int32_t width, int32_t height);

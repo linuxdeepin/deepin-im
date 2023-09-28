@@ -29,10 +29,10 @@ signals:
 class InputPopupSurfaceV2 : public wl::client::ZwpInputPopupSurfaceV2
 {
 public:
-    InputPopupSurfaceV2(zwp_input_popup_surface_v2 *val);
+    explicit InputPopupSurfaceV2(zwp_input_popup_surface_v2 *val);
     virtual ~InputPopupSurfaceV2();
 
-    InputPopupSurfaceV2QObj *qobject();
+    inline InputPopupSurfaceV2QObj *getQObject() const { return qObject_.get(); }
 
 protected:
     void zwp_input_popup_surface_v2_text_input_rectangle(int32_t x,
@@ -41,7 +41,7 @@ protected:
                                                          int32_t height) override;
 
 private:
-    std::unique_ptr<InputPopupSurfaceV2QObj> qobject_;
+    std::unique_ptr<InputPopupSurfaceV2QObj> qObject_;
 };
 
 } // namespace dim

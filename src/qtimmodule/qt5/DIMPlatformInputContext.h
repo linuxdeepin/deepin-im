@@ -63,7 +63,6 @@ private:
 
     void ensureInitialized();
 
-
     bool m_initialized = false;
     QObject *m_focusObject = nullptr;
     xkb_compose_table *m_composeTable = nullptr;

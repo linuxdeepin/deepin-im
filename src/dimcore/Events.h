@@ -28,7 +28,7 @@ enum class EventType {
 class Event
 {
 public:
-    Event(EventType type_, InputContext *ic_);
+    explicit Event(EventType type_, InputContext *ic_);
     ~Event() = default;
 
     inline EventType type() const { return type_; }

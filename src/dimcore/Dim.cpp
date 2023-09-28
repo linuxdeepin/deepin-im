@@ -112,7 +112,7 @@ void Dim::loadAddon(const QString &infoFile)
 
 void Dim::initInputMethodAddon(InputMethodAddon *imAddon)
 {
-    for (auto &i : imAddon->getInputMethods()) {
+    for (const auto &i : imAddon->getInputMethods()) {
         ims_.insert(i.uniqueName(), std::move(i));
     }
 }
@@ -195,7 +195,7 @@ void Dim::postInputContextFocused(Event &event)
     }
 }
 
-void Dim::postInputContextUnfocused([[maybe_unused]] Event &event)
+void Dim::postInputContextUnfocused(Event &event)
 {
     focusedInputContext_ = 0;
     emit focusedInputContextChanged(focusedInputContext_);
@@ -220,7 +220,8 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
 
     auto *addon = getInputMethodAddon(inputState);
 
-    return addon->keyEvent(event);
+    // TODO: must use right InputMethodEntry
+    return addon->keyEvent(addon->getInputMethods().first(), event);
 }
 
 void Dim::postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &event)

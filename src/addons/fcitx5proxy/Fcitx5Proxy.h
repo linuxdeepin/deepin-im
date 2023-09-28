@@ -22,12 +22,12 @@ class DBusProvider;
 class Fcitx5Proxy : public ProxyAddon
 {
 public:
-    Fcitx5Proxy(Dim *dim);
-    virtual ~Fcitx5Proxy();
+    explicit Fcitx5Proxy(Dim *dim);
+    ~Fcitx5Proxy() override;
 
     void initInputMethods() override;
     QList<InputMethodEntry> getInputMethods() override;
-    bool keyEvent(InputContextKeyEvent &keyEvent) override;
+    bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
     void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) override;
     void setSurroundingText(InputContextSetSurroundingTextEvent &event) override;
     void createFcitxInputContext(InputContext *ic) override;

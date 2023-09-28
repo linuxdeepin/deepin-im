@@ -38,7 +38,7 @@ class Dim : public QObject
     Q_OBJECT
 
 public:
-    Dim(QObject *parent = nullptr);
+    explicit Dim(QObject *parent = nullptr);
     ~Dim();
 
     QMap<uint32_t, InputContext *> getInputContexts() { return inputContexts_; }
@@ -56,13 +56,6 @@ Q_SIGNALS:
     void focusedInputContextChanged(int focusedInputContext);
 
 private:
-    QMap<uint32_t, InputContext *> inputContexts_;
-    uint32_t focusedInputContext_;
-    QMap<QString, InputMethodAddon *> inputMethodAddons_;
-    QSet<FrontendAddon *> frontends_;
-
-    QMap<QString, InputMethodEntry> ims_;
-
     void loadAddons();
     void loadAddon(const QString &infoFile);
     void initInputMethodAddon(InputMethodAddon *imAddon);
@@ -75,6 +68,14 @@ private:
     void postInputContextSetSurroundingTextEvent(InputContextSetSurroundingTextEvent &event);
 
     InputMethodAddon *getInputMethodAddon(InputState &state);
+
+private:
+    QMap<uint32_t, InputContext *> inputContexts_;
+    uint32_t focusedInputContext_;
+    QMap<QString, InputMethodAddon *> inputMethodAddons_;
+    QSet<FrontendAddon *> frontends_;
+
+    QMap<QString, InputMethodEntry> ims_;
 };
 
 } // namespace dim

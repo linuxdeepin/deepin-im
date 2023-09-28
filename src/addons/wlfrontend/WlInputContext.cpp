@@ -35,6 +35,8 @@ WlInputContext::WlInputContext(Dim *dim, InputMethodV2 *im)
     });
 }
 
+WlInputContext::~WlInputContext() = default;
+
 void WlInputContext::textInputRectangle(int32_t x, int32_t y, int32_t width, int32_t height)
 {
     InputContextCursorRectChangeEvent e(this, x, y, width, height);
@@ -44,9 +46,9 @@ void WlInputContext::textInputRectangle(int32_t x, int32_t y, int32_t width, int
 void WlInputContext::keyEventDispatch()
 {
     auto list = getAndClearBatchList();
-    for (auto &e : list) {
+    for (const auto &e : list) {
         if (std::holds_alternative<ForwardKey>(e)) {
-            auto forwardKey = std::get<ForwardKey>(e);
+            const auto &forwardKey = std::get<ForwardKey>(e);
             im_->vk_->key(getTimestamp(),
                           forwardKey.keycode + XKB_HISTORICAL_OFFSET,
                           forwardKey.pressed ? WL_KEYBOARD_KEY_STATE_PRESSED
@@ -55,7 +57,7 @@ void WlInputContext::keyEventDispatch()
         }
 
         if (std::holds_alternative<PreeditInfo>(e)) {
-            auto preeditInfo = std::get<PreeditInfo>(e);
+            const auto &preeditInfo = std::get<PreeditInfo>(e);
             im_->set_preedit_string(preeditInfo.text.toStdString().c_str(),
                                     preeditInfo.cursorBegin,
                                     preeditInfo.cursorEnd);
@@ -63,7 +65,7 @@ void WlInputContext::keyEventDispatch()
         }
 
         if (std::holds_alternative<CommitString>(e)) {
-            auto text = std::get<CommitString>(e).text;
+            const auto &text = std::get<CommitString>(e).text;
             im_->commit_string(text.toStdString().c_str());
             continue;
         }

@@ -19,22 +19,24 @@ namespace dim {
 class Keyboard : public InputMethodAddon
 {
 public:
-    Keyboard(Dim *dim);
-    ~Keyboard();
+    explicit Keyboard(Dim *dim);
+    ~Keyboard() override;
 
     QList<InputMethodEntry> getInputMethods() override;
     void initInputMethods() override;
     bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
+    void setSurroundingText(InputContextSetSurroundingTextEvent &event) override;
+
+private:
+    void parseRule(const QString &file);
+    void parseLayoutList(const QDomElement &layoutListEle);
+    void parseVariantList(const QString &layoutName, const QDomElement &variantListEle);
 
 private:
     std::unique_ptr<struct xkb_context, Deleter<xkb_context_unref>> ctx_;
     std::unique_ptr<struct xkb_keymap, Deleter<xkb_keymap_unref>> keymap_;
     std::unique_ptr<struct xkb_state, Deleter<xkb_state_unref>> state_;
     QList<InputMethodEntry> keyboards_;
-
-    void parseRule(const QString &file);
-    void parseLayoutList(const QDomElement &layoutListEle);
-    void parseVariantList(const QString &layoutName, const QDomElement &variantListEle);
 };
 
 } // namespace dim

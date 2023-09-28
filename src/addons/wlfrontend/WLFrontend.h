@@ -32,7 +32,7 @@ class WLFrontend : public FrontendAddon
 
 public:
     explicit WLFrontend(Dim *dim);
-    ~WLFrontend();
+    ~WLFrontend() override;
 
 private:
     std::unique_ptr<wl::client::ConnectionBase> wl_;
@@ -40,7 +40,6 @@ private:
     std::shared_ptr<wl::client::Surface> surface_;
     std::unordered_map<std::shared_ptr<wl::client::Seat>, std::shared_ptr<InputMethodV2>> ims_;
 
-    void init();
     void reloadSeats();
 };
 
