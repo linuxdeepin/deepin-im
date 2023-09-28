@@ -14,7 +14,7 @@ add_executable(imwl
     InputPopupSurfaceV2.cpp InputPopupSurfaceV2.h
     VirtualKeyboardManagerV1.cpp VirtualKeyboardManagerV1.h
     VirtualKeyboardV1.cpp VirtualKeyboardV1.h
-    XCB.cpp XCB.h
+    Xcb.cpp Xcb.h
     X11KeyboardGrabber.cpp X11KeyboardGrabber.h
     X11ActiveWindowMonitor.cpp X11ActiveWindowMonitor.h
     DimTextInputManagerV1.cpp DimTextInputManagerV1.h

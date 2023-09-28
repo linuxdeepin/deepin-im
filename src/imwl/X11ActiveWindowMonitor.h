@@ -5,9 +5,9 @@
 #ifndef X11ACTIVEWINDOWMONITOR_H
 #define X11ACTIVEWINDOWMONITOR_H
 
-#include "XCB.h"
+#include "Xcb.h"
 
-class X11ActiveWindowMonitor : public XCB
+class X11ActiveWindowMonitor : public Xcb
 {
     Q_OBJECT
 

@@ -9,7 +9,7 @@
 #include <QDebug>
 
 X11KeyboardGrabber::X11KeyboardGrabber()
-    : XCB()
+    : Xcb()
 {
     initXinputExtension();
 }

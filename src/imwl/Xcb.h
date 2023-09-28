@@ -30,13 +30,13 @@
 #define XCB_EVENT_RESPONSE_TYPE(e) (e->response_type & XCB_EVENT_RESPONSE_TYPE_MASK)
 #define XCB_EVENT_SENT(e) (e->response_type & ~XCB_EVENT_RESPONSE_TYPE_MASK)
 
-class XCB : public QObject
+class Xcb : public QObject
 {
     Q_OBJECT
 
 public:
-    XCB();
-    virtual ~XCB();
+    Xcb();
+    virtual ~Xcb();
 
     xcb_atom_t getAtom(const char *atomName);
     std::vector<char> getProperty(xcb_window_t window, xcb_atom_t property, uint32_t size);
