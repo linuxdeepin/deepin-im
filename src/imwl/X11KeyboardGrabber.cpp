@@ -7,11 +7,18 @@
 #include <xcb/xinput.h>
 
 #include <QDebug>
+#include <QTimer>
 
 X11KeyboardGrabber::X11KeyboardGrabber()
     : Xcb()
+    , repeatTimer_(new QTimer(this))
 {
     initXinputExtension();
+    connect(repeatTimer_, &QTimer::timeout, this, [this]() {
+        if (keyPressed_) {
+            emit keyEvent(lastKeyCode_, !keyPressed_);
+        }
+    });
 }
 
 X11KeyboardGrabber::~X11KeyboardGrabber() { }
@@ -34,6 +41,19 @@ void X11KeyboardGrabber::xcbEvent(const std::unique_ptr<xcb_generic_event_t> &ev
 
     bool isRelease = ge->event_type == XCB_INPUT_RAW_KEY_RELEASE;
     auto *ke = reinterpret_cast<xcb_input_raw_key_press_event_t *>(event.get());
+
+    if (isRelease) {
+        keyPressed_ = false;
+        if (repeatTimer_->isActive()) {
+            repeatTimer_->stop();
+        }
+    } else {
+        keyPressed_ = true;
+        lastKeyCode_ = ke->detail;
+
+        repeatTimer_->setInterval(1000000 / repeatRate_);
+        repeatTimer_->start(repeatDelay_);
+    }
 
     emit keyEvent(ke->detail, isRelease);
 }
