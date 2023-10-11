@@ -41,19 +41,25 @@ public:
     explicit Dim(QObject *parent = nullptr);
     ~Dim();
 
-    QMap<uint32_t, InputContext *> getInputContexts() { return inputContexts_; }
-
-    InputContext *getInputContext(uint32_t id) { return inputContexts_.value(id); }
-
     QList<QString> imAddonNames() const;
-    QMap<QString, InputMethodAddon *> imAddons() const;
-
     bool postEvent(Event &event);
 
-    int focusedInputContext() { return focusedInputContext_; }
+    QMap<uint32_t, InputContext *> getInputContexts() const { return inputContexts_; }
+
+    InputContext *getInputContext(uint32_t id) const { return inputContexts_.value(id); }
+
+    QMap<QString, InputMethodAddon *> imAddons() const { return inputMethodAddons_; }
+
+    QMap<QString, InputMethodEntry> imEntries() const { return ims_; };
+
+    int focusedInputContext() const { return focusedInputContext_; }
 
 Q_SIGNALS:
     void focusedInputContextChanged(int focusedInputContext);
+    void inputMethodEntryChanged();
+
+public Q_SLOTS:
+    void switchIM(const QString &imName);
 
 private:
     void loadAddons();
@@ -66,8 +72,10 @@ private:
     bool postInputContextKeyEvent(InputContextKeyEvent &event);
     void postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &event);
     void postInputContextSetSurroundingTextEvent(Event &event);
-
     InputMethodAddon *getInputMethodAddon(InputState &state);
+
+    template<typename T>
+    T getImAddon(InputMethodAddon *imAddon) const;
 
 private:
     QMap<uint32_t, InputContext *> inputContexts_;

@@ -5,6 +5,9 @@
 #ifndef INPUTSTATE_H
 #define INPUTSTATE_H
 
+#include "InputMethodEntry.h"
+
+#include <QMap>
 #include <QObject>
 #include <QString>
 
@@ -14,7 +17,6 @@ namespace dim {
 
 class Dim;
 class InputContext;
-class InputMethodAddon;
 class InputMethodEntry;
 
 class InputState : public QObject
@@ -24,15 +26,13 @@ class InputState : public QObject
 public:
     explicit InputState(InputContext *ic);
 
-    inline const QString &currentIMAddon() const { return currentImAddon_; }
-
+    const InputMethodEntry &currentIMEntry() const;
     void switchIMAddon();
 
 private:
     InputContext *ic_;
-    QList<QString> ims_;
-    int currentImIdx_;
-    QString currentImAddon_;
+    QMap<QString, InputMethodEntry>::const_iterator imEntryIt_;
+    QMap<QString, InputMethodEntry> imEntries_;
 };
 
 } // namespace dim

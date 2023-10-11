@@ -15,9 +15,6 @@ namespace org {
 namespace deepin {
 namespace dim {
 
-class InputMethodAddon;
-class InputContextKeyEvent;
-
 class InputMethodEntry
 {
 public:
@@ -29,7 +26,7 @@ public:
                      const QString &iconName);
     ~InputMethodEntry();
 
-    const QString &addon() const;
+    const QString &addonName() const;
     const QString &uniqueName() const;
     const QString &name() const;
     const QString &description() const;

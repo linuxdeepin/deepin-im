@@ -9,6 +9,7 @@
 #include "dimcore/Dim.h"
 #include "dimcore/Events.h"
 #include "dimcore/InputContext.h"
+#include "dimcore/InputMethodEntry.h"
 
 #include <QGuiApplication>
 
@@ -88,7 +89,7 @@ Fcitx5Proxy::~Fcitx5Proxy()
     icMap_.clear();
 }
 
-QList<InputMethodEntry> Fcitx5Proxy::getInputMethods()
+const QList<InputMethodEntry> &Fcitx5Proxy::getInputMethods()
 {
     return inputMethods_;
 }
@@ -179,6 +180,13 @@ void Fcitx5Proxy::destroyed(uint32_t id)
 {
     if (isICDBusInterfaceValid(id)) {
         icMap_[id]->asyncCall("DestroyIC");
+    }
+}
+
+void Fcitx5Proxy::setCurrentIM(const QString &im)
+{
+    if (available_ && dbusProvider_) {
+        dbusProvider_->controller()->SetCurrentIM(im);
     }
 }
 
@@ -279,21 +287,29 @@ void Fcitx5Proxy::updateInputMethods()
 
     auto call = dbusProvider_->controller()->AvailableInputMethods();
     auto watcher = new QDBusPendingCallWatcher(call, this);
-    connect(
-        watcher,
-        &QDBusPendingCallWatcher::finished,
-        this,
-        [this](QDBusPendingCallWatcher *watcher) {
-            QDBusPendingReply<FcitxQtInputMethodEntryList> ims = *watcher;
-            watcher->deleteLater();
+    connect(watcher,
+            &QDBusPendingCallWatcher::finished,
+            this,
+            [this](QDBusPendingCallWatcher *watcher) {
+                QDBusPendingReply<FcitxQtInputMethodEntryList> ims = *watcher;
+                watcher->deleteLater();
 
-            QList<InputMethodEntry> inputMethods;
-            for (auto &im : ims.value()) {
-                inputMethods.append(
-                    { key(), im.uniqueName(), im.name(), im.nativeName(), im.label(), im.icon() });
-            }
+                QList<InputMethodEntry> inputMethods;
+                for (auto &im : ims.value()) {
+                    // 过滤掉键盘布局
+                    if (im.uniqueName().startsWith(QLatin1String("keyboard-"))) {
+                        continue;
+                    }
 
-            inputMethods_.swap(inputMethods);
-            Q_EMIT addonInitFinished(this);
-        });
+                    inputMethods.append(InputMethodEntry(key(),
+                                                         im.uniqueName(),
+                                                         im.name(),
+                                                         im.nativeName(),
+                                                         im.label(),
+                                                         im.icon()));
+                }
+
+                inputMethods_.swap(inputMethods);
+                Q_EMIT addonInitFinished(this);
+            });
 }

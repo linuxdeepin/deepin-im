@@ -20,7 +20,7 @@ public:
     explicit DimIBusProxy(Dim *dim);
     ~DimIBusProxy() override;
 
-    QList<InputMethodEntry> getInputMethods() override;
+    const QList<InputMethodEntry> &getInputMethods() override;
     void initInputMethods() override;
     bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
     void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) override;
@@ -29,6 +29,7 @@ public:
     void focusIn(uint32_t id) override;
     void focusOut(uint32_t id) override;
     void destroyed(uint32_t id) override;
+    void setCurrentIM(const QString &im) override;
 
 private:
     QString getSocketPath();

@@ -143,7 +143,7 @@ void DimIBusProxy::initInputMethods()
     Q_EMIT addonInitFinished(this);
 }
 
-QList<InputMethodEntry> DimIBusProxy::getInputMethods()
+const QList<InputMethodEntry> &DimIBusProxy::getInputMethods()
 {
     return inputMethods_;
 }
@@ -234,6 +234,12 @@ void DimIBusProxy::destroyed(uint32_t id)
     if (isICDBusInterfaceValid(id)) {
         iBusICMap_[id]->Destroy();
     }
+}
+
+void DimIBusProxy::setCurrentIM(const QString &im)
+{
+    // TODO: implement ibus switch input method
+    Q_UNUSED(im)
 }
 
 bool DimIBusProxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,

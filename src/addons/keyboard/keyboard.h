@@ -22,7 +22,7 @@ public:
     explicit Keyboard(Dim *dim);
     ~Keyboard() override;
 
-    QList<InputMethodEntry> getInputMethods() override;
+    const QList<InputMethodEntry> &getInputMethods() override;
     void initInputMethods() override;
     bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
     void setSurroundingText(InputContextSetSurroundingTextEvent &event) override;

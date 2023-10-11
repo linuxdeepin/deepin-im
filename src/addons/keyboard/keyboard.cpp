@@ -7,6 +7,7 @@
 #include "config.h"
 #include "dimcore/Events.h"
 #include "dimcore/InputContext.h"
+#include "dimcore/InputMethodEntry.h"
 
 #include <common/common.h>
 
@@ -60,7 +61,7 @@ Keyboard::~Keyboard()
     keyboards_.clear();
 }
 
-QList<InputMethodEntry> Keyboard::getInputMethods()
+const QList<InputMethodEntry> &Keyboard::getInputMethods()
 {
     return keyboards_;
 }
@@ -126,8 +127,12 @@ void Keyboard::parseLayoutList(const QDomElement &layoutListEle)
         // QString languageList =
         // parseLanguageList(configItemEle.firstChildElement("languageList"));
 
-        keyboards_.append(
-            { key(), QString("keyboard-%1").arg(name), name, shortDescription, description, "" });
+        keyboards_.append(InputMethodEntry(key(),
+                                           QString("keyboard-%1").arg(name),
+                                           name,
+                                           shortDescription,
+                                           description,
+                                           ""));
 
         parseVariantList(name, layoutEle.firstChildElement("variantList"));
     }
@@ -148,12 +153,13 @@ void Keyboard::parseVariantList(const QString &layoutName, const QDomElement &va
 
         const QString fullname = layoutName + "_" + name;
 
-        keyboards_.append({ key(),
-                            QString("keyboard-%1").arg(fullname),
-                            fullname,
-                            shortDescription,
-                            description,
-                            "" });
+        keyboards_.append(InputMethodEntry(this,
+                                           key(),
+                                           QString("keyboard-%1").arg(fullname),
+                                           fullname,
+                                           shortDescription,
+                                           description,
+                                           ""));
     }
 }
 
