@@ -29,6 +29,7 @@ public:
     virtual void destroyed(uint32_t id) = 0;
     virtual void createFcitxInputContext(InputContext *) = 0;
     virtual void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) = 0;
+    virtual void setCurrentIM(const QString &im) = 0;
 };
 
 } // namespace dim

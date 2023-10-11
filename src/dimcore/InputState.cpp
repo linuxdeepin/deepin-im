@@ -11,29 +11,30 @@ using namespace org::deepin::dim;
 
 InputState::InputState(InputContext *ic)
     : ic_(ic)
-    , ims_(ic_->dim_->imAddonNames())
-    , currentImIdx_(-1)
 {
-    if (ims_.isEmpty()) {
-        return;
-    }
-
-    currentImIdx_ = 0;
-    currentImAddon_ = ims_[currentImIdx_];
+    connect(ic_->dim_, &Dim::inputMethodEntryChanged, this, [this]() {
+        imEntries_ = ic_->dim_->imEntries();
+        imEntryIt_ = imEntries_.begin();
+    });
 }
 
 void InputState::switchIMAddon()
 {
-    if (ims_.isEmpty()) {
+    if (imEntries_.empty()) {
         return;
     }
 
-    auto nextIdx = currentImIdx_ + 1;
-    if (nextIdx >= ims_.size()) {
-        nextIdx = 0;
+    ++imEntryIt_;
+    if (imEntryIt_ == imEntries_.end()) {
+        imEntryIt_ = imEntries_.begin();
     }
 
-    currentImIdx_ = nextIdx;
-    currentImAddon_ = ims_[currentImIdx_];
-    emit ic_->imAddonSwitched(currentImAddon_);
+    const auto currentImName = imEntryIt_.value().uniqueName();
+
+    emit ic_->imAddonSwitched(currentImName);
+}
+
+const InputMethodEntry &InputState::currentIMEntry() const
+{
+    return imEntryIt_.value();
 }

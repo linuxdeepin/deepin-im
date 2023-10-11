@@ -23,7 +23,7 @@ public:
     explicit InputMethodAddon(Dim *dim, const QString &key, const QString &iconName);
     virtual ~InputMethodAddon();
 
-    virtual QList<InputMethodEntry> getInputMethods() = 0;
+    virtual const QList<InputMethodEntry> &getInputMethods() = 0;
     virtual void initInputMethods() = 0;
     virtual bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) = 0;
     virtual void updateSurroundingText(Event &event) = 0;

@@ -29,7 +29,7 @@ InputMethodEntry::InputMethodEntry(const QString &addon,
 
 InputMethodEntry::~InputMethodEntry() { }
 
-const QString &InputMethodEntry::addon() const
+const QString &InputMethodEntry::addonName() const
 {
     return d->addon;
 }
