@@ -1,8 +1,14 @@
 set(WLFRONTEND_SOURCES
   WLFrontend.h
   WLFrontend.cpp
-  WlInputContext.h
-  WlInputContext.cpp
+  VirtualInputContextManager.h
+  VirtualInputContextManager.cpp
+  VirtualInputContext.h
+  VirtualInputContext.cpp
+  VirtualInputContextGlue.h
+  VirtualInputContextGlue.cpp
+  WaylandInputContext.h
+  WaylandInputContext.cpp
   InputMethodV2.h
   InputMethodV2.cpp
   InputMethodKeyboardGrabV2.h

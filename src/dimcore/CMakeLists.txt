@@ -19,6 +19,7 @@ set(DIMCORE_HEADERS
   Dim.h
   Addon.h
   FrontendAddon.h
+  SurroundingText.h
   InputContext.h
   InputMethodAddon.h
   InputMethodEntry.h

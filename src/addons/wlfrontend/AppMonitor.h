@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+namespace org::deepin::dim {
+
 class AppMonitor : public QObject
 {
     Q_OBJECT
@@ -14,5 +16,7 @@ public:
 signals:
     void appUpdated(const std::unordered_map<QString, pid_t> &appState, const QString &focus);
 };
+
+} // namespace org::deepin::dim
 
 #endif // !APPMONITOR_H

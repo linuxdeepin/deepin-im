@@ -8,6 +8,7 @@
 #include "Events.h"
 #include "InputState.h"
 #include "ObjectId.h"
+#include "SurroundingText.h"
 
 #include <QObject>
 
@@ -18,24 +19,6 @@ namespace deepin {
 namespace dim {
 
 class Dim;
-
-struct PreeditInfo
-{
-    QString text;
-    int32_t cursorBegin;
-    int32_t cursorEnd;
-};
-
-struct CommitString
-{
-    QString text;
-};
-
-struct ForwardKey
-{
-    uint32_t keycode;
-    bool pressed;
-};
 
 class InputContext : public QObject, public ObjectId<InputContext>
 {
@@ -54,30 +37,29 @@ public:
 
     InputState &inputState();
 
-    void setAsyncMode(bool enable) { asyncMode_ = enable; }
-
-    bool isAsyncMode() { return asyncMode_; }
-
     void updatePreedit(const QString &text, int32_t cursorBegin, int32_t cursorEnd);
-    void updateCommitString(const QString &text);
+    void commitString(const QString &text);
     void forwardKey(uint32_t keycode, bool pressed);
-    void setSurroundingText(const QString &text, uint32_t cursor, uint32_t anchor);
+    SurroundingText &surroundingText();
+    void updateSurroundingText();
 
 Q_SIGNALS:
     void imAddonSwitched(const QString &imAddon);
-    void processKeyEventFinished();
 
 protected:
     Dim *dim() { return dim_; }
 
-    std::list<std::variant<ForwardKey, PreeditInfo, CommitString>> getAndClearBatchList();
+    bool hasFocus() const;
+
+    virtual void updatePreeditImpl(const QString &text, int32_t cursorBegin, int32_t cursorEnd) = 0;
+    virtual void commitStringImpl(const QString &text) = 0;
+    virtual void forwardKeyImpl(uint32_t keycode, bool pressed) = 0;
 
 private:
     Dim *dim_;
+    bool hasFocus_ = false;
     InputState inputState_;
-    bool asyncMode_;
-
-    std::list<std::variant<ForwardKey, PreeditInfo, CommitString>> batchList_;
+    SurroundingText surroundingText_;
 };
 
 } // namespace dim

@@ -139,9 +139,8 @@ bool Dim::postEvent(Event &event)
         postInputContextCursorRectChanged(
             reinterpret_cast<InputContextCursorRectChangeEvent &>(event));
         break;
-    case EventType::InputContextSetSurroundingText:
-        postInputContextSetSurroundingTextEvent(
-            reinterpret_cast<InputContextSetSurroundingTextEvent &>(event));
+    case EventType::InputContextUpdateSurroundingText:
+        postInputContextSetSurroundingTextEvent(event);
         break;
     }
 
@@ -235,14 +234,14 @@ void Dim::postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &e
     }
 }
 
-void Dim::postInputContextSetSurroundingTextEvent(InputContextSetSurroundingTextEvent &event)
+void Dim::postInputContextSetSurroundingTextEvent(Event &event)
 {
 
     auto &inputState = event.ic()->inputState();
 
     auto *addon = getInputMethodAddon(inputState);
 
-    addon->setSurroundingText(event);
+    addon->updateSurroundingText(event);
 }
 
 InputMethodAddon *Dim::getInputMethodAddon(InputState &inputState)

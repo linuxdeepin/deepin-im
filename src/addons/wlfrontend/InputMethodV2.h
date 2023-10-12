@@ -7,6 +7,7 @@
 
 #include "wl/client/ZwpInputMethodV2.h"
 
+#include <QObject>
 #include <QString>
 
 #include <list>
@@ -22,39 +23,29 @@ namespace deepin {
 namespace dim {
 
 class Dim;
-class WlInputContext;
-class InputMethodKeyboardGrabV2;
-class InputPopupSurfaceV2;
 
-struct SurroundingText
+class InputMethodV2QObject : public QObject
 {
-    QString text;
-    uint32_t cursor;
-    uint32_t anchor;
-};
+    Q_OBJECT
 
-struct TextChangeCause
-{
-    uint32_t cause;
-};
-
-struct ContentType
-{
-    uint32_t hint;
-    uint32_t purpose;
+signals:
+    void activate();
+    void deactivate();
+    void surroundingText(const char *text, uint32_t cursor, uint32_t anchor);
+    void textChangeCause(uint32_t cause);
+    void contentType(uint32_t hint, uint32_t purpose);
+    void done();
+    void unavailable();
 };
 
 class InputMethodV2 : public wl::client::ZwpInputMethodV2
 {
-    friend class InputMethodKeyboardGrabV2;
-    friend class WlInputContext;
-
 public:
     explicit InputMethodV2(zwp_input_method_v2 *val,
-                           const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk,
-                           const std::shared_ptr<wl::client::Surface> &surface,
                            Dim *dim);
     ~InputMethodV2() override;
+
+    InputMethodV2QObject *qobject() { return qobject_.get(); }
 
 protected:
     void zwp_input_method_v2_activate() override;
@@ -68,13 +59,7 @@ protected:
     void zwp_input_method_v2_unavailable() override;
 
 private:
-    std::shared_ptr<InputMethodKeyboardGrabV2> grab_;
-    std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> vk_;
-    std::shared_ptr<wl::client::Surface> surface_;
-    std::shared_ptr<InputPopupSurfaceV2> popup_;
-    std::unique_ptr<WlInputContext> ic_;
-
-    std::list<std::variant<SurroundingText, TextChangeCause, ContentType>> penddingEvents_;
+    std::unique_ptr<InputMethodV2QObject> qobject_;
 };
 
 } // namespace dim

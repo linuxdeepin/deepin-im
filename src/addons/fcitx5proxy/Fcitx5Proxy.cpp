@@ -191,8 +191,6 @@ bool Fcitx5Proxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
         return false;
     }
 
-    keyEvent.ic()->setAsyncMode(false);
-
     auto response = icMap_[id]->ProcessKeyEventBatch(keyEvent.keyValue(),
                                                      keyEvent.keycode(),
                                                      keyEvent.state(),
@@ -214,7 +212,7 @@ bool Fcitx5Proxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
         switch (type) {
         case BATCHED_COMMIT_STRING: {
             if (v.canConvert<QString>()) {
-                ic->updateCommitString(v.toString());
+                ic->commitString(v.toString());
             }
             break;
         }
@@ -258,7 +256,7 @@ void Fcitx5Proxy::cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &
     }
 }
 
-void Fcitx5Proxy::setSurroundingText(InputContextSetSurroundingTextEvent &event)
+void Fcitx5Proxy::updateSurroundingText(Event &event)
 {
     auto id = event.ic()->id();
 
@@ -266,7 +264,10 @@ void Fcitx5Proxy::setSurroundingText(InputContextSetSurroundingTextEvent &event)
         return;
     }
 
-    icMap_[id]->SetSurroundingText(event.text, event.cursor, event.anchor);
+    auto &surroundingText = event.ic()->surroundingText();
+    icMap_[id]->SetSurroundingText(surroundingText.text(),
+                                   surroundingText.cursor(),
+                                   surroundingText.anchor());
 }
 
 void Fcitx5Proxy::updateInputMethods()

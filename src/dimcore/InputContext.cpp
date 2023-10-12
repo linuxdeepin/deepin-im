@@ -13,7 +13,6 @@ InputContext::InputContext(Dim *dim, QObject *parent)
     , ObjectId()
     , dim_(dim)
     , inputState_(this)
-    , asyncMode_(false)
 {
     Event e(EventType::InputContextCreated, this);
     dim_->postEvent(e);
@@ -29,14 +28,23 @@ void InputContext::destroy()
 
 void InputContext::focusIn()
 {
+    hasFocus_ = true;
+
     Event e(EventType::InputContextFocused, this);
     dim_->postEvent(e);
 }
 
 void InputContext::focusOut()
 {
+    hasFocus_ = false;
+
     Event e(EventType::InputContextUnfocused, this);
     dim_->postEvent(e);
+}
+
+bool InputContext::hasFocus() const
+{
+    return hasFocus_;
 }
 
 bool InputContext::keyEvent(InputContextKeyEvent &event)
@@ -46,40 +54,28 @@ bool InputContext::keyEvent(InputContextKeyEvent &event)
 
 void InputContext::updatePreedit(const QString &text, int32_t cursorBegin, int32_t cursorEnd)
 {
-    batchList_.emplace_back(PreeditInfo{ text, cursorBegin, cursorEnd });
-    if (isAsyncMode()) {
-        Q_EMIT processKeyEventFinished();
-    }
+    updatePreeditImpl(text, cursorBegin, cursorEnd);
 }
 
-void InputContext::updateCommitString(const QString &text)
+void InputContext::commitString(const QString &text)
 {
-    batchList_.emplace_back(CommitString{ text });
-    if (isAsyncMode()) {
-        Q_EMIT processKeyEventFinished();
-    }
+    commitStringImpl(text);
 }
 
 void InputContext::forwardKey(uint32_t keycode, bool pressed)
 {
-    batchList_.emplace_back(ForwardKey{ keycode, pressed });
-    if (isAsyncMode()) {
-        Q_EMIT processKeyEventFinished();
-    }
+    forwardKeyImpl(keycode, pressed);
 }
 
-void InputContext::setSurroundingText(const QString &text, uint32_t cursor, uint32_t anchor)
+SurroundingText &InputContext::surroundingText()
 {
-    InputContextSetSurroundingTextEvent event(this, text, cursor, anchor);
+    return surroundingText_;
+}
+
+void InputContext::updateSurroundingText()
+{
+    Event event(EventType::InputContextUpdateSurroundingText, this);
     dim_->postEvent(event);
-}
-
-std::list<std::variant<ForwardKey, PreeditInfo, CommitString>> InputContext::getAndClearBatchList()
-{
-    decltype(batchList_) tmp;
-    tmp.swap(batchList_);
-
-    return tmp;
 }
 
 InputState &InputContext::inputState()

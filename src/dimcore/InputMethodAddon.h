@@ -6,6 +6,7 @@
 #define INPUTMETHODADDON_H
 
 #include "Addon.h"
+#include "Events.h"
 #include "InputMethodEntry.h"
 
 #include <QList>
@@ -13,8 +14,6 @@
 namespace org {
 namespace deepin {
 namespace dim {
-
-class InputContextSetSurroundingTextEvent;
 
 class InputMethodAddon : public Addon
 {
@@ -27,7 +26,7 @@ public:
     virtual QList<InputMethodEntry> getInputMethods() = 0;
     virtual void initInputMethods() = 0;
     virtual bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) = 0;
-    virtual void setSurroundingText(InputContextSetSurroundingTextEvent &event) = 0;
+    virtual void updateSurroundingText(Event &event) = 0;
 
     const QString &iconName() { return iconName_; }
 

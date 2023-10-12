@@ -24,7 +24,7 @@ namespace org {
 namespace deepin {
 namespace dim {
 
-class InputMethodV2;
+class WaylandInputContext;
 
 class WLFrontend : public FrontendAddon
 {
@@ -38,7 +38,8 @@ private:
     std::unique_ptr<wl::client::ConnectionBase> wl_;
     std::shared_ptr<wl::client::Compositor> compositor_;
     std::shared_ptr<wl::client::Surface> surface_;
-    std::unordered_map<std::shared_ptr<wl::client::Seat>, std::shared_ptr<InputMethodV2>> ims_;
+    std::unordered_map<std::shared_ptr<wl::client::Seat>, std::unique_ptr<WaylandInputContext>>
+        ims_;
 
     void reloadSeats();
 };

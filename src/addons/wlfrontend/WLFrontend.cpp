@@ -5,6 +5,7 @@
 #include "WLFrontend.h"
 
 #include "InputMethodV2.h"
+#include "WaylandInputContext.h"
 #include "wl/client/Compositor.h"
 #include "wl/client/Connection.h"
 #include "wl/client/ConnectionRaw.h"
@@ -80,10 +81,10 @@ void WLFrontend::reloadSeats()
     for (const auto &seat : seats) {
         auto vk = std::make_shared<wl::client::ZwpVirtualKeyboardV1>(
             vkManager->create_virtual_keyboard(seat));
-        auto im =
-            std::make_shared<InputMethodV2>(imManager->get_input_method(seat), vk, surface_, dim());
+        auto im = std::make_shared<InputMethodV2>(imManager->get_input_method(seat), dim());
+        auto wic = std::make_unique<WaylandInputContext>(im, vk, surface_, dim());
 
-        ims_.emplace(seat, im);
+        ims_.emplace(seat, std::move(wic));
     }
 
     wl_->flush();

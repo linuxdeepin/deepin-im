@@ -10,10 +10,9 @@
 
 X11ActiveWindowMonitor::X11ActiveWindowMonitor()
     : Xcb()
+    , activeWindow_("_NET_ACTIVE_WINDOW")
+    , wmPid_("_NET_WM_PID")
 {
-    activeWindowAtom_ = getAtom("_NET_ACTIVE_WINDOW");
-    wmPidAtom_ = getAtom("_NET_WM_PID");
-
     uint32_t values[] = { XCB_EVENT_MASK_PROPERTY_CHANGE };
     xcb_change_window_attributes(xconn_.get(), screen()->root, XCB_CW_EVENT_MASK, values);
 
@@ -24,14 +23,14 @@ X11ActiveWindowMonitor::~X11ActiveWindowMonitor() { }
 
 pid_t X11ActiveWindowMonitor::activeWindowPid()
 {
-    auto data = getProperty(screen()->root, activeWindowAtom_, sizeof(xcb_window_t));
+    auto data = getProperty(screen()->root, activeWindow_, sizeof(xcb_window_t));
     if (data.size() == 0) {
         qWarning() << "failed to get active window id";
         return 0;
     }
     xcb_window_t windowId = *reinterpret_cast<xcb_window_t *>(data.data());
 
-    auto data1 = getProperty(windowId, wmPidAtom_, sizeof(uint32_t));
+    auto data1 = getProperty(windowId, wmPid_, sizeof(uint32_t));
     if (data1.size() == 0) {
         qWarning() << "failed to get pid of active window";
         return 0;
@@ -43,7 +42,7 @@ pid_t X11ActiveWindowMonitor::activeWindowPid()
 
 std::tuple<uint16_t, uint16_t> X11ActiveWindowMonitor::activeWindowPosition()
 {
-    auto data = getProperty(screen()->root, activeWindowAtom_, sizeof(xcb_window_t));
+    auto data = getProperty(screen()->root, activeWindow_, sizeof(xcb_window_t));
     if (data.size() == 0) {
         qWarning() << "failed to get active window id";
         return {};
@@ -68,7 +67,7 @@ void X11ActiveWindowMonitor::xcbEvent(const std::unique_ptr<xcb_generic_event_t>
     }
 
     auto *e = reinterpret_cast<xcb_property_notify_event_t *>(event.get());
-    if (e->atom != activeWindowAtom_) {
+    if (e->atom != getAtom(activeWindow_)) {
         return;
     }
 
