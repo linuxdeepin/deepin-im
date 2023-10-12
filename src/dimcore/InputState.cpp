@@ -6,35 +6,47 @@
 
 #include "Dim.h"
 #include "InputContext.h"
+#include "InputMethodEntry.h"
 
 using namespace org::deepin::dim;
 
 InputState::InputState(InputContext *ic)
     : ic_(ic)
+    , currentIMIndex_(std::make_pair("fcitx5proxy", "keyboard-us"))
 {
     connect(ic_->dim_, &Dim::inputMethodEntryChanged, this, [this]() {
-        imEntries_ = ic_->dim_->imEntries();
-        imEntryIt_ = imEntries_.begin();
+        const auto imEntry = ic_->dim()->imEntries()[currentIMIndex()];
+        currentIMIndex_ = std::make_pair(imEntry.addonName(), imEntry.uniqueName());
     });
 }
 
 void InputState::switchIMAddon()
 {
-    if (imEntries_.empty()) {
-        return;
+    auto idx = currentIMIndex();
+    auto size = ic_->dim_->imEntries().size();
+
+    ++idx;
+
+    if (idx == size) {
+        idx = 0;
     }
 
-    ++imEntryIt_;
-    if (imEntryIt_ == imEntries_.end()) {
-        imEntryIt_ = imEntries_.begin();
-    }
-
-    const auto currentImName = imEntryIt_.value().uniqueName();
-
-    emit ic_->imAddonSwitched(currentImName);
+    const auto imEntry = ic_->dim()->imEntries()[idx];
+    currentIMIndex_ = std::make_pair(imEntry.addonName(), imEntry.uniqueName());
+    emit ic_->imSwitch(currentIMIndex_);
 }
 
-const InputMethodEntry &InputState::currentIMEntry() const
+int InputState::currentIMIndex() const
 {
-    return imEntryIt_.value();
+    const auto &imList = ic_->dim_->imEntries();
+    auto len = imList.size();
+
+    for (int i = 0; i < len; ++i) {
+        if (imList[i].uniqueName() == currentIMIndex_.second
+            && imList[i].addonName() == currentIMIndex_.first) {
+            return i;
+        }
+    }
+
+    return 0;
 }

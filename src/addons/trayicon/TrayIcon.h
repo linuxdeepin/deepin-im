@@ -33,7 +33,7 @@ private:
     QMetaObject::Connection oldConnection_;
 
     void onFocusedInputContextChanged(int focusedInputContext);
-    void onImAddonSwitched(const QString &imAddon);
+    void onImSwitched(const QPair<QString, QString> &imIndex);
 };
 
 } // namespace dim

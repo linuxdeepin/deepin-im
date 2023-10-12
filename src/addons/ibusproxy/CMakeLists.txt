@@ -17,6 +17,15 @@ qt_add_dbus_interface(IC_SOURCES
     IBUSPortIface
 )
 
+set_source_files_properties(${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.IBus.xml
+    PROPERTIES NO_NAMESPACE ON
+)
+
+qt_add_dbus_interface(IC_SOURCES
+    ${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.IBus.xml
+    IBUSIface
+)
+
 add_library(ibusproxy MODULE
     ${IBUSPROXY_SOURCES}
     ${IC_SOURCES}

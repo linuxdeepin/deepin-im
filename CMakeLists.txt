@@ -20,7 +20,7 @@ option(ENABLE_GTK4_IM_MODULE "Enable GTK4 IM Module" ON)
 find_package(ECM 1.4.0 REQUIRED)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Widgets Xml DBus WaylandCompositor)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Widgets Xml DBus)
 find_package(Qt6Gui ${REQUIRED_QT6_VERSION} REQUIRED Private)
 find_package(Fcitx5Qt6DBusAddons REQUIRED)
 find_package(PkgConfig REQUIRED)

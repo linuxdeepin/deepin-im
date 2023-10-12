@@ -6,9 +6,11 @@
 #define IBUSPROXY_H
 
 #include "IBUSInputContextIface.h"
-#include "IBUSPortIface.h"
 
 #include <dimcore/ProxyAddon.h>
+
+class IBusEngineDesc;
+class DimIBusInputContextPrivate;
 
 namespace org {
 namespace deepin {
@@ -32,9 +34,8 @@ public:
     void setCurrentIM(const QString &im) override;
 
 private:
-    QString getSocketPath();
-
-    inline bool isIBusPortalInterfaceValid() { return portalBus_ && portalBus_->isValid(); }
+    QList<IBusEngineDesc> listEngines();
+    void initEngines();
 
     inline bool isICDBusInterfaceValid(uint32_t id)
     {
@@ -46,15 +47,13 @@ public Q_SLOTS:
     void socketChanged(const QString &str);
     void busRegistered(const QString &str);
     void busUnregistered(const QString &str);
+    void globalEngineChanged(const QString &engineName);
 
 private:
+    DimIBusInputContextPrivate *d;
     bool useSyncMode_;
-    QDBusConnection dbusConn_;
     QFileSystemWatcher socketWatcher_;
-    OrgFreedesktopIBusInputContextInterface *context_;
-    OrgFreedesktopIBusPortalInterface *portalBus_;
     QTimer timer_;
-    QDBusServiceWatcher *serviceWatcher_;
     QList<InputMethodEntry> inputMethods_;
     QMap<uint32_t, OrgFreedesktopIBusInputContextInterface *> iBusICMap_;
 };
