@@ -113,10 +113,10 @@ void Dim::loadAddon(const QString &infoFile)
 void Dim::initInputMethodAddon(InputMethodAddon *imAddon)
 {
     for (const auto &entry : imAddon->getInputMethods()) {
-        ims_.insert(entry.uniqueName(), entry);
+        imEntries_.emplace_back(entry);
     }
 
-    if (!ims_.isEmpty()) {
+    if (!imEntries_.empty()) {
         QTimer::singleShot(0, [this]() {
             Q_EMIT inputMethodEntryChanged();
         });
@@ -162,7 +162,7 @@ void Dim::postInputContextCreated(Event &event)
 {
     auto *ic = event.ic();
 
-    connect(ic, &InputContext::imAddonSwitched, this, &Dim::switchIM);
+    connect(ic, &InputContext::imSwitch, this, &Dim::switchIM);
 
     inputContexts_.insert(ic->id(), ic);
 
@@ -222,10 +222,13 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
         });
     }
 
-    auto addon = getImAddon<InputMethodAddon *>(getInputMethodAddon(event.ic()->inputState()));
+    const auto &state = event.ic()->inputState();
 
-    if (addon) {
-        return addon->keyEvent(inputState.currentIMEntry(), event);
+    auto addon = getImAddon<InputMethodAddon *>(getInputMethodAddon(state));
+    const auto &imList = imEntries();
+
+    if (addon && !imList.empty()) {
+        return addon->keyEvent(imList[state.currentIMIndex()], event);
     }
 
     return false;
@@ -249,11 +252,11 @@ void Dim::postInputContextSetSurroundingTextEvent(Event &event)
     }
 }
 
-InputMethodAddon *Dim::getInputMethodAddon(InputState &inputState)
+InputMethodAddon *Dim::getInputMethodAddon(const InputState &inputState)
 {
-    const QString &addonKey = inputState.currentIMEntry().addonName();
-    auto j = inputMethodAddons_.find(addonKey);
-    assert(j != inputMethodAddons_.end());
+    const QString &addonKey = imEntries()[inputState.currentIMIndex()].addonName();
+    auto j = imAddons().find(addonKey);
+    assert(j != imAddons().end());
 
     return j.value();
 }
@@ -266,11 +269,11 @@ T Dim::getImAddon(InputMethodAddon *imAddon) const
     return addon ? addon : nullptr;
 }
 
-void Dim::switchIM(const QString &imName)
+void Dim::switchIM(const QPair<QString, QString> &imIndex)
 {
-    auto addon = getImAddon<ProxyAddon *>(imAddons().take(imName));
+    auto addon = getImAddon<ProxyAddon *>(imAddons().take(imIndex.first));
 
     if (addon) {
-        addon->setCurrentIM(imName);
+        addon->setCurrentIM(imIndex.second);
     }
 }

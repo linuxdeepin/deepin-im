@@ -44,7 +44,7 @@ public:
     void updateSurroundingText();
 
 Q_SIGNALS:
-    void imAddonSwitched(const QString &imAddon);
+    void imSwitch(const QPair<QString, QString> &imEntry);
 
 protected:
     Dim *dim() { return dim_; }

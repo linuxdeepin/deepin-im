@@ -50,7 +50,7 @@ public:
 
     QMap<QString, InputMethodAddon *> imAddons() const { return inputMethodAddons_; }
 
-    QMap<QString, InputMethodEntry> imEntries() const { return ims_; };
+    std::vector<InputMethodEntry> imEntries() const { return imEntries_; };
 
     int focusedInputContext() const { return focusedInputContext_; }
 
@@ -59,7 +59,7 @@ Q_SIGNALS:
     void inputMethodEntryChanged();
 
 public Q_SLOTS:
-    void switchIM(const QString &imName);
+    void switchIM(const QPair<QString, QString> &imIndex);
 
 private:
     void loadAddons();
@@ -72,7 +72,7 @@ private:
     bool postInputContextKeyEvent(InputContextKeyEvent &event);
     void postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &event);
     void postInputContextSetSurroundingTextEvent(Event &event);
-    InputMethodAddon *getInputMethodAddon(InputState &state);
+    InputMethodAddon *getInputMethodAddon(const InputState &state);
 
     template<typename T>
     T getImAddon(InputMethodAddon *imAddon) const;
@@ -82,8 +82,7 @@ private:
     uint32_t focusedInputContext_;
     QMap<QString, InputMethodAddon *> inputMethodAddons_;
     QSet<FrontendAddon *> frontends_;
-
-    QMap<QString, InputMethodEntry> ims_;
+    std::vector<InputMethodEntry> imEntries_;
 };
 
 } // namespace dim

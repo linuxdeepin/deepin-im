@@ -7,13 +7,14 @@
 
 #include "InputMethodEntry.h"
 
-#include <QMap>
 #include <QObject>
-#include <QString>
+#include <QPair>
 
 namespace org {
 namespace deepin {
 namespace dim {
+
+typedef QPair<QString, QString> IMIndex;
 
 class Dim;
 class InputContext;
@@ -26,13 +27,12 @@ class InputState : public QObject
 public:
     explicit InputState(InputContext *ic);
 
-    const InputMethodEntry &currentIMEntry() const;
+    int currentIMIndex() const;
     void switchIMAddon();
 
 private:
+    IMIndex currentIMIndex_;
     InputContext *ic_;
-    QMap<QString, InputMethodEntry>::const_iterator imEntryIt_;
-    QMap<QString, InputMethodEntry> imEntries_;
 };
 
 } // namespace dim

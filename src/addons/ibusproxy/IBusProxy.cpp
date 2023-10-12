@@ -4,9 +4,13 @@
 
 #include "IBusProxy.h"
 
+#include "IBUSIface.h"
+#include "IBUSPortIface.h"
 #include "dimcore/Dim.h"
 #include "dimcore/InputContext.h"
 #include "ibustypes.h"
+
+#include <signal.h>
 
 #ifndef IBUS_RELEASE_MASK
 #  define IBUS_RELEASE_MASK (1 << 30)
@@ -16,44 +20,117 @@
 #  define IBUS_META_MASK (1 << 28)
 #endif
 
-static const QString IBUS_PORTAL_SERVICE = QStringLiteral("org.freedesktop.portal.IBus");
-static const QString IBUS_PORTAL_SERVICE_PATH = QStringLiteral("/org/freedesktop/IBus");
-
 using namespace org::deepin::dim;
 
 DIM_ADDON_FACTORY(DimIBusProxy);
 
-DimIBusProxy::DimIBusProxy(Dim *dim)
-    : ProxyAddon(dim, "ibusproxy", "ibus")
-    , useSyncMode_(false)
-    , dbusConn_(QDBusConnection::sessionBus())
-    , serviceWatcher_(new QDBusServiceWatcher(
-          IBUS_PORTAL_SERVICE, dbusConn_, QDBusServiceWatcher::WatchForOwnerChange, this))
-    , portalBus_(nullptr)
-
+class DimIBusInputContextPrivate
 {
-    if (qEnvironmentVariableIsSet("IBUS_ENABLE_SYNC_MODE")) {
-        bool ok;
-        int enableSync = qEnvironmentVariableIntValue("IBUS_ENABLE_SYNC_MODE", &ok);
-        if (ok && enableSync == 1)
-            useSyncMode_ = true;
+public:
+    DimIBusInputContextPrivate();
+
+    ~DimIBusInputContextPrivate()
+    {
+        delete context_;
+        delete busInterface_;
+        delete portalBus_;
+        delete dbusConn_;
     }
 
-    connectToBus();
+    static QString getSocketPath();
+    QDBusConnection *createConnection();
+    void initBus();
+    void createBusProxy();
 
-    timer_.setSingleShot(true);
-    connect(&timer_, &QTimer::timeout, this, &DimIBusProxy::connectToBus);
-    connect(serviceWatcher_,
-            &QDBusServiceWatcher::serviceRegistered,
-            this,
-            &DimIBusProxy::busRegistered);
-    connect(serviceWatcher_,
-            &QDBusServiceWatcher::serviceUnregistered,
-            this,
-            &DimIBusProxy::busUnregistered);
+    bool usePortal_;
+    bool isValid_;
+    bool busConnected_;
+    QString ibusService_;
+    QString ibusIcPath_;
+    QDBusConnection *dbusConn_;
+    OrgFreedesktopIBusInputContextInterface *context_;
+    OrgFreedesktopIBusPortalInterface *portalBus_;
+    OrgFreedesktopIBusInterface *busInterface_;
+    QDBusServiceWatcher serviceWatcher_;
+};
+
+DimIBusInputContextPrivate::DimIBusInputContextPrivate()
+    : usePortal_(false)
+    , isValid_(false)
+    , busConnected_(false)
+    , dbusConn_(nullptr)
+    , context_(nullptr)
+    , portalBus_(nullptr)
+    , busInterface_(nullptr)
+{
+    if (qEnvironmentVariableIsSet("IBUS_USE_PORTAL")) {
+        bool ok;
+        int enableSync = qEnvironmentVariableIntValue("IBUS_USE_PORTAL", &ok);
+        if (ok && enableSync == 1)
+            usePortal_ = true;
+    }
+    if (usePortal_) {
+        isValid_ = true;
+    } else {
+        isValid_ =
+            !QStandardPaths::findExecutable(QString::fromLocal8Bit("ibus-daemon"), QStringList())
+                 .isEmpty();
+    }
+    if (!isValid_)
+        return;
+    initBus();
 }
 
-QString DimIBusProxy::getSocketPath()
+void DimIBusInputContextPrivate::initBus()
+{
+    dbusConn_ = createConnection();
+    createBusProxy();
+}
+
+void DimIBusInputContextPrivate::createBusProxy()
+{
+    if (!dbusConn_ || !dbusConn_->isConnected())
+        return;
+
+    ibusService_ = usePortal_ ? QLatin1String("org.freedesktop.portal.IBus")
+                              : QLatin1String("org.freedesktop.IBus");
+    QDBusReply<QDBusObjectPath> ic;
+    if (usePortal_) {
+        portalBus_ = new OrgFreedesktopIBusPortalInterface((ibusService_),
+                                                           QLatin1String("/org/freedesktop/IBus"),
+                                                           *dbusConn_);
+        if (!portalBus_->isValid()) {
+            qWarning("ibus proxy: invalid portal bus");
+            return;
+        }
+
+        ic = portalBus_->CreateInputContext(QLatin1String("DimInputContext"));
+    } else {
+        busInterface_ = new OrgFreedesktopIBusInterface(ibusService_,
+                                                        QLatin1String("/org/freedesktop/IBus"),
+                                                        *dbusConn_);
+        if (!busInterface_->isValid()) {
+            qWarning("ibus proxy: invalid bus.");
+            return;
+        }
+
+        ic = busInterface_->CreateInputContext(QLatin1String("DimInputContext"));
+    }
+
+    serviceWatcher_.removeWatchedService(ibusService_);
+    serviceWatcher_.setConnection(*dbusConn_);
+    serviceWatcher_.addWatchedService(ibusService_);
+
+    if (!ic.isValid()) {
+        qWarning("ibus proxy: CreateInputContext failed.");
+        return;
+    }
+
+    ibusIcPath_ = ic.value().path();
+    busConnected_ = true;
+}
+
+QString DimIBusInputContextPrivate::getSocketPath()
 {
     QByteArray display;
     QByteArray displayNumber = "0";
@@ -87,32 +164,108 @@ QString DimIBusProxy::getSocketPath()
         + QString::fromLocal8Bit(displayNumber);
 }
 
-void DimIBusProxy::connectToBus()
+QDBusConnection *DimIBusInputContextPrivate::createConnection()
 {
-    if (socketWatcher_.files().size() == 0) {
-        const QString socketPath = getSocketPath();
+    if (usePortal_)
+        return new QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SessionBus,
+                                                                 QLatin1String("DimIBusProxy")));
+    QFile file(getSocketPath());
+
+    if (!file.open(QFile::ReadOnly))
+        return 0;
+
+    QByteArray address;
+    int pid = -1;
+
+    while (!file.atEnd()) {
+        QByteArray line = file.readLine().trimmed();
+        if (line.startsWith('#'))
+            continue;
+
+        if (line.startsWith("IBUS_ADDRESS="))
+            address = line.mid(sizeof("IBUS_ADDRESS=") - 1);
+        if (line.startsWith("IBUS_DAEMON_PID="))
+            pid = line.mid(sizeof("IBUS_DAEMON_PID=") - 1).toInt();
+    }
+
+    if (address.isEmpty() || pid < 0 || kill(pid, 0) != 0)
+        return 0;
+
+    return new QDBusConnection(
+        QDBusConnection::connectToBus(QString::fromLatin1(address), QLatin1String("DimIBusProxy")));
+}
+
+DimIBusProxy::DimIBusProxy(Dim *dim)
+    : ProxyAddon(dim, "ibusproxy", "ibus")
+    , d(new DimIBusInputContextPrivate())
+    , useSyncMode_(false)
+{
+    qDBusRegisterMetaType<IBusText>();
+    qDBusRegisterMetaType<IBusEngineDesc>();
+
+    if (qEnvironmentVariableIsSet("IBUS_ENABLE_SYNC_MODE")) {
+        bool ok;
+        int enableSync = qEnvironmentVariableIntValue("IBUS_ENABLE_SYNC_MODE", &ok);
+        if (ok && enableSync == 1)
+            useSyncMode_ = true;
+    }
+
+    if (!d->usePortal_) {
+        QString socketPath = DimIBusInputContextPrivate::getSocketPath();
         QFile file(socketPath);
         if (file.open(QFile::ReadOnly)) {
+            qDebug() << "socketWatcher.addPath" << socketPath;
+            // If restart ibus-daemon,
+            // the applications could run before ibus-daemon runs.
+            // We watch the getSocketPath() to get the launching ibus-daemon.
             socketWatcher_.addPath(socketPath);
             connect(&socketWatcher_,
                     &QFileSystemWatcher::fileChanged,
                     this,
                     &DimIBusProxy::socketChanged);
         }
+        timer_.setSingleShot(true);
+        connect(&timer_, &QTimer::timeout, this, &DimIBusProxy::connectToBus);
+        timer_.start();
     }
 
-    auto ibusPort = new OrgFreedesktopIBusPortalInterface(IBUS_PORTAL_SERVICE,
-                                                          IBUS_PORTAL_SERVICE_PATH,
-                                                          dbusConn_,
-                                                          this);
-    if (ibusPort->isValid()) {
-        portalBus_ = ibusPort;
+    connect(&d->serviceWatcher_,
+            &QDBusServiceWatcher::serviceRegistered,
+            this,
+            &DimIBusProxy::busRegistered);
+    connect(&d->serviceWatcher_,
+            &QDBusServiceWatcher::serviceUnregistered,
+            this,
+            &DimIBusProxy::busUnregistered);
+}
+
+void DimIBusProxy::connectToBus()
+{
+    qDebug() << "connect to ibus";
+
+    d->initBus();
+    initEngines();
+
+    if (!d->usePortal_ && socketWatcher_.files().size() == 0)
+        socketWatcher_.addPath(DimIBusInputContextPrivate::getSocketPath());
+
+    const auto &inputContexts = dim()->getInputContexts();
+    for (auto i = inputContexts.begin(); i != inputContexts.end(); ++i) {
+        createFcitxInputContext(i.value());
     }
 }
 
 void DimIBusProxy::socketChanged(const QString &str)
 {
     Q_UNUSED(str);
+    qDebug() << "socketChanged";
+
+    if (d->context_)
+        disconnect(d->context_);
+    if (d->busInterface_ && d->busInterface_->isValid())
+        disconnect(d->busInterface_);
+    if (d->dbusConn_)
+        d->dbusConn_->disconnectFromBus(QLatin1String("DimIBusProxy"));
 
     timer_.stop();
     timer_.start(100);
@@ -120,17 +273,18 @@ void DimIBusProxy::socketChanged(const QString &str)
 
 void DimIBusProxy::busRegistered(const QString &str)
 {
+    qDebug() << "bus registered";
     Q_UNUSED(str);
-    connectToBus();
-    const auto &inputContexts = dim()->getInputContexts();
-    for (auto i = inputContexts.begin(); i != inputContexts.end(); ++i) {
-        createFcitxInputContext(i.value());
+    if (d->usePortal_) {
+        connectToBus();
     }
 }
 
 void DimIBusProxy::busUnregistered(const QString &str)
 {
+    qDebug() << "bus unregistered";
     Q_UNUSED(str);
+    d->busConnected_ = false;
 }
 
 DimIBusProxy::~DimIBusProxy()
@@ -150,30 +304,21 @@ const QList<InputMethodEntry> &DimIBusProxy::getInputMethods()
 
 void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 {
-    if (!ic || !isIBusPortalInterfaceValid()) {
+    if (!d->busConnected_ || !ic) {
         return;
     }
 
     auto id = ic->id();
-    auto reply = portalBus_->CreateInputContext(QLatin1String("dim ibus context"));
 
-    reply.waitForFinished();
-    if (!reply.isValid()) {
-        qWarning("QIBusPlatformInputContext: CreateInputContext failed.");
-        return;
-    }
+    d->context_ =
+        new OrgFreedesktopIBusInputContextInterface(d->ibusService_, d->ibusIcPath_, *d->dbusConn_);
 
-    context_ = new OrgFreedesktopIBusInputContextInterface(IBUS_PORTAL_SERVICE,
-                                                           reply.value().path(),
-                                                           dbusConn_,
-                                                           this);
-
-    if (!context_->isValid()) {
+    if (!d->context_->isValid()) {
         qWarning("invalid input context");
         return;
     }
 
-    iBusICMap_[id] = context_;
+    iBusICMap_[id] = d->context_;
 
     enum Capabilities {
         IBUS_CAP_PREEDIT_TEXT = 1 << 0,
@@ -184,9 +329,10 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
         IBUS_CAP_SURROUNDING_TEXT = 1 << 5
     };
 
-    context_->SetCapabilities(IBUS_CAP_PREEDIT_TEXT | IBUS_CAP_FOCUS | IBUS_CAP_SURROUNDING_TEXT);
+    d->context_->SetCapabilities(IBUS_CAP_PREEDIT_TEXT | IBUS_CAP_FOCUS
+                                 | IBUS_CAP_SURROUNDING_TEXT);
 
-    connect(context_,
+    connect(d->context_,
             &OrgFreedesktopIBusInputContextInterface::CommitText,
             this,
             [ic](const QDBusVariant &text) {
@@ -196,7 +342,7 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 
                 ic->commitString(t.text);
             });
-    connect(context_,
+    connect(d->context_,
             &OrgFreedesktopIBusInputContextInterface::UpdatePreeditText,
             this,
             [ic](const QDBusVariant &text, uint cursorPos, bool visible) {
@@ -207,7 +353,7 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 
                 ic->updatePreedit(t.text, cursorPos, cursorPos);
             });
-    connect(context_,
+    connect(d->context_,
             &OrgFreedesktopIBusInputContextInterface::ForwardKeyEvent,
             this,
             [ic](uint keyval, uint keycode, uint state) {
@@ -238,8 +384,16 @@ void DimIBusProxy::destroyed(uint32_t id)
 
 void DimIBusProxy::setCurrentIM(const QString &im)
 {
-    // TODO: implement ibus switch input method
-    Q_UNUSED(im)
+    if (!d->busConnected_ || d->usePortal_ || !d->busInterface_) {
+        return;
+    }
+
+    QDBusPendingReply<> reply = d->busInterface_->SetGlobalEngine(im);
+    reply.waitForFinished();
+
+    if (reply.isError()) {
+        qWarning() << "set global engine error" << reply.error();
+    }
 }
 
 bool DimIBusProxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
@@ -258,6 +412,12 @@ bool DimIBusProxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
         auto reply =
             iBusICMap_[id]->ProcessKeyEvent(keyEvent.keyValue(), keyEvent.keycode(), ibusState);
         reply.waitForFinished();
+
+        if (reply.isError()) {
+            qWarning() << "processKeyEvent error: " << reply.error().message();
+            return false;
+        }
+
         if (useSyncMode_ || reply.isFinished()) {
             result = reply.value();
         }
@@ -284,8 +444,78 @@ void DimIBusProxy::updateSurroundingText(Event &event)
         return;
     }
 
+    IBusText text;
     auto &surroundingText = event.ic()->surroundingText();
-    iBusICMap_[id]->SetSurroundingText(QDBusVariant(QVariant::fromValue(surroundingText.text())),
+    text.text = surroundingText.text();
+
+    QVariant variant;
+    variant.setValue(text);
+    QDBusVariant dbusText(variant);
+
+    iBusICMap_[id]->SetSurroundingText(dbusText,
                                        surroundingText.cursor(),
                                        surroundingText.anchor());
+}
+
+void DimIBusProxy::initEngines()
+{
+    QList<InputMethodEntry> inputMethods;
+    for (auto &engine : listEngines()) {
+        QString imEntryName = engine.engine_name;
+
+        // 过滤掉键盘布局
+        if (imEntryName.startsWith(QLatin1String("xkb:"))) {
+            continue;
+        }
+
+        inputMethods.append(InputMethodEntry(key(),
+                                             imEntryName,
+                                             engine.longname,
+                                             engine.description,
+                                             engine.symbol,
+                                             engine.icon));
+    }
+
+    inputMethods_.swap(inputMethods);
+    Q_EMIT addonInitFinished(this);
+}
+
+void DimIBusProxy::globalEngineChanged(const QString &engineName)
+{
+    if (d->usePortal_ || !d->busConnected_) {
+        return;
+    }
+
+    initEngines();
+}
+
+QList<IBusEngineDesc> DimIBusProxy::listEngines()
+{
+    QList<IBusEngineDesc> engines;
+
+    if (d->usePortal_) {
+        return engines;
+    }
+
+    if (!d->busConnected_) {
+        qWarning() << "IBus is not connected!";
+        return engines;
+    }
+
+    QDBusPendingReply<QVariantList> reply = d->busInterface_->ListEngines();
+    reply.waitForFinished();
+
+    if (reply.isError()) {
+        qWarning() << "Bus::listEngines:" << reply.error();
+        return engines;
+    }
+
+    QVariantList ret = reply.value();
+    for (int i = 0; i < ret.size(); i++) {
+        IBusEngineDesc e;
+        ret.at(i).value<QDBusArgument>() >> e;
+        engines << e;
+    }
+
+    return engines;
 }
