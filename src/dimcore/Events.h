@@ -22,7 +22,7 @@ enum class EventType {
     InputContextUnfocused,
     InputContextKeyEvent,
     InputContextCursorRectChanged,
-    InputContextSetSurroundingText,
+    InputContextUpdateSurroundingText,
 };
 
 class Event
@@ -79,19 +79,6 @@ public:
     const int32_t y;
     const int32_t w;
     const int32_t h;
-};
-
-class InputContextSetSurroundingTextEvent : public Event
-{
-public:
-    InputContextSetSurroundingTextEvent(InputContext *ic,
-                                        const QString &surroundingText,
-                                        uint32_t cursor,
-                                        uint32_t anchor);
-
-    const QString text;
-    const uint32_t cursor;
-    const uint32_t anchor;
 };
 
 } // namespace dim

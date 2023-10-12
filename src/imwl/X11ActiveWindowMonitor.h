@@ -25,8 +25,8 @@ protected:
     void xcbEvent(const std::unique_ptr<xcb_generic_event_t> &event) override;
 
 private:
-    xcb_atom_t activeWindowAtom_;
-    xcb_atom_t wmPidAtom_;
+    const std::string activeWindow_;
+    const std::string wmPid_;
 };
 
 #endif // !X11ACTIVEWINDOWMONITOR_H

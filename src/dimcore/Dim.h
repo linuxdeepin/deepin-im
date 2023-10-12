@@ -65,7 +65,7 @@ private:
     void postInputContextUnfocused(Event &event);
     bool postInputContextKeyEvent(InputContextKeyEvent &event);
     void postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &event);
-    void postInputContextSetSurroundingTextEvent(InputContextSetSurroundingTextEvent &event);
+    void postInputContextSetSurroundingTextEvent(Event &event);
 
     InputMethodAddon *getInputMethodAddon(InputState &state);
 

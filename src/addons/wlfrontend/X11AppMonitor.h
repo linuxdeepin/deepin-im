@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef XCBAPPMONITOR_H
 #define XCBAPPMONITOR_H
 
@@ -6,7 +10,7 @@
 
 #include <memory>
 
-class X11ActiveWindowMonitor;
+namespace org::deepin::dim {
 
 class X11AppMonitor : public AppMonitor, public Xcb
 {
@@ -14,13 +18,15 @@ public:
     X11AppMonitor();
     ~X11AppMonitor() override;
 
+    std::unordered_map<QString, pid_t> apps() { return apps_; }
+
 protected:
     void xcbEvent(const std::unique_ptr<xcb_generic_event_t> &event) override;
 
 private:
-    xcb_atom_t atomActiveWindow_;
-    xcb_atom_t atomNetClientList_;
-    xcb_atom_t atomWmPid_;
+    const std::string activeWindow_;
+    const std::string netClientList_;
+    const std::string wmPid_;
 
     std::unordered_map<QString, pid_t> apps_;
     QString focus_;
@@ -28,9 +34,10 @@ private:
     void init();
     pid_t getWindowPid(xcb_window_t window);
     std::tuple<uint16_t, uint16_t> getWindowPosition(xcb_window_t window);
-    
-    QString windowToString(xcb_window_t window);
-    xcb_window_t stringToWindow(const QString &string);
+    void activeWindowChanged();
+    void clientListChanged();
 };
+
+} // namespace org::deepin::dim
 
 #endif // !XCBAPPMONITOR_H

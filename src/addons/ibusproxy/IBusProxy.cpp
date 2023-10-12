@@ -165,7 +165,8 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 
     context_ = new OrgFreedesktopIBusInputContextInterface(IBUS_PORTAL_SERVICE,
                                                            reply.value().path(),
-                                                           dbusConn_, this);
+                                                           dbusConn_,
+                                                           this);
 
     if (!context_->isValid()) {
         qWarning("invalid input context");
@@ -193,7 +194,7 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
                 IBusText t;
                 arg >> t;
 
-                ic->updateCommitString(t.text);
+                ic->commitString(t.text);
             });
     connect(context_,
             &OrgFreedesktopIBusInputContextInterface::UpdatePreeditText,
@@ -236,7 +237,7 @@ void DimIBusProxy::destroyed(uint32_t id)
 }
 
 bool DimIBusProxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
-                           InputContextKeyEvent &keyEvent)
+                            InputContextKeyEvent &keyEvent)
 {
     bool result = false;
 
@@ -248,7 +249,6 @@ bool DimIBusProxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
     auto id = keyEvent.ic()->id();
 
     if (isICDBusInterfaceValid(id)) {
-        keyEvent.ic()->setAsyncMode(true);
         auto reply =
             iBusICMap_[id]->ProcessKeyEvent(keyEvent.keyValue(), keyEvent.keycode(), ibusState);
         reply.waitForFinished();
@@ -271,14 +271,15 @@ void DimIBusProxy::cursorRectangleChangeEvent(InputContextCursorRectChangeEvent 
     iBusICMap_[id]->SetCursorLocationRelative(event.x, event.y, event.w, event.h);
 }
 
-void DimIBusProxy::setSurroundingText(InputContextSetSurroundingTextEvent &event)
+void DimIBusProxy::updateSurroundingText(Event &event)
 {
     auto id = event.ic()->id();
     if (!isICDBusInterfaceValid(id)) {
         return;
     }
 
-    iBusICMap_[id]->SetSurroundingText(QDBusVariant(QVariant::fromValue(event.text)),
-                                       event.cursor,
-                                       event.anchor);
+    auto &surroundingText = event.ic()->surroundingText();
+    iBusICMap_[id]->SetSurroundingText(QDBusVariant(QVariant::fromValue(surroundingText.text())),
+                                       surroundingText.cursor(),
+                                       surroundingText.anchor());
 }

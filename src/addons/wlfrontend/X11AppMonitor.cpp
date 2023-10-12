@@ -1,15 +1,21 @@
+// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include "X11AppMonitor.h"
+
+#include <experimental/unordered_map>
 
 #include <QDebug>
 
-X11AppMonitor::X11AppMonitor()
-{
-    atomActiveWindow_ = getAtom("_NET_ACTIVE_WINDOW");
-    atomNetClientList_ = getAtom("_NET_CLIENT_LIST");
-    atomWmPid_ = getAtom("_NET_WM_PID");
+using namespace org::deepin::dim;
 
-    uint32_t values[] = { XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
-                          | XCB_EVENT_MASK_PROPERTY_CHANGE };
+X11AppMonitor::X11AppMonitor()
+    : activeWindow_("_NET_ACTIVE_WINDOW")
+    , netClientList_("_NET_CLIENT_LIST")
+    , wmPid_("_NET_WM_PID")
+{
+    uint32_t values[] = { XCB_EVENT_MASK_PROPERTY_CHANGE };
     xcb_change_window_attributes(xconn_.get(), screen()->root, XCB_CW_EVENT_MASK, values);
 
     xcb_flush(xconn_.get());
@@ -22,52 +28,25 @@ X11AppMonitor::~X11AppMonitor() = default;
 void X11AppMonitor::xcbEvent(const std::unique_ptr<xcb_generic_event_t> &event)
 {
     auto responseType = XCB_EVENT_RESPONSE_TYPE(event);
-
-    switch (responseType) {
-    case XCB_CREATE_NOTIFY: {
-        auto *e = reinterpret_cast<xcb_create_notify_event_t *>(event.get());
-        pid_t pid = getWindowPid(e->window);
-        apps_.emplace(windowToString(e->window), pid);
-    } break;
-    case XCB_DESTROY_NOTIFY: {
-        auto *e = reinterpret_cast<xcb_destroy_notify_event_t *>(event.get());
-        apps_.erase(windowToString(e->window));
-    } break;
-    case XCB_CONFIGURE_NOTIFY: {
-        auto *e = reinterpret_cast<xcb_configure_notify_event_t *>(event.get());
-    } break;
-
-    case XCB_PROPERTY_NOTIFY: {
-        auto *e = reinterpret_cast<xcb_property_notify_event_t *>(event.get());
-        if (e->atom != atomActiveWindow_) {
-            return;
-        }
-
-        auto data = getProperty(screen()->root, atomActiveWindow_, sizeof(xcb_window_t));
-        if (data.size() == 0) {
-            qWarning() << "failed to get active window id";
-            return;
-        }
-
-        xcb_window_t window = *reinterpret_cast<xcb_window_t *>(data.data());
-        auto windowTmp = windowToString(window);
-        if (focus_ == windowTmp) {
-            return;
-        }
-
-        qWarning() << window << windowTmp << stringToWindow(windowTmp);
-        focus_ = windowTmp;
-    } break;
-    default:
+    if (responseType != XCB_PROPERTY_NOTIFY) {
         return;
     }
 
-    emit appUpdated(apps_, focus_);
+    auto *e = reinterpret_cast<xcb_property_notify_event_t *>(event.get());
+    if (e->atom == getAtom(activeWindow_)) {
+        activeWindowChanged();
+        return;
+    }
+
+    if (e->atom == getAtom(netClientList_)) {
+        clientListChanged();
+        return;
+    }
 }
 
 void X11AppMonitor::init()
 {
-    auto data = getProperty(screen()->root, atomNetClientList_);
+    auto data = getProperty(screen()->root, netClientList_);
     for (int i = 0; i < data.size(); i += sizeof(xcb_window_t)) {
         xcb_window_t window = *reinterpret_cast<xcb_window_t *>(data.data() + i);
         pid_t pid = getWindowPid(window);
@@ -78,9 +57,9 @@ void X11AppMonitor::init()
 
 pid_t X11AppMonitor::getWindowPid(xcb_window_t window)
 {
-    auto data1 = getProperty(window, atomWmPid_, sizeof(uint32_t));
+    auto data1 = getProperty(window, wmPid_, sizeof(uint32_t));
     if (data1.size() == 0) {
-        qWarning() << "failed to get pid of active window";
+        qWarning() << "failed to get pid";
         return 0;
     }
 
@@ -99,17 +78,62 @@ std::tuple<uint16_t, uint16_t> X11AppMonitor::getWindowPosition(xcb_window_t win
     return { offset->dst_x, offset->dst_y };
 }
 
-QString X11AppMonitor::windowToString(xcb_window_t window)
+void X11AppMonitor::activeWindowChanged()
 {
-    if (window == 0) {
-        return QString{};
+    auto data = getProperty(screen()->root, activeWindow_, sizeof(xcb_window_t));
+    if (data.size() == 0) {
+        qWarning() << "failed to get active window id";
+        return;
     }
 
-    return QString("0x%1").arg(window, 8, 16, QLatin1Char('0'));
+    xcb_window_t window = *reinterpret_cast<xcb_window_t *>(data.data());
+    if (window == 0) {
+        return;
+    }
+
+    auto windowTmp = windowToString(window);
+    if (focus_ == windowTmp) {
+        return;
+    }
+
+    focus_ = windowTmp;
+
+    emit appUpdated(apps_, focus_);
 }
 
-xcb_window_t X11AppMonitor::stringToWindow(const QString &string)
+void X11AppMonitor::clientListChanged()
 {
-    bool ok = false;
-    return string.toUInt(&ok, 16);
+    auto data = getProperty(screen()->root, netClientList_);
+    if (data.size() == 0) {
+        return;
+    }
+
+    auto cnt = data.size() / sizeof(xcb_window_t);
+    auto *windowIds = reinterpret_cast<xcb_window_t *>(data.data());
+
+    std::experimental::erase_if(apps_, [cnt, &windowIds](const auto &item) {
+        const auto &[windowId, _] = item;
+
+        for (uint32_t i = 0; i < cnt; i++) {
+            xcb_window_t windowId1 = windowIds[i];
+            if (stringToWindow(windowId) == windowId1) {
+                return false;
+            }
+        }
+
+        return true;
+    });
+
+    for (uint32_t i = 0; i < cnt; i++) {
+        xcb_window_t windowId = windowIds[i];
+
+        auto windowIdStr = windowToString(windowId);
+        auto iter = apps_.find(windowIdStr);
+        if (iter == apps_.end()) {
+            pid_t pid = getWindowPid(windowId);
+            apps_.emplace(windowIdStr, pid);
+        }
+    }
+
+    emit appUpdated(apps_, focus_);
 }

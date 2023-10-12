@@ -27,38 +27,51 @@ Xcb::Xcb()
 
 Xcb::~Xcb() { }
 
-xcb_atom_t Xcb::getAtom(const char *atomName)
+xcb_atom_t Xcb::getAtom(const std::string &atomName)
 {
-    auto reply = XCB_REPLY(xcb_intern_atom, xconn_.get(), 0, strlen(atomName), atomName);
+    auto iter = atoms_.find(atomName);
+    if (iter != atoms_.end()) {
+        return iter->second;
+    }
+
+    auto reply = XCB_REPLY(xcb_intern_atom, xconn_.get(), 0, atomName.length(), atomName.c_str());
     if (!reply) {
         throw std::runtime_error("xcb_intern_atom failed");
         return 0;
     }
 
-    return reply->atom;
+    auto atom = reply->atom;
+    atoms_.emplace(atomName, atom);
+    return atom;
 }
 
-std::vector<char> Xcb::getProperty(xcb_window_t window, xcb_atom_t property, uint32_t size)
+std::vector<char> Xcb::getProperty(xcb_window_t window, const std::string &property, uint32_t size)
 {
     std::vector<char> buff(size);
-    getPropertyAux(buff, window, property, 0, size);
+
+    uint32_t offset = 0;
+    auto bytesLeft = size;
+    std::tie(offset, bytesLeft) = getPropertyAux(buff, window, property, 0, size);
+    if (offset == 0 && bytesLeft == 0) {
+        return {};
+    }
 
     return buff;
 }
 
-std::vector<char> Xcb::getProperty(xcb_window_t window, xcb_atom_t property)
+std::vector<char> Xcb::getProperty(xcb_window_t window, const std::string &property)
 {
     // Don't read anything, just get the size of the property data
     auto reply = XCB_REPLY(xcb_get_property,
                            xconn_.get(),
                            false,
                            window,
-                           property,
+                           getAtom(property),
                            XCB_GET_PROPERTY_TYPE_ANY,
                            0,
                            0);
     if (!reply || reply->type == XCB_NONE) {
-        qWarning("no reply");
+        qWarning() << "no reply:" << windowToString(window) << property.c_str();
         return {};
     }
 
@@ -86,6 +99,21 @@ xcb_screen_t *Xcb::screenOfDisplay(int screen)
     return nullptr;
 }
 
+QString Xcb::windowToString(xcb_window_t window)
+{
+    if (window == 0) {
+        return QString{};
+    }
+
+    return QString("0x%1").arg(window, 8, 16, QLatin1Char('0'));
+}
+
+xcb_window_t Xcb::stringToWindow(const QString &string)
+{
+    bool ok = false;
+    return string.toUInt(&ok, 16);
+}
+
 void Xcb::onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationEvent)
 {
     std::unique_ptr<xcb_generic_event_t> event;
@@ -96,7 +124,7 @@ void Xcb::onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationE
 
 std::tuple<uint32_t, uint32_t> Xcb::getPropertyAux(std::vector<char> &buff,
                                                    xcb_window_t window,
-                                                   xcb_atom_t property,
+                                                   const std::string &property,
                                                    uint32_t offset,
                                                    uint32_t size)
 {
@@ -106,12 +134,12 @@ std::tuple<uint32_t, uint32_t> Xcb::getPropertyAux(std::vector<char> &buff,
                            xconn_.get(),
                            false,
                            window,
-                           property,
+                           getAtom(property),
                            XCB_GET_PROPERTY_TYPE_ANY,
                            xcbOffset,
                            size / 4);
     if (!reply || reply->type == XCB_NONE) {
-        qWarning("no reply");
+        qWarning() << "no reply:" << windowToString(window) << property.c_str();
         return { 0, 0 };
     }
 

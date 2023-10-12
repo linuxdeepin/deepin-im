@@ -36,12 +36,3 @@ InputContextCursorRectChangeEvent::InputContextCursorRectChangeEvent(
     , h(h)
 {
 }
-
-InputContextSetSurroundingTextEvent::InputContextSetSurroundingTextEvent(
-    InputContext *ic, const QString &surroundingText, uint32_t cursor, uint32_t anchor)
-    : Event(EventType::InputContextSetSurroundingText, ic)
-    , text(surroundingText)
-    , cursor(cursor)
-    , anchor(anchor)
-{
-}
