@@ -38,8 +38,8 @@ Server::Server()
 
     QObject::connect(activeWindowMonitor_.get(),
                      &X11ActiveWindowMonitor::activeWindowChanged,
-                     [this]() {
-                         activeWindowChanged(activeWindowMonitor_->activeWindowPid());
+                     [this](xcb_window_t window) {
+                         activeWindowChanged(activeWindowMonitor_->windowPid(window));
                      });
 }
 
@@ -65,11 +65,15 @@ void Server::create()
     virtualKeyboardManagerV1_ = std::make_unique<VirtualKeyboardManagerV1>();
     virtualKeyboardManagerV1_->init(display());
 
-    activeWindowChanged(activeWindowMonitor_->activeWindowPid());
+    activeWindowChanged(activeWindowMonitor_->windowPid(activeWindowMonitor_->activeWindow()));
 }
 
 void Server::activeWindowChanged(pid_t pid)
 {
+    if (activePid_ == pid) {
+        return;
+    }
+
     qDebug() << "active window changed, pid:" << pid;
     seat_->getDimTextInputV1()->leavePid(activePid_);
     seat_->getDimTextInputV1()->enterPid(pid);

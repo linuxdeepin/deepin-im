@@ -127,6 +127,8 @@ void DimTextInputV1::zwp_dim_text_input_v1_enable(wl::server::Resource *resource
 
     auto im2 = seat_->getInputMethodV2();
     im2->sendActivate();
+    // todo:: send im state
+    im2->sendDone();
 }
 
 void DimTextInputV1::zwp_dim_text_input_v1_disable(wl::server::Resource *resource)
@@ -135,6 +137,7 @@ void DimTextInputV1::zwp_dim_text_input_v1_disable(wl::server::Resource *resourc
 
     auto im2 = seat_->getInputMethodV2();
     im2->sendDeactivate();
+    im2->sendDone();
 }
 
 void DimTextInputV1::zwp_dim_text_input_v1_set_surrounding_text(wl::server::Resource *resource,
