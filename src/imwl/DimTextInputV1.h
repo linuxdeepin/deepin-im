@@ -10,6 +10,7 @@
 #include <set>
 
 class Seat;
+class InputMethodV2;
 
 class DimTextInputV1 : public wl::server::ZwpDimTextInputV1
 {

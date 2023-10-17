@@ -42,6 +42,7 @@ void DimTextInputV1::zwp_dim_text_input_v1_enter()
     m_pendingCommitString.clear();
     m_pendingDeleteBeforeText = 0;
     m_pendingDeleteAfterText = 0;
+    m_entered = true;
 
     enable();
     updateState(supportedQueries4, update_state_enter);
@@ -64,6 +65,7 @@ void DimTextInputV1::zwp_dim_text_input_v1_leave()
     m_currentPreeditString.clear();
 
     // m_surface = nullptr;
+    m_entered = false;
     m_currentSerial = 0U;
 
     disable();
@@ -273,6 +275,10 @@ void DimTextInputV1::commit()
 void DimTextInputV1::updateState(Qt::InputMethodQueries queries, uint32_t flags)
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO << queries << flags;
+
+    if (flags == update_state_enter && !m_entered) {
+        return;
+    }
 
     if (!QGuiApplication::focusObject()) {
         return;

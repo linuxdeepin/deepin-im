@@ -93,6 +93,7 @@ private:
     uint32_t m_contentHint = 0;
     uint32_t m_contentPurpose = 0;
     QRect m_cursorRect;
+    bool m_entered = false;
 
     uint m_currentSerial = 0;
 
