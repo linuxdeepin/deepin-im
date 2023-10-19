@@ -249,8 +249,10 @@ void WaylandInputContext::keyCallback(uint32_t serial, uint32_t time, uint32_t k
 {
     assert(xkbState_);
 
+    auto *ic = delegatedInputContext();
+
     xkb_keysym_t sym = xkb_state_key_get_one_sym(xkbState_.get(), key);
-    InputContextKeyEvent ke(this,
+    InputContextKeyEvent ke(ic,
                             static_cast<uint32_t>(sym),
                             key,
                             state_->modifiers,
@@ -332,6 +334,8 @@ void WaylandInputContext::textInputRectangleCallback(int32_t x,
                                                      int32_t width,
                                                      int32_t height)
 {
-    InputContextCursorRectChangeEvent e(this, x, y, width, height);
+    auto *ic = delegatedInputContext();
+
+    InputContextCursorRectChangeEvent e(ic, x, y, width, height);
     dim()->postEvent(e);
 }
