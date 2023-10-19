@@ -135,6 +135,15 @@ void DimTextInputV1::zwp_dim_text_input_v1_disable(wl::server::Resource *resourc
 {
     m_enabled.erase(resource);
 
+    auto i = pidMap_.find(enteredPid_);
+    if (i == pidMap_.end()) {
+        return;
+    }
+
+    if (i->second != resource) {
+        return;
+    }
+
     auto im2 = seat_->getInputMethodV2();
     im2->sendDeactivate();
     im2->sendDone();
