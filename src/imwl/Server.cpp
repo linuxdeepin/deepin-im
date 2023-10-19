@@ -8,6 +8,7 @@
 #include "DimTextInputManagerV1.h"
 #include "DimTextInputV1.h"
 #include "InputMethodManagerV2.h"
+#include "InputMethodV2.h"
 #include "Seat.h"
 #include "VirtualKeyboardManagerV1.h"
 #include "X11ActiveWindowMonitor.h"
@@ -75,6 +76,7 @@ void Server::activeWindowChanged(pid_t pid)
     }
 
     qDebug() << "active window changed, pid:" << pid;
+    seat_->getInputMethodV2()->sendDeactivate();
     seat_->getDimTextInputV1()->leavePid(activePid_);
     seat_->getDimTextInputV1()->enterPid(pid);
     activePid_ = pid;
