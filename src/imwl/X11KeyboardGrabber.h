@@ -12,8 +12,6 @@
 #include <QObject>
 #include <QSocketNotifier>
 
-class QTimer;
-
 class X11KeyboardGrabber : public Xcb
 {
     Q_OBJECT
@@ -31,11 +29,6 @@ protected:
 private:
     int xcbFd_;
     uint8_t xinput2OPCode_;
-    QTimer *repeatTimer_;
-    uint32_t lastKeyCode_ = 0;
-    bool keyPressed_ = false;
-    // TODO: it must read from config file
-    int32_t repeatRate_ = 30, repeatDelay_ = 250;
 
     void onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationEvent);
     void initXinputExtension();
