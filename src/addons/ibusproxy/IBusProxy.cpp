@@ -78,7 +78,6 @@ DimIBusInputContextPrivate::DimIBusInputContextPrivate()
     }
     if (!isValid_)
         return;
-    initBus();
 }
 
 void DimIBusInputContextPrivate::initBus()
@@ -226,7 +225,6 @@ DimIBusProxy::DimIBusProxy(Dim *dim)
         }
         timer_.setSingleShot(true);
         connect(&timer_, &QTimer::timeout, this, &DimIBusProxy::connectToBus);
-        timer_.start();
     }
 
     connect(&d->serviceWatcher_,
