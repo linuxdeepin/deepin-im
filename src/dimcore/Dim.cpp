@@ -101,7 +101,7 @@ void Dim::loadAddon(const QString &infoFile)
         auto *imAddon = qobject_cast<InputMethodAddon *>(addon);
         connect(imAddon, &InputMethodAddon::addonInitFinished, this, &Dim::initInputMethodAddon);
         imAddon->initInputMethods();
-        inputMethodAddons_.insert(imAddon->key(), imAddon);
+        inputMethodAddons_.emplace(imAddon->key(), imAddon);
         break;
     }
     default:
@@ -153,21 +153,16 @@ bool Dim::postEvent(Event &event)
     return false;
 }
 
-QList<QString> Dim::imAddonNames() const
-{
-    return inputMethodAddons_.keys();
-}
-
 void Dim::postInputContextCreated(Event &event)
 {
     auto *ic = event.ic();
 
     connect(ic, &InputContext::imSwitch, this, &Dim::switchIM);
 
-    inputContexts_.insert(ic->id(), ic);
+    inputContexts_.emplace(ic->id(), ic);
 
-    for (auto it = inputMethodAddons_.begin(); it != inputMethodAddons_.end(); ++it) {
-        auto addon = getImAddon<ProxyAddon *>(it.value());
+    for (const auto &[_, v] : inputMethodAddons_) {
+        auto addon = getImAddon<ProxyAddon *>(v);
         if (addon) {
             addon->createFcitxInputContext(ic);
         }
@@ -176,9 +171,9 @@ void Dim::postInputContextCreated(Event &event)
 
 void Dim::postInputContextDestroyed([[maybe_unused]] Event &event)
 {
-    inputContexts_.remove(event.ic()->id());
-    for (auto it = inputMethodAddons_.begin(); it != inputMethodAddons_.end(); ++it) {
-        auto addon = getImAddon<ProxyAddon *>(it.value());
+    inputContexts_.erase(event.ic()->id());
+    for (const auto &[_, v] : inputMethodAddons_) {
+        auto addon = getImAddon<ProxyAddon *>(v);
         if (addon) {
             addon->destroyed(event.ic()->id());
         }
@@ -190,8 +185,8 @@ void Dim::postInputContextFocused(Event &event)
     focusedInputContext_ = event.ic()->id();
     emit focusedInputContextChanged(focusedInputContext_);
 
-    for (auto it = inputMethodAddons_.begin(); it != inputMethodAddons_.end(); ++it) {
-        auto addon = getImAddon<ProxyAddon *>(it.value());
+    for (const auto &[_, v] : inputMethodAddons_) {
+        auto addon = getImAddon<ProxyAddon *>(v);
 
         if (addon) {
             addon->focusIn(focusedInputContext_);
@@ -204,8 +199,8 @@ void Dim::postInputContextUnfocused(Event &event)
     focusedInputContext_ = 0;
     emit focusedInputContextChanged(focusedInputContext_);
 
-    for (auto it = inputMethodAddons_.begin(); it != inputMethodAddons_.end(); ++it) {
-        auto addon = getImAddon<ProxyAddon *>(it.value());
+    for (const auto &[_, v] : inputMethodAddons_) {
+        auto addon = getImAddon<ProxyAddon *>(v);
         if (addon) {
             addon->focusOut(event.ic()->id());
         }
@@ -258,7 +253,7 @@ InputMethodAddon *Dim::getInputMethodAddon(const InputState &inputState)
     auto j = imAddons().find(addonKey);
     assert(j != imAddons().end());
 
-    return j.value();
+    return j->second;
 }
 
 template<typename T>
@@ -269,9 +264,9 @@ T Dim::getImAddon(InputMethodAddon *imAddon) const
     return addon ? addon : nullptr;
 }
 
-void Dim::switchIM(const QPair<QString, QString> &imIndex)
+void Dim::switchIM(const std::pair<QString, QString> &imIndex)
 {
-    auto addon = getImAddon<ProxyAddon *>(imAddons().take(imIndex.first));
+    auto addon = getImAddon<ProxyAddon *>(imAddons().at(imIndex.first));
 
     if (addon) {
         addon->setCurrentIM(imIndex.second);

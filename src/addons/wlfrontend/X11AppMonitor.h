@@ -18,7 +18,7 @@ public:
     X11AppMonitor();
     ~X11AppMonitor() override;
 
-    std::unordered_map<QString, pid_t> apps() { return apps_; }
+    const std::unordered_map<QString, pid_t> &apps() { return apps_; }
 
 protected:
     void xcbEvent(const std::unique_ptr<xcb_generic_event_t> &event) override;

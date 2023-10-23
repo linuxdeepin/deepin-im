@@ -7,10 +7,9 @@
 
 #include "InputMethodEntry.h"
 
-#include <QList>
-#include <QMap>
 #include <QObject>
-#include <QSet>
+
+#include <set>
 
 namespace org {
 namespace deepin {
@@ -41,16 +40,21 @@ public:
     explicit Dim(QObject *parent = nullptr);
     ~Dim();
 
-    QList<QString> imAddonNames() const;
     bool postEvent(Event &event);
 
-    QMap<uint32_t, InputContext *> getInputContexts() const { return inputContexts_; }
+    const std::unordered_map<uint32_t, InputContext *> &getInputContexts() const
+    {
+        return inputContexts_;
+    }
 
-    InputContext *getInputContext(uint32_t id) const { return inputContexts_.value(id); }
+    InputContext *getInputContext(uint32_t id) const { return inputContexts_.at(id); }
 
-    QMap<QString, InputMethodAddon *> imAddons() const { return inputMethodAddons_; }
+    const std::unordered_map<QString, InputMethodAddon *> &imAddons() const
+    {
+        return inputMethodAddons_;
+    }
 
-    std::vector<InputMethodEntry> imEntries() const { return imEntries_; };
+    const std::vector<InputMethodEntry> &imEntries() const { return imEntries_; };
 
     int focusedInputContext() const { return focusedInputContext_; }
 
@@ -59,7 +63,7 @@ Q_SIGNALS:
     void inputMethodEntryChanged();
 
 public Q_SLOTS:
-    void switchIM(const QPair<QString, QString> &imIndex);
+    void switchIM(const std::pair<QString, QString> &imIndex);
 
 private:
     void loadAddons();
@@ -78,10 +82,10 @@ private:
     T getImAddon(InputMethodAddon *imAddon) const;
 
 private:
-    QMap<uint32_t, InputContext *> inputContexts_;
+    std::unordered_map<uint32_t, InputContext *> inputContexts_;
     uint32_t focusedInputContext_;
-    QMap<QString, InputMethodAddon *> inputMethodAddons_;
-    QSet<FrontendAddon *> frontends_;
+    std::unordered_map<QString, InputMethodAddon *> inputMethodAddons_;
+    std::set<FrontendAddon *> frontends_;
     std::vector<InputMethodEntry> imEntries_;
 };
 
