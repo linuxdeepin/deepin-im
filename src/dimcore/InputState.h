@@ -8,13 +8,12 @@
 #include "InputMethodEntry.h"
 
 #include <QObject>
-#include <QPair>
 
 namespace org {
 namespace deepin {
 namespace dim {
 
-typedef QPair<QString, QString> IMIndex;
+typedef std::pair<QString, QString> IMKey;
 
 class Dim;
 class InputContext;
@@ -27,11 +26,11 @@ class InputState : public QObject
 public:
     explicit InputState(InputContext *ic);
 
-    int currentIMIndex() const;
+    std::vector<InputMethodEntry>::const_iterator currentIMEntry() const;
     void switchIMAddon();
 
 private:
-    IMIndex currentIMIndex_;
+    IMKey currentIMKey_;
     InputContext *ic_;
 };
 
