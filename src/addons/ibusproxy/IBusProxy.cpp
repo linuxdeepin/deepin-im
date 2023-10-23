@@ -249,7 +249,7 @@ void DimIBusProxy::connectToBus()
 
     const auto &inputContexts = dim()->getInputContexts();
     for (auto i = inputContexts.begin(); i != inputContexts.end(); ++i) {
-        createFcitxInputContext(i.value());
+        createFcitxInputContext(i->second);
     }
 }
 

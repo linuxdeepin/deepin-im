@@ -46,9 +46,9 @@ void TrayIcon::onFocusedInputContextChanged(int focusedInputContext)
         connect(ic, &InputContext::imSwitch, this, &TrayIcon::onImSwitched);
 }
 
-void TrayIcon::onImSwitched(const QPair<QString, QString> &imIndex)
+void TrayIcon::onImSwitched(const std::pair<QString, QString> &imIndex)
 {
-    auto addon = dim()->imAddons().take(imIndex.first);
+    auto addon = dim()->imAddons().at(imIndex.first);
     if (addon) {
         imAddonIcon_ = addon->iconName();
         qDebug() << "imAddonIcon" << imAddonIcon_;
