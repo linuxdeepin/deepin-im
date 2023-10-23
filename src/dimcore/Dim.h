@@ -77,9 +77,7 @@ private:
     void postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &event);
     void postInputContextSetSurroundingTextEvent(Event &event);
     InputMethodAddon *getInputMethodAddon(const InputState &state);
-
-    template<typename T>
-    T getImAddon(InputMethodAddon *imAddon) const;
+    void loopProxyAddon(const std::function<void(ProxyAddon *addon)> callback);
 
 private:
     std::unordered_map<uint32_t, InputContext *> inputContexts_;

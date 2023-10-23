@@ -20,7 +20,7 @@
 
 #include <dlfcn.h>
 
-#define DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE (SHIFT_MASK + CONTROL_MASK)
+constexpr uint32_t DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE = SHIFT_MASK | CONTROL_MASK;
 
 using namespace org::deepin::dim;
 
@@ -161,50 +161,44 @@ void Dim::postInputContextCreated(Event &event)
 
     inputContexts_.emplace(ic->id(), ic);
 
-    for (const auto &[_, v] : inputMethodAddons_) {
-        auto addon = getImAddon<ProxyAddon *>(v);
-        if (addon) {
-            addon->createFcitxInputContext(ic);
-        }
-    }
+    loopProxyAddon([ic](ProxyAddon *addon) {
+        addon->createFcitxInputContext(ic);
+    });
 }
 
 void Dim::postInputContextDestroyed([[maybe_unused]] Event &event)
 {
-    inputContexts_.erase(event.ic()->id());
-    for (const auto &[_, v] : inputMethodAddons_) {
-        auto addon = getImAddon<ProxyAddon *>(v);
-        if (addon) {
-            addon->destroyed(event.ic()->id());
-        }
-    }
+    auto *ic = event.ic();
+
+    inputContexts_.erase(ic->id());
+
+    loopProxyAddon([ic](ProxyAddon *addon) {
+        addon->destroyed(ic->id());
+    });
 }
 
 void Dim::postInputContextFocused(Event &event)
 {
-    focusedInputContext_ = event.ic()->id();
+    auto *ic = event.ic();
+
+    focusedInputContext_ = ic->id();
     emit focusedInputContextChanged(focusedInputContext_);
 
-    for (const auto &[_, v] : inputMethodAddons_) {
-        auto addon = getImAddon<ProxyAddon *>(v);
-
-        if (addon) {
-            addon->focusIn(focusedInputContext_);
-        }
-    }
+    loopProxyAddon([ic](ProxyAddon *addon) {
+        addon->focusIn(ic->id());
+    });
 }
 
 void Dim::postInputContextUnfocused(Event &event)
 {
+    auto *ic = event.ic();
+
     focusedInputContext_ = 0;
     emit focusedInputContextChanged(focusedInputContext_);
 
-    for (const auto &[_, v] : inputMethodAddons_) {
-        auto addon = getImAddon<ProxyAddon *>(v);
-        if (addon) {
-            addon->focusOut(event.ic()->id());
-        }
-    }
+    loopProxyAddon([ic](ProxyAddon *addon) {
+        addon->focusOut(ic->id());
+    });
 }
 
 bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
@@ -217,13 +211,11 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
         });
     }
 
-    const auto &state = event.ic()->inputState();
-
-    auto addon = getImAddon<InputMethodAddon *>(getInputMethodAddon(state));
+    auto addon = getInputMethodAddon(inputState);
     const auto &imList = imEntries();
 
     if (addon && !imList.empty()) {
-        return addon->keyEvent(imList[state.currentIMIndex()], event);
+        return addon->keyEvent(*inputState.currentIMEntry(), event);
     }
 
     return false;
@@ -231,8 +223,7 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
 
 void Dim::postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &event)
 {
-    auto addon = getImAddon<ProxyAddon *>(getInputMethodAddon(event.ic()->inputState()));
-
+    auto addon = qobject_cast<ProxyAddon *>(getInputMethodAddon(event.ic()->inputState()));
     if (addon) {
         addon->cursorRectangleChangeEvent(event);
     }
@@ -240,8 +231,7 @@ void Dim::postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &e
 
 void Dim::postInputContextSetSurroundingTextEvent(Event &event)
 {
-    auto addon = getImAddon<InputMethodAddon *>(getInputMethodAddon(event.ic()->inputState()));
-
+    auto addon = getInputMethodAddon(event.ic()->inputState());
     if (addon) {
         addon->updateSurroundingText(event);
     }
@@ -249,24 +239,26 @@ void Dim::postInputContextSetSurroundingTextEvent(Event &event)
 
 InputMethodAddon *Dim::getInputMethodAddon(const InputState &inputState)
 {
-    const QString &addonKey = imEntries()[inputState.currentIMIndex()].addonName();
+    const QString &addonKey = inputState.currentIMEntry()->addonName();
     auto j = imAddons().find(addonKey);
     assert(j != imAddons().end());
 
     return j->second;
 }
 
-template<typename T>
-T Dim::getImAddon(InputMethodAddon *imAddon) const
+void Dim::loopProxyAddon(const std::function<void(ProxyAddon *addon)> callback)
 {
-    T addon = qobject_cast<T>(imAddon);
-
-    return addon ? addon : nullptr;
+    for (const auto &[_, v] : inputMethodAddons_) {
+        auto addon = qobject_cast<ProxyAddon *>(v);
+        if (addon) {
+            callback(addon);
+        }
+    }
 }
 
 void Dim::switchIM(const std::pair<QString, QString> &imIndex)
 {
-    auto addon = getImAddon<ProxyAddon *>(imAddons().at(imIndex.first));
+    auto addon = qobject_cast<ProxyAddon *>(imAddons().at(imIndex.first));
 
     if (addon) {
         addon->setCurrentIM(imIndex.second);

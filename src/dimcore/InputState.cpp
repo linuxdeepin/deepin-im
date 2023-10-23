@@ -12,41 +12,39 @@ using namespace org::deepin::dim;
 
 InputState::InputState(InputContext *ic)
     : ic_(ic)
-    , currentIMIndex_(std::make_pair("fcitx5proxy", "keyboard-us"))
+    , currentIMKey_(std::make_pair("fcitx5proxy", "keyboard-us"))
 {
     connect(ic_->dim_, &Dim::inputMethodEntryChanged, this, [this]() {
-        const auto imEntry = ic_->dim()->imEntries()[currentIMIndex()];
-        currentIMIndex_ = std::make_pair(imEntry.addonName(), imEntry.uniqueName());
+        auto iter = currentIMEntry();
+        currentIMKey_ = std::make_pair(iter->addonName(), iter->uniqueName());
     });
 }
 
 void InputState::switchIMAddon()
 {
-    auto idx = currentIMIndex();
-    auto size = ic_->dim_->imEntries().size();
+    auto iter = currentIMEntry();
+    iter++;
 
-    ++idx;
-
-    if (idx == size) {
-        idx = 0;
+    const auto &imList = ic_->dim_->imEntries();
+    if (iter == imList.cend()) {
+        iter = imList.cbegin();
     }
 
-    const auto imEntry = ic_->dim()->imEntries()[idx];
-    currentIMIndex_ = std::make_pair(imEntry.addonName(), imEntry.uniqueName());
-    emit ic_->imSwitch(currentIMIndex_);
+    currentIMKey_ = std::make_pair(iter->addonName(), iter->uniqueName());
+    emit ic_->imSwitch(currentIMKey_);
 }
 
-int InputState::currentIMIndex() const
+std::vector<InputMethodEntry>::const_iterator InputState::currentIMEntry() const
 {
     const auto &imList = ic_->dim_->imEntries();
-    auto len = imList.size();
 
-    for (int i = 0; i < len; ++i) {
-        if (imList[i].uniqueName() == currentIMIndex_.second
-            && imList[i].addonName() == currentIMIndex_.first) {
-            return i;
-        }
+    auto iter = std::find_if(imList.cbegin(), imList.cend(), [this](const InputMethodEntry &entry) {
+        return entry.addonName() == currentIMKey_.first
+            && entry.uniqueName() == currentIMKey_.second;
+    });
+    if (iter == imList.cend()) {
+        iter = imList.cbegin();
     }
 
-    return 0;
+    return iter;
 }
