@@ -34,11 +34,8 @@ InputMethodKeyboardGrabV2::InputMethodKeyboardGrabV2(wl::server::Seat *seat)
     QObject::connect(grabber_.get(),
                      &X11KeyboardGrabber::keyEvent,
                      [this](int keycode, bool isRelease) {
-                         if (updateState(keycode, isRelease)) {
-                             return;
-                         }
-
                          sendKey(keycode, isRelease);
+                         updateState(keycode, isRelease);
                      });
 }
 
