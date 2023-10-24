@@ -108,8 +108,8 @@ void Fcitx5Proxy::createFcitxInputContext(InputContext *ic)
     FcitxQtStringKeyValue arg;
 
     arg.setKey("program");
-    // TODO: it must be actual app name
-    arg.setValue(QStringLiteral("dim"));
+    const auto &icName = QString("DimInputContext-%1").arg(ic->id());
+    arg.setValue(icName);
     list << arg;
 
     FcitxQtStringKeyValue arg2;

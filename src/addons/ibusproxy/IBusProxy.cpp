@@ -46,7 +46,6 @@ public:
     bool isValid_;
     bool busConnected_;
     QString ibusService_;
-    QString ibusIcPath_;
     QDBusConnection *dbusConn_;
     OrgFreedesktopIBusInputContextInterface *context_;
     OrgFreedesktopIBusPortalInterface *portalBus_;
@@ -93,7 +92,6 @@ void DimIBusInputContextPrivate::createBusProxy()
 
     ibusService_ = usePortal_ ? QLatin1String("org.freedesktop.portal.IBus")
                               : QLatin1String("org.freedesktop.IBus");
-    QDBusReply<QDBusObjectPath> ic;
     if (usePortal_) {
         portalBus_ = new OrgFreedesktopIBusPortalInterface((ibusService_),
                                                            QLatin1String("/org/freedesktop/IBus"),
@@ -102,8 +100,6 @@ void DimIBusInputContextPrivate::createBusProxy()
             qWarning("ibus proxy: invalid portal bus");
             return;
         }
-
-        ic = portalBus_->CreateInputContext(QLatin1String("DimInputContext"));
     } else {
         busInterface_ = new OrgFreedesktopIBusInterface(ibusService_,
                                                         QLatin1String("/org/freedesktop/IBus"),
@@ -112,20 +108,12 @@ void DimIBusInputContextPrivate::createBusProxy()
             qWarning("ibus proxy: invalid bus.");
             return;
         }
-
-        ic = busInterface_->CreateInputContext(QLatin1String("DimInputContext"));
     }
 
     serviceWatcher_.removeWatchedService(ibusService_);
     serviceWatcher_.setConnection(*dbusConn_);
     serviceWatcher_.addWatchedService(ibusService_);
 
-    if (!ic.isValid()) {
-        qWarning("ibus proxy: CreateInputContext failed.");
-        return;
-    }
-
-    ibusIcPath_ = ic.value().path();
     busConnected_ = true;
 }
 
@@ -308,8 +296,18 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 
     auto id = ic->id();
 
+    const auto &icName = QString("DimInputContext-%1").arg(id);
+    const auto &icDbusObj = d->usePortal_ ? d->portalBus_->CreateInputContext(icName)
+                                          : d->busInterface_->CreateInputContext(icName);
+    if (!icDbusObj.isValid()) {
+        qWarning("ibus proxy: CreateInputContext failed.");
+        return;
+    }
+
+    const auto &ibusIcPath = icDbusObj.value().path();
+
     d->context_ =
-        new OrgFreedesktopIBusInputContextInterface(d->ibusService_, d->ibusIcPath_, *d->dbusConn_);
+        new OrgFreedesktopIBusInputContextInterface(d->ibusService_, ibusIcPath, *d->dbusConn_);
 
     if (!d->context_->isValid()) {
         qWarning("invalid input context");
