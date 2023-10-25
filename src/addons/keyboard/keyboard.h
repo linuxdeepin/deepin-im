@@ -25,7 +25,7 @@ public:
     const QList<InputMethodEntry> &getInputMethods() override;
     void initInputMethods() override;
     bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
-    void setSurroundingText(InputContextSetSurroundingTextEvent &event) override;
+    void updateSurroundingText(Event &event) override;
 
 private:
     void parseRule(const QString &file);

@@ -12,7 +12,7 @@ using namespace org::deepin::dim;
 
 InputState::InputState(InputContext *ic)
     : ic_(ic)
-    , currentIMKey_(std::make_pair("fcitx5proxy", "keyboard-us"))
+    , currentIMKey_(std::make_pair("keyboard", "keyboard-us"))
 {
     connect(ic_->dim_, &Dim::inputMethodEntryChanged, this, [this]() {
         auto iter = currentIMEntry();

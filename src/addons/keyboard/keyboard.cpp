@@ -17,6 +17,8 @@
 
 using namespace org::deepin::dim;
 
+constexpr uint32_t BUFF_SIZE = 100;
+
 DIM_ADDON_FACTORY(Keyboard)
 
 struct Variant
@@ -76,33 +78,37 @@ bool Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &key
     auto *ic = keyEvent.ic();
 
     // by pass all key release
-    if (keyEvent.isRelease()) {
-        return false;
+    if (!keyEvent.isRelease()) {
+        struct xkb_rule_names names;
+        const auto &layout = entry.name();
+        auto layoutName = layout.contains("_") ? entry.name().split("_").first() : layout;
+        auto variantName = layout.contains("_") ? entry.name().split("_").last() : "";
+
+        names.layout = layoutName.toStdString().c_str();
+        names.variant = variantName.toStdString().c_str();
+        names.rules = DEFAULT_XKB_RULES;
+        names.model = "";
+        names.options = "";
+        keymap_.reset(xkb_keymap_new_from_names(ctx_.get(), &names, XKB_KEYMAP_COMPILE_NO_FLAGS));
+
+        keymap_ ? state_.reset(xkb_state_new(keymap_.get())) : state_.reset();
+
+        if (state_) {
+            xkb_keysym_t keySym = xkb_state_key_get_one_sym(state_.get(), keyEvent.keycode());
+            char buf[BUFF_SIZE] = {};
+            xkb_keysym_get_name(keySym, buf, BUFF_SIZE);
+            qDebug("keycode %02x, keysym %02x: %s", keyEvent.keycode(), keySym, buf);
+            buf[0] = '\0';
+            xkb_keysym_to_utf8(keySym, buf, BUFF_SIZE);
+            ic->commitString(buf);
+            return true;
+        }
     }
 
-    struct xkb_rule_names names;
-    const auto layout = entry.name();
-    auto layoutName = layout.contains("_") ? entry.name().split("_").first() : layout;
-    auto variantName = layout.contains("_") ? entry.name().split("_").last() : "";
-
-    names.layout = layoutName.toStdString().c_str();
-    names.variant = variantName.toStdString().c_str();
-    names.rules = DEFAULT_XKB_RULES;
-    names.model = "";
-    names.options = "";
-    keymap_.reset(xkb_keymap_new_from_names(ctx_.get(), &names, XKB_KEYMAP_COMPILE_NO_FLAGS));
-
-    keymap_ ? state_.reset(xkb_state_new(keymap_.get())) : state_.reset();
-    xkb_keysym_t keySym{};
-    if (state_) {
-        keySym = xkb_state_key_get_one_sym(state_.get(), keyEvent.keycode());
-    }
-
-    ic->forwardKey(keySym, keyEvent.isRelease());
-    return true;
+    return false;
 }
 
-void setSurroundingText([[maybe_unused]] InputContextSetSurroundingTextEvent &event) { }
+void Keyboard::updateSurroundingText(Event &event) { }
 
 // static QList<QString> parseLanguageList(const QDomElement &languageListEle) {
 //     QList<QString> languageList;
@@ -153,8 +159,7 @@ void Keyboard::parseVariantList(const QString &layoutName, const QDomElement &va
 
         const QString fullname = layoutName + "_" + name;
 
-        keyboards_.append(InputMethodEntry(this,
-                                           key(),
+        keyboards_.append(InputMethodEntry(key(),
                                            QString("keyboard-%1").arg(fullname),
                                            fullname,
                                            shortDescription,
