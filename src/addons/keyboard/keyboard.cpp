@@ -99,7 +99,12 @@ bool Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &key
             xkb_keysym_get_name(keySym, buf, BUFF_SIZE);
             qDebug("keycode %02x, keysym %02x: %s", keyEvent.keycode(), keySym, buf);
             buf[0] = '\0';
-            xkb_keysym_to_utf8(keySym, buf, BUFF_SIZE);
+            xkb_state_key_get_utf8(state_.get(), keyEvent.keycode(), buf, BUFF_SIZE);
+            if (buf[0] == '\n' || buf[0] == '\r' || buf[0] == '\b' || buf[0] == '\033'
+                || buf[0] == '\x7f') {
+                return false;
+            }
+
             ic->commitString(buf);
             return true;
         }
