@@ -44,7 +44,7 @@ public:
     void updateSurroundingText();
 
 Q_SIGNALS:
-    void imSwitch(const std::pair<QString, QString> &imEntry);
+    void imSwitch(const std::pair<std::string, std::string> &imEntry);
 
 protected:
     Dim *dim() { return dim_; }

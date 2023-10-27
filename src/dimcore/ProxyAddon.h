@@ -21,7 +21,7 @@ class ProxyAddon : public InputMethodAddon
     Q_OBJECT
 
 public:
-    explicit ProxyAddon(Dim *dim, const QString &key, const QString &iconName);
+    explicit ProxyAddon(Dim *dim, const std::string &key, const QString &iconName);
     virtual ~ProxyAddon();
 
     virtual void focusIn(uint32_t id) = 0;
@@ -29,7 +29,7 @@ public:
     virtual void destroyed(uint32_t id) = 0;
     virtual void createFcitxInputContext(InputContext *) = 0;
     virtual void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) = 0;
-    virtual void setCurrentIM(const QString &im) = 0;
+    virtual void setCurrentIM(const std::string &im) = 0;
 };
 
 } // namespace dim

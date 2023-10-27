@@ -33,7 +33,7 @@ private:
     QMetaObject::Connection oldConnection_;
 
     void onFocusedInputContextChanged(int focusedInputContext);
-    void onImSwitched(const std::pair<QString, QString> &imIndex);
+    void onImSwitched(const std::pair<std::string, std::string> &imIndex);
 };
 
 } // namespace dim

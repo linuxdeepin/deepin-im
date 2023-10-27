@@ -6,7 +6,7 @@
 
 using namespace org::deepin::dim;
 
-Addon::Addon(Dim *dim, const QString &key)
+Addon::Addon(Dim *dim, const std::string &key)
     : dim_(dim)
     , key_(key)
 {

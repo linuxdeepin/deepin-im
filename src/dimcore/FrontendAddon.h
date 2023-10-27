@@ -16,7 +16,7 @@ class FrontendAddon : public Addon
     Q_OBJECT
 
 public:
-    explicit FrontendAddon(Dim *dim, const QString &key);
+    explicit FrontendAddon(Dim *dim, const std::string &key);
 };
 
 } // namespace dim

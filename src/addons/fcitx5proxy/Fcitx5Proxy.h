@@ -34,7 +34,7 @@ public:
     void focusIn(uint32_t id) override;
     void focusOut(uint32_t id) override;
     void destroyed(uint32_t id) override;
-    void setCurrentIM(const QString &im) override;
+    void setCurrentIM(const std::string &im) override;
 
     void addCapability(uint32_t id);
 

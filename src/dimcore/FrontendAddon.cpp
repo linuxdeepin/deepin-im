@@ -6,6 +6,6 @@
 
 using namespace org::deepin::dim;
 
-FrontendAddon::FrontendAddon(Dim *dim, const QString &key)
+FrontendAddon::FrontendAddon(Dim *dim, const std::string &key)
     : Addon(dim, key) {
 }

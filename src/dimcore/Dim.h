@@ -49,7 +49,7 @@ public:
 
     InputContext *getInputContext(uint32_t id) const { return inputContexts_.at(id); }
 
-    const std::unordered_map<QString, InputMethodAddon *> &imAddons() const
+    const std::unordered_map<std::string, InputMethodAddon *> &imAddons() const
     {
         return inputMethodAddons_;
     }
@@ -63,7 +63,7 @@ Q_SIGNALS:
     void inputMethodEntryChanged();
 
 public Q_SLOTS:
-    void switchIM(const std::pair<QString, QString> &imIndex);
+    void switchIM(const std::pair<std::string, std::string> &imIndex);
 
 private:
     void loadAddons();
@@ -82,7 +82,7 @@ private:
 private:
     std::unordered_map<uint32_t, InputContext *> inputContexts_;
     uint32_t focusedInputContext_;
-    std::unordered_map<QString, InputMethodAddon *> inputMethodAddons_;
+    std::unordered_map<std::string, InputMethodAddon *> inputMethodAddons_;
     std::set<FrontendAddon *> frontends_;
     std::vector<InputMethodEntry> imEntries_;
 };

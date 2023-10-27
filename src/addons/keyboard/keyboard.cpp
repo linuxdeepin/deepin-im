@@ -73,6 +73,19 @@ void Keyboard::initInputMethods()
     Q_EMIT addonInitFinished(this);
 }
 
+static std::pair<std::string, std::string> splitLayout(const std::string &layout)
+{
+    auto pos = layout.find_first_of('_');
+    if (pos == std::string::npos) {
+        return { layout, "" };
+    }
+
+    return {
+        { layout.cbegin(), layout.cbegin() + pos },
+        { layout.cbegin() + pos + 1, layout.cend() },
+    };
+}
+
 bool Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
 {
     auto *ic = keyEvent.ic();
@@ -81,11 +94,10 @@ bool Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &key
     if (!keyEvent.isRelease()) {
         struct xkb_rule_names names;
         const auto &layout = entry.name();
-        auto layoutName = layout.contains("_") ? entry.name().split("_").first() : layout;
-        auto variantName = layout.contains("_") ? entry.name().split("_").last() : "";
+        const auto [layoutName, variantName] = splitLayout(layout);
 
-        names.layout = layoutName.toStdString().c_str();
-        names.variant = variantName.toStdString().c_str();
+        names.layout = layoutName.c_str();
+        names.variant = variantName.c_str();
         names.rules = DEFAULT_XKB_RULES;
         names.model = "";
         names.options = "";
@@ -132,14 +144,14 @@ void Keyboard::parseLayoutList(const QDomElement &layoutListEle)
          layoutEle = layoutEle.nextSiblingElement("layout")) {
         auto configItemEle = layoutEle.firstChildElement("configItem");
 
-        const QString name = configItemEle.firstChildElement("name").text();
-        const QString shortDescription = configItemEle.firstChildElement("shortDescription").text();
-        const QString description = configItemEle.firstChildElement("description").text();
+        const std::string name = configItemEle.firstChildElement("name").text().toStdString();
+        const std::string shortDescription = configItemEle.firstChildElement("shortDescription").text().toStdString();
+        const std::string description = configItemEle.firstChildElement("description").text().toStdString();
         // QString languageList =
         // parseLanguageList(configItemEle.firstChildElement("languageList"));
 
         keyboards_.append(InputMethodEntry(key(),
-                                           QString("keyboard-%1").arg(name),
+                                           std::string("keyboard-").append(name),
                                            name,
                                            shortDescription,
                                            description,
@@ -149,23 +161,22 @@ void Keyboard::parseLayoutList(const QDomElement &layoutListEle)
     }
 }
 
-void Keyboard::parseVariantList(const QString &layoutName, const QDomElement &variantListEle)
+void Keyboard::parseVariantList(const std::string &layoutName, const QDomElement &variantListEle)
 {
-    QList<Variant> list;
     for (auto variantEle = variantListEle.firstChildElement("variant"); !variantEle.isNull();
          variantEle = variantEle.nextSiblingElement("variant")) {
         auto configItemEle = variantEle.firstChildElement("configItem");
 
-        const QString name = configItemEle.firstChildElement("name").text();
-        const QString shortDescription = configItemEle.firstChildElement("shortDescription").text();
-        const QString description = configItemEle.firstChildElement("description").text();
+        const std::string name = configItemEle.firstChildElement("name").text().toStdString();
+        const std::string shortDescription = configItemEle.firstChildElement("shortDescription").text().toStdString();
+        const std::string description = configItemEle.firstChildElement("description").text().toStdString();
         // QString languageList =
         // parseLanguageList(configItemEle.firstChildElement("languageList"));
 
-        const QString fullname = layoutName + "_" + name;
+        const std::string fullname = layoutName + "_" + name;
 
         keyboards_.append(InputMethodEntry(key(),
-                                           QString("keyboard-%1").arg(fullname),
+                                           std::string("keyboard-").append(fullname),
                                            fullname,
                                            shortDescription,
                                            description,
