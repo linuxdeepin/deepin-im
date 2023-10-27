@@ -6,7 +6,7 @@
 
 using namespace org::deepin::dim;
 
-InputMethodAddon::InputMethodAddon(Dim *dim, const QString &key, const QString &iconName)
+InputMethodAddon::InputMethodAddon(Dim *dim, const std::string &key, const QString &iconName)
     : Addon(dim, key)
     , iconName_(iconName)
 {

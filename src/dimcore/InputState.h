@@ -13,7 +13,7 @@ namespace org {
 namespace deepin {
 namespace dim {
 
-typedef std::pair<QString, QString> IMKey;
+typedef std::pair<std::string, std::string> IMKey;
 
 class Dim;
 class InputContext;

@@ -183,10 +183,10 @@ void Fcitx5Proxy::destroyed(uint32_t id)
     }
 }
 
-void Fcitx5Proxy::setCurrentIM(const QString &im)
+void Fcitx5Proxy::setCurrentIM(const std::string &im)
 {
     if (available_ && dbusProvider_) {
-        dbusProvider_->controller()->SetCurrentIM(im);
+        dbusProvider_->controller()->SetCurrentIM(QString::fromStdString(im));
     }
 }
 
@@ -302,11 +302,11 @@ void Fcitx5Proxy::updateInputMethods()
                     }
 
                     inputMethods.append(InputMethodEntry(key(),
-                                                         im.uniqueName(),
-                                                         im.name(),
-                                                         im.nativeName(),
-                                                         im.label(),
-                                                         im.icon()));
+                                                         im.uniqueName().toStdString(),
+                                                         im.name().toStdString(),
+                                                         im.nativeName().toStdString(),
+                                                         im.label().toStdString(),
+                                                         im.icon().toStdString()));
                 }
 
                 inputMethods_.swap(inputMethods);

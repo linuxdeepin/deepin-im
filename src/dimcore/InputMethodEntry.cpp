@@ -7,54 +7,54 @@
 class InputMethodEntryPrivate
 {
 public:
-    QString addon;
-    QString uniqueName;
-    QString name;
-    QString description;
-    QString label;
-    QString iconName;
+    std::string addon;
+    std::string uniqueName;
+    std::string name;
+    std::string description;
+    std::string label;
+    std::string iconName;
 };
 
 using namespace org::deepin::dim;
 
-InputMethodEntry::InputMethodEntry(const QString &addon,
-                                   const QString &uniqueName,
-                                   const QString &name,
-                                   const QString &description,
-                                   const QString &label,
-                                   const QString &iconName)
+InputMethodEntry::InputMethodEntry(const std::string &addon,
+                                   const std::string &uniqueName,
+                                   const std::string &name,
+                                   const std::string &description,
+                                   const std::string &label,
+                                   const std::string &iconName)
     : d(new InputMethodEntryPrivate{ addon, uniqueName, name, description, label, iconName })
 {
 }
 
 InputMethodEntry::~InputMethodEntry() { }
 
-const QString &InputMethodEntry::addonName() const
+const std::string &InputMethodEntry::addonName() const
 {
     return d->addon;
 }
 
-const QString &InputMethodEntry::uniqueName() const
+const std::string &InputMethodEntry::uniqueName() const
 {
     return d->uniqueName;
 }
 
-const QString &InputMethodEntry::name() const
+const std::string &InputMethodEntry::name() const
 {
     return d->name;
 }
 
-const QString &InputMethodEntry::description() const
+const std::string &InputMethodEntry::description() const
 {
     return d->description;
 }
 
-const QString &InputMethodEntry::label() const
+const std::string &InputMethodEntry::label() const
 {
     return d->label;
 }
 
-const QString &InputMethodEntry::iconName() const
+const std::string &InputMethodEntry::iconName() const
 {
     return d->iconName;
 }

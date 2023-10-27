@@ -18,20 +18,20 @@ namespace dim {
 class InputMethodEntry
 {
 public:
-    InputMethodEntry(const QString &addon,
-                     const QString &uniqueName,
-                     const QString &name,
-                     const QString &description,
-                     const QString &label,
-                     const QString &iconName);
+    InputMethodEntry(const std::string &addon,
+                     const std::string &uniqueName,
+                     const std::string &name,
+                     const std::string &description,
+                     const std::string &label,
+                     const std::string &iconName);
     ~InputMethodEntry();
 
-    const QString &addonName() const;
-    const QString &uniqueName() const;
-    const QString &name() const;
-    const QString &description() const;
-    const QString &label() const;
-    const QString &iconName() const;
+    const std::string &addonName() const;
+    const std::string &uniqueName() const;
+    const std::string &name() const;
+    const std::string &description() const;
+    const std::string &label() const;
+    const std::string &iconName() const;
 
 private:
     std::shared_ptr<InputMethodEntryPrivate> d;

@@ -239,7 +239,7 @@ void Dim::postInputContextSetSurroundingTextEvent(Event &event)
 
 InputMethodAddon *Dim::getInputMethodAddon(const InputState &inputState)
 {
-    const QString &addonKey = inputState.currentIMEntry()->addonName();
+    const std::string &addonKey = inputState.currentIMEntry()->addonName();
     auto j = imAddons().find(addonKey);
     assert(j != imAddons().end());
 
@@ -256,7 +256,7 @@ void Dim::loopProxyAddon(const std::function<void(ProxyAddon *addon)> callback)
     }
 }
 
-void Dim::switchIM(const std::pair<QString, QString> &imIndex)
+void Dim::switchIM(const std::pair<std::string, std::string> &imIndex)
 {
     auto addon = qobject_cast<ProxyAddon *>(imAddons().at(imIndex.first));
 

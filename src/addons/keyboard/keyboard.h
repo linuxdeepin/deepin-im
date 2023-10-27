@@ -30,7 +30,7 @@ public:
 private:
     void parseRule(const QString &file);
     void parseLayoutList(const QDomElement &layoutListEle);
-    void parseVariantList(const QString &layoutName, const QDomElement &variantListEle);
+    void parseVariantList(const std::string &layoutName, const QDomElement &variantListEle);
 
 private:
     std::unique_ptr<struct xkb_context, Deleter<xkb_context_unref>> ctx_;

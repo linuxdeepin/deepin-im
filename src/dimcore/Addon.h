@@ -18,16 +18,16 @@ class Addon : public QObject
     Q_OBJECT
 
 public:
-    explicit Addon(Dim *dim, const QString &key);
+    explicit Addon(Dim *dim, const std::string &key);
     virtual ~Addon();
 
     inline Dim *dim() const { return dim_; }
 
-    inline const QString &key() const { return key_; }
+    inline const std::string &key() const { return key_; }
 
 private:
     Dim *dim_;
-    QString key_;
+    std::string key_;
 };
 
 #define DIM_ADDON_FACTORY(name) \

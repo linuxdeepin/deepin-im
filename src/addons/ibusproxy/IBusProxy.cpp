@@ -379,13 +379,13 @@ void DimIBusProxy::destroyed(uint32_t id)
     }
 }
 
-void DimIBusProxy::setCurrentIM(const QString &im)
+void DimIBusProxy::setCurrentIM(const std::string &im)
 {
     if (!d->busConnected_ || d->usePortal_ || !d->busInterface_) {
         return;
     }
 
-    QDBusPendingReply<> reply = d->busInterface_->SetGlobalEngine(im);
+    QDBusPendingReply<> reply = d->busInterface_->SetGlobalEngine(QString::fromStdString(im));
     reply.waitForFinished();
 
     if (reply.isError()) {
@@ -466,11 +466,11 @@ void DimIBusProxy::initEngines()
         }
 
         inputMethods.append(InputMethodEntry(key(),
-                                             imEntryName,
-                                             engine.longname,
-                                             engine.description,
-                                             engine.symbol,
-                                             engine.icon));
+                                             imEntryName.toStdString(),
+                                             engine.longname.toStdString(),
+                                             engine.description.toStdString(),
+                                             engine.symbol.toStdString(),
+                                             engine.icon.toStdString()));
     }
 
     inputMethods_.swap(inputMethods);

@@ -20,7 +20,7 @@ class InputMethodAddon : public Addon
     Q_OBJECT
 
 public:
-    explicit InputMethodAddon(Dim *dim, const QString &key, const QString &iconName);
+    explicit InputMethodAddon(Dim *dim, const std::string &key, const QString &iconName);
     virtual ~InputMethodAddon();
 
     virtual const QList<InputMethodEntry> &getInputMethods() = 0;
