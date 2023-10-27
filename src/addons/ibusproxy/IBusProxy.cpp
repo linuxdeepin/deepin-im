@@ -31,7 +31,6 @@ public:
 
     ~DimIBusInputContextPrivate()
     {
-        delete context_;
         delete busInterface_;
         delete portalBus_;
         delete dbusConn_;
@@ -47,7 +46,6 @@ public:
     bool busConnected_;
     QString ibusService_;
     QDBusConnection *dbusConn_;
-    OrgFreedesktopIBusInputContextInterface *context_;
     OrgFreedesktopIBusPortalInterface *portalBus_;
     OrgFreedesktopIBusInterface *busInterface_;
     QDBusServiceWatcher serviceWatcher_;
@@ -58,7 +56,6 @@ DimIBusInputContextPrivate::DimIBusInputContextPrivate()
     , isValid_(false)
     , busConnected_(false)
     , dbusConn_(nullptr)
-    , context_(nullptr)
     , portalBus_(nullptr)
     , busInterface_(nullptr)
 {
@@ -246,8 +243,11 @@ void DimIBusProxy::socketChanged(const QString &str)
     Q_UNUSED(str);
     qDebug() << "socketChanged";
 
-    if (d->context_)
-        disconnect(d->context_);
+    for (auto it = iBusICMap_.begin(); it != iBusICMap_.end(); ++it) {
+        if (it.value()) {
+            disconnect(it.value().get());
+        }
+    }
     if (d->busInterface_ && d->busInterface_->isValid())
         disconnect(d->busInterface_);
     if (d->dbusConn_)
@@ -297,24 +297,26 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
     auto id = ic->id();
 
     const auto &icName = QString("DimInputContext-%1").arg(id);
-    const auto &icDbusObj = d->usePortal_ ? d->portalBus_->CreateInputContext(icName)
-                                          : d->busInterface_->CreateInputContext(icName);
+    auto icDbusObj = d->usePortal_ ? d->portalBus_->CreateInputContext(icName)
+                                   : d->busInterface_->CreateInputContext(icName);
+    icDbusObj.waitForFinished();
     if (!icDbusObj.isValid()) {
-        qWarning("ibus proxy: CreateInputContext failed.");
+        qWarning() << "ibus proxy: CreateInputContext failed." << icDbusObj.error().message();
         return;
     }
 
     const auto &ibusIcPath = icDbusObj.value().path();
 
-    d->context_ =
-        new OrgFreedesktopIBusInputContextInterface(d->ibusService_, ibusIcPath, *d->dbusConn_);
+    auto context = std::make_shared<OrgFreedesktopIBusInputContextInterface>(d->ibusService_,
+                                                                             ibusIcPath,
+                                                                             *d->dbusConn_);
 
-    if (!d->context_->isValid()) {
+    if (!context->isValid()) {
         qWarning("invalid input context");
         return;
     }
 
-    iBusICMap_[id] = d->context_;
+    iBusICMap_[id] = context;
 
     enum Capabilities {
         IBUS_CAP_PREEDIT_TEXT = 1 << 0,
@@ -325,10 +327,9 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
         IBUS_CAP_SURROUNDING_TEXT = 1 << 5
     };
 
-    d->context_->SetCapabilities(IBUS_CAP_PREEDIT_TEXT | IBUS_CAP_FOCUS
-                                 | IBUS_CAP_SURROUNDING_TEXT);
+    context->SetCapabilities(IBUS_CAP_PREEDIT_TEXT | IBUS_CAP_FOCUS | IBUS_CAP_SURROUNDING_TEXT);
 
-    connect(d->context_,
+    connect(context.get(),
             &OrgFreedesktopIBusInputContextInterface::CommitText,
             this,
             [ic](const QDBusVariant &text) {
@@ -338,7 +339,7 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 
                 ic->commitString(t.text);
             });
-    connect(d->context_,
+    connect(context.get(),
             &OrgFreedesktopIBusInputContextInterface::UpdatePreeditText,
             this,
             [ic](const QDBusVariant &text, uint cursorPos, bool visible) {
@@ -349,7 +350,7 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
 
                 ic->updatePreedit(t.text, cursorPos, cursorPos);
             });
-    connect(d->context_,
+    connect(context.get(),
             &OrgFreedesktopIBusInputContextInterface::ForwardKeyEvent,
             this,
             [ic](uint keyval, uint keycode, uint state) {
