@@ -8,6 +8,7 @@
 #include "IBUSInputContextIface.h"
 
 #include <dimcore/ProxyAddon.h>
+#include <memory>
 
 class IBusEngineDesc;
 class DimIBusInputContextPrivate;
@@ -55,7 +56,7 @@ private:
     QFileSystemWatcher socketWatcher_;
     QTimer timer_;
     QList<InputMethodEntry> inputMethods_;
-    QMap<uint32_t, OrgFreedesktopIBusInputContextInterface *> iBusICMap_;
+    QMap<uint32_t, std::shared_ptr<OrgFreedesktopIBusInputContextInterface>> iBusICMap_;
 };
 
 } // namespace dim
