@@ -199,7 +199,7 @@ bool Fcitx5Proxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
         return false;
     }
 
-    auto response = icMap_[id]->ProcessKeyEventBatch(keyEvent.keyValue(),
+    auto response = icMap_[id]->ProcessKeyEventBatch(keyEvent.keySym(),
                                                      keyEvent.keycode(),
                                                      keyEvent.state(),
                                                      keyEvent.isRelease(),

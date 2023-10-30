@@ -407,7 +407,7 @@ bool DimIBusProxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
 
     if (isICDBusInterfaceValid(id)) {
         auto reply =
-            iBusICMap_[id]->ProcessKeyEvent(keyEvent.keyValue(), keyEvent.keycode(), ibusState);
+            iBusICMap_[id]->ProcessKeyEvent(keyEvent.keySym(), keyEvent.keycode(), ibusState);
         reply.waitForFinished();
 
         if (reply.isError()) {

@@ -19,7 +19,7 @@ InputContextKeyEvent::InputContextKeyEvent(InputContext *ic,
                                            bool isRelease,
                                            uint32_t time)
     : Event(EventType::InputContextKeyEvent, ic)
-    , keyVal_(keyVal)
+    , keySym_(keyVal)
     , keycode_(keycode)
     , state_(state)
     , isRelease_(isRelease)

@@ -52,7 +52,7 @@ public:
     ~InputContextKeyEvent() = default;
 
 public:
-    inline uint32_t keyValue() const { return keyVal_; }
+    inline uint32_t keySym() const { return keySym_; }
 
     inline uint32_t keycode() const { return keycode_; }
 
@@ -63,7 +63,7 @@ public:
     inline uint32_t time() const { return time_; }
 
 private:
-    uint32_t keyVal_;
+    uint32_t keySym_;
     uint32_t keycode_;
     uint32_t state_;
     bool isRelease_;
