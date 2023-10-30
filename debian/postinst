@@ -12,3 +12,5 @@ if [ -f $IM_CONFIG_FILE ]; then
         sed -i "$IMConfigPreferredRuleLine s#\,#\,dim\,#g" $IM_CONFIG_FILE
 	fi
 fi
+
+#DEBHELPER#
