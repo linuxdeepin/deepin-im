@@ -4,6 +4,8 @@
 
 #include "ProxyAddon.h"
 
+#include "Dim.h"
+
 using namespace org::deepin::dim;
 
 ProxyAddon::ProxyAddon(Dim *dim, const std::string &key, const QString &iconName)
@@ -12,3 +14,11 @@ ProxyAddon::ProxyAddon(Dim *dim, const std::string &key, const QString &iconName
 }
 
 ProxyAddon::~ProxyAddon() { }
+
+void ProxyAddon::updateActiveInputMethods(const std::vector<std::string> &value)
+{
+    activeInputMethods_ = value;
+
+    ProxyEvent event(EventType::ProxyActiveInputMethodsChanged, this);
+    dim()->postEvent(event);
+}

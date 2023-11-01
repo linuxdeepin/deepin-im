@@ -6,8 +6,13 @@
 
 using namespace org::deepin::dim;
 
-Event::Event(EventType type, InputContext *ic)
+Event::Event(EventType type)
     : type_(type)
+{
+}
+
+InputContextEvent::InputContextEvent(EventType type, InputContext *ic)
+    : Event(type)
     , ic_(ic)
 {
 }
@@ -18,7 +23,7 @@ InputContextKeyEvent::InputContextKeyEvent(InputContext *ic,
                                            uint32_t state,
                                            bool isRelease,
                                            uint32_t time)
-    : Event(EventType::InputContextKeyEvent, ic)
+    : InputContextEvent(EventType::InputContextKeyEvent, ic)
     , keySym_(keyVal)
     , keycode_(keycode)
     , state_(state)
@@ -29,10 +34,18 @@ InputContextKeyEvent::InputContextKeyEvent(InputContext *ic,
 
 InputContextCursorRectChangeEvent::InputContextCursorRectChangeEvent(
     InputContext *ic, int32_t x, int32_t y, int32_t w, int32_t h)
-    : Event(EventType::InputContextCursorRectChanged, ic)
+    : InputContextEvent(EventType::InputContextCursorRectChanged, ic)
     , x(x)
     , y(y)
     , w(w)
     , h(h)
 {
 }
+
+ProxyEvent::ProxyEvent(EventType type, ProxyAddon *proxyAddon)
+    : Event(type)
+    , proxyAddon_(proxyAddon)
+{
+}
+
+ProxyEvent::~ProxyEvent() = default;

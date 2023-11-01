@@ -14,7 +14,7 @@ InputContext::InputContext(Dim *dim, QObject *parent)
     , dim_(dim)
     , inputState_(this)
 {
-    Event e(EventType::InputContextCreated, this);
+    InputContextEvent e(EventType::InputContextCreated, this);
     dim_->postEvent(e);
 }
 
@@ -22,7 +22,7 @@ void InputContext::destroy()
 {
     deleteLater();
 
-    Event e(EventType::InputContextDestroyed, this);
+    InputContextEvent e(EventType::InputContextDestroyed, this);
     dim_->postEvent(e);
 }
 
@@ -30,7 +30,7 @@ void InputContext::focusIn()
 {
     hasFocus_ = true;
 
-    Event e(EventType::InputContextFocused, this);
+    InputContextEvent e(EventType::InputContextFocused, this);
     dim_->postEvent(e);
 }
 
@@ -38,7 +38,7 @@ void InputContext::focusOut()
 {
     hasFocus_ = false;
 
-    Event e(EventType::InputContextUnfocused, this);
+    InputContextEvent e(EventType::InputContextUnfocused, this);
     dim_->postEvent(e);
 }
 
@@ -74,7 +74,7 @@ SurroundingText &InputContext::surroundingText()
 
 void InputContext::updateSurroundingText()
 {
-    Event event(EventType::InputContextUpdateSurroundingText, this);
+    InputContextEvent event(EventType::InputContextUpdateSurroundingText, this);
     dim_->postEvent(event);
 }
 

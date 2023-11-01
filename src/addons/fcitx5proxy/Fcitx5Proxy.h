@@ -29,7 +29,7 @@ public:
     const QList<InputMethodEntry> &getInputMethods() override;
     bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
     void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) override;
-    void updateSurroundingText(Event &event) override;
+    void updateSurroundingText(InputContextEvent &event) override;
     void createFcitxInputContext(InputContext *ic) override;
     void focusIn(uint32_t id) override;
     void focusOut(uint32_t id) override;
@@ -45,6 +45,8 @@ private:
     }
 
     void updateInputMethods();
+
+    bool shouldBeIgnored(const std::string &uniqueName) const;
 
 private:
     DBusProvider *dbusProvider_;

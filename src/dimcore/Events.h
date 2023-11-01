@@ -14,6 +14,7 @@ namespace deepin {
 namespace dim {
 
 class InputContext;
+class ProxyAddon;
 
 enum class EventType {
     InputContextCreated,
@@ -23,24 +24,35 @@ enum class EventType {
     InputContextKeyEvent,
     InputContextCursorRectChanged,
     InputContextUpdateSurroundingText,
+
+    ProxyActiveInputMethodsChanged,
 };
 
 class Event
 {
 public:
-    explicit Event(EventType type_, InputContext *ic_);
+    explicit Event(EventType type_);
     ~Event() = default;
 
     inline EventType type() const { return type_; }
 
+private:
+    EventType type_;
+};
+
+class InputContextEvent : public Event
+{
+public:
+    explicit InputContextEvent(EventType type_, InputContext *ic_);
+    ~InputContextEvent() = default;
+
     inline InputContext *ic() const { return ic_; }
 
 private:
-    EventType type_;
     InputContext *ic_;
 };
 
-class InputContextKeyEvent : public Event
+class InputContextKeyEvent : public InputContextEvent
 {
 public:
     InputContextKeyEvent(InputContext *ic,
@@ -70,7 +82,7 @@ private:
     uint32_t time_;
 };
 
-class InputContextCursorRectChangeEvent : public Event
+class InputContextCursorRectChangeEvent : public InputContextEvent
 {
 public:
     InputContextCursorRectChangeEvent(InputContext *ic, int32_t x, int32_t y, int32_t w, int32_t h);
@@ -79,6 +91,18 @@ public:
     const int32_t y;
     const int32_t w;
     const int32_t h;
+};
+
+class ProxyEvent : public Event
+{
+public:
+    ProxyEvent(EventType type, ProxyAddon *proxyAddon);
+    ~ProxyEvent();
+
+    ProxyAddon *proxyAddon() const { return proxyAddon_; }
+
+private:
+    ProxyAddon *proxyAddon_;
 };
 
 } // namespace dim
