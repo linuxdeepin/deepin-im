@@ -434,7 +434,7 @@ void DimIBusProxy::cursorRectangleChangeEvent(InputContextCursorRectChangeEvent 
     iBusICMap_[id]->SetCursorLocationRelative(event.x, event.y, event.w, event.h);
 }
 
-void DimIBusProxy::updateSurroundingText(Event &event)
+void DimIBusProxy::updateSurroundingText(InputContextEvent &event)
 {
     auto id = event.ic()->id();
     if (!isICDBusInterfaceValid(id)) {

@@ -28,9 +28,11 @@ class ProxyAddon;
 class FrontendAddon;
 class Addon;
 class Event;
+class InputContextEvent;
 class InputContextKeyEvent;
 class InputContextCursorRectChangeEvent;
 class InputContextSetSurroundingTextEvent;
+class ProxyEvent;
 
 class Dim : public QObject
 {
@@ -69,13 +71,15 @@ private:
     void loadAddons();
     void loadAddon(const QString &infoFile);
     void initInputMethodAddon(InputMethodAddon *imAddon);
-    void postInputContextCreated(Event &event);
-    void postInputContextDestroyed(Event &event);
-    void postInputContextFocused(Event &event);
-    void postInputContextUnfocused(Event &event);
+    void postInputContextCreated(InputContextEvent &event);
+    void postInputContextDestroyed(InputContextEvent &event);
+    void postInputContextFocused(InputContextEvent &event);
+    void postInputContextUnfocused(InputContextEvent &event);
     bool postInputContextKeyEvent(InputContextKeyEvent &event);
     void postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &event);
-    void postInputContextSetSurroundingTextEvent(Event &event);
+    void postInputContextSetSurroundingTextEvent(InputContextEvent &event);
+    void postProxyActivateInputMethodChanged(ProxyEvent &event);
+    void addActiveInputMethodEntry(const std::string &addon, const std::string &entry);
     InputMethodAddon *getInputMethodAddon(const InputState &state);
     void loopProxyAddon(const std::function<void(ProxyAddon *addon)> callback);
 
@@ -83,8 +87,9 @@ private:
     std::unordered_map<uint32_t, InputContext *> inputContexts_;
     uint32_t focusedInputContext_;
     std::unordered_map<std::string, InputMethodAddon *> inputMethodAddons_;
-    std::set<FrontendAddon *> frontends_;
     std::vector<InputMethodEntry> imEntries_;
+    std::set<std::pair<std::string, std::string>> activeInputMethodEntries_;
+    std::set<FrontendAddon *> frontends_;
 };
 
 } // namespace dim

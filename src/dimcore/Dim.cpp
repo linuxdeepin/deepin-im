@@ -127,16 +127,16 @@ bool Dim::postEvent(Event &event)
 {
     switch (event.type()) {
     case EventType::InputContextCreated:
-        postInputContextCreated(event);
+        postInputContextCreated(reinterpret_cast<InputContextEvent &>(event));
         break;
     case EventType::InputContextDestroyed:
-        postInputContextCreated(event);
+        postInputContextCreated(reinterpret_cast<InputContextEvent &>(event));
         break;
     case EventType::InputContextFocused:
-        postInputContextFocused(event);
+        postInputContextFocused(reinterpret_cast<InputContextEvent &>(event));
         break;
     case EventType::InputContextUnfocused:
-        postInputContextUnfocused(event);
+        postInputContextUnfocused(reinterpret_cast<InputContextEvent &>(event));
         break;
     case EventType::InputContextKeyEvent:
         return postInputContextKeyEvent(reinterpret_cast<InputContextKeyEvent &>(event));
@@ -146,14 +146,17 @@ bool Dim::postEvent(Event &event)
             reinterpret_cast<InputContextCursorRectChangeEvent &>(event));
         break;
     case EventType::InputContextUpdateSurroundingText:
-        postInputContextSetSurroundingTextEvent(event);
+        postInputContextSetSurroundingTextEvent(reinterpret_cast<InputContextEvent &>(event));
+        break;
+    case EventType::ProxyActiveInputMethodsChanged:
+        postProxyActivateInputMethodChanged(reinterpret_cast<ProxyEvent &>(event));
         break;
     }
 
     return false;
 }
 
-void Dim::postInputContextCreated(Event &event)
+void Dim::postInputContextCreated(InputContextEvent &event)
 {
     auto *ic = event.ic();
 
@@ -166,7 +169,7 @@ void Dim::postInputContextCreated(Event &event)
     });
 }
 
-void Dim::postInputContextDestroyed([[maybe_unused]] Event &event)
+void Dim::postInputContextDestroyed(InputContextEvent &event)
 {
     auto *ic = event.ic();
 
@@ -177,7 +180,7 @@ void Dim::postInputContextDestroyed([[maybe_unused]] Event &event)
     });
 }
 
-void Dim::postInputContextFocused(Event &event)
+void Dim::postInputContextFocused(InputContextEvent &event)
 {
     auto *ic = event.ic();
 
@@ -189,7 +192,7 @@ void Dim::postInputContextFocused(Event &event)
     });
 }
 
-void Dim::postInputContextUnfocused(Event &event)
+void Dim::postInputContextUnfocused(InputContextEvent &event)
 {
     auto *ic = event.ic();
 
@@ -229,12 +232,33 @@ void Dim::postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &e
     }
 }
 
-void Dim::postInputContextSetSurroundingTextEvent(Event &event)
+void Dim::postInputContextSetSurroundingTextEvent(InputContextEvent &event)
 {
     auto addon = getInputMethodAddon(event.ic()->inputState());
     if (addon) {
         addon->updateSurroundingText(event);
     }
+}
+
+void Dim::postProxyActivateInputMethodChanged(ProxyEvent &event)
+{
+    auto *proxyAddon = event.proxyAddon();
+    std::string addonKey = proxyAddon->key();
+
+    auto &list = proxyAddon->activeInputMethods();
+    for (const auto &entry : list) {
+        addActiveInputMethodEntry(addonKey, entry);
+    }
+}
+
+void Dim::addActiveInputMethodEntry(const std::string &addon, const std::string &entry)
+{
+    auto [_, res] = activeInputMethodEntries_.emplace(std::make_pair(addon, entry));
+    if (!res) {
+        return;
+    }
+
+    // todo: save config
 }
 
 InputMethodAddon *Dim::getInputMethodAddon(const InputState &inputState)

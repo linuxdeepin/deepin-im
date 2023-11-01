@@ -27,7 +27,7 @@ public:
     void initInputMethods() override;
     bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
     void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) override;
-    void updateSurroundingText(Event &event) override;
+    void updateSurroundingText(InputContextEvent &event) override;
     void createFcitxInputContext(InputContext *ic) override;
     void focusIn(uint32_t id) override;
     void focusOut(uint32_t id) override;

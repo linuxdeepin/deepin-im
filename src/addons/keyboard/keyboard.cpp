@@ -121,7 +121,7 @@ bool Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &key
     return false;
 }
 
-void Keyboard::updateSurroundingText(Event &event) { }
+void Keyboard::updateSurroundingText(InputContextEvent &event) { }
 
 // static QList<QString> parseLanguageList(const QDomElement &languageListEle) {
 //     QList<QString> languageList;
@@ -141,8 +141,10 @@ void Keyboard::parseLayoutList(const QDomElement &layoutListEle)
         auto configItemEle = layoutEle.firstChildElement("configItem");
 
         const std::string name = configItemEle.firstChildElement("name").text().toStdString();
-        const std::string shortDescription = configItemEle.firstChildElement("shortDescription").text().toStdString();
-        const std::string description = configItemEle.firstChildElement("description").text().toStdString();
+        const std::string shortDescription =
+            configItemEle.firstChildElement("shortDescription").text().toStdString();
+        const std::string description =
+            configItemEle.firstChildElement("description").text().toStdString();
         // QString languageList =
         // parseLanguageList(configItemEle.firstChildElement("languageList"));
 
@@ -164,8 +166,10 @@ void Keyboard::parseVariantList(const std::string &layoutName, const QDomElement
         auto configItemEle = variantEle.firstChildElement("configItem");
 
         const std::string name = configItemEle.firstChildElement("name").text().toStdString();
-        const std::string shortDescription = configItemEle.firstChildElement("shortDescription").text().toStdString();
-        const std::string description = configItemEle.firstChildElement("description").text().toStdString();
+        const std::string shortDescription =
+            configItemEle.firstChildElement("shortDescription").text().toStdString();
+        const std::string description =
+            configItemEle.firstChildElement("description").text().toStdString();
         // QString languageList =
         // parseLanguageList(configItemEle.firstChildElement("languageList"));
 

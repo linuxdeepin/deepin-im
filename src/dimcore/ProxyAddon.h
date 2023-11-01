@@ -7,8 +7,6 @@
 
 #include "InputMethodAddon.h"
 
-#include <QList>
-
 namespace org {
 namespace deepin {
 namespace dim {
@@ -24,12 +22,20 @@ public:
     explicit ProxyAddon(Dim *dim, const std::string &key, const QString &iconName);
     virtual ~ProxyAddon();
 
+    const std::vector<std::string> &activeInputMethods() const { return activeInputMethods_; }
+
     virtual void focusIn(uint32_t id) = 0;
     virtual void focusOut(uint32_t id) = 0;
     virtual void destroyed(uint32_t id) = 0;
     virtual void createFcitxInputContext(InputContext *) = 0;
     virtual void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) = 0;
     virtual void setCurrentIM(const std::string &im) = 0;
+
+protected:
+    void updateActiveInputMethods(const std::vector<std::string> &value);
+
+private:
+    std::vector<std::string> activeInputMethods_;
 };
 
 } // namespace dim

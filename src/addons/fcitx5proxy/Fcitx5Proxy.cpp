@@ -15,6 +15,9 @@
 
 using namespace org::deepin::dim;
 
+static const QString DIM_IM_GROUP = "dim";
+static const std::string KEYBOARD_PREFIX = "keyboard-";
+
 // This need to keep sync with fcitx5.
 enum FcitxCapabilityFlag : uint64_t {
     FcitxCapabilityFlag_Preedit = (1 << 1),
@@ -264,7 +267,7 @@ void Fcitx5Proxy::cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &
     }
 }
 
-void Fcitx5Proxy::updateSurroundingText(Event &event)
+void Fcitx5Proxy::updateSurroundingText(InputContextEvent &event)
 {
     auto id = event.ic()->id();
 
@@ -285,31 +288,73 @@ void Fcitx5Proxy::updateInputMethods()
         return;
     }
 
-    auto call = dbusProvider_->controller()->AvailableInputMethods();
-    auto watcher = new QDBusPendingCallWatcher(call, this);
-    connect(watcher,
-            &QDBusPendingCallWatcher::finished,
-            this,
-            [this](QDBusPendingCallWatcher *watcher) {
-                QDBusPendingReply<FcitxQtInputMethodEntryList> ims = *watcher;
-                watcher->deleteLater();
+    auto *controller = dbusProvider_->controller();
 
-                QList<InputMethodEntry> inputMethods;
-                for (auto &im : ims.value()) {
-                    // 过滤掉键盘布局
-                    if (im.uniqueName().startsWith(QLatin1String("keyboard-"))) {
-                        continue;
+    {
+        auto call = controller->AvailableInputMethods();
+        auto watcher = new QDBusPendingCallWatcher(call, this);
+        connect(watcher,
+                &QDBusPendingCallWatcher::finished,
+                this,
+                [this](QDBusPendingCallWatcher *watcher) {
+                    watcher->deleteLater();
+
+                    QDBusPendingReply<FcitxQtInputMethodEntryList> reply = *watcher;
+
+                    QList<InputMethodEntry> inputMethods;
+                    for (auto &im : reply.value()) {
+                        // 过滤掉键盘布局
+                        std::string uniqueName = im.uniqueName().toStdString();
+                        if (shouldBeIgnored(uniqueName)) {
+                            continue;
+                        }
+
+                        inputMethods.append(InputMethodEntry(key(),
+                                                             uniqueName,
+                                                             im.name().toStdString(),
+                                                             im.nativeName().toStdString(),
+                                                             im.label().toStdString(),
+                                                             im.icon().toStdString()));
                     }
 
-                    inputMethods.append(InputMethodEntry(key(),
-                                                         im.uniqueName().toStdString(),
-                                                         im.name().toStdString(),
-                                                         im.nativeName().toStdString(),
-                                                         im.label().toStdString(),
-                                                         im.icon().toStdString()));
-                }
+                    inputMethods_.swap(inputMethods);
+                    Q_EMIT addonInitFinished(this);
+                });
+    }
 
-                inputMethods_.swap(inputMethods);
-                Q_EMIT addonInitFinished(this);
-            });
+    {
+        auto call = controller->InputMethodGroups();
+        auto watcher = new QDBusPendingCallWatcher(call, this);
+        connect(watcher,
+                &QDBusPendingCallWatcher::finished,
+                this,
+                [this, controller](QDBusPendingCallWatcher *watcher) {
+                    watcher->deleteLater();
+
+                    QDBusPendingReply<QStringList> reply = *watcher;
+                    auto groups = reply.value();
+                    auto group = groups[0];
+
+                    auto groupInfoCall = controller->InputMethodGroupInfo(group);
+                    groupInfoCall.waitForFinished();
+
+                    std::vector<std::string> activeInputMethods;
+                    auto ims = groupInfoCall.argumentAt<1>();
+                    for (auto &im : ims) {
+                        auto uniqueName = im.key().toStdString();
+                        if (shouldBeIgnored(uniqueName)) {
+                            continue;
+                        }
+                        activeInputMethods.emplace_back(uniqueName);
+                    }
+
+                    updateActiveInputMethods(activeInputMethods);
+                });
+    }
+}
+
+bool Fcitx5Proxy::shouldBeIgnored(const std::string &uniqueName) const
+{
+    return std::mismatch(KEYBOARD_PREFIX.begin(), KEYBOARD_PREFIX.end(), uniqueName.begin()).first
+        != KEYBOARD_PREFIX.end();
 }

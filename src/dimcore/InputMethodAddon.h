@@ -26,7 +26,7 @@ public:
     virtual const QList<InputMethodEntry> &getInputMethods() = 0;
     virtual void initInputMethods() = 0;
     virtual bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) = 0;
-    virtual void updateSurroundingText(Event &event) = 0;
+    virtual void updateSurroundingText(InputContextEvent &event) = 0;
 
     const QString &iconName() { return iconName_; }
 
