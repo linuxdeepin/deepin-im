@@ -56,6 +56,8 @@ public:
         return inputMethodAddons_;
     }
 
+    const auto &activeInputMethodEntries() const { return activeInputMethodEntries_; };
+
     const std::vector<InputMethodEntry> &imEntries() const { return imEntries_; };
 
     int focusedInputContext() const { return focusedInputContext_; }

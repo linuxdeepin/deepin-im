@@ -356,5 +356,5 @@ void Fcitx5Proxy::updateInputMethods()
 bool Fcitx5Proxy::shouldBeIgnored(const std::string &uniqueName) const
 {
     return std::mismatch(KEYBOARD_PREFIX.begin(), KEYBOARD_PREFIX.end(), uniqueName.begin()).first
-        != KEYBOARD_PREFIX.end();
+        == KEYBOARD_PREFIX.end();
 }

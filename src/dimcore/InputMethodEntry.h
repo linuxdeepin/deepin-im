@@ -18,7 +18,7 @@ namespace dim {
 class InputMethodEntry
 {
 public:
-    InputMethodEntry(const std::string &addon,
+    InputMethodEntry(const std::string &addonKey,
                      const std::string &uniqueName,
                      const std::string &name,
                      const std::string &description,
@@ -26,7 +26,7 @@ public:
                      const std::string &iconName);
     ~InputMethodEntry();
 
-    const std::string &addonName() const;
+    const std::string &addonKey() const;
     const std::string &uniqueName() const;
     const std::string &name() const;
     const std::string &description() const;

@@ -9,11 +9,11 @@
 
 #include <QObject>
 
+#include <set>
+
 namespace org {
 namespace deepin {
 namespace dim {
-
-typedef std::pair<std::string, std::string> IMKey;
 
 class Dim;
 class InputContext;
@@ -26,11 +26,15 @@ class InputState : public QObject
 public:
     explicit InputState(InputContext *ic);
 
-    std::vector<InputMethodEntry>::const_iterator currentIMEntry() const;
+    const auto &currentIMEntry() const { return currentIMKey_; }
+
     void switchIMAddon();
 
 private:
-    IMKey currentIMKey_;
+    std::set<std::pair<std::string, std::string>>::const_iterator findIMEntry() const;
+
+private:
+    std::pair<std::string, std::string> currentIMKey_;
     InputContext *ic_;
 };
 

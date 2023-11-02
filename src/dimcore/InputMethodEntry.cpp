@@ -7,7 +7,7 @@
 class InputMethodEntryPrivate
 {
 public:
-    std::string addon;
+    std::string addonKey;
     std::string uniqueName;
     std::string name;
     std::string description;
@@ -17,21 +17,21 @@ public:
 
 using namespace org::deepin::dim;
 
-InputMethodEntry::InputMethodEntry(const std::string &addon,
+InputMethodEntry::InputMethodEntry(const std::string &addonKey,
                                    const std::string &uniqueName,
                                    const std::string &name,
                                    const std::string &description,
                                    const std::string &label,
                                    const std::string &iconName)
-    : d(new InputMethodEntryPrivate{ addon, uniqueName, name, description, label, iconName })
+    : d(new InputMethodEntryPrivate{ addonKey, uniqueName, name, description, label, iconName })
 {
 }
 
 InputMethodEntry::~InputMethodEntry() { }
 
-const std::string &InputMethodEntry::addonName() const
+const std::string &InputMethodEntry::addonKey() const
 {
-    return d->addon;
+    return d->addonKey;
 }
 
 const std::string &InputMethodEntry::uniqueName() const
