@@ -24,6 +24,8 @@ using namespace org::deepin::dim;
 
 DIM_ADDON_FACTORY(DimIBusProxy);
 
+static const std::string KEYBOARD_PREFIX = "xkb:";
+
 class DimIBusInputContextPrivate
 {
 public:
@@ -182,6 +184,7 @@ QDBusConnection *DimIBusInputContextPrivate::createConnection()
 DimIBusProxy::DimIBusProxy(Dim *dim)
     : ProxyAddon(dim, "ibusproxy", "ibus")
     , d(new DimIBusInputContextPrivate())
+    , gsettings_(g_settings_new("org.freedesktop.ibus.general"))
     , useSyncMode_(false)
 {
     qDBusRegisterMetaType<IBusText>();
@@ -281,6 +284,24 @@ DimIBusProxy::~DimIBusProxy()
 void DimIBusProxy::initInputMethods()
 {
     Q_EMIT addonInitFinished(this);
+
+    std::unique_ptr<gchar *, Deleter<g_strfreev>> list(
+        g_settings_get_strv(gsettings_.get(), "preload-engines"));
+    if (!list) {
+        return;
+    }
+
+    std::vector<std::string> activeInputMethods;
+    auto **listPtr = list.get();
+    for (int i = 0; listPtr[i] != nullptr; i++) {
+        std::string key = listPtr[i];
+        if (shouldBeIgnored(key)) {
+            continue;
+        }
+
+        activeInputMethods.emplace_back(key);
+    }
+    updateActiveInputMethods(activeInputMethods);
 }
 
 const QList<InputMethodEntry> &DimIBusProxy::getInputMethods()
@@ -458,15 +479,15 @@ void DimIBusProxy::initEngines()
 {
     QList<InputMethodEntry> inputMethods;
     for (auto &engine : listEngines()) {
-        QString imEntryName = engine.engine_name;
+        std::string imEntryName = engine.engine_name.toStdString();
 
         // 过滤掉键盘布局
-        if (imEntryName.startsWith(QLatin1String("xkb:"))) {
+        if (shouldBeIgnored(imEntryName)) {
             continue;
         }
 
         inputMethods.append(InputMethodEntry(key(),
-                                             imEntryName.toStdString(),
+                                             imEntryName,
                                              engine.longname.toStdString(),
                                              engine.description.toStdString(),
                                              engine.symbol.toStdString(),
@@ -515,4 +536,10 @@ QList<IBusEngineDesc> DimIBusProxy::listEngines()
     }
 
     return engines;
+}
+
+bool DimIBusProxy::shouldBeIgnored(const std::string &uniqueName) const
+{
+    return std::mismatch(KEYBOARD_PREFIX.begin(), KEYBOARD_PREFIX.end(), uniqueName.begin()).first
+        == KEYBOARD_PREFIX.end();
 }

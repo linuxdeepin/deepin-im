@@ -6,8 +6,11 @@
 #define IBUSPROXY_H
 
 #include "IBUSInputContextIface.h"
+#include "common/common.h"
 
 #include <dimcore/ProxyAddon.h>
+#include <gio/gio.h>
+
 #include <memory>
 
 class IBusEngineDesc;
@@ -51,6 +54,10 @@ public Q_SLOTS:
     void globalEngineChanged(const QString &engineName);
 
 private:
+    bool shouldBeIgnored(const std::string &uniqueName) const;
+
+private:
+    std::unique_ptr<GSettings, Deleter<g_object_unref>> gsettings_;
     DimIBusInputContextPrivate *d;
     bool useSyncMode_;
     QFileSystemWatcher socketWatcher_;

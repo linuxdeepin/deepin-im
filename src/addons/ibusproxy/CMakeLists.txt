@@ -39,6 +39,7 @@ target_link_libraries(ibusproxy PRIVATE
     Qt::DBus
     Qt::Gui
     Qt::GuiPrivate
+    PkgConfig::gio
 )
 
 install(TARGETS ibusproxy
