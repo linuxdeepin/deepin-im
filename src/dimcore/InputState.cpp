@@ -6,44 +6,47 @@
 
 #include "Dim.h"
 #include "InputContext.h"
-#include "InputMethodEntry.h"
+
+#include <QDebug>
 
 using namespace org::deepin::dim;
 
 InputState::InputState(InputContext *ic)
     : ic_(ic)
-    , currentIMKey_(std::make_pair("keyboard", "keyboard-us"))
+    , currentIMKey_(std::make_pair("keyboard", "us"))
 {
     connect(ic_->dim_, &Dim::inputMethodEntryChanged, this, [this]() {
-        auto iter = currentIMEntry();
-        currentIMKey_ = std::make_pair(iter->addonName(), iter->uniqueName());
+        auto iter = findIMEntry();
+        currentIMKey_ = *iter;
     });
 }
 
 void InputState::switchIMAddon()
 {
-    auto iter = currentIMEntry();
+    auto iter = findIMEntry();
     iter++;
 
-    const auto &imList = ic_->dim_->imEntries();
+    const auto &imList = ic_->dim_->activeInputMethodEntries();
     if (iter == imList.cend()) {
         iter = imList.cbegin();
     }
 
-    currentIMKey_ = std::make_pair(iter->addonName(), iter->uniqueName());
+    currentIMKey_ = *iter;
     emit ic_->imSwitch(currentIMKey_);
 }
 
-std::vector<InputMethodEntry>::const_iterator InputState::currentIMEntry() const
+std::set<std::pair<std::string, std::string>>::const_iterator InputState::findIMEntry() const
 {
-    const auto &imList = ic_->dim_->imEntries();
+    const auto &activeInputMethodEntries = ic_->dim_->activeInputMethodEntries();
 
-    auto iter = std::find_if(imList.cbegin(), imList.cend(), [this](const InputMethodEntry &entry) {
-        return entry.addonName() == currentIMKey_.first
-            && entry.uniqueName() == currentIMKey_.second;
-    });
-    if (iter == imList.cend()) {
-        iter = imList.cbegin();
+    auto iter = std::find_if(activeInputMethodEntries.cbegin(),
+                             activeInputMethodEntries.cend(),
+                             [this](const auto &pair) {
+                                 return pair.first == currentIMKey_.first
+                                     && pair.second == currentIMKey_.second;
+                             });
+    if (iter == activeInputMethodEntries.cend()) {
+        iter = activeInputMethodEntries.cbegin();
     }
 
     return iter;

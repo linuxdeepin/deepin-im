@@ -32,6 +32,7 @@ static const QMap<QString, AddonType> AddonsType = {
 Dim::Dim(QObject *parent)
     : QObject(parent)
     , focusedInputContext_(0)
+    , activeInputMethodEntries_({ { "keyboard", "us" } }) // todo: load from config file
 {
     loadAddons();
 }
@@ -209,16 +210,22 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
     auto &inputState = event.ic()->inputState();
 
     if (event.isRelease() && event.state() == DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE) {
-        QTimer::singleShot(0, [&inputState]() {
-            inputState.switchIMAddon();
+        QTimer::singleShot(0, [ic = event.ic()]() {
+            ic->inputState().switchIMAddon();
         });
     }
 
     auto addon = getInputMethodAddon(inputState);
-    const auto &imList = imEntries();
+    const auto &[addonKey, entryUniqueName] = inputState.currentIMEntry();
 
-    if (addon && !imList.empty()) {
-        return addon->keyEvent(*inputState.currentIMEntry(), event);
+    auto entryIter = std::find_if(imEntries_.cbegin(),
+                                  imEntries_.cend(),
+                                  [&addonKey, &entryUniqueName](const InputMethodEntry &entry) {
+                                      return entry.addonKey() == addonKey
+                                          && entry.uniqueName() == entryUniqueName;
+                                  });
+    if (addon) {
+        return addon->keyEvent(*entryIter, event);
     }
 
     return false;
@@ -263,7 +270,7 @@ void Dim::addActiveInputMethodEntry(const std::string &addon, const std::string 
 
 InputMethodAddon *Dim::getInputMethodAddon(const InputState &inputState)
 {
-    const std::string &addonKey = inputState.currentIMEntry()->addonName();
+    const std::string &addonKey = inputState.currentIMEntry().first;
     auto j = imAddons().find(addonKey);
     assert(j != imAddons().end());
 
