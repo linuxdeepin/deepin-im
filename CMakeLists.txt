@@ -40,6 +40,7 @@ pkg_check_modules(wayland-server REQUIRED IMPORTED_TARGET wayland-server)
 pkg_check_modules(libudev REQUIRED IMPORTED_TARGET libudev)
 pkg_check_modules(libinput REQUIRED IMPORTED_TARGET libinput)
 pkg_check_modules(gio REQUIRED IMPORTED_TARGET gio-2.0)
+pkg_check_modules(wlroots REQUIRED IMPORTED_TARGET wlroots)
 
 if (ENABLE_GTK3_IM_MODULE)
     pkg_check_modules(Gtk3 REQUIRED IMPORTED_TARGET "gtk+-3.0")

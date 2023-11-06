@@ -6,6 +6,7 @@ set(DIM_ADDON_DIR ${CMAKE_INSTALL_LIBDIR}/dim)
 
 add_subdirectory(wl)
 add_subdirectory(imwl)
+add_subdirectory(dimwl)
 add_subdirectory(dimcore)
 add_subdirectory(dim)
 add_subdirectory(addons)
