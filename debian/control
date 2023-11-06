@@ -14,6 +14,7 @@ Build-Depends:
  libgtk-4-dev,
  libudev-dev,
  libwayland-dev,
+ libwlroots-dev,
  libxcb-xinput-dev,
  libxcb1-dev,
  libxkbcommon-dev,
