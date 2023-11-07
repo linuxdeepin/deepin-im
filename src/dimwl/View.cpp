@@ -11,6 +11,13 @@
 View::View(Server *server, wlr_xdg_surface *xdg_surface, wl_list *list)
     : parentLink_(list)
     , server_(server)
+    , map_(this)
+    , unmap_(this)
+    , destroy_(this)
+    , request_move_(this)
+    , request_resize_(this)
+    , request_maximize_(this)
+    , request_fullscreen_(this)
 {
     xdg_toplevel_ = xdg_surface->toplevel;
     scene_tree_ = wlr_scene_xdg_surface_create(&server_->scene()->tree, xdg_toplevel_->base);
@@ -18,66 +25,47 @@ View::View(Server *server, wlr_xdg_surface *xdg_surface, wl_list *list)
     xdg_surface->data = scene_tree_;
 
     /* Listen to the various events it can emit */
-    map_.notify = mapNotify;
-    wl_signal_add(&xdg_surface->events.map, &map_);
-    unmap_.notify = unmapNotify;
-    wl_signal_add(&xdg_surface->events.unmap, &unmap_);
-    destroy_.notify = destroyNotify;
-    wl_signal_add(&xdg_surface->events.destroy, &destroy_);
+    wl_signal_add(&xdg_surface->events.map, map_);
+    wl_signal_add(&xdg_surface->events.unmap, unmap_);
+    wl_signal_add(&xdg_surface->events.destroy, destroy_);
 
     /* cotd */
-    request_move_.notify = xdgToplevelRequestMoveNotify;
-    wl_signal_add(&xdg_toplevel_->events.request_move, &request_move_);
-    request_resize_.notify = xdgToplevelRequestResizeNotify;
-    wl_signal_add(&xdg_toplevel_->events.request_resize, &request_resize_);
-    request_maximize_.notify = xdgToplevelRequestMaximizeNotify;
-    wl_signal_add(&xdg_toplevel_->events.request_maximize, &request_maximize_);
-    request_fullscreen_.notify = xdgToplevelRequestFullscreenNotify;
-    wl_signal_add(&xdg_toplevel_->events.request_fullscreen, &request_fullscreen_);
+    wl_signal_add(&xdg_toplevel_->events.request_move, request_move_);
+    wl_signal_add(&xdg_toplevel_->events.request_resize, request_resize_);
+    wl_signal_add(&xdg_toplevel_->events.request_maximize, request_maximize_);
+    wl_signal_add(&xdg_toplevel_->events.request_fullscreen, request_fullscreen_);
 }
 
-View::~View()
-{
-    wl_list_remove(&map_.link);
-    wl_list_remove(&unmap_.link);
-    wl_list_remove(&destroy_.link);
-    wl_list_remove(&request_move_.link);
-    wl_list_remove(&request_resize_.link);
-    wl_list_remove(&request_maximize_.link);
-    wl_list_remove(&request_fullscreen_.link);
-}
+View::~View() { }
 
-void View::mapNotify(struct wl_listener *listener, void *data)
+void View::mapNotify(void *data)
 {
     /* Called when the surface is mapped, or ready to display on-screen. */
-    View *view = wl_container_of(listener, view, map_);
 
-    wl_list_insert(view->parentLink_, &view->link_);
+    wl_list_insert(parentLink_, &link_);
 
-    view->focusView();
+    focusView();
 }
 
-void View::unmapNotify(struct wl_listener *listener, void *data)
+void View::unmapNotify(void *data)
 {
     /* Called when the surface is unmapped, and should no longer be shown. */
-    View *view = wl_container_of(listener, view, unmap_);
 
     /* Reset the cursor mode if the grabbed view was unmapped. */
     // if (view == view->server->grabbed_view) {
     //     reset_cursor_mode(view->server);
     // }
 
-    wl_list_remove(&view->link_);
+    wl_list_remove(&link_);
 }
 
-void View::destroyNotify(struct wl_listener *listener, void *data)
+void View::destroyNotify(void *data)
 {
     /* Called when the surface is destroyed and should never be shown again. */
-    View *view = wl_container_of(listener, view, destroy_);
-    delete view;
+    delete this;
 }
 
-void View::xdgToplevelRequestMoveNotify(struct wl_listener *listener, void *data)
+void View::xdgToplevelRequestMoveNotify(void *data)
 {
     /* This event is raised when a client would like to begin an interactive
      * move, typically because the user clicked on their client-side
@@ -87,7 +75,7 @@ void View::xdgToplevelRequestMoveNotify(struct wl_listener *listener, void *data
     // beginInteractive(TINYWL_CURSOR_MOVE, 0);
 }
 
-void View::xdgToplevelRequestResizeNotify(struct wl_listener *listener, void *data)
+void View::xdgToplevelRequestResizeNotify(void *data)
 {
     /* This event is raised when a client would like to begin an interactive
      * resize, typically because the user clicked on their client-side
@@ -98,22 +86,20 @@ void View::xdgToplevelRequestResizeNotify(struct wl_listener *listener, void *da
     // beginInteractive(TINYWL_CURSOR_RESIZE, event->edges);
 }
 
-void View::xdgToplevelRequestMaximizeNotify(struct wl_listener *listener, void *data)
+void View::xdgToplevelRequestMaximizeNotify(void *data)
 {
     /* This event is raised when a client would like to maximize itself,
      * typically because the user clicked on the maximize button on
      * client-side decorations. tinywl doesn't support maximization, but
      * to conform to xdg-shell protocol we still must send a configure.
      * wlr_xdg_surface_schedule_configure() is used to send an empty reply. */
-    View *view = wl_container_of(listener, view, request_maximize_);
-    wlr_xdg_surface_schedule_configure(view->xdg_toplevel_->base);
+    wlr_xdg_surface_schedule_configure(xdg_toplevel_->base);
 }
 
-void View::xdgToplevelRequestFullscreenNotify(struct wl_listener *listener, void *data)
+void View::xdgToplevelRequestFullscreenNotify(void *data)
 {
     /* Just as with request_maximize, we must send a configure here. */
-    View *view = wl_container_of(listener, view, request_fullscreen_);
-    wlr_xdg_surface_schedule_configure(view->xdg_toplevel_->base);
+    wlr_xdg_surface_schedule_configure(xdg_toplevel_->base);
 }
 
 void View::focusView()

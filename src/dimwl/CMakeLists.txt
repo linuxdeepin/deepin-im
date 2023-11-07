@@ -2,6 +2,7 @@ add_definitions(-DWLR_USE_UNSTABLE)
 
 add_executable(dimwl
     main.cpp
+    Listener.h
     Server.h
     Server.cpp
     Output.h
