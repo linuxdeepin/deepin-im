@@ -10,6 +10,8 @@
 #include "dimcore/InputContext.h"
 #include "ibustypes.h"
 
+#include <gio/gsettingsschema.h>
+
 #include <signal.h>
 
 #ifndef IBUS_RELEASE_MASK
@@ -184,11 +186,20 @@ QDBusConnection *DimIBusInputContextPrivate::createConnection()
 DimIBusProxy::DimIBusProxy(Dim *dim)
     : ProxyAddon(dim, "ibusproxy", "ibus")
     , d(new DimIBusInputContextPrivate())
-    , gsettings_(g_settings_new("org.freedesktop.ibus.general"))
     , useSyncMode_(false)
 {
     qDBusRegisterMetaType<IBusText>();
     qDBusRegisterMetaType<IBusEngineDesc>();
+
+    auto schema = g_settings_schema_source_lookup(g_settings_schema_source_get_default(),
+                                                  "org.freedesktop.ibus.general",
+                                                  TRUE);
+
+    gsettings_.reset();
+    if (schema) {
+        gsettings_.reset(g_settings_new_full(schema, nullptr, nullptr));
+        g_settings_schema_unref(schema);
+    }
 
     if (qEnvironmentVariableIsSet("IBUS_ENABLE_SYNC_MODE")) {
         bool ok;
@@ -285,8 +296,11 @@ void DimIBusProxy::initInputMethods()
 {
     Q_EMIT addonInitFinished(this);
 
-    std::unique_ptr<gchar *, Deleter<g_strfreev>> list(
-        g_settings_get_strv(gsettings_.get(), "preload-engines"));
+    std::unique_ptr<gchar *, Deleter<g_strfreev>> list(nullptr);
+    if (gsettings_ && gsettings_.get()) {
+        list.reset(g_settings_get_strv(gsettings_.get(), "preload-engines"));
+    }
+
     if (!list) {
         return;
     }
