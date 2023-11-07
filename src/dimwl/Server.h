@@ -5,6 +5,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include "Listener.h"
 #include "common/common.h"
 
 #include <wayland-server-core.h>
@@ -54,16 +55,16 @@ public:
     wlr_seat *seat() { return seat_.get(); }
 
 private:
-    static void newOutputNotify(struct wl_listener *listener, void *data);
-    static void newXdgSurfaceNotify(struct wl_listener *listener, void *data);
-    static void cursorMotionNotify(struct wl_listener *listener, void *data);
-    static void cursorMotionAbsoluteNotify(struct wl_listener *listener, void *data);
-    static void cursorButtonNotify(struct wl_listener *listener, void *data);
-    static void cursorAxisNotify(struct wl_listener *listener, void *data);
-    static void cursorFrameNotify(struct wl_listener *listener, void *data);
-    static void newInputNotify(struct wl_listener *listener, void *data);
-    static void seatRequestCursorNotify(struct wl_listener *listener, void *data);
-    static void seatRequestSetSelectionNotify(struct wl_listener *listener, void *data);
+    void newOutputNotify(void *data);
+    void newXdgSurfaceNotify(void *data);
+    void cursorMotionNotify(void *data);
+    void cursorMotionAbsoluteNotify(void *data);
+    void cursorButtonNotify(void *data);
+    void cursorAxisNotify(void *data);
+    void cursorFrameNotify(void *data);
+    void newInputNotify(void *data);
+    void seatRequestCursorNotify(void *data);
+    void seatRequestSetSelectionNotify(void *data);
 
     void processCursorMotion(uint32_t time);
     View *desktopViewAt(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy);
@@ -74,24 +75,24 @@ private:
     std::unique_ptr<wlr_renderer, Deleter<wlr_renderer_destroy>> renderer_;
     std::unique_ptr<wlr_allocator, Deleter<wlr_allocator_destroy>> allocator_;
     std::unique_ptr<wlr_output_layout, Deleter<wlr_output_layout_destroy>> output_layout_;
-    wl_listener new_output_;
+    Listener<&Server::newOutputNotify> new_output_;
     wl_list outputs_;
     std::unique_ptr<wlr_scene> scene_;
     wl_list views_;
     std::unique_ptr<wlr_xdg_shell> xdg_shell_;
-    wl_listener new_xdg_surface_;
+    Listener<&Server::newXdgSurfaceNotify> new_xdg_surface_;
     std::unique_ptr<wlr_cursor, Deleter<wlr_cursor_destroy>> cursor_;
     std::unique_ptr<wlr_xcursor_manager, Deleter<wlr_xcursor_manager_destroy>> cursor_mgr_;
-    wl_listener cursor_motion_;
-    wl_listener cursor_motion_absolute_;
-    wl_listener cursor_button_;
-    wl_listener cursor_axis_;
-    wl_listener cursor_frame_;
+    Listener<&Server::cursorMotionNotify> cursor_motion_;
+    Listener<&Server::cursorMotionAbsoluteNotify> cursor_motion_absolute_;
+    Listener<&Server::cursorButtonNotify> cursor_button_;
+    Listener<&Server::cursorAxisNotify> cursor_axis_;
+    Listener<&Server::cursorFrameNotify> cursor_frame_;
     std::unique_ptr<wlr_seat, Deleter<wlr_seat_destroy>> seat_;
-    wl_listener request_cursor_;
-    wl_listener request_set_selection_;
+    Listener<&Server::seatRequestCursorNotify> seat_request_cursor_;
+    Listener<&Server::seatRequestSetSelectionNotify> seat_request_set_selection_;
     wl_list keyboards_;
-    wl_listener new_input_;
+    Listener<&Server::newInputNotify> new_input_;
 };
 
 #endif // !SERVER_H

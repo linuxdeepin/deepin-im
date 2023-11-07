@@ -5,6 +5,8 @@
 #ifndef VIEW_H
 #define VIEW_H
 
+#include "Listener.h"
+
 extern "C" {
 #include <wlr/backend.h>
 #define static
@@ -22,13 +24,13 @@ public:
     ~View();
 
 private:
-    static void mapNotify(struct wl_listener *listener, void *data);
-    static void unmapNotify(struct wl_listener *listener, void *data);
-    static void destroyNotify(struct wl_listener *listener, void *data);
-    static void xdgToplevelRequestMoveNotify(struct wl_listener *listener, void *data);
-    static void xdgToplevelRequestResizeNotify(struct wl_listener *listener, void *data);
-    static void xdgToplevelRequestMaximizeNotify(struct wl_listener *listener, void *data);
-    static void xdgToplevelRequestFullscreenNotify(struct wl_listener *listener, void *data);
+    void mapNotify(void *data);
+    void unmapNotify(void *data);
+    void destroyNotify(void *data);
+    void xdgToplevelRequestMoveNotify(void *data);
+    void xdgToplevelRequestResizeNotify(void *data);
+    void xdgToplevelRequestMaximizeNotify(void *data);
+    void xdgToplevelRequestFullscreenNotify(void *data);
 
     void focusView();
 
@@ -40,13 +42,13 @@ private:
     wlr_xdg_toplevel *xdg_toplevel_;
     wlr_scene_tree *scene_tree_;
 
-    wl_listener map_;
-    wl_listener unmap_;
-    wl_listener destroy_;
-    wl_listener request_move_;
-    wl_listener request_resize_;
-    wl_listener request_maximize_;
-    wl_listener request_fullscreen_;
+    Listener<&View::mapNotify> map_;
+    Listener<&View::unmapNotify> unmap_;
+    Listener<&View::destroyNotify> destroy_;
+    Listener<&View::xdgToplevelRequestMoveNotify> request_move_;
+    Listener<&View::xdgToplevelRequestResizeNotify> request_resize_;
+    Listener<&View::xdgToplevelRequestMaximizeNotify> request_maximize_;
+    Listener<&View::xdgToplevelRequestFullscreenNotify> request_fullscreen_;
 };
 
 #endif // !VIEW_H

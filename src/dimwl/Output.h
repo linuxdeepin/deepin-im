@@ -5,8 +5,9 @@
 #ifndef OUTPUT_H
 #define OUTPUT_H
 
+#include "Listener.h"
+
 #include <wayland-server-core.h>
-#include <wayland-util.h>
 
 struct wlr_output;
 
@@ -19,8 +20,8 @@ public:
     ~Output();
 
 private:
-    static void frameNotify(struct wl_listener *listener, void *data);
-    static void destroyNotify(struct wl_listener *listener, void *data);
+    void frameNotify(void *data);
+    void destroyNotify(void *data);
 
 private:
     wl_list link_;
@@ -28,8 +29,8 @@ private:
     Server *server_;
     struct wlr_output *wlr_output_;
 
-    wl_listener frame_;
-    wl_listener destroy_;
+    Listener<&Output::frameNotify> frame_;
+    Listener<&Output::destroyNotify> destroy_;
 };
 
 #endif // !OUTPUT_H
