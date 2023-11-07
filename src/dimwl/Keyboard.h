@@ -1,6 +1,8 @@
 #ifndef KEYBAORD_H
 #define KEYBAORD_H
 
+#include "Listener.h"
+
 #include <wayland-server-core.h>
 
 struct wlr_seat;
@@ -16,9 +18,9 @@ public:
     ~Keyboard();
 
 private:
-    static void modifiersNotify(struct wl_listener *listener, void *data);
-    static void keyNotify(struct wl_listener *listener, void *data);
-    static void destroyNotify(struct wl_listener *listener, void *data);
+    void modifiersNotify(void *data);
+    void keyNotify(void *data);
+    void destroyNotify(void *data);
 
 private:
     wl_list link_;
@@ -26,9 +28,9 @@ private:
     Server *server_;
     wlr_keyboard *wlr_keyboard_;
 
-    wl_listener modifiers_;
-    wl_listener key_;
-    wl_listener destroy_;
+    Listener<&Keyboard::modifiersNotify> modifiers_;
+    Listener<&Keyboard::keyNotify> key_;
+    Listener<&Keyboard::destroyNotify> destroy_;
 };
 
 #endif // !KEYBAORD_H

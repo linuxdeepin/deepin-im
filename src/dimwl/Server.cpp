@@ -18,6 +18,16 @@ extern "C" {
 
 Server::Server()
     : display_(wl_display_create())
+    , new_output_(this)
+    , new_xdg_surface_(this)
+    , cursor_motion_(this)
+    , cursor_motion_absolute_(this)
+    , cursor_button_(this)
+    , cursor_axis_(this)
+    , cursor_frame_(this)
+    , new_input_(this)
+    , seat_request_cursor_(this)
+    , seat_request_set_selection_(this)
 {
     backend_.reset(wlr_backend_autocreate(display_.get()));
     if (!backend_) {
@@ -54,8 +64,7 @@ Server::Server()
     /* Configure a listener to be notified when new outputs are available on the
      * backend. */
     wl_list_init(&outputs_);
-    new_output_.notify = newOutputNotify;
-    wl_signal_add(&backend_->events.new_output, &new_output_);
+    wl_signal_add(&backend_->events.new_output, new_output_);
 
     /* Create a scene graph. This is a wlroots abstraction that handles all
      * rendering and damage tracking. All the compositor author needs to do
@@ -74,8 +83,7 @@ Server::Server()
      */
     wl_list_init(&views_);
     xdg_shell_.reset(wlr_xdg_shell_create(display_.get(), 3));
-    new_xdg_surface_.notify = newXdgSurfaceNotify;
-    wl_signal_add(&xdg_shell_->events.new_surface, &new_xdg_surface_);
+    wl_signal_add(&xdg_shell_->events.new_surface, new_xdg_surface_);
 
     /*
      * Creates a cursor, which is a wlroots utility for tracking the cursor
@@ -104,16 +112,11 @@ Server::Server()
      * And more comments are sprinkled throughout the notify functions above.
      */
     // server.cursor_mode = TINYWL_CURSOR_PASSTHROUGH;
-    cursor_motion_.notify = cursorMotionNotify;
-    wl_signal_add(&cursor_->events.motion, &cursor_motion_);
-    cursor_motion_absolute_.notify = cursorMotionAbsoluteNotify;
-    wl_signal_add(&cursor_->events.motion_absolute, &cursor_motion_absolute_);
-    cursor_button_.notify = cursorButtonNotify;
-    wl_signal_add(&cursor_->events.button, &cursor_button_);
-    cursor_axis_.notify = cursorAxisNotify;
-    wl_signal_add(&cursor_->events.axis, &cursor_axis_);
-    cursor_frame_.notify = cursorFrameNotify;
-    wl_signal_add(&cursor_->events.frame, &cursor_frame_);
+    wl_signal_add(&cursor_->events.motion, cursor_motion_);
+    wl_signal_add(&cursor_->events.motion_absolute, cursor_motion_absolute_);
+    wl_signal_add(&cursor_->events.button, cursor_button_);
+    wl_signal_add(&cursor_->events.axis, cursor_axis_);
+    wl_signal_add(&cursor_->events.frame, cursor_frame_);
 
     /*
      * Configures a seat, which is a single "seat" at which a user sits and
@@ -122,13 +125,10 @@ Server::Server()
      * let us know when new input devices are available on the backend.
      */
     wl_list_init(&keyboards_);
-    new_input_.notify = newInputNotify;
-    wl_signal_add(&backend_->events.new_input, &new_input_);
+    wl_signal_add(&backend_->events.new_input, new_input_);
     seat_.reset(wlr_seat_create(display_.get(), "seat0"));
-    request_cursor_.notify = seatRequestCursorNotify;
-    wl_signal_add(&seat_->events.request_set_cursor, &request_cursor_);
-    request_set_selection_.notify = seatRequestSetSelectionNotify;
-    wl_signal_add(&seat_->events.request_set_selection, &request_set_selection_);
+    wl_signal_add(&seat_->events.request_set_cursor, seat_request_cursor_);
+    wl_signal_add(&seat_->events.request_set_selection, seat_request_set_selection_);
 }
 
 Server::~Server() = default;
@@ -148,9 +148,10 @@ bool Server::startBackend()
     return wlr_backend_start(backend_.get());
 }
 
-void Server::newOutputNotify(struct wl_listener *listener, void *data)
+void Server::newOutputNotify(void *data)
 {
-    Server *server = wl_container_of(listener, server, new_output_);
+    /* This event is raised by the backend when a new output (aka a display or
+     * monitor) becomes available. */
     struct wlr_output *wlr_output = static_cast<struct wlr_output *>(data);
 
     if (!wl_list_empty(&wlr_output->modes)) {
@@ -158,14 +159,13 @@ void Server::newOutputNotify(struct wl_listener *listener, void *data)
         wlr_output_set_mode(wlr_output, mode);
     }
 
-    auto *output = new Output(server, wlr_output, &server->outputs_);
+    auto *output = new Output(this, wlr_output, &outputs_);
 }
 
-void Server::newXdgSurfaceNotify(struct wl_listener *listener, void *data)
+void Server::newXdgSurfaceNotify(void *data)
 {
     /* This event is raised when wlr_xdg_shell receives a new xdg surface from a
      * client, either a toplevel (application window) or popup. */
-    Server *server = wl_container_of(listener, server, new_xdg_surface_);
     struct wlr_xdg_surface *xdg_surface = static_cast<wlr_xdg_surface *>(data);
 
     /* We must add xdg popups to the scene graph so they get rendered. The
@@ -182,7 +182,7 @@ void Server::newXdgSurfaceNotify(struct wl_listener *listener, void *data)
     }
     assert(xdg_surface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL);
 
-    new View(server, xdg_surface, &server->views_);
+    new View(this, xdg_surface, &views_);
 
     // /* cotd */
     // struct wlr_xdg_toplevel *toplevel = xdg_surface->toplevel;
@@ -196,22 +196,21 @@ void Server::newXdgSurfaceNotify(struct wl_listener *listener, void *data)
     // wl_signal_add(&toplevel->events.request_fullscreen, &view->request_fullscreen);
 }
 
-void Server::cursorMotionNotify(struct wl_listener *listener, void *data)
+void Server::cursorMotionNotify(void *data)
 {
     /* This event is forwarded by the cursor when a pointer emits a _relative_
      * pointer motion event (i.e. a delta) */
-    Server *server = wl_container_of(listener, server, cursor_motion_);
     struct wlr_pointer_motion_event *event = static_cast<wlr_pointer_motion_event *>(data);
     /* The cursor doesn't move unless we tell it to. The cursor automatically
      * handles constraining the motion to the output layout, as well as any
      * special configuration applied for the specific input device which
      * generated the event. You can pass NULL for the device if you want to move
      * the cursor around without any input. */
-    wlr_cursor_move(server->cursor_.get(), &event->pointer->base, event->delta_x, event->delta_y);
+    wlr_cursor_move(cursor_.get(), &event->pointer->base, event->delta_x, event->delta_y);
     // process_cursor_motion(server, event->time_msec);
 }
 
-void Server::cursorMotionAbsoluteNotify(struct wl_listener *listener, void *data)
+void Server::cursorMotionAbsoluteNotify(void *data)
 {
     /* This event is forwarded by the cursor when a pointer emits an _absolute_
      * motion event, from 0..1 on each axis. This happens, for example, when
@@ -219,27 +218,22 @@ void Server::cursorMotionAbsoluteNotify(struct wl_listener *listener, void *data
      * move the mouse over the window. You could enter the window from any edge,
      * so we have to warp the mouse there. There is also some hardware which
      * emits these events. */
-    Server *server = wl_container_of(listener, server, cursor_motion_absolute_);
     struct wlr_pointer_motion_absolute_event *event =
         static_cast<wlr_pointer_motion_absolute_event *>(data);
-    wlr_cursor_warp_absolute(server->cursor_.get(), &event->pointer->base, event->x, event->y);
-    server->processCursorMotion(event->time_msec);
+    wlr_cursor_warp_absolute(cursor_.get(), &event->pointer->base, event->x, event->y);
+    processCursorMotion(event->time_msec);
 }
 
-void Server::cursorButtonNotify(struct wl_listener *listener, void *data)
+void Server::cursorButtonNotify(void *data)
 {
     /* This event is forwarded by the cursor when a pointer emits a button
      * event. */
-    Server *server = wl_container_of(listener, server, cursor_button_);
     struct wlr_pointer_button_event *event = static_cast<wlr_pointer_button_event *>(data);
     /* Notify the client with pointer focus that a button press has occurred */
-    wlr_seat_pointer_notify_button(server->seat_.get(),
-                                   event->time_msec,
-                                   event->button,
-                                   event->state);
+    wlr_seat_pointer_notify_button(seat_.get(), event->time_msec, event->button, event->state);
     double sx, sy;
     struct wlr_surface *surface = NULL;
-    View *view = server->desktopViewAt(server->cursor_->x, server->cursor_->y, &surface, &sx, &sy);
+    View *view = desktopViewAt(cursor_->x, cursor_->y, &surface, &sx, &sy);
     if (event->state == WLR_BUTTON_RELEASED) {
         /* If you released any buttons, we exit interactive move/resize mode. */
         // reset_cursor_mode(server);
@@ -249,14 +243,13 @@ void Server::cursorButtonNotify(struct wl_listener *listener, void *data)
     }
 }
 
-void Server::cursorAxisNotify(struct wl_listener *listener, void *data)
+void Server::cursorAxisNotify(void *data)
 {
     /* This event is forwarded by the cursor when a pointer emits an axis event,
      * for example when you move the scroll wheel. */
-    Server *server = wl_container_of(listener, server, cursor_axis_);
     struct wlr_pointer_axis_event *event = static_cast<wlr_pointer_axis_event *>(data);
     /* Notify the client with pointer focus of the axis event. */
-    wlr_seat_pointer_notify_axis(server->seat_.get(),
+    wlr_seat_pointer_notify_axis(seat_.get(),
                                  event->time_msec,
                                  event->orientation,
                                  event->delta,
@@ -264,33 +257,31 @@ void Server::cursorAxisNotify(struct wl_listener *listener, void *data)
                                  event->source);
 }
 
-void Server::cursorFrameNotify(struct wl_listener *listener, void *data)
+void Server::cursorFrameNotify(void *data)
 {
     /* This event is forwarded by the cursor when a pointer emits an frame
      * event. Frame events are sent after regular pointer events to group
      * multiple events together. For instance, two axis events may happen at the
      * same time, in which case a frame event won't be sent in between. */
-    Server *server = wl_container_of(listener, server, cursor_frame_);
     /* Notify the client with pointer focus of the frame event. */
-    wlr_seat_pointer_notify_frame(server->seat_.get());
+    wlr_seat_pointer_notify_frame(seat_.get());
 }
 
-void Server::newInputNotify(struct wl_listener *listener, void *data)
+void Server::newInputNotify(void *data)
 {
     /* This event is raised by the backend when a new input device becomes
      * available. */
-    Server *server = wl_container_of(listener, server, new_input_);
     struct wlr_input_device *device = static_cast<wlr_input_device *>(data);
     switch (device->type) {
     case WLR_INPUT_DEVICE_KEYBOARD:
-        new Keyboard(server, server->seat_.get(), device, &server->keyboards_);
+        new Keyboard(this, seat_.get(), device, &keyboards_);
         break;
     case WLR_INPUT_DEVICE_POINTER:
         /* We don't do anything special with pointers. All of our pointer handling
          * is proxied through wlr_cursor. On another compositor, you might take this
          * opportunity to do libinput configuration on the device to set
          * acceleration, etc. */
-        wlr_cursor_attach_input_device(server->cursor_.get(), device);
+        wlr_cursor_attach_input_device(cursor_.get(), device);
         break;
     default:
         break;
@@ -299,15 +290,15 @@ void Server::newInputNotify(struct wl_listener *listener, void *data)
      * communiciated to the client. In TinyWL we always have a cursor, even if
      * there are no pointer devices, so we always include that capability. */
     uint32_t caps = WL_SEAT_CAPABILITY_POINTER;
-    if (!wl_list_empty(&server->keyboards_)) {
+    if (!wl_list_empty(&keyboards_)) {
         caps |= WL_SEAT_CAPABILITY_KEYBOARD;
     }
-    wlr_seat_set_capabilities(server->seat_.get(), caps);
+    wlr_seat_set_capabilities(seat_.get(), caps);
 }
 
-void Server::seatRequestCursorNotify(struct wl_listener *listener, void *data) { }
+void Server::seatRequestCursorNotify(void *data) { }
 
-void Server::seatRequestSetSelectionNotify(struct wl_listener *listener, void *data) { }
+void Server::seatRequestSetSelectionNotify(void *data) { }
 
 void Server::processCursorMotion(uint32_t time)
 {

@@ -14,6 +14,8 @@ extern "C" {
 Output::Output(Server *dimwl, struct wlr_output *wlr_output, wl_list *parent)
     : server_(dimwl)
     , wlr_output_(wlr_output)
+    , frame_(this)
+    , destroy_(this)
 {
     /* Configures the output created by the backend to use our allocator
      * and our renderer. Must be done once, before commiting the output */
@@ -33,10 +35,8 @@ Output::Output(Server *dimwl, struct wlr_output *wlr_output, wl_list *parent)
         }
     }
 
-    destroy_.notify = destroyNotify;
-    wl_signal_add(&wlr_output_->events.destroy, &destroy_);
-    frame_.notify = frameNotify;
-    wl_signal_add(&wlr_output_->events.frame, &frame_);
+    wl_signal_add(&wlr_output_->events.destroy, destroy_);
+    wl_signal_add(&wlr_output_->events.frame, frame_);
 
     wl_list_insert(parent, &link_);
 
@@ -55,23 +55,15 @@ Output::Output(Server *dimwl, struct wlr_output *wlr_output, wl_list *parent)
 Output::~Output()
 {
     wl_list_remove(&link_);
-    wl_list_remove(&destroy_.link);
-    wl_list_remove(&frame_.link);
 }
 
-void Output::destroyNotify(struct wl_listener *listener, void *data)
+void Output::frameNotify(void *data)
 {
-    Output *output = wl_container_of(listener, output, destroy_);
-    delete output;
-}
+    /* This function is called every time an output is ready to display a frame,
+     * generally at the output's refresh rate (e.g. 60Hz). */
+    struct wlr_scene *scene = server_->scene();
 
-void Output::frameNotify(struct wl_listener *listener, void *data)
-{
-    Output *output = wl_container_of(listener, output, frame_);
-
-    struct wlr_scene *scene = output->server_->scene();
-
-    struct wlr_scene_output *scene_output = wlr_scene_get_scene_output(scene, output->wlr_output_);
+    struct wlr_scene_output *scene_output = wlr_scene_get_scene_output(scene, wlr_output_);
 
     /* Render the scene if needed and commit the output */
     wlr_scene_output_commit(scene_output);
@@ -79,4 +71,9 @@ void Output::frameNotify(struct wl_listener *listener, void *data)
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
     wlr_scene_output_send_frame_done(scene_output, &now);
+}
+
+void Output::destroyNotify(void *data)
+{
+    delete this;
 }
