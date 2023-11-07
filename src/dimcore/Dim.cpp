@@ -227,14 +227,14 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
     }
 
     auto addon = getInputMethodAddon(inputState);
-    const auto &[addonKey, entryUniqueName] = inputState.currentIMEntry();
 
-    auto entryIter = std::find_if(imEntries_.cbegin(),
-                                  imEntries_.cend(),
-                                  [&addonKey, &entryUniqueName](const InputMethodEntry &entry) {
-                                      return entry.addonKey() == addonKey
-                                          && entry.uniqueName() == entryUniqueName;
-                                  });
+    auto entryIter = std::find_if(
+        imEntries_.cbegin(),
+        imEntries_.cend(),
+        [&currentIMEntry = inputState.currentIMEntry()](const InputMethodEntry &entry) {
+            return entry.addonKey() == currentIMEntry.first
+                && entry.uniqueName() == currentIMEntry.second;
+        });
     if (addon) {
         return addon->keyEvent(*entryIter, event);
     }
