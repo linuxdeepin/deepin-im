@@ -20,8 +20,8 @@ extern "C" {
 
 Server::Server()
     : display_(wl_display_create())
-    , new_output_(this)
-    , new_xdg_surface_(this)
+    , backend_new_output_(this)
+    , xdg_shell_new_surface_(this)
     , cursor_motion_(this)
     , cursor_motion_absolute_(this)
     , cursor_button_(this)
@@ -29,7 +29,7 @@ Server::Server()
     , cursor_frame_(this)
     , seat_request_cursor_(this)
     , seat_request_set_selection_(this)
-    , new_input_(this)
+    , backend_new_input_(this)
 {
     backend_.reset(wlr_backend_autocreate(display_.get()));
     if (!backend_) {
@@ -66,7 +66,7 @@ Server::Server()
     /* Configure a listener to be notified when new outputs are available on the
      * backend. */
     wl_list_init(&outputs_);
-    wl_signal_add(&backend_->events.new_output, new_output_);
+    wl_signal_add(&backend_->events.new_output, backend_new_output_);
 
     /* Create a scene graph. This is a wlroots abstraction that handles all
      * rendering and damage tracking. All the compositor author needs to do
@@ -85,7 +85,7 @@ Server::Server()
      */
     wl_list_init(&views_);
     xdg_shell_.reset(wlr_xdg_shell_create(display_.get(), 3));
-    wl_signal_add(&xdg_shell_->events.new_surface, new_xdg_surface_);
+    wl_signal_add(&xdg_shell_->events.new_surface, xdg_shell_new_surface_);
 
     /*
      * Creates a cursor, which is a wlroots utility for tracking the cursor
@@ -130,7 +130,7 @@ Server::Server()
     wl_signal_add(&seat_->events.request_set_cursor, seat_request_cursor_);
     wl_signal_add(&seat_->events.request_set_selection, seat_request_set_selection_);
     wl_list_init(&keyboards_);
-    wl_signal_add(&backend_->events.new_input, new_input_);
+    wl_signal_add(&backend_->events.new_input, backend_new_input_);
 }
 
 Server::~Server() = default;
@@ -150,7 +150,7 @@ bool Server::startBackend()
     return wlr_backend_start(backend_.get());
 }
 
-void Server::newOutputNotify(void *data)
+void Server::backendNewOutputNotify(void *data)
 {
     /* This event is raised by the backend when a new output (aka a display or
      * monitor) becomes available. */
@@ -164,7 +164,7 @@ void Server::newOutputNotify(void *data)
     auto *output = new Output(this, wlr_output, &outputs_);
 }
 
-void Server::newXdgSurfaceNotify(void *data)
+void Server::xdgShellNewSurfaceNotify(void *data)
 {
     /* This event is raised when wlr_xdg_shell receives a new xdg surface from a
      * client, either a toplevel (application window) or popup. */
@@ -258,7 +258,7 @@ void Server::cursorFrameNotify(void *data)
     wlr_seat_pointer_notify_frame(seat_.get());
 }
 
-void Server::newInputNotify(void *data)
+void Server::backendNewInputNotify(void *data)
 {
     /* This event is raised by the backend when a new input device becomes
      * available. */

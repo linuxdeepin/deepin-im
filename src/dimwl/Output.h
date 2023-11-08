@@ -16,7 +16,7 @@ class Server;
 class Output
 {
 public:
-    Output(Server *server, struct wlr_output *wlr_output, wl_list *list);
+    Output(Server *server, struct wlr_output *output, wl_list *list);
     ~Output();
 
 private:
@@ -24,10 +24,9 @@ private:
     void destroyNotify(void *data);
 
 private:
-    wl_list link_;
-
     Server *server_;
-    struct wlr_output *wlr_output_;
+    wl_list link_;
+    struct wlr_output *output_;
 
     Listener<&Output::frameNotify> frame_;
     Listener<&Output::destroyNotify> destroy_;

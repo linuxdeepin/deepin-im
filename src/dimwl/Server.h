@@ -55,14 +55,14 @@ public:
     wlr_seat *seat() { return seat_.get(); }
 
 private:
-    void newOutputNotify(void *data);
-    void newXdgSurfaceNotify(void *data);
+    void backendNewOutputNotify(void *data);
+    void xdgShellNewSurfaceNotify(void *data);
     void cursorMotionNotify(void *data);
     void cursorMotionAbsoluteNotify(void *data);
     void cursorButtonNotify(void *data);
     void cursorAxisNotify(void *data);
     void cursorFrameNotify(void *data);
-    void newInputNotify(void *data);
+    void backendNewInputNotify(void *data);
     void seatRequestCursorNotify(void *data);
     void seatRequestSetSelectionNotify(void *data);
 
@@ -75,12 +75,15 @@ private:
     std::unique_ptr<wlr_renderer, Deleter<wlr_renderer_destroy>> renderer_;
     std::unique_ptr<wlr_allocator, Deleter<wlr_allocator_destroy>> allocator_;
     std::unique_ptr<wlr_output_layout, Deleter<wlr_output_layout_destroy>> output_layout_;
-    Listener<&Server::newOutputNotify> new_output_;
     wl_list outputs_;
+    Listener<&Server::backendNewOutputNotify> backend_new_output_;
+
     std::unique_ptr<wlr_scene> scene_;
+
     wl_list views_;
     std::unique_ptr<wlr_xdg_shell> xdg_shell_;
-    Listener<&Server::newXdgSurfaceNotify> new_xdg_surface_;
+    Listener<&Server::xdgShellNewSurfaceNotify> xdg_shell_new_surface_;
+
     std::unique_ptr<wlr_cursor, Deleter<wlr_cursor_destroy>> cursor_;
     std::unique_ptr<wlr_xcursor_manager, Deleter<wlr_xcursor_manager_destroy>> cursor_mgr_;
     Listener<&Server::cursorMotionNotify> cursor_motion_;
@@ -88,11 +91,12 @@ private:
     Listener<&Server::cursorButtonNotify> cursor_button_;
     Listener<&Server::cursorAxisNotify> cursor_axis_;
     Listener<&Server::cursorFrameNotify> cursor_frame_;
+
     std::unique_ptr<wlr_seat, Deleter<wlr_seat_destroy>> seat_;
     Listener<&Server::seatRequestCursorNotify> seat_request_cursor_;
     Listener<&Server::seatRequestSetSelectionNotify> seat_request_set_selection_;
     wl_list keyboards_;
-    Listener<&Server::newInputNotify> new_input_;
+    Listener<&Server::backendNewInputNotify> backend_new_input_;
 };
 
 #endif // !SERVER_H

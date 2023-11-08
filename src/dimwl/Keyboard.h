@@ -27,10 +27,9 @@ private:
     void destroyNotify(void *data);
 
 private:
-    wl_list link_;
-
     Server *server_;
-    wlr_keyboard *wlr_keyboard_;
+    wl_list link_;
+    wlr_keyboard *keyboard_;
 
     Listener<&Keyboard::modifiersNotify> modifiers_;
     Listener<&Keyboard::keyNotify> key_;

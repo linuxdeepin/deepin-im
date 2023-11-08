@@ -24,9 +24,10 @@ public:
     ~View();
 
 private:
-    void mapNotify(void *data);
-    void unmapNotify(void *data);
-    void destroyNotify(void *data);
+    void xdgSurfaceMapNotify(void *data);
+    void xdgSurfaceUnmapNotify(void *data);
+    void xdgSurfaceDestroyNotify(void *data);
+
     void xdgToplevelRequestMoveNotify(void *data);
     void xdgToplevelRequestResizeNotify(void *data);
     void xdgToplevelRequestMaximizeNotify(void *data);
@@ -35,20 +36,21 @@ private:
     void focusView();
 
 private:
-    wl_list link_;
-    wl_list *parentLink_;
-
     Server *server_;
+    wl_list link_;
+    wl_list *list_;
+
     wlr_xdg_toplevel *xdg_toplevel_;
     wlr_scene_tree *scene_tree_;
 
-    Listener<&View::mapNotify> map_;
-    Listener<&View::unmapNotify> unmap_;
-    Listener<&View::destroyNotify> destroy_;
-    Listener<&View::xdgToplevelRequestMoveNotify> request_move_;
-    Listener<&View::xdgToplevelRequestResizeNotify> request_resize_;
-    Listener<&View::xdgToplevelRequestMaximizeNotify> request_maximize_;
-    Listener<&View::xdgToplevelRequestFullscreenNotify> request_fullscreen_;
+    Listener<&View::xdgSurfaceMapNotify> xdg_surface_map_;
+    Listener<&View::xdgSurfaceUnmapNotify> xdg_surface_unmap_;
+    Listener<&View::xdgSurfaceDestroyNotify> xdg_surface_destroy_;
+
+    Listener<&View::xdgToplevelRequestMoveNotify> xdg_toplevel_request_move_;
+    Listener<&View::xdgToplevelRequestResizeNotify> xdg_toplevel_request_resize_;
+    Listener<&View::xdgToplevelRequestMaximizeNotify> xdg_toplevel_request_maximize_;
+    Listener<&View::xdgToplevelRequestFullscreenNotify> xdg_toplevel_request_fullscreen_;
 };
 
 #endif // !VIEW_H
