@@ -9,15 +9,15 @@
 #include <assert.h>
 
 View::View(Server *server, wlr_xdg_surface *xdg_surface, wl_list *list)
-    : parentLink_(list)
-    , server_(server)
-    , map_(this)
-    , unmap_(this)
-    , destroy_(this)
-    , request_move_(this)
-    , request_resize_(this)
-    , request_maximize_(this)
-    , request_fullscreen_(this)
+    : server_(server)
+    , list_(list)
+    , xdg_surface_map_(this)
+    , xdg_surface_unmap_(this)
+    , xdg_surface_destroy_(this)
+    , xdg_toplevel_request_move_(this)
+    , xdg_toplevel_request_resize_(this)
+    , xdg_toplevel_request_maximize_(this)
+    , xdg_toplevel_request_fullscreen_(this)
 {
     xdg_toplevel_ = xdg_surface->toplevel;
     scene_tree_ = wlr_scene_xdg_surface_create(&server_->scene()->tree, xdg_toplevel_->base);
@@ -25,29 +25,29 @@ View::View(Server *server, wlr_xdg_surface *xdg_surface, wl_list *list)
     xdg_surface->data = scene_tree_;
 
     /* Listen to the various events it can emit */
-    wl_signal_add(&xdg_surface->events.map, map_);
-    wl_signal_add(&xdg_surface->events.unmap, unmap_);
-    wl_signal_add(&xdg_surface->events.destroy, destroy_);
+    wl_signal_add(&xdg_surface->events.map, xdg_surface_map_);
+    wl_signal_add(&xdg_surface->events.unmap, xdg_surface_unmap_);
+    wl_signal_add(&xdg_surface->events.destroy, xdg_surface_destroy_);
 
     /* cotd */
-    wl_signal_add(&xdg_toplevel_->events.request_move, request_move_);
-    wl_signal_add(&xdg_toplevel_->events.request_resize, request_resize_);
-    wl_signal_add(&xdg_toplevel_->events.request_maximize, request_maximize_);
-    wl_signal_add(&xdg_toplevel_->events.request_fullscreen, request_fullscreen_);
+    wl_signal_add(&xdg_toplevel_->events.request_move, xdg_toplevel_request_move_);
+    wl_signal_add(&xdg_toplevel_->events.request_resize, xdg_toplevel_request_resize_);
+    wl_signal_add(&xdg_toplevel_->events.request_maximize, xdg_toplevel_request_maximize_);
+    wl_signal_add(&xdg_toplevel_->events.request_fullscreen, xdg_toplevel_request_fullscreen_);
 }
 
 View::~View() { }
 
-void View::mapNotify(void *data)
+void View::xdgSurfaceMapNotify(void *data)
 {
     /* Called when the surface is mapped, or ready to display on-screen. */
 
-    wl_list_insert(parentLink_, &link_);
+    wl_list_insert(list_, &link_);
 
     focusView();
 }
 
-void View::unmapNotify(void *data)
+void View::xdgSurfaceUnmapNotify(void *data)
 {
     /* Called when the surface is unmapped, and should no longer be shown. */
 
@@ -59,7 +59,7 @@ void View::unmapNotify(void *data)
     wl_list_remove(&link_);
 }
 
-void View::destroyNotify(void *data)
+void View::xdgSurfaceDestroyNotify(void *data)
 {
     /* Called when the surface is destroyed and should never be shown again. */
     delete this;

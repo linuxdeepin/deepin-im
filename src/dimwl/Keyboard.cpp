@@ -13,7 +13,7 @@ extern "C" {
 
 Keyboard::Keyboard(Server *server, wlr_seat *seat, wlr_input_device *device, wl_list *list)
     : server_(server)
-    , wlr_keyboard_(wlr_keyboard_from_input_device(device))
+    , keyboard_(wlr_keyboard_from_input_device(device))
     , modifiers_(this)
     , key_(this)
     , destroy_(this)
@@ -24,17 +24,17 @@ Keyboard::Keyboard(Server *server, wlr_seat *seat, wlr_input_device *device, wl_
     struct xkb_keymap *keymap =
         xkb_keymap_new_from_names(context, NULL, XKB_KEYMAP_COMPILE_NO_FLAGS);
 
-    wlr_keyboard_set_keymap(wlr_keyboard_, keymap);
+    wlr_keyboard_set_keymap(keyboard_, keymap);
     xkb_keymap_unref(keymap);
     xkb_context_unref(context);
-    wlr_keyboard_set_repeat_info(wlr_keyboard_, 25, 600);
+    wlr_keyboard_set_repeat_info(keyboard_, 25, 600);
 
     /* Here we set up listeners for keyboard events. */
-    wl_signal_add(&wlr_keyboard_->events.modifiers, modifiers_);
-    wl_signal_add(&wlr_keyboard_->events.key, key_);
+    wl_signal_add(&keyboard_->events.modifiers, modifiers_);
+    wl_signal_add(&keyboard_->events.key, key_);
     wl_signal_add(&device->events.destroy, destroy_);
 
-    wlr_seat_set_keyboard(seat, wlr_keyboard_);
+    wlr_seat_set_keyboard(seat, keyboard_);
 
     /* And add the keyboard to our list of keyboards */
     wl_list_insert(list, &link_);
@@ -55,9 +55,9 @@ void Keyboard::modifiersNotify(void *data)
      * same seat. You can swap out the underlying wlr_keyboard like this and
      * wlr_seat handles this transparently.
      */
-    wlr_seat_set_keyboard(server_->seat(), wlr_keyboard_);
+    wlr_seat_set_keyboard(server_->seat(), keyboard_);
     /* Send modifiers to the client. */
-    wlr_seat_keyboard_notify_modifiers(server_->seat(), &wlr_keyboard_->modifiers);
+    wlr_seat_keyboard_notify_modifiers(server_->seat(), &keyboard_->modifiers);
 }
 
 void Keyboard::keyNotify(void *data)
@@ -70,10 +70,10 @@ void Keyboard::keyNotify(void *data)
     uint32_t keycode = event->keycode + 8;
     /* Get a list of keysyms based on the keymap for this keyboard */
     const xkb_keysym_t *syms;
-    int nsyms = xkb_state_key_get_syms(wlr_keyboard_->xkb_state, keycode, &syms);
+    int nsyms = xkb_state_key_get_syms(keyboard_->xkb_state, keycode, &syms);
 
     bool handled = false;
-    uint32_t modifiers = wlr_keyboard_get_modifiers(wlr_keyboard_);
+    uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard_);
     if ((modifiers & WLR_MODIFIER_ALT) && event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
         /* If alt is held down and this button was _pressed_, we attempt to
          * process it as a compositor keybinding. */
@@ -85,7 +85,7 @@ void Keyboard::keyNotify(void *data)
 
     if (!handled) {
         /* Otherwise, we pass it along to the client. */
-        wlr_seat_set_keyboard(seat, wlr_keyboard_);
+        wlr_seat_set_keyboard(seat, keyboard_);
         wlr_seat_keyboard_notify_key(seat, event->time_msec, event->keycode, event->state);
     }
 }
