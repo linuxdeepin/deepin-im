@@ -30,6 +30,9 @@ public:
 
     void switchIMAddon();
 
+public Q_SLOTS:
+    void requestSwitchIM(const std::string &framework, const std::string &name);
+
 private:
     std::set<std::pair<std::string, std::string>>::const_iterator findIMEntry() const;
 

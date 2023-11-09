@@ -35,6 +35,23 @@ void InputState::switchIMAddon()
     emit ic_->imSwitch(currentIMKey_);
 }
 
+void InputState::requestSwitchIM(const std::string &framework, const std::string &name)
+{
+    const auto &activeInputMethodEntries = ic_->dim_->activeInputMethodEntries();
+
+    auto iter = std::find_if(activeInputMethodEntries.cbegin(),
+                             activeInputMethodEntries.cend(),
+                             [this, &framework, &name](const auto &pair) {
+                                 return pair.first == framework && pair.second == name;
+                             });
+    if (iter == activeInputMethodEntries.cend()) {
+        return;
+    }
+
+    currentIMKey_ = *iter;
+    emit ic_->imSwitch(currentIMKey_);
+}
+
 std::set<std::pair<std::string, std::string>>::const_iterator InputState::findIMEntry() const
 {
     const auto &activeInputMethodEntries = ic_->dim_->activeInputMethodEntries();
