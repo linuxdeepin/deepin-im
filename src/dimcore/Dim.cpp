@@ -321,7 +321,7 @@ void Dim::launchFcitx5Daemon()
     fcitx5Proc.startDetached(
         QStringLiteral("fcitx5"),
         QStringList{ QStringLiteral("--disable"),
-                     QStringLiteral("fcitx4frontend,ibusfrontend,xim,waylandim"),
+                     QStringLiteral("fcitx4frontend,ibusfrontend,xim,waylandim,notificationitem"),
                      QStringLiteral("-r"),
                      QStringLiteral("-d") });
     auto ret = fcitx5Proc.waitForStarted(500);
