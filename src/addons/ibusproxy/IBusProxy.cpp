@@ -184,7 +184,7 @@ QDBusConnection *DimIBusInputContextPrivate::createConnection()
 }
 
 DimIBusProxy::DimIBusProxy(Dim *dim)
-    : ProxyAddon(dim, "ibusproxy", "ibus")
+    : ProxyAddon(dim, "ibus", "ibus")
     , d(new DimIBusInputContextPrivate())
     , useSyncMode_(false)
 {

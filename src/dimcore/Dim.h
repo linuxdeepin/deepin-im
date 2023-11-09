@@ -67,9 +67,16 @@ public:
 
     const auto &activeInputMethodEntries() const { return activeInputMethodEntries_; };
 
+    const auto &getCurrentInputMethod() const { return currentActiveIM; };
+
+    const auto &getCurrentInputMethods() const { return currentActiveIMEntries_; };
+
     const std::vector<InputMethodEntry> &imEntries() const { return imEntries_; };
 
     int focusedInputContext() const { return focusedInputContext_; }
+
+    void addInputMethod(const std::string &addon, const std::string &name);
+    void removeInputMethod(const std::string &addon, const std::string &name);
 
 Q_SIGNALS:
     void focusedInputContextChanged(int focusedInputContext);
@@ -77,6 +84,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void switchIM(const std::pair<std::string, std::string> &imIndex);
+    bool requestSwitchIM(const std::string &addon, const std::string &name);
 
 private:
     void loadAddons();
@@ -107,6 +115,8 @@ private:
     std::vector<InputMethodEntry> imEntries_;
     std::set<std::pair<std::string, std::string>> activeInputMethodEntries_;
     std::set<FrontendAddon *> frontends_;
+    std::pair<std::string, std::string> currentActiveIM;
+    std::set<std::pair<std::string, std::string>> currentActiveIMEntries_;
 #ifdef Dtk6Core_FOUND
     DTK_CORE_NAMESPACE::DConfig *dimConf_;
 #endif

@@ -2,9 +2,13 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "dbus/DimDBusAdaptor.h"
+#include "dimadaptor.h"
 #include "dimcore/Dim.h"
 
 #include <QGuiApplication>
+
+using namespace org::deepin::dim;
 
 #ifdef Dtk6Core_FOUND
 #  include <DLog>
@@ -21,7 +25,14 @@ int main(int argc, char *argv[])
     DLogManager::registerConsoleAppender();
 #endif
 
-    org::deepin::dim::Dim dim;
+    Dim *dim = new Dim();
+
+    auto dimDBusAdaptor = new DimDBusAdaptor(dim);
+    new DimAdaptor(dimDBusAdaptor);
+    QDBusConnection::sessionBus().registerService("org.deepin.dde.Dim");
+    QDBusConnection::sessionBus().registerObject("/org/deepin/dde/Dim",
+                                                 "org.deepin.dde.Dim",
+                                                 dimDBusAdaptor);
 
     return a.exec();
 }

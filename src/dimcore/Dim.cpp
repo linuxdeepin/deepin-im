@@ -50,6 +50,7 @@ Dim::Dim(QObject *parent)
     : QObject(parent)
     , focusedInputContext_(0)
     , activeInputMethodEntries_({ { "keyboard", "us" } }) // todo: load from config file
+    , currentActiveIMEntries_({ { "keyboard", "us" } })
 #ifdef Dtk6Core_FOUND
     , dimConf_(DconfigSettings::ConfigPtr(DimDConfigAppID, DimDConfigJson))
 #endif
@@ -336,6 +337,8 @@ void Dim::switchIM(const std::pair<std::string, std::string> &imIndex)
 
     if (addon) {
         addon->setCurrentIM(imIndex.second);
+
+        currentActiveIM = imIndex;
     }
 }
 
@@ -386,4 +389,67 @@ void Dim::launchInputMethodProxyDaemon(uint32_t modifier)
     if (modifier & IBusDaemonMask) {
         launchIbusDaemon();
     }
+}
+
+bool Dim::requestSwitchIM(const std::string &addon, const std::string &name)
+{
+    auto iter = std::find_if(getCurrentInputMethods().cbegin(),
+                             getCurrentInputMethods().cend(),
+                             [&addon, &name](const auto &pair) {
+                                 return (pair.first == addon) && pair.second == name;
+                             });
+    if (iter == getCurrentInputMethods().cend()) {
+        qDebug() << "invalid input method " << QString::fromStdString(name);
+        return false;
+    }
+
+    auto currentFocusedIc = getInputContext(focusedInputContext());
+    if (currentFocusedIc) {
+        currentFocusedIc->inputState().requestSwitchIM(addon, name);
+        return true;
+    }
+
+    return false;
+}
+
+/*
+ * Description: add input method
+ * addon: input method framework(ibus or fcitx5)
+ * name: input method name
+ */
+void Dim::addInputMethod(const std::string &addon, const std::string &name)
+{
+    auto iter = std::find_if(activeInputMethodEntries().cbegin(),
+                             activeInputMethodEntries().cend(),
+                             [&addon, &name](const auto &pair) {
+                                 return (pair.first == addon) && pair.second == name;
+                             });
+    if (iter == activeInputMethodEntries().cend()) {
+        qDebug() << "invalid input method " << QString::fromStdString(name);
+        return;
+    }
+
+    currentActiveIMEntries_.emplace(*iter);
+    // TODO: save to config
+}
+
+/*
+ * Description: remove input method
+ * addon: input method framework(ibus or fcitx)
+ * name: input method name
+ */
+void Dim::removeInputMethod(const std::string &addon, const std::string &name)
+{
+    auto iter = std::find_if(getCurrentInputMethods().cbegin(),
+                             getCurrentInputMethods().cend(),
+                             [&addon, &name](const auto &pair) {
+                                 return (pair.first == addon) && pair.second == name;
+                             });
+    if (iter == getCurrentInputMethods().cend()) {
+        qDebug() << "invalid input method " << QString::fromStdString(name);
+        return;
+    }
+
+    currentActiveIMEntries_.erase(iter);
+    // TODO: remove from config
 }
