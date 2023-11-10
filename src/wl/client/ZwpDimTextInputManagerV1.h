@@ -22,7 +22,7 @@ public:
     ZwpDimTextInputManagerV1(zwp_dim_text_input_manager_v1 *val);
     ~ZwpDimTextInputManagerV1();
 
-    struct zwp_dim_text_input_v1 *get_text_tnput(const std::shared_ptr<Seat> &seat);
+    struct zwp_dim_text_input_v1 *get_text_input(const std::shared_ptr<Seat> &seat);
 
 private:
 };
