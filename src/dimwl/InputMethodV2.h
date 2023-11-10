@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#ifndef INPUTMETHODV2_H
+#define INPUTMETHODV2_H
+
+#include "Listener.h"
+
+extern "C" {
+#define delete delete_
+#include <wlr/types/wlr_input_method_v2.h>
+#undef delete
+}
+
+class Server;
+class TextInputV3;
+
+class InputMethodV2
+{
+    friend class TextInputV3;
+    friend class Keyboard;;
+
+public:
+    InputMethodV2(Server *server, wlr_input_method_v2 *input_method);
+    ~InputMethodV2();
+
+private:
+    void commitNotify(void *data);
+    void newPopupSurfaceNotify(void *data);
+    void grabKeyboardNotify(void *data);
+    void destroyNotify(void *data);
+    void keyboardGrabDestroyNotify(void *data);
+
+    TextInputV3 *getFocusedTextInput() const;
+
+private:
+    Server *server_;
+    wlr_input_method_v2 *input_method_;
+
+    Listener<&InputMethodV2::commitNotify> commit_;
+    Listener<&InputMethodV2::newPopupSurfaceNotify> new_popup_surface_;
+    Listener<&InputMethodV2::grabKeyboardNotify> grab_keyboard_;
+    Listener<&InputMethodV2::destroyNotify> destroy_;
+
+    Listener<&InputMethodV2::keyboardGrabDestroyNotify> keyboard_grab_destroy_;
+};
+
+#endif // !INPUTMETHODV2_H
