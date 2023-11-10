@@ -19,7 +19,6 @@ add_executable(imwl
     X11ActiveWindowMonitor.cpp X11ActiveWindowMonitor.h
     DimTextInputManagerV1.cpp DimTextInputManagerV1.h
     DimTextInputV1.cpp DimTextInputV1.h
-    shm_open_anon.c shm_open_anon.h
 )
 
 target_link_libraries(imwl PUBLIC
@@ -28,6 +27,7 @@ target_link_libraries(imwl PUBLIC
     PkgConfig::xcb
     PkgConfig::xcb-xinput
     PkgConfig::xkbcommon
+    shm_open_anon
     $<$<BOOL:${Dtk6Core_FOUND}>:Dtk6::Core>
 )
 

@@ -6,7 +6,7 @@
 
 #include "X11KeyboardGrabber.h"
 #include "common.h"
-#include "shm_open_anon.h"
+#include "common/shm_open_anon.h"
 
 #include <QDateTime>
 #include <QDebug>
