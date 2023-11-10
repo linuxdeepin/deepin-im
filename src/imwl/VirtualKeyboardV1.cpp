@@ -97,7 +97,7 @@ void VirtualKeyboardV1::zwp_virtual_keyboard_v1_key(wl::server::Resource *resour
                                                     uint32_t key,
                                                     uint32_t state)
 {
-    xkb_keysym_t sym = xkb_state_key_get_one_sym(xkbState_.get(), key);
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(xkbState_.get(), key + XKB_HISTORICAL_OFFSET);
     auto dti = seat_->getDimTextInputV1();
     dti->sendKeysym(nextSerial(), time, sym, state, state_.modifiers);
 }

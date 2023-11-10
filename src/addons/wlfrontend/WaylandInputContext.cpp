@@ -98,7 +98,7 @@ void WaylandInputContext::commitStringDelegate(InputContext *, const QString &te
 void WaylandInputContext::forwardKeyDelegate(InputContext *, uint32_t keycode, bool pressed) const
 {
     vk_->key(getTimestamp(),
-             keycode + XKB_HISTORICAL_OFFSET,
+             keycode,
              pressed ? WL_KEYBOARD_KEY_STATE_PRESSED : WL_KEYBOARD_KEY_STATE_RELEASED);
 }
 
@@ -251,10 +251,12 @@ void WaylandInputContext::keyCallback(uint32_t serial, uint32_t time, uint32_t k
 
     auto *ic = delegatedInputContext();
 
-    xkb_keysym_t sym = xkb_state_key_get_one_sym(xkbState_.get(), key);
+    uint32_t code = key + XKB_HISTORICAL_OFFSET;
+
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(xkbState_.get(), code);
     InputContextKeyEvent ke(ic,
                             static_cast<uint32_t>(sym),
-                            key,
+                            code,
                             state_->modifiers,
                             state == WL_KEYBOARD_KEY_STATE_RELEASED,
                             time);

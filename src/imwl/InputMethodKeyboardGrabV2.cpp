@@ -95,7 +95,9 @@ std::pair<int, size_t> InputMethodKeyboardGrabV2::genKeymapData(xkb_keymap *keym
 
 bool InputMethodKeyboardGrabV2::updateState(uint32_t keycode, bool isRelease)
 {
-    xkb_state_update_key(xkbState_.get(), keycode, isRelease ? XKB_KEY_UP : XKB_KEY_DOWN);
+    xkb_state_update_key(xkbState_.get(),
+                         keycode + XKB_HISTORICAL_OFFSET,
+                         isRelease ? XKB_KEY_UP : XKB_KEY_DOWN);
 
     State state = {};
     state.modsDepressed = xkb_state_serialize_mods(xkbState_.get(), XKB_STATE_MODS_DEPRESSED);

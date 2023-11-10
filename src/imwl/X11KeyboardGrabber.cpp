@@ -35,7 +35,7 @@ void X11KeyboardGrabber::xcbEvent(const std::unique_ptr<xcb_generic_event_t> &ev
     bool isRelease = ge->event_type == XCB_INPUT_RAW_KEY_RELEASE;
     auto *ke = reinterpret_cast<xcb_input_raw_key_press_event_t *>(event.get());
 
-    emit keyEvent(ke->detail, isRelease);
+    emit keyEvent(ke->detail - XKB_HISTORICAL_OFFSET, isRelease);
 }
 
 void X11KeyboardGrabber::initXinputExtension()
