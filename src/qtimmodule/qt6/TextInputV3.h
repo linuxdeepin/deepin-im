@@ -61,6 +61,8 @@ protected:
 private:
     QWaylandInputMethodEventBuilder m_builder;
 
+    wl_surface *m_surface = nullptr;
+
     struct PreeditInfo
     {
         QString text;

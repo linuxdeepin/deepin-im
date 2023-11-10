@@ -32,7 +32,7 @@ void TextInputV3::zwp_text_input_v3_enter(struct wl_surface *surface)
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO;
 
-    // m_surface = surface;
+    m_surface = surface;
 
     m_pendingPreeditString.clear();
     m_pendingCommitString.clear();
@@ -48,11 +48,11 @@ void TextInputV3::zwp_text_input_v3_leave(struct wl_surface *surface)
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO;
 
-    // if (m_surface != surface) {
-    //     qCWarning(qLcQpaWaylandTextInput()) << Q_FUNC_INFO << "Got leave event for surface"
-    //                                         << surface << "focused surface" << m_surface;
-    //     return;
-    // }
+    if (m_surface != surface) {
+        qCWarning(qLcQpaWaylandTextInput()) << Q_FUNC_INFO << "Got leave event for surface"
+                                            << surface << "focused surface" << m_surface;
+        return;
+    }
 
     // QTBUG-97248: check commit_mode
     // Currently text-input-unstable-v4-wip is implemented with preedit_commit_mode
@@ -60,7 +60,7 @@ void TextInputV3::zwp_text_input_v3_leave(struct wl_surface *surface)
 
     m_currentPreeditString.clear();
 
-    // m_surface = nullptr;
+    m_surface = nullptr;
     m_entered = false;
     m_currentSerial = 0U;
 

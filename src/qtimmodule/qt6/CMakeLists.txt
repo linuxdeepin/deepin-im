@@ -7,6 +7,10 @@ set(QTIMMODULE_SOURCES
   Keyboard.cpp
   TextInputV3.h
   TextInputV3.cpp
+  XdgSurface.h
+  XdgSurface.cpp
+  XdgToplevel.h
+  XdgToplevel.cpp
 
   QWaylandTextInputInterface.h
   QWaylandInputMethodEventBuilder.h
@@ -30,6 +34,7 @@ target_link_libraries(dimplatforminputcontextplugin-qt6 PRIVATE
   Qt6::GuiPrivate
   Qt6::DBus
   wlc
+  shm_open_anon
 )
 
 get_target_property(_QT6_QMAKE_EXECUTABLE Qt6::qmake LOCATION)

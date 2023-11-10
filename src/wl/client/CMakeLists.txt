@@ -7,10 +7,18 @@ set(WLC_SOURCES
   Connection.cpp
   Compositor.h Compositor.cpp
   Surface.h Surface.cpp
+  Shm.h
+  Shm.cpp
   Seat.h
   Seat.cpp
   Keyboard.h
   Keyboard.cpp
+  XdgWmBase.h
+  XdgWmBase.cpp
+  XdgSurface.h
+  XdgSurface.cpp
+  XdgToplevel.h
+  XdgToplevel.cpp
   ZwpInputMethodManagerV2.h
   ZwpInputMethodManagerV2.cpp
   ZwpInputMethodV2.h
