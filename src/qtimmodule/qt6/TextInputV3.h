@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-#ifndef QWAYLANDTEXTINPUTV4_P_H
-#define QWAYLANDTEXTINPUTV4_P_H
+#ifndef DIM_TEXTINPUTV3_H
+#define DIM_TEXTINPUTV3_H
 
 //
 //  W A R N I N G
@@ -20,7 +20,7 @@
 
 #include "QWaylandInputMethodEventBuilder.h"
 #include "QWaylandTextInputInterface.h"
-#include "wl/client/ZwpDimTextInputV1.h"
+#include "wl/client/ZwpTextInputV3.h"
 
 #include <QLoggingCategory>
 
@@ -31,12 +31,12 @@ Q_DECLARE_LOGGING_CATEGORY(qLcQpaWaylandTextInput)
 
 class QWaylandDisplay;
 
-class DimTextInputV1 : public wl::client::ZwpDimTextInputV1,
-                       public QtWaylandClient::QWaylandTextInputInterface
+class TextInputV3 : public wl::client::ZwpTextInputV3,
+                    public QtWaylandClient::QWaylandTextInputInterface
 {
 public:
-    explicit DimTextInputV1(struct ::zwp_dim_text_input_v1 *text_input);
-    ~DimTextInputV1() override;
+    explicit TextInputV3(struct ::zwp_text_input_v3 *text_input);
+    ~TextInputV3() override;
 
     void reset() override;
     void commit() override;
@@ -48,23 +48,18 @@ public:
     void disable() override;
 
 protected:
-    void zwp_dim_text_input_v1_enter() override;
-    void zwp_dim_text_input_v1_leave() override;
-    void zwp_dim_text_input_v1_modifiers_map(struct wl_array *map) override;
-    void zwp_dim_text_input_v1_preedit_string(const char *text,
-                                              int32_t cursor_begin,
-                                              int32_t cursor_end) override;
-    void zwp_dim_text_input_v1_commit_string(const char *text) override;
-    void zwp_dim_text_input_v1_delete_surrounding_text(uint32_t before_length,
-                                                       uint32_t after_length) override;
-    void zwp_dim_text_input_v1_done(uint32_t serial) override;
-    void zwp_dim_text_input_v1_keysym(
-        uint32_t serial, uint32_t time, uint32_t sym, uint32_t state, uint32_t modifiers) override;
+    void zwp_text_input_v3_enter(struct wl_surface *surface) override;
+    void zwp_text_input_v3_leave(struct wl_surface *surface) override;
+    void zwp_text_input_v3_preedit_string(const char *text,
+                                          int32_t cursor_begin,
+                                          int32_t cursor_end) override;
+    void zwp_text_input_v3_commit_string(const char *text) override;
+    void zwp_text_input_v3_delete_surrounding_text(uint32_t before_length,
+                                                   uint32_t after_length) override;
+    void zwp_text_input_v3_done(uint32_t serial) override;
 
 private:
     QWaylandInputMethodEventBuilder m_builder;
-
-    QList<Qt::KeyboardModifier> m_modifiersMap;
 
     struct PreeditInfo
     {
@@ -87,9 +82,8 @@ private:
     uint m_pendingDeleteAfterText = 0;
 
     QString m_surroundingText;
-    int m_cursor;    // cursor position in QString
-    int m_cursorPos; // cursor position in wayland index
-    int m_anchorPos; // anchor position in wayland index
+    int m_cursorPos = 0; // cursor position in wayland index
+    int m_anchorPos = 0; // anchor position in wayland index
     uint32_t m_contentHint = 0;
     uint32_t m_contentPurpose = 0;
     QRect m_cursorRect;
@@ -98,8 +92,6 @@ private:
     uint m_currentSerial = 0;
 
     bool m_condReselection = false;
-
-    Qt::KeyboardModifiers modifiersToQtModifiers(uint32_t modifiers);
 };
 
-#endif // QWAYLANDTEXTINPUTV4_P_H
+#endif // DIM_TEXTINPUTV3_H

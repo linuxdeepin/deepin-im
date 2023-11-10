@@ -4,35 +4,31 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-#include "DimTextInputV1.h"
-
-#include "Key.h"
-
-#include <private/qxkbcommon_p.h>
-#include <qpa/qwindowsysteminterface.h>
+#include "TextInputV3.h"
 
 #include <QTextCharFormat>
 #include <QtCore/qloggingcategory.h>
 #include <QtGui/qevent.h>
 #include <QtGui/qguiapplication.h>
 #include <QtGui/qpa/qplatformwindow.h>
+#include <QtGui/qpa/qwindowsysteminterface.h>
 #include <QtGui/qwindow.h>
 
 Q_LOGGING_CATEGORY(qLcQpaWaylandTextInput, "qt.qpa.wayland.textinput")
 
-DimTextInputV1::DimTextInputV1(struct ::zwp_dim_text_input_v1 *text_input)
-    : wl::client::ZwpDimTextInputV1(text_input)
+TextInputV3::TextInputV3(struct ::zwp_text_input_v3 *text_input)
+    : wl::client::ZwpTextInputV3(text_input)
 {
 }
 
-DimTextInputV1::~DimTextInputV1() { }
+TextInputV3::~TextInputV3() { }
 
 namespace {
 const Qt::InputMethodQueries supportedQueries4 = Qt::ImEnabled | Qt::ImSurroundingText
     | Qt::ImCursorPosition | Qt::ImAnchorPosition | Qt::ImHints | Qt::ImCursorRectangle;
 }
 
-void DimTextInputV1::zwp_dim_text_input_v1_enter()
+void TextInputV3::zwp_text_input_v3_enter(struct wl_surface *surface)
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO;
 
@@ -48,7 +44,7 @@ void DimTextInputV1::zwp_dim_text_input_v1_enter()
     updateState(supportedQueries4, update_state_enter);
 }
 
-void DimTextInputV1::zwp_dim_text_input_v1_leave()
+void TextInputV3::zwp_text_input_v3_leave(struct wl_surface *surface)
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO;
 
@@ -72,32 +68,9 @@ void DimTextInputV1::zwp_dim_text_input_v1_leave()
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO << "Done";
 }
 
-void DimTextInputV1::zwp_dim_text_input_v1_modifiers_map(struct wl_array *map)
-{
-    const QList<QByteArray> modifiersMap =
-        QByteArray::fromRawData(static_cast<const char *>(map->data), map->size).split('\0');
-
-    m_modifiersMap.clear();
-
-    for (const QByteArray &modifier : modifiersMap) {
-        if (modifier == "Shift")
-            m_modifiersMap.append(Qt::ShiftModifier);
-        else if (modifier == "Control")
-            m_modifiersMap.append(Qt::ControlModifier);
-        else if (modifier == "Alt")
-            m_modifiersMap.append(Qt::AltModifier);
-        else if (modifier == "Mod1")
-            m_modifiersMap.append(Qt::AltModifier);
-        else if (modifier == "Mod4")
-            m_modifiersMap.append(Qt::MetaModifier);
-        else
-            m_modifiersMap.append(Qt::NoModifier);
-    }
-}
-
-void DimTextInputV1::zwp_dim_text_input_v1_preedit_string(const char *text,
-                                                          int32_t cursorBegin,
-                                                          int32_t cursorEnd)
+void TextInputV3::zwp_text_input_v3_preedit_string(const char *text,
+                                                   int32_t cursorBegin,
+                                                   int32_t cursorEnd)
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO << text << cursorBegin << cursorEnd;
 
@@ -109,7 +82,7 @@ void DimTextInputV1::zwp_dim_text_input_v1_preedit_string(const char *text,
     m_pendingPreeditString.cursorEnd = cursorEnd;
 }
 
-void DimTextInputV1::zwp_dim_text_input_v1_commit_string(const char *text)
+void TextInputV3::zwp_text_input_v3_commit_string(const char *text)
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO << text;
 
@@ -119,8 +92,7 @@ void DimTextInputV1::zwp_dim_text_input_v1_commit_string(const char *text)
     m_pendingCommitString = text;
 }
 
-void DimTextInputV1::zwp_dim_text_input_v1_delete_surrounding_text(uint32_t beforeText,
-                                                                   uint32_t afterText)
+void TextInputV3::zwp_text_input_v3_delete_surrounding_text(uint32_t beforeText, uint32_t afterText)
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO << beforeText << afterText;
 
@@ -133,7 +105,7 @@ void DimTextInputV1::zwp_dim_text_input_v1_delete_surrounding_text(uint32_t befo
         QWaylandInputMethodEventBuilder::indexFromWayland(m_surroundingText, afterText);
 }
 
-void DimTextInputV1::zwp_dim_text_input_v1_done(uint32_t serial)
+void TextInputV3::zwp_text_input_v3_done(uint32_t serial)
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO << "with serial" << serial << m_currentSerial;
 
@@ -203,76 +175,36 @@ void DimTextInputV1::zwp_dim_text_input_v1_done(uint32_t serial)
     }
 }
 
-void DimTextInputV1::zwp_dim_text_input_v1_keysym(
-    uint32_t serial, uint32_t time, uint32_t sym, uint32_t state, uint32_t modifiers)
-{
-    // m_serial = serial;
-
-    // if (m_resetCallback) {
-    //     qCDebug(qLcQpaInputMethods()) << "discard keysym: reset not confirmed";
-    //     return;
-    // }
-
-    if (!QGuiApplication::focusWindow()) {
-        return;
-    }
-
-    Qt::KeyboardModifiers qtModifiers = modifiersToQtModifiers(modifiers);
-
-    QEvent::Type type =
-        state == WL_KEYBOARD_KEY_STATE_PRESSED ? QEvent::KeyPress : QEvent::KeyRelease;
-    QString text = QXkbCommon::lookupStringNoKeysymTransformations(sym);
-    int qtkey = keySymToQtKey(sym, text);
-
-    QWindowSystemInterface::handleKeyEvent(QGuiApplication::focusWindow(),
-                                           time,
-                                           type,
-                                           qtkey,
-                                           qtModifiers,
-                                           text);
-}
-
-Qt::KeyboardModifiers DimTextInputV1::modifiersToQtModifiers(uint32_t modifiers)
-{
-    Qt::KeyboardModifiers ret = Qt::NoModifier;
-    for (int i = 0; i < m_modifiersMap.size(); ++i) {
-        if (modifiers & (1 << i)) {
-            ret |= m_modifiersMap[i];
-        }
-    }
-    return ret;
-}
-
-void DimTextInputV1::reset()
+void TextInputV3::reset()
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO;
 
     m_pendingPreeditString.clear();
 }
 
-void DimTextInputV1::enable()
+void TextInputV3::enable()
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO;
 
-    wl::client::ZwpDimTextInputV1::enable();
+    wl::client::ZwpTextInputV3::enable();
 }
 
-void DimTextInputV1::disable()
+void TextInputV3::disable()
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO;
 
-    wl::client::ZwpDimTextInputV1::disable();
+    wl::client::ZwpTextInputV3::disable();
 }
 
-void DimTextInputV1::commit()
+void TextInputV3::commit()
 {
     m_currentSerial = (m_currentSerial < UINT_MAX) ? m_currentSerial + 1U : 0U;
 
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO << "with serial" << m_currentSerial;
-    ZwpDimTextInputV1::commit();
+    ZwpTextInputV3::commit();
 }
 
-void DimTextInputV1::updateState(Qt::InputMethodQueries queries, uint32_t flags)
+void TextInputV3::updateState(Qt::InputMethodQueries queries, uint32_t flags)
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO << queries << flags;
 
@@ -402,7 +334,6 @@ void DimTextInputV1::updateState(Qt::InputMethodQueries queries, uint32_t flags)
             m_surroundingText = text;
             m_cursorPos = cursorPos;
             m_anchorPos = anchorPos;
-            m_cursor = cursor;
         }
     }
 
@@ -427,7 +358,7 @@ void DimTextInputV1::updateState(Qt::InputMethodQueries queries, uint32_t flags)
         commit();
 }
 
-QRectF DimTextInputV1::keyboardRect() const
+QRectF TextInputV3::keyboardRect() const
 {
     qCDebug(qLcQpaWaylandTextInput) << Q_FUNC_INFO;
     return m_cursorRect;

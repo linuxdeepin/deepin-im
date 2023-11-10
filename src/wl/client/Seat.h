@@ -15,6 +15,8 @@ class Seat : public Type<wl_seat>
 public:
     Seat(wl_seat *val);
     ~Seat();
+
+    struct wl_keyboard *get_keyboard();
 };
 
 } // namespace client

@@ -3,10 +3,10 @@ set(QTIMMODULE_SOURCES
   DIMPlatformInputContextPlugin.cpp
   DIMPlatformInputContext.h
   DIMPlatformInputContext.cpp
-  DimTextInputV1.h
-  DimTextInputV1.cpp
-  Key.h
-  Key.cpp
+  Keyboard.h
+  Keyboard.cpp
+  TextInputV3.h
+  TextInputV3.cpp
 
   QWaylandTextInputInterface.h
   QWaylandInputMethodEventBuilder.h

@@ -9,6 +9,8 @@ set(WLC_SOURCES
   Surface.h Surface.cpp
   Seat.h
   Seat.cpp
+  Keyboard.h
+  Keyboard.cpp
   ZwpInputMethodManagerV2.h
   ZwpInputMethodManagerV2.cpp
   ZwpInputMethodV2.h

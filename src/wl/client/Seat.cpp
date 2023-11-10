@@ -20,3 +20,7 @@ Seat::~Seat()
         wl_seat_destroy(get());
     }
 }
+
+struct wl_keyboard *Seat::get_keyboard() {
+    return wl_seat_get_keyboard(get());
+}
