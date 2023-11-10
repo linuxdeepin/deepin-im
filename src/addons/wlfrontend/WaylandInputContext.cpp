@@ -196,22 +196,26 @@ void WaylandInputContext::keymapCallback(uint32_t format, int32_t fd, uint32_t s
         return;
     }
 
-    void *ptr = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0);
+    auto *ptr = static_cast<const char *>(mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0));
     if (ptr == MAP_FAILED) {
         return;
     }
 
-    xkbKeymap_.reset(xkb_keymap_new_from_string(xkbContext_.get(),
-                                                static_cast<const char *>(ptr),
-                                                XKB_KEYMAP_FORMAT_TEXT_V1,
-                                                XKB_KEYMAP_COMPILE_NO_FLAGS));
-    munmap(ptr, size);
+    const bool keymapChanged =
+        (size != keymapData_.size() || memcmp(ptr, keymapData_.data(), size) != 0);
+    if (keymapChanged) {
+        std::vector<char> newKeymapData(ptr, ptr + size);
+        std::swap(keymapData_, newKeymapData);
+
+        xkbKeymap_.reset(xkb_keymap_new_from_string(xkbContext_.get(),
+                                                    static_cast<const char *>(ptr),
+                                                    XKB_KEYMAP_FORMAT_TEXT_V1,
+                                                    XKB_KEYMAP_COMPILE_NO_FLAGS));
+    }
 
     if (!xkbKeymap_) {
         return;
     }
-
-    vk_->keymap(format, fd, size);
 
     xkbState_.reset(xkb_state_new(xkbKeymap_.get()));
     if (!xkbState_) {
@@ -243,6 +247,10 @@ void WaylandInputContext::keymapCallback(uint32_t format, int32_t fd, uint32_t s
         << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Super");
     modifierMask_[static_cast<uint8_t>(Modifiers::Hyper)] = 1
         << xkb_keymap_mod_get_index(xkbKeymap_.get(), "Hyper");
+
+    if (keymapChanged) {
+        vk_->keymap(format, fd, size);
+    }
 }
 
 void WaylandInputContext::keyCallback(uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
