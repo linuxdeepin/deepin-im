@@ -4,10 +4,16 @@
 
 #include "Server.h"
 
+extern "C" {
+#include <wlr/util/log.h>
+}
+
 #include <iostream>
 
 int main()
 {
+    wlr_log_init(WLR_DEBUG, NULL);
+
     Server dimwl;
     std::string socket = dimwl.addSocketAuto();
     std::cout << socket << std::endl;

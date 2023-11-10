@@ -11,6 +11,8 @@
 View::View(Server *server, wlr_xdg_surface *xdg_surface, wl_list *list)
     : server_(server)
     , list_(list)
+    , xdg_toplevel_(xdg_surface->toplevel)
+    , scene_tree_(wlr_scene_xdg_surface_create(&server_->scene()->tree, xdg_toplevel_->base))
     , xdg_surface_map_(this)
     , xdg_surface_unmap_(this)
     , xdg_surface_destroy_(this)
@@ -19,8 +21,6 @@ View::View(Server *server, wlr_xdg_surface *xdg_surface, wl_list *list)
     , xdg_toplevel_request_maximize_(this)
     , xdg_toplevel_request_fullscreen_(this)
 {
-    xdg_toplevel_ = xdg_surface->toplevel;
-    scene_tree_ = wlr_scene_xdg_surface_create(&server_->scene()->tree, xdg_toplevel_->base);
     scene_tree_->node.data = this;
     xdg_surface->data = scene_tree_;
 
@@ -123,7 +123,6 @@ void View::focusView()
         assert(previous->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL);
         wlr_xdg_toplevel_set_activated(previous->toplevel, false);
     }
-    struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
     /* Move the view to the front */
     wlr_scene_node_raise_to_top(&scene_tree_->node);
     wl_list_remove(&link_);
@@ -135,6 +134,7 @@ void View::focusView()
      * track of this and automatically send key events to the appropriate
      * clients without additional work on your part.
      */
+    struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
     if (keyboard != NULL) {
         wlr_seat_keyboard_notify_enter(seat,
                                        xdg_toplevel_->base->surface,
@@ -142,4 +142,6 @@ void View::focusView()
                                        keyboard->num_keycodes,
                                        &keyboard->modifiers);
     }
+
+    server_->setTextInputFocus(surface);
 }

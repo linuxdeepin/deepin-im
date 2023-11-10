@@ -11,6 +11,10 @@ add_executable(dimwl
     View.cpp
     Keyboard.h
     Keyboard.cpp
+    InputMethodV2.h
+    InputMethodV2.cpp
+    TextInputV3.h
+    TextInputV3.cpp
 )
 
 

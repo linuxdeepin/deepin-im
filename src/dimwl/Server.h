@@ -28,8 +28,13 @@ extern "C" {
 
 struct wlr_scene;
 struct wlr_xdg_shell;
+struct wlr_virtual_keyboard_manager_v1;
+struct wlr_input_method_manager_v2;
+struct wlr_text_input_manager_v3;
 
 class View;
+class InputMethodV2;
+class TextInputV3;
 
 class Server
 {
@@ -54,6 +59,12 @@ public:
 
     wlr_seat *seat() { return seat_.get(); }
 
+    InputMethodV2 *inputMethod() { return input_method_; }
+
+    wl_list *textInputs() { return &text_inputs_; }
+
+    void setTextInputFocus(wlr_surface *surface);
+
 private:
     void backendNewOutputNotify(void *data);
     void xdgShellNewSurfaceNotify(void *data);
@@ -65,6 +76,11 @@ private:
     void backendNewInputNotify(void *data);
     void seatRequestCursorNotify(void *data);
     void seatRequestSetSelectionNotify(void *data);
+    void virtualKeyboardManagerNewVirtualKeyboardNotify(void *data);
+    void inputMethodManagerV2InputMethodNotify(void *data);
+    void inputMethodV2DestroyNotify(void *data);
+    void textInputManagerV3TextInputNotify(void *data);
+    void textInputV3DestroyNotify(void *data);
 
     void processCursorMotion(uint32_t time);
     View *desktopViewAt(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy);
@@ -97,6 +113,18 @@ private:
     Listener<&Server::seatRequestSetSelectionNotify> seat_request_set_selection_;
     wl_list keyboards_;
     Listener<&Server::backendNewInputNotify> backend_new_input_;
+
+    std::unique_ptr<wlr_virtual_keyboard_manager_v1> virtual_keyboard_manager_v1_;
+    Listener<&Server::virtualKeyboardManagerNewVirtualKeyboardNotify> virtual_keyboard_manager_v1_new_virtual_keyboard_;
+
+    std::unique_ptr<wlr_input_method_manager_v2> input_method_manager_v2_;
+    Listener<&Server::inputMethodManagerV2InputMethodNotify> input_method_manager_v2_input_method_;
+    InputMethodV2 *input_method_ = nullptr;
+    Listener<&Server::inputMethodV2DestroyNotify> input_method_v2_destroy_;
+
+    std::unique_ptr<wlr_text_input_manager_v3> text_input_manager_v3_;
+    wl_list text_inputs_;
+    Listener<&Server::textInputManagerV3TextInputNotify> text_input_manager_v3_text_input_;
 };
 
 #endif // !SERVER_H

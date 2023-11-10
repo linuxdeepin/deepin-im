@@ -4,14 +4,21 @@
 
 #include "Server.h"
 
+#include "InputMethodV2.h"
 #include "Keyboard.h"
 #include "Output.h"
+#include "TextInputV3.h"
 #include "View.h"
 
 extern "C" {
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_data_device.h>
+#define delete delete_
+#include <wlr/types/wlr_input_method_v2.h>
+#undef delete
 #include <wlr/types/wlr_subcompositor.h>
+#include <wlr/types/wlr_text_input_v3.h>
+#include <wlr/types/wlr_virtual_keyboard_v1.h>
 }
 
 #include <stdexcept>
@@ -30,6 +37,10 @@ Server::Server()
     , seat_request_cursor_(this)
     , seat_request_set_selection_(this)
     , backend_new_input_(this)
+    , virtual_keyboard_manager_v1_new_virtual_keyboard_(this)
+    , input_method_manager_v2_input_method_(this)
+    , input_method_v2_destroy_(this)
+    , text_input_manager_v3_text_input_(this)
 {
     backend_.reset(wlr_backend_autocreate(display_.get()));
     if (!backend_) {
@@ -131,6 +142,18 @@ Server::Server()
     wl_signal_add(&seat_->events.request_set_selection, seat_request_set_selection_);
     wl_list_init(&keyboards_);
     wl_signal_add(&backend_->events.new_input, backend_new_input_);
+
+    virtual_keyboard_manager_v1_.reset(wlr_virtual_keyboard_manager_v1_create(display_.get()));
+    wl_signal_add(&virtual_keyboard_manager_v1_->events.new_virtual_keyboard,
+                  virtual_keyboard_manager_v1_new_virtual_keyboard_);
+
+    input_method_manager_v2_.reset(wlr_input_method_manager_v2_create(display_.get()));
+    wl_signal_add(&input_method_manager_v2_->events.input_method,
+                  input_method_manager_v2_input_method_);
+
+    wl_list_init(&text_inputs_);
+    text_input_manager_v3_.reset(wlr_text_input_manager_v3_create(display_.get()));
+    wl_signal_add(&text_input_manager_v3_->events.text_input, text_input_manager_v3_text_input_);
 }
 
 Server::~Server() = default;
@@ -148,6 +171,22 @@ void Server::run()
 bool Server::startBackend()
 {
     return wlr_backend_start(backend_.get());
+}
+
+void Server::setTextInputFocus(wlr_surface *surface)
+{
+    if (!input_method_) {
+        return;
+    }
+
+    TextInputV3 *textInput;
+    wl_list_for_each(textInput, &text_inputs_, link_)
+    {
+        if (wl_resource_get_client(textInput->text_input_->resource)
+            == wl_resource_get_client(surface->resource)) {
+            wlr_text_input_v3_send_enter(textInput->text_input_, surface);
+        }
+    }
 }
 
 void Server::backendNewOutputNotify(void *data)
@@ -265,7 +304,7 @@ void Server::backendNewInputNotify(void *data)
     struct wlr_input_device *device = static_cast<wlr_input_device *>(data);
     switch (device->type) {
     case WLR_INPUT_DEVICE_KEYBOARD:
-        new Keyboard(this, seat_.get(), device, &keyboards_);
+        new Keyboard(this, device, &keyboards_);
         break;
     case WLR_INPUT_DEVICE_POINTER:
         /* We don't do anything special with pointers. All of our pointer handling
@@ -290,6 +329,36 @@ void Server::backendNewInputNotify(void *data)
 void Server::seatRequestCursorNotify(void *data) { }
 
 void Server::seatRequestSetSelectionNotify(void *data) { }
+
+void Server::virtualKeyboardManagerNewVirtualKeyboardNotify(void *data)
+{
+    struct wlr_virtual_keyboard_v1 *keyboard = static_cast<wlr_virtual_keyboard_v1 *>(data);
+    struct wlr_input_device *device = &keyboard->keyboard.base;
+
+    new Keyboard(this, device, &keyboards_);
+}
+
+void Server::inputMethodManagerV2InputMethodNotify(void *data)
+{
+    if (input_method_) {
+        return;
+    }
+
+    auto *im2 = static_cast<wlr_input_method_v2 *>(data);
+    input_method_ = new InputMethodV2(this, im2);
+    wl_signal_add(&im2->events.destroy, input_method_v2_destroy_);
+}
+
+void Server::inputMethodV2DestroyNotify(void *data)
+{
+    input_method_ = nullptr;
+}
+
+void Server::textInputManagerV3TextInputNotify(void *data)
+{
+    auto *ti3 = static_cast<wlr_text_input_v3 *>(data);
+    new TextInputV3(this, ti3, &text_inputs_);
+}
 
 void Server::processCursorMotion(uint32_t time)
 {
