@@ -91,6 +91,7 @@ private:
     uint32_t serial_ = 1;
     std::unique_ptr<State> state_;
 
+    std::vector<char> keymapData_;
     std::unique_ptr<xkb_context, Deleter<xkb_context_unref>> xkbContext_;
     std::unique_ptr<xkb_keymap, Deleter<xkb_keymap_unref>> xkbKeymap_;
     std::unique_ptr<xkb_state, Deleter<xkb_state_unref>> xkbState_;
