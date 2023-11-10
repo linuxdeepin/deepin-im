@@ -30,6 +30,8 @@ namespace QtWaylandClient {
 class QWaylandTextInputInterface;
 }
 
+class XdgSurface;
+class XdgToplevel;
 class Keyboard;
 
 class DIMPlatformInputContext : public QPlatformInputContext
@@ -58,6 +60,8 @@ public:
     bool filterEvent(const QEvent *event) override;
 
 private:
+    std::shared_ptr<XdgSurface> xdgSurface_;
+    std::shared_ptr<XdgToplevel> xdgToplevel_;
     std::shared_ptr<Keyboard> keyboard_;
     std::shared_ptr<QtWaylandClient::QWaylandTextInputInterface> textInput_;
     const std::shared_ptr<QtWaylandClient::QWaylandTextInputInterface> &textInput() const;

@@ -9,9 +9,14 @@
 #include "Keyboard.h"
 #include "QWaylandTextInputInterface.h"
 #include "TextInputV3.h"
+#include "XdgSurface.h"
+#include "XdgToplevel.h"
+#include "wl/client/Compositor.h"
 #include "wl/client/Connection.h"
 #include "wl/client/ConnectionRaw.h"
 #include "wl/client/Seat.h"
+#include "wl/client/Shm.h"
+#include "wl/client/XdgWmBase.h"
 #include "wl/client/ZwpTextInputManagerV3.h"
 
 #include <private/qxkbcommon_p.h>
@@ -60,6 +65,17 @@ DIMPlatformInputContext::DIMPlatformInputContext()
         QObject::connect(dispatcher, &QAbstractEventDispatcher::aboutToBlock, this, [this]() {
             wl_->flush();
         });
+
+        auto shm = wl_->getGlobal<wl::client::Shm>();
+        auto compositor = wl_->getGlobal<wl::client::Compositor>();
+        auto *surface = compositor->create_surface();
+        auto xdgWmBase = wl_->getGlobal<wl::client::XdgWmBase>();
+        xdgSurface_ =
+            std::make_shared<XdgSurface>(xdg_wm_base_get_xdg_surface(xdgWmBase->get(), surface),
+                                         surface,
+                                         shm);
+        xdgToplevel_ = std::make_shared<XdgToplevel>(xdg_surface_get_toplevel(xdgSurface_->get()));
+        wl_surface_commit(surface);
     }
 
     auto seat = wl_->getGlobal<wl::client::Seat>();

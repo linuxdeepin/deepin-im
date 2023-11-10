@@ -7,6 +7,10 @@ set(QTIMMODULE_SOURCES
   Keyboard.cpp
   TextInputV3.h
   TextInputV3.cpp
+  XdgSurface.h
+  XdgSurface.cpp
+  XdgToplevel.h
+  XdgToplevel.cpp
 
   QWaylandTextInputInterface.h
   QWaylandInputMethodEventBuilder.h
@@ -26,6 +30,7 @@ target_link_libraries(dimplatforminputcontextplugin PRIVATE
   Qt5::GuiPrivate
   Qt5::XkbCommonSupportPrivate
   wlc
+  shm_open_anon
 )
 
 include(ECMQueryQt)
