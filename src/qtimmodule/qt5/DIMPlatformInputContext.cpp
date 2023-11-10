@@ -64,7 +64,7 @@ DIMPlatformInputContext::DIMPlatformInputContext()
     auto seat = wl_->getGlobal<wl::client::Seat>();
     auto tiManager = wl_->getGlobal<wl::client::ZwpDimTextInputManagerV1>();
 
-    textInput_ = std::make_shared<DimTextInputV1>(tiManager->get_text_tnput(seat));
+    textInput_ = std::make_shared<DimTextInputV1>(tiManager->get_text_input(seat));
     wl_->flush();
 
     QXkbCommon::setXkbContext(this, m_XkbContext.get());
