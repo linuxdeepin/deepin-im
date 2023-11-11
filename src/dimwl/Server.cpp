@@ -11,6 +11,8 @@
 #include "View.h"
 
 extern "C" {
+#include <wlr/backend/wayland.h>
+#include <wlr/backend/x11.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_data_device.h>
 #define delete delete_
@@ -42,9 +44,18 @@ Server::Server()
     , input_method_v2_destroy_(this)
     , text_input_manager_v3_text_input_(this)
 {
-    backend_.reset(wlr_backend_autocreate(display_.get()));
+    if (getenv("WAYLAND_DISPLAY") || getenv("WAYLAND_SOCKET")) {
+        sessionType_ = SessionType ::WL;
+        backend_.reset(wlr_wl_backend_create(display_.get(), nullptr));
+        wlr_wl_output_create(backend_.get());
+    } else if (const char *display = getenv("DISPLAY")) {
+        sessionType_ = SessionType ::X11;
+        backend_.reset(wlr_x11_backend_create(display_.get(), display));
+        wlr_x11_output_create(backend_.get());
+    }
+
     if (!backend_) {
-        throw std::runtime_error("failed to create xkb context");
+        throw std::runtime_error("failed to create backend");
     }
 
     renderer_.reset(wlr_renderer_autocreate(backend_.get()));
