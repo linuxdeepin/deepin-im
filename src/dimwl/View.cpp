@@ -34,6 +34,9 @@ View::View(Server *server, wlr_xdg_surface *xdg_surface, wl_list *list)
     wl_signal_add(&xdg_toplevel_->events.request_resize, xdg_toplevel_request_resize_);
     wl_signal_add(&xdg_toplevel_->events.request_maximize, xdg_toplevel_request_maximize_);
     wl_signal_add(&xdg_toplevel_->events.request_fullscreen, xdg_toplevel_request_fullscreen_);
+
+    auto *client = wl_resource_get_client(xdg_toplevel_->resource);
+    wl_client_get_credentials(client, &pid_, nullptr, nullptr);
 }
 
 View::~View() { }

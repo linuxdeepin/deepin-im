@@ -15,6 +15,12 @@ add_executable(dimwl
     InputMethodV2.cpp
     TextInputV3.h
     TextInputV3.cpp
+    XcbHelper.h
+    XcbHelper.cpp
+    Xcb.h
+    Xcb.cpp
+    X11ActiveWindowMonitor.h
+    X11ActiveWindowMonitor.cpp
 )
 
 
@@ -31,6 +37,7 @@ target_link_libraries(dimwl PUBLIC
     PkgConfig::wlroots
     PkgConfig::wayland-server
     PkgConfig::xkbcommon
+    PkgConfig::xcb
 )
 
 install(TARGETS dimwl

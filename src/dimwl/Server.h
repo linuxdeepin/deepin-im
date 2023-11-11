@@ -36,6 +36,7 @@ class Output;
 class View;
 class InputMethodV2;
 class TextInputV3;
+class X11ActiveWindowMonitor;
 
 enum class SessionType {
     WL,
@@ -87,6 +88,7 @@ private:
     void inputMethodV2DestroyNotify(void *data);
     void textInputManagerV3TextInputNotify(void *data);
     void textInputV3DestroyNotify(void *data);
+    void x11ActiveWindowNotify(void *data);
 
     void processCursorMotion(uint32_t time);
     View *desktopViewAt(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy);
@@ -132,6 +134,9 @@ private:
     std::unique_ptr<wlr_text_input_manager_v3> text_input_manager_v3_;
     wl_list text_inputs_;
     Listener<&Server::textInputManagerV3TextInputNotify> text_input_manager_v3_text_input_;
+
+    std::unique_ptr<X11ActiveWindowMonitor> x11ActiveWindowMonitor_;
+    Listener<&Server::x11ActiveWindowNotify> x11ActiveWindow_;
 };
 
 #endif // !SERVER_H

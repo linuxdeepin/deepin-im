@@ -9,6 +9,7 @@
 #include "Output.h"
 #include "TextInputV3.h"
 #include "View.h"
+#include "X11ActiveWindowMonitor.h"
 
 extern "C" {
 #include <wlr/backend/wayland.h>
@@ -43,6 +44,7 @@ Server::Server()
     , input_method_manager_v2_input_method_(this)
     , input_method_v2_destroy_(this)
     , text_input_manager_v3_text_input_(this)
+    , x11ActiveWindow_(this)
 {
     if (getenv("WAYLAND_DISPLAY") || getenv("WAYLAND_SOCKET")) {
         sessionType_ = SessionType ::WL;
@@ -164,6 +166,13 @@ Server::Server()
     wl_list_init(&text_inputs_);
     text_input_manager_v3_.reset(wlr_text_input_manager_v3_create(display_.get()));
     wl_signal_add(&text_input_manager_v3_->events.text_input, text_input_manager_v3_text_input_);
+
+    if (sessionType_ == SessionType::X11) {
+        struct wl_event_loop *loop = wl_display_get_event_loop(display_.get());
+        x11ActiveWindowMonitor_ = std::make_unique<X11ActiveWindowMonitor>(loop);
+
+        wl_signal_add(&x11ActiveWindowMonitor_->events.activeWindow, x11ActiveWindow_);
+    }
 }
 
 Server::~Server() = default;
@@ -364,6 +373,26 @@ void Server::textInputManagerV3TextInputNotify(void *data)
 {
     auto *ti3 = static_cast<wlr_text_input_v3 *>(data);
     new TextInputV3(this, ti3, &text_inputs_);
+}
+
+void Server::textInputV3DestroyNotify(void *data) { }
+
+void Server::x11ActiveWindowNotify(void *data)
+{
+    xcb_window_t win = *static_cast<xcb_window_t *>(data);
+
+    pid_t pid = x11ActiveWindowMonitor_->windowPid(win);
+    if (!pid) {
+        return;
+    }
+
+    View *view = nullptr;
+    wl_list_for_each(view, &views_, link_)
+    {
+        if (view->getPid() == pid) {
+            view->focusView();
+        }
+    }
 }
 
 void Server::processCursorMotion(uint32_t time)
