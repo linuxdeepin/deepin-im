@@ -42,7 +42,9 @@ Output::Output(Server *dimwl, struct wlr_output *output, wl_list *list)
     wl_signal_add(&output_->events.destroy, destroy_);
     wl_signal_add(&output_->events.frame, frame_);
 
-    wl_list_insert(list, &link_);
+    if (list) {
+        wl_list_insert(list, &link_);
+    }
 
     /* Adds this to the output layout. The add_auto function arranges outputs
      * from left-to-right in the order they appear. A more sophisticated

@@ -32,6 +32,7 @@ struct wlr_virtual_keyboard_manager_v1;
 struct wlr_input_method_manager_v2;
 struct wlr_text_input_manager_v3;
 
+class Output;
 class View;
 class InputMethodV2;
 class TextInputV3;
@@ -97,7 +98,7 @@ private:
     std::unique_ptr<wlr_renderer, Deleter<wlr_renderer_destroy>> renderer_;
     std::unique_ptr<wlr_allocator, Deleter<wlr_allocator_destroy>> allocator_;
     std::unique_ptr<wlr_output_layout, Deleter<wlr_output_layout_destroy>> output_layout_;
-    wl_list outputs_;
+    Output *output_ = nullptr;
     Listener<&Server::backendNewOutputNotify> backend_new_output_;
 
     std::unique_ptr<wlr_scene> scene_;
