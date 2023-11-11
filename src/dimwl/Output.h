@@ -16,7 +16,7 @@ class Server;
 class Output
 {
 public:
-    Output(Server *server, struct wlr_output *output, wl_list *list);
+    Output(Server *server, struct wlr_output *output, wl_list *list = nullptr);
     ~Output();
 
 private:

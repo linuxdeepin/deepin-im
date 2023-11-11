@@ -87,7 +87,6 @@ Server::Server()
 
     /* Configure a listener to be notified when new outputs are available on the
      * backend. */
-    wl_list_init(&outputs_);
     wl_signal_add(&backend_->events.new_output, backend_new_output_);
 
     /* Create a scene graph. This is a wlroots abstraction that handles all
@@ -204,14 +203,10 @@ void Server::backendNewOutputNotify(void *data)
 {
     /* This event is raised by the backend when a new output (aka a display or
      * monitor) becomes available. */
-    struct wlr_output *wlr_output = static_cast<struct wlr_output *>(data);
+    assert(output_ == nullptr);
+    struct wlr_output *output = static_cast<struct wlr_output *>(data);
 
-    if (!wl_list_empty(&wlr_output->modes)) {
-        struct wlr_output_mode *mode = wl_container_of(wlr_output->modes.prev, mode, link);
-        wlr_output_set_mode(wlr_output, mode);
-    }
-
-    auto *output = new Output(this, wlr_output, &outputs_);
+    output_ = new Output(this, output);
 }
 
 void Server::xdgShellNewSurfaceNotify(void *data)
