@@ -36,6 +36,11 @@ class View;
 class InputMethodV2;
 class TextInputV3;
 
+enum class SessionType {
+    WL,
+    X11,
+};
+
 class Server
 {
 public:
@@ -86,6 +91,7 @@ private:
     View *desktopViewAt(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy);
 
 private:
+    SessionType sessionType_;
     std::unique_ptr<wl_display, Deleter<wl_display_destroy>> display_;
     std::unique_ptr<wlr_backend, Deleter<wlr_backend_destroy>> backend_;
     std::unique_ptr<wlr_renderer, Deleter<wlr_renderer_destroy>> renderer_;
