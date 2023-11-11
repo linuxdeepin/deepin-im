@@ -23,6 +23,10 @@ public:
     View(Server *server, wlr_xdg_surface *xdg_surface, wl_list *list);
     ~View();
 
+    pid_t getPid() const { return pid_; }
+
+    void focusView();
+
 private:
     void xdgSurfaceMapNotify(void *data);
     void xdgSurfaceUnmapNotify(void *data);
@@ -33,11 +37,11 @@ private:
     void xdgToplevelRequestMaximizeNotify(void *data);
     void xdgToplevelRequestFullscreenNotify(void *data);
 
-    void focusView();
+public:
+    wl_list link_;
 
 private:
     Server *server_;
-    wl_list link_;
     wl_list *list_;
 
     wlr_xdg_toplevel *xdg_toplevel_;
@@ -51,6 +55,8 @@ private:
     Listener<&View::xdgToplevelRequestResizeNotify> xdg_toplevel_request_resize_;
     Listener<&View::xdgToplevelRequestMaximizeNotify> xdg_toplevel_request_maximize_;
     Listener<&View::xdgToplevelRequestFullscreenNotify> xdg_toplevel_request_fullscreen_;
+
+    pid_t pid_;
 };
 
 #endif // !VIEW_H
