@@ -34,6 +34,12 @@ private:
     void sendIMState(InputMethodV2 *inputMethod);
     void disableTextInput(InputMethodV2 *inputMethod);
 
+public:
+    struct
+    {
+        struct wl_signal cursorRectangle;
+    } events;
+
 private:
     Server *server_;
     wl_list link_;

@@ -28,6 +28,26 @@ extern "C" {
 
 #include <assert.h>
 
+struct unsafe_wlr_x11_backend
+{
+    struct wlr_backend backend;
+    struct wl_display *wl_display;
+    bool started;
+
+    xcb_connection_t *xcb;
+    xcb_screen_t *screen;
+    xcb_depth_t *depth;
+};
+
+struct unsafe_wlr_x11_output
+{
+    struct wlr_output wlr_output;
+    struct wlr_x11_backend *x11;
+    struct wl_list link; // wlr_x11_backend::outputs
+
+    xcb_window_t win;
+};
+
 Server::Server()
     : display_(wl_display_create())
     , backend_new_output_(this)
@@ -45,6 +65,7 @@ Server::Server()
     , input_method_v2_destroy_(this)
     , text_input_manager_v3_text_input_(this)
     , x11ActiveWindow_(this)
+    , textInputCursorRectangle_(this)
 {
     if (getenv("WAYLAND_DISPLAY") || getenv("WAYLAND_SOCKET")) {
         sessionType_ = SessionType ::WL;
@@ -54,6 +75,9 @@ Server::Server()
         sessionType_ = SessionType ::X11;
         backend_.reset(wlr_x11_backend_create(display_.get(), display));
         wlr_x11_output_create(backend_.get());
+
+        unsafe_wlr_x11_backend *x11_backend = wl_container_of(backend_.get(), x11_backend, backend);
+        xcb_helper_.setConnection(x11_backend->xcb);
     }
 
     if (!backend_) {
@@ -215,6 +239,8 @@ void Server::backendNewOutputNotify(void *data)
     assert(output_ == nullptr);
     struct wlr_output *output = static_cast<struct wlr_output *>(data);
 
+    wlr_output_set_custom_mode(output, 200, 60, 0);
+
     output_ = new Output(this, output);
 }
 
@@ -372,7 +398,9 @@ void Server::inputMethodV2DestroyNotify(void *data)
 void Server::textInputManagerV3TextInputNotify(void *data)
 {
     auto *ti3 = static_cast<wlr_text_input_v3 *>(data);
-    new TextInputV3(this, ti3, &text_inputs_);
+
+    auto *textInput = new TextInputV3(this, ti3, &text_inputs_);
+    wl_signal_add(&textInput->events.cursorRectangle, textInputCursorRectangle_);
 }
 
 void Server::textInputV3DestroyNotify(void *data) { }
@@ -392,6 +420,28 @@ void Server::x11ActiveWindowNotify(void *data)
         if (view->getPid() == pid) {
             view->focusView();
         }
+    }
+}
+
+void Server::textInputCursorRectangleNotify(void *data)
+{
+    auto *rectangle = static_cast<wlr_box *>(data);
+
+    if (sessionType_ == SessionType::X11) {
+        auto [x, y] =
+            x11ActiveWindowMonitor_->windowPosition(x11ActiveWindowMonitor_->activeWindow());
+
+        unsafe_wlr_x11_output *x11_output =
+            wl_container_of(output_->output(), x11_output, wlr_output);
+        xcb_params_configure_window_t wc;
+        wc.x = x + rectangle->x + rectangle->height;
+        wc.y = y + rectangle->y + rectangle->width;
+        wc.stack_mode = XCB_STACK_MODE_ABOVE;
+        xcb_helper_.auxConfigureWindow(x11_output->win,
+                                       XCB_CONFIG_WINDOW_STACK_MODE | XCB_CONFIG_WINDOW_X
+                                           | XCB_CONFIG_WINDOW_Y,
+                                       &wc);
+        xcb_helper_.flush();
     }
 }
 

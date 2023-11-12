@@ -33,6 +33,7 @@ endif()
 
 pkg_check_modules(xcb REQUIRED IMPORTED_TARGET xcb)
 pkg_check_modules(xcb-xinput REQUIRED IMPORTED_TARGET xcb-xinput)
+pkg_check_modules(xcb-aux REQUIRED IMPORTED_TARGET xcb-aux)
 pkg_check_modules(xkbcommon REQUIRED IMPORTED_TARGET xkbcommon)
 pkg_check_modules(xkeyboard-config REQUIRED IMPORTED_TARGET xkeyboard-config)
 pkg_check_modules(wayland-client REQUIRED IMPORTED_TARGET wayland-client)

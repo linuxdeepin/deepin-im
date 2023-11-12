@@ -113,3 +113,10 @@ std::tuple<uint32_t, uint32_t> XcbHelper::getPropertyAux(std::vector<char> &buff
 
     return { offset, bytesLeft };
 }
+
+void XcbHelper::auxConfigureWindow(xcb_window_t window,
+                                   uint16_t mask,
+                                   const xcb_params_configure_window_t *params)
+{
+    xcb_aux_configure_window(conn_, window, mask, params);
+}
