@@ -40,6 +40,10 @@ public:
     std::vector<char> getProperty(xcb_window_t window, const std::string &property, uint32_t size);
     std::vector<char> getProperty(xcb_window_t window, const std::string &property);
 
+    void auxConfigureWindow(xcb_window_t window,
+                            uint16_t mask,
+                            const xcb_params_configure_window_t *params);
+
 private:
     std::tuple<uint32_t, uint32_t> getPropertyAux(std::vector<char> &buff,
                                                   xcb_window_t window,

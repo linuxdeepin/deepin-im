@@ -20,6 +20,8 @@ TextInputV3::TextInputV3(Server *server, wlr_text_input_v3 *text_input, wl_list 
     wl_signal_add(&text_input_->events.disable, disable_);
     wl_signal_add(&text_input_->events.destroy, destroy_);
 
+    wl_signal_init(&events.cursorRectangle);
+
     wl_list_insert(list, &link_);
 }
 
@@ -92,6 +94,11 @@ void TextInputV3::sendIMState(InputMethodV2 *inputMethod)
                                               text_input_->current.content_type.hint,
                                               text_input_->current.content_type.purpose);
     }
+
+    if (text_input_->active_features & WLR_TEXT_INPUT_V3_FEATURE_CURSOR_RECTANGLE) {
+        wl_signal_emit(&events.cursorRectangle, &text_input_->current.cursor_rectangle);
+    }
+
     wlr_input_method_v2_send_done(inputMethod->input_method_);
 }
 

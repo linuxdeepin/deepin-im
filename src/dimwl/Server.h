@@ -6,6 +6,7 @@
 #define SERVER_H
 
 #include "Listener.h"
+#include "XcbHelper.h"
 #include "common/common.h"
 
 #include <wayland-server-core.h>
@@ -89,6 +90,7 @@ private:
     void textInputManagerV3TextInputNotify(void *data);
     void textInputV3DestroyNotify(void *data);
     void x11ActiveWindowNotify(void *data);
+    void textInputCursorRectangleNotify(void *data);
 
     void processCursorMotion(uint32_t time);
     View *desktopViewAt(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy);
@@ -135,8 +137,12 @@ private:
     wl_list text_inputs_;
     Listener<&Server::textInputManagerV3TextInputNotify> text_input_manager_v3_text_input_;
 
+    XcbHelper xcb_helper_;
+
     std::unique_ptr<X11ActiveWindowMonitor> x11ActiveWindowMonitor_;
     Listener<&Server::x11ActiveWindowNotify> x11ActiveWindow_;
+
+    Listener<&Server::textInputCursorRectangleNotify> textInputCursorRectangle_;
 };
 
 #endif // !SERVER_H

@@ -38,6 +38,7 @@ target_link_libraries(dimwl PUBLIC
     PkgConfig::wayland-server
     PkgConfig::xkbcommon
     PkgConfig::xcb
+    PkgConfig::xcb-aux
 )
 
 install(TARGETS dimwl

@@ -19,6 +19,8 @@ public:
     Output(Server *server, struct wlr_output *output, wl_list *list = nullptr);
     ~Output();
 
+    wlr_output *output() { return output_; }
+
 private:
     void frameNotify(void *data);
     void destroyNotify(void *data);
