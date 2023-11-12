@@ -241,6 +241,15 @@ void Server::backendNewOutputNotify(void *data)
 
     wlr_output_set_custom_mode(output, 200, 60, 0);
 
+    if (sessionType_ == SessionType::X11) {
+        unsafe_wlr_x11_output *x11_output = wl_container_of(output, x11_output, wlr_output);
+
+        xcb_helper_.setPropertyAtom(x11_output->win,
+                                    "_NET_WM_WINDOW_TYPE",
+                                    "_NET_WM_WINDOW_TYPE_POPUP_MENU");
+        xcb_helper_.flush();
+    }
+
     output_ = new Output(this, output);
 }
 

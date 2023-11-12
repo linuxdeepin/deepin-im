@@ -40,6 +40,10 @@ public:
     std::vector<char> getProperty(xcb_window_t window, const std::string &property, uint32_t size);
     std::vector<char> getProperty(xcb_window_t window, const std::string &property);
 
+    void setPropertyAtom(xcb_window_t window,
+                         const std::string &property,
+                         const std::string &value);
+
     void auxConfigureWindow(xcb_window_t window,
                             uint16_t mask,
                             const xcb_params_configure_window_t *params);
