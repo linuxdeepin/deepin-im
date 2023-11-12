@@ -114,6 +114,23 @@ std::tuple<uint32_t, uint32_t> XcbHelper::getPropertyAux(std::vector<char> &buff
     return { offset, bytesLeft };
 }
 
+void XcbHelper::setPropertyAtom(xcb_window_t window,
+                                const std::string &property,
+                                const std::string &value)
+{
+    xcb_atom_t propertyAtom = getAtom(property);
+    xcb_atom_t valueAtom = getAtom(value);
+    xcb_atom_t values[] = { valueAtom };
+    xcb_change_property(conn_,
+                        XCB_PROP_MODE_APPEND,
+                        window,
+                        propertyAtom,
+                        XCB_ATOM_ATOM,
+                        32,
+                        1,
+                        values);
+}
+
 void XcbHelper::auxConfigureWindow(xcb_window_t window,
                                    uint16_t mask,
                                    const xcb_params_configure_window_t *params)
