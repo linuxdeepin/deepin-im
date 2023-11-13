@@ -42,6 +42,8 @@ pkg_check_modules(libinput REQUIRED IMPORTED_TARGET libinput)
 pkg_check_modules(gio REQUIRED IMPORTED_TARGET gio-2.0)
 pkg_check_modules(wlroots REQUIRED IMPORTED_TARGET wlroots)
 
+pkg_get_variable(WAYLAND_PROTOCOLS_DIR wayland-protocols pkgdatadir)
+
 if (ENABLE_GTK3_IM_MODULE)
     pkg_check_modules(Gtk3 REQUIRED IMPORTED_TARGET "gtk+-3.0")
     pkg_check_modules(Gdk3 REQUIRED IMPORTED_TARGET "gdk-3.0")
@@ -68,7 +70,7 @@ ecm_add_wayland_server_protocol(wayland_protocols
 )
 
 ecm_add_wayland_server_protocol(wayland_protocols
-  PROTOCOL misc/wayland-protocols/text-input-unstable-v3.xml
+  PROTOCOL ${WAYLAND_PROTOCOLS_DIR}/unstable/text-input/text-input-unstable-v3.xml
   BASENAME text-input-unstable-v3
 )
 
