@@ -25,6 +25,8 @@ public:
 
     pid_t getPid() const { return pid_; }
 
+    wlr_surface *surface() { return xdg_surface_->surface; }
+
     void focusView();
 
 private:
@@ -44,6 +46,7 @@ private:
     Server *server_;
     wl_list *list_;
 
+    wlr_xdg_surface *xdg_surface_;
     wlr_xdg_toplevel *xdg_toplevel_;
     wlr_scene_tree *scene_tree_;
 

@@ -72,6 +72,7 @@ public:
     wl_list *textInputs() { return &text_inputs_; }
 
     void setTextInputFocus(wlr_surface *surface);
+    void setTextInputUnfocus(wlr_surface *surface);
 
 private:
     void backendNewOutputNotify(void *data);

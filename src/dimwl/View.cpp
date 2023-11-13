@@ -11,8 +11,9 @@
 View::View(Server *server, wlr_xdg_surface *xdg_surface, wl_list *list)
     : server_(server)
     , list_(list)
+    , xdg_surface_(xdg_surface)
     , xdg_toplevel_(xdg_surface->toplevel)
-    , scene_tree_(wlr_scene_xdg_surface_create(&server_->scene()->tree, xdg_toplevel_->base))
+    , scene_tree_(wlr_scene_xdg_surface_create(&server_->scene()->tree, xdg_surface_))
     , xdg_surface_map_(this)
     , xdg_surface_unmap_(this)
     , xdg_surface_destroy_(this)
@@ -96,19 +97,19 @@ void View::xdgToplevelRequestMaximizeNotify(void *data)
      * client-side decorations. tinywl doesn't support maximization, but
      * to conform to xdg-shell protocol we still must send a configure.
      * wlr_xdg_surface_schedule_configure() is used to send an empty reply. */
-    wlr_xdg_surface_schedule_configure(xdg_toplevel_->base);
+    wlr_xdg_surface_schedule_configure(xdg_surface_);
 }
 
 void View::xdgToplevelRequestFullscreenNotify(void *data)
 {
     /* Just as with request_maximize, we must send a configure here. */
-    wlr_xdg_surface_schedule_configure(xdg_toplevel_->base);
+    wlr_xdg_surface_schedule_configure(xdg_surface_);
 }
 
 void View::focusView()
 {
     /* Note: this function only deals with keyboard focus. */
-    struct wlr_surface *surface = xdg_toplevel_->base->surface;
+    struct wlr_surface *surface = xdg_surface_->surface;
     struct wlr_seat *seat = server_->seat();
     struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
     if (prev_surface == surface) {
@@ -140,11 +141,9 @@ void View::focusView()
     struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
     if (keyboard != NULL) {
         wlr_seat_keyboard_notify_enter(seat,
-                                       xdg_toplevel_->base->surface,
+                                       xdg_surface_->surface,
                                        keyboard->keycodes,
                                        keyboard->num_keycodes,
                                        &keyboard->modifiers);
     }
-
-    server_->setTextInputFocus(surface);
 }
