@@ -225,8 +225,18 @@ void Server::setTextInputFocus(wlr_surface *surface)
     TextInputV3 *textInput;
     wl_list_for_each(textInput, &text_inputs_, link_)
     {
-        if (wl_resource_get_client(textInput->text_input_->resource)
-            == wl_resource_get_client(surface->resource)) {
+        if (textInput->text_input_->focused_surface) {
+            if (surface != textInput->text_input_->focused_surface) {
+                textInput->disableTextInput(input_method_);
+                wlr_text_input_v3_send_leave(textInput->text_input_);
+            } else {
+                continue;
+            }
+        }
+
+        if (surface
+            && wl_resource_get_client(textInput->text_input_->resource)
+                == wl_resource_get_client(surface->resource)) {
             wlr_text_input_v3_send_enter(textInput->text_input_, surface);
         }
     }
@@ -423,13 +433,17 @@ void Server::x11ActiveWindowNotify(void *data)
         return;
     }
 
+    wlr_surface *focusedSurface = nullptr;
     View *view = nullptr;
     wl_list_for_each(view, &views_, link_)
     {
         if (view->getPid() == pid) {
             view->focusView();
+            focusedSurface = view->surface();
         }
     }
+
+    setTextInputFocus(focusedSurface);
 }
 
 void Server::textInputCursorRectangleNotify(void *data)
