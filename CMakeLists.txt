@@ -60,6 +60,11 @@ endif()
 add_library(wayland_protocols OBJECT)
 
 ecm_add_wayland_server_protocol(wayland_protocols
+  PROTOCOL ${WAYLAND_PROTOCOLS_DIR}/stable/xdg-shell/xdg-shell.xml
+  BASENAME xdg-shell
+)
+
+ecm_add_wayland_server_protocol(wayland_protocols
   PROTOCOL misc/wayland-protocols/input-method-unstable-v2.xml
   BASENAME input-method-unstable-v2
 )
