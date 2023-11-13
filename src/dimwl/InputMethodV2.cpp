@@ -6,6 +6,7 @@
 
 #include "Server.h"
 #include "TextInputV3.h"
+#include "X11KeyboardGrabber.h"
 
 InputMethodV2::InputMethodV2(Server *server, wlr_input_method_v2 *input_method)
     : server_(server)
@@ -15,6 +16,8 @@ InputMethodV2::InputMethodV2(Server *server, wlr_input_method_v2 *input_method)
     , grab_keyboard_(this)
     , destroy_(this)
     , keyboard_grab_destroy_(this)
+    , grabberKey_(this)
+    , grabberModifiers_(this)
 {
     wl_signal_add(&input_method_->events.commit, commit_);
     wl_signal_add(&input_method_->events.new_popup_surface, new_popup_surface_);
@@ -63,6 +66,12 @@ void InputMethodV2::grabKeyboardNotify(void *data)
     wlr_input_method_keyboard_grab_v2_set_keyboard(keyboard_grab, active_keyboard);
 
     wl_signal_add(&keyboard_grab->events.destroy, keyboard_grab_destroy_);
+
+    if (server_->sessionType() == SessionType::X11) {
+        grabber_.reset(new X11KeyboardGrabber(server_->getLoop()));
+        wl_signal_add(&grabber_->events.key, grabberKey_);
+        wl_signal_add(&grabber_->events.modifiers, grabberModifiers_);
+    }
 }
 
 void InputMethodV2::destroyNotify(void *data)
@@ -80,6 +89,30 @@ void InputMethodV2::keyboardGrabDestroyNotify(void *data)
         wlr_seat_keyboard_notify_modifiers(keyboard_grab->input_method->seat,
                                            &keyboard_grab->keyboard->modifiers);
     }
+
+    if (server_->sessionType() == SessionType::X11) {
+        grabber_.reset();
+    }
+}
+
+void InputMethodV2::grabberKeyNotify(void *data)
+{
+    auto *ev = static_cast<GrabberKeyEvent *>(data);
+
+    uint32_t ts = getTimestamp();
+
+    wlr_input_method_keyboard_grab_v2_send_key(input_method_->keyboard_grab,
+                                               ts,
+                                               ev->keycode,
+                                               ev->isRelease ? WL_KEYBOARD_KEY_STATE_RELEASED
+                                                             : WL_KEYBOARD_KEY_STATE_PRESSED);
+}
+
+void InputMethodV2::grabberModifiersNotify(void *data)
+{
+    auto *modifiers = static_cast<wlr_keyboard_modifiers *>(data);
+
+    wlr_input_method_keyboard_grab_v2_send_modifiers(input_method_->keyboard_grab, modifiers);
 }
 
 TextInputV3 *InputMethodV2::getFocusedTextInput() const

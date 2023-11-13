@@ -6,6 +6,7 @@
 #define INPUTMETHODV2_H
 
 #include "Listener.h"
+#include <memory>
 
 extern "C" {
 #define delete delete_
@@ -15,6 +16,7 @@ extern "C" {
 
 class Server;
 class TextInputV3;
+class X11KeyboardGrabber;
 
 class InputMethodV2
 {
@@ -31,6 +33,8 @@ private:
     void grabKeyboardNotify(void *data);
     void destroyNotify(void *data);
     void keyboardGrabDestroyNotify(void *data);
+    void grabberKeyNotify(void *data);
+    void grabberModifiersNotify(void *data);
 
     TextInputV3 *getFocusedTextInput() const;
 
@@ -44,6 +48,10 @@ private:
     Listener<&InputMethodV2::destroyNotify> destroy_;
 
     Listener<&InputMethodV2::keyboardGrabDestroyNotify> keyboard_grab_destroy_;
+
+    std::unique_ptr<X11KeyboardGrabber> grabber_;
+    Listener<&InputMethodV2::grabberKeyNotify> grabberKey_;
+    Listener<&InputMethodV2::grabberModifiersNotify> grabberModifiers_;
 };
 
 #endif // !INPUTMETHODV2_H

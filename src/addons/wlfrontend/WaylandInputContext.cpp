@@ -21,13 +21,6 @@
 
 using namespace org::deepin::dim;
 
-static int32_t getTimestamp()
-{
-    struct timespec time;
-    clock_gettime(CLOCK_MONOTONIC, &time);
-    return time.tv_sec * 1000 + time.tv_nsec / (1000 * 1000);
-}
-
 WaylandInputContext::WaylandInputContext(
     const std::shared_ptr<InputMethodV2> &im,
     const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk,

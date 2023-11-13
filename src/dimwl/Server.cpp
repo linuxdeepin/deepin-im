@@ -10,6 +10,7 @@
 #include "TextInputV3.h"
 #include "View.h"
 #include "X11ActiveWindowMonitor.h"
+#include "X11KeyboardGrabber.h"
 
 extern "C" {
 #include <wlr/backend/wayland.h>
@@ -214,6 +215,11 @@ void Server::run()
 bool Server::startBackend()
 {
     return wlr_backend_start(backend_.get());
+}
+
+wl_event_loop *Server::getLoop()
+{
+    return wl_display_get_event_loop(display_.get());
 }
 
 void Server::setTextInputFocus(wlr_surface *surface)
