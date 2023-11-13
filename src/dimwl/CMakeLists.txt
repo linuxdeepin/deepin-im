@@ -21,6 +21,8 @@ add_executable(dimwl
     Xcb.cpp
     X11ActiveWindowMonitor.h
     X11ActiveWindowMonitor.cpp
+    X11KeyboardGrabber.h
+    X11KeyboardGrabber.cpp
 )
 
 
@@ -39,6 +41,7 @@ target_link_libraries(dimwl PUBLIC
     PkgConfig::xkbcommon
     PkgConfig::xcb
     PkgConfig::xcb-aux
+    PkgConfig::xcb-xinput
 )
 
 install(TARGETS dimwl

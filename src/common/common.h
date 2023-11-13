@@ -6,6 +6,7 @@
 #define COMMON_COMMON_H_
 
 #include <stdint.h>
+#include <time.h>
 
 constexpr int XKB_HISTORICAL_OFFSET = 8;
 
@@ -69,5 +70,12 @@ struct CallbackWrapper<F>
         return (p->*F)(args...);
     }
 };
+
+static int32_t getTimestamp()
+{
+    struct timespec time;
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    return time.tv_sec * 1000 + time.tv_nsec / (1000 * 1000);
+}
 
 #endif // COMMON_COMMON_H_

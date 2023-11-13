@@ -55,6 +55,10 @@ public:
 
     bool startBackend();
 
+    wl_event_loop *getLoop();
+
+    SessionType sessionType() { return sessionType_; }
+
     wlr_allocator *allocator() { return allocator_.get(); }
 
     wlr_renderer *renderer() { return renderer_.get(); }
@@ -127,7 +131,8 @@ private:
     Listener<&Server::backendNewInputNotify> backend_new_input_;
 
     std::unique_ptr<wlr_virtual_keyboard_manager_v1> virtual_keyboard_manager_v1_;
-    Listener<&Server::virtualKeyboardManagerNewVirtualKeyboardNotify> virtual_keyboard_manager_v1_new_virtual_keyboard_;
+    Listener<&Server::virtualKeyboardManagerNewVirtualKeyboardNotify>
+        virtual_keyboard_manager_v1_new_virtual_keyboard_;
 
     std::unique_ptr<wlr_input_method_manager_v2> input_method_manager_v2_;
     Listener<&Server::inputMethodManagerV2InputMethodNotify> input_method_manager_v2_input_method_;
