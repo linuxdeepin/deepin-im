@@ -20,6 +20,8 @@ public:
 
     const std::unordered_map<QString, pid_t> &apps() { return apps_; }
 
+    std::tuple<uint16_t, uint16_t> getTopWindowPosition() { return getWindowPosition(window_); }
+
 protected:
     void xcbEvent(const std::unique_ptr<xcb_generic_event_t> &event) override;
 
@@ -29,6 +31,7 @@ private:
     const std::string wmPid_;
 
     std::unordered_map<QString, pid_t> apps_;
+    xcb_window_t window_;
     QString focus_;
 
     void init();

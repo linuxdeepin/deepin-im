@@ -14,6 +14,7 @@ X11AppMonitor::X11AppMonitor()
     : activeWindow_("_NET_ACTIVE_WINDOW")
     , netClientList_("_NET_CLIENT_LIST")
     , wmPid_("_NET_WM_PID")
+    , window_(0)
 {
     uint32_t values[] = { XCB_EVENT_MASK_PROPERTY_CHANGE };
     xcb_change_window_attributes(xconn_.get(), screen()->root, XCB_CW_EVENT_MASK, values);
@@ -68,7 +69,14 @@ pid_t X11AppMonitor::getWindowPid(xcb_window_t window)
 
 std::tuple<uint16_t, uint16_t> X11AppMonitor::getWindowPosition(xcb_window_t window)
 {
+    if (window == 0) {
+        return { 0, 0 };
+    }
+
     auto geom = XCB_REPLY(xcb_get_geometry, xconn_.get(), window);
+    if (!geom) {
+        return { 0, 0 };
+    }
     auto offset = XCB_REPLY(xcb_translate_coordinates,
                             xconn_.get(),
                             window,
@@ -87,16 +95,12 @@ void X11AppMonitor::activeWindowChanged()
     }
 
     xcb_window_t window = *reinterpret_cast<xcb_window_t *>(data.data());
-    if (window == 0) {
+    if (window == 0 || window == window_) {
         return;
     }
 
-    auto windowTmp = windowToString(window);
-    if (focus_ == windowTmp) {
-        return;
-    }
-
-    focus_ = windowTmp;
+    window_ = window;
+    focus_ = windowToString(window);
 
     emit appUpdated(apps_, focus_);
 }

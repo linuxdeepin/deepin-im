@@ -16,6 +16,10 @@ VirtualInputContext::VirtualInputContext(VirtualInputContextGlue *parentIC, Dim 
 
 VirtualInputContext::~VirtualInputContext() = default;
 
+void VirtualInputContext::setWindowPos(const QPoint &leftTop) {
+    leftTop_ = leftTop;
+}
+
 void VirtualInputContext::updatePreeditImpl(const QString &text,
                                             int32_t cursorBegin,
                                             int32_t cursorEnd)

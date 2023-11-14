@@ -27,11 +27,14 @@ public:
     InputMethodV2(Server *server, wlr_input_method_v2 *input_method);
     ~InputMethodV2();
 
+    void setCursorRectangle(wlr_box *rectangle);
+
 private:
     void commitNotify(void *data);
     void newPopupSurfaceNotify(void *data);
     void grabKeyboardNotify(void *data);
     void destroyNotify(void *data);
+    void popupDestroyNotify(void *data);
     void keyboardGrabDestroyNotify(void *data);
     void grabberKeyNotify(void *data);
     void grabberModifiersNotify(void *data);
@@ -46,6 +49,9 @@ private:
     Listener<&InputMethodV2::newPopupSurfaceNotify> new_popup_surface_;
     Listener<&InputMethodV2::grabKeyboardNotify> grab_keyboard_;
     Listener<&InputMethodV2::destroyNotify> destroy_;
+
+    wlr_input_popup_surface_v2 *popup_ = nullptr;
+    Listener<&InputMethodV2::popupDestroyNotify> popup_destroy_;
 
     Listener<&InputMethodV2::keyboardGrabDestroyNotify> keyboard_grab_destroy_;
 

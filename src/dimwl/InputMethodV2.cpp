@@ -15,6 +15,7 @@ InputMethodV2::InputMethodV2(Server *server, wlr_input_method_v2 *input_method)
     , new_popup_surface_(this)
     , grab_keyboard_(this)
     , destroy_(this)
+    , popup_destroy_(this)
     , keyboard_grab_destroy_(this)
     , grabberKey_(this)
     , grabberModifiers_(this)
@@ -26,6 +27,14 @@ InputMethodV2::InputMethodV2(Server *server, wlr_input_method_v2 *input_method)
 }
 
 InputMethodV2::~InputMethodV2() { }
+
+void InputMethodV2::setCursorRectangle(wlr_box *rectangle) { 
+    if (!popup_) {
+        return;
+    }
+
+    wlr_input_popup_surface_v2_send_text_input_rectangle(popup_, rectangle);
+}
 
 void InputMethodV2::commitNotify(void *data)
 {
@@ -54,7 +63,11 @@ void InputMethodV2::commitNotify(void *data)
     wlr_text_input_v3_send_done(textInput->text_input_);
 }
 
-void InputMethodV2::newPopupSurfaceNotify(void *data) { }
+void InputMethodV2::newPopupSurfaceNotify(void *data)
+{
+    popup_ = static_cast<wlr_input_popup_surface_v2 *>(data);
+    wl_signal_add(&popup_->events.destroy, popup_destroy_);
+}
 
 void InputMethodV2::grabKeyboardNotify(void *data)
 {
@@ -77,6 +90,11 @@ void InputMethodV2::grabKeyboardNotify(void *data)
 void InputMethodV2::destroyNotify(void *data)
 {
     delete this;
+}
+
+void InputMethodV2::popupDestroyNotify(void *data)
+{
+    popup_ = nullptr;
 }
 
 void InputMethodV2::keyboardGrabDestroyNotify(void *data)

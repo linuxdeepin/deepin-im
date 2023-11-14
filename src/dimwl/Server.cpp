@@ -255,7 +255,7 @@ void Server::backendNewOutputNotify(void *data)
     assert(output_ == nullptr);
     struct wlr_output *output = static_cast<struct wlr_output *>(data);
 
-    wlr_output_set_custom_mode(output, 200, 60, 0);
+    // wlr_output_set_custom_mode(output, 200, 60, 0);
 
     if (sessionType_ == SessionType::X11) {
         unsafe_wlr_x11_output *x11_output = wl_container_of(output, x11_output, wlr_output);
@@ -455,23 +455,26 @@ void Server::x11ActiveWindowNotify(void *data)
 void Server::textInputCursorRectangleNotify(void *data)
 {
     auto *rectangle = static_cast<wlr_box *>(data);
-
-    if (sessionType_ == SessionType::X11) {
-        auto [x, y] =
-            x11ActiveWindowMonitor_->windowPosition(x11ActiveWindowMonitor_->activeWindow());
-
-        unsafe_wlr_x11_output *x11_output =
-            wl_container_of(output_->output(), x11_output, wlr_output);
-        xcb_params_configure_window_t wc;
-        wc.x = x + rectangle->x + rectangle->height;
-        wc.y = y + rectangle->y + rectangle->width;
-        wc.stack_mode = XCB_STACK_MODE_ABOVE;
-        xcb_helper_.auxConfigureWindow(x11_output->win,
-                                       XCB_CONFIG_WINDOW_STACK_MODE | XCB_CONFIG_WINDOW_X
-                                           | XCB_CONFIG_WINDOW_Y,
-                                       &wc);
-        xcb_helper_.flush();
+    if (input_method_) {
+        input_method_->setCursorRectangle(rectangle);
     }
+
+    // if (sessionType_ == SessionType::X11) {
+    //     auto [x, y] =
+    //         x11ActiveWindowMonitor_->windowPosition(x11ActiveWindowMonitor_->activeWindow());
+
+    //     unsafe_wlr_x11_output *x11_output =
+    //         wl_container_of(output_->output(), x11_output, wlr_output);
+    //     xcb_params_configure_window_t wc;
+    //     wc.x = x + rectangle->x + rectangle->height;
+    //     wc.y = y + rectangle->y + rectangle->width;
+    //     wc.stack_mode = XCB_STACK_MODE_ABOVE;
+    //     xcb_helper_.auxConfigureWindow(x11_output->win,
+    //                                    XCB_CONFIG_WINDOW_STACK_MODE | XCB_CONFIG_WINDOW_X
+    //                                        | XCB_CONFIG_WINDOW_Y,
+    //                                    &wc);
+    //     xcb_helper_.flush();
+    // }
 }
 
 void Server::processCursorMotion(uint32_t time)
