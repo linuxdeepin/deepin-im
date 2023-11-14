@@ -15,6 +15,7 @@ Build-Depends:
  libudev-dev,
  libwayland-dev,
  libwlroots-dev,
+ libxcb-util-dev,
  libxcb-xinput-dev,
  libxcb1-dev,
  libxkbcommon-dev,
