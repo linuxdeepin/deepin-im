@@ -16,6 +16,8 @@
 #include <linux/input.h>
 
 #include <QDebug>
+#include <QGuiApplication>
+#include <QScreen>
 
 #include <sys/mman.h>
 
@@ -145,7 +147,7 @@ void WaylandInputContext::doneCallback()
 
         // todo: release all pressed keys
 
-        delegatedInputContext()->focusOut();
+        focusOutWrapper();
     }
 
     if (pendingActivate_) {
@@ -174,7 +176,7 @@ void WaylandInputContext::doneCallback()
                 this,
                 &WaylandInputContext::repeatInfoCallback);
 
-        delegatedInputContext()->focusIn();
+        focusInWrapper();
     }
 }
 
@@ -332,6 +334,29 @@ void WaylandInputContext::repeatInfoCallback(int32_t rate, int32_t delay)
     // TODO:
 }
 
+static QRect transformCursorRectangle(const QPoint &p, const QRect &r)
+{
+    auto screens = QGuiApplication::screens();
+    for (auto *screen : screens) {
+        auto geo = screen->geometry();
+        auto ratio = screen->devicePixelRatio();
+
+        QTransform logiToPhysTrans;
+        logiToPhysTrans *= ratio;
+        QRect physGeo = logiToPhysTrans.mapRect(geo);
+
+        if (physGeo.contains(p)) {
+            QTransform phisTologiTrans;
+            phisTologiTrans /= ratio;
+            QRect logiPoint = phisTologiTrans.mapRect(r);
+
+            return logiPoint;
+        }
+    }
+
+    return r;
+}
+
 void WaylandInputContext::textInputRectangleCallback(int32_t x,
                                                      int32_t y,
                                                      int32_t width,
@@ -339,6 +364,12 @@ void WaylandInputContext::textInputRectangleCallback(int32_t x,
 {
     auto *ic = delegatedInputContext();
 
-    InputContextCursorRectChangeEvent e(ic, x, y, width, height);
+    auto r = transformCursorRectangle(leftTop_, { x, y, width, height });
+
+    InputContextCursorRectChangeEvent e(ic,
+                                        leftTop_.x() + r.x(),
+                                        leftTop_.y() + r.y(),
+                                        r.width(),
+                                        r.height());
     dim()->postEvent(e);
 }

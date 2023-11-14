@@ -49,6 +49,7 @@ void View::xdgSurfaceMapNotify(void *data)
     wl_list_insert(list_, &link_);
 
     focusView();
+    server_->setTextInputFocus(xdg_surface_->surface);
 }
 
 void View::xdgSurfaceUnmapNotify(void *data)

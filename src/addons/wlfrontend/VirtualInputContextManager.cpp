@@ -7,6 +7,7 @@
 #include "AppMonitor.h"
 #include "VirtualInputContext.h"
 #include "VirtualInputContextGlue.h"
+#include "X11AppMonitor.h"
 #include "dimcore/InputContext.h"
 
 #include <experimental/unordered_map>
@@ -52,12 +53,19 @@ void VirtualInputContextManager::appUpdated(const std::unordered_map<QString, pi
 
     lastAppState_ = appState;
     focus_ = focus;
+
+    auto *x11AppMonitor = dynamic_cast<X11AppMonitor *>(appMonitor_);
+    if (x11AppMonitor) {
+        auto pos = x11AppMonitor->getTopWindowPosition();
+        parentIC_->setWindowPos({ std::get<0>(pos), std::get<1>(pos) });
+    }
+
     updateFocus();
 }
 
 void VirtualInputContextManager::updateFocus()
 {
-    InputContext *ic = nullptr;
+    VirtualInputContext *ic = nullptr;
     if (!focus_.isEmpty()) {
         auto iter = managed_.find(focus_);
         if (iter != managed_.end()) {
@@ -75,6 +83,7 @@ void VirtualInputContextManager::updateFocus()
         // forward capability flags on focus in.
         if (ic != parentIC_) {
             // ic->setCapabilityFlags(parentIC_->capabilityFlags());
+            ic->setWindowPos(parentIC_->windowPos());
             ic->surroundingText() = parentIC_->surroundingText();
             ic->updateSurroundingText();
         }

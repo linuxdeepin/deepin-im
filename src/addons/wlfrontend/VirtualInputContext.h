@@ -7,6 +7,8 @@
 
 #include <dimcore/InputContext.h>
 
+#include <QPoint>
+
 namespace org::deepin::dim {
 
 class VirtualInputContextGlue;
@@ -17,10 +19,17 @@ public:
     VirtualInputContext(VirtualInputContextGlue *parentIC, Dim *dim);
     ~VirtualInputContext();
 
+    void setWindowPos(const QPoint &leftTop);
+
+    const QPoint &windowPos() { return leftTop_; }
+
 protected:
     void updatePreeditImpl(const QString &text, int32_t cursorBegin, int32_t cursorEnd) override;
     void commitStringImpl(const QString &text) override;
     void forwardKeyImpl(uint32_t keycode, bool pressed) override;
+
+protected:
+    QPoint leftTop_;
 
 private:
     VirtualInputContextGlue *parentIC_;
