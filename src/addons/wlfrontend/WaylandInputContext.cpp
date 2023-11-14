@@ -347,7 +347,7 @@ static QRect transformCursorRectangle(const QPoint &p, const QRect &r)
 
         if (physGeo.contains(p)) {
             QTransform phisTologiTrans;
-            phisTologiTrans /= ratio;
+            phisTologiTrans *= ratio;
             QRect logiPoint = phisTologiTrans.mapRect(r);
 
             return logiPoint;
@@ -363,7 +363,6 @@ void WaylandInputContext::textInputRectangleCallback(int32_t x,
                                                      int32_t height)
 {
     auto *ic = delegatedInputContext();
-
     auto r = transformCursorRectangle(leftTop_, { x, y, width, height });
 
     InputContextCursorRectChangeEvent e(ic,

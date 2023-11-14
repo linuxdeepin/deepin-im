@@ -67,7 +67,7 @@ pid_t X11AppMonitor::getWindowPid(xcb_window_t window)
     return *reinterpret_cast<uint32_t *>(data1.data());
 }
 
-std::tuple<uint16_t, uint16_t> X11AppMonitor::getWindowPosition(xcb_window_t window)
+std::tuple<int32_t, int32_t> X11AppMonitor::getWindowPosition(xcb_window_t window)
 {
     if (window == 0) {
         return { 0, 0 };

@@ -20,7 +20,7 @@ public:
 
     const std::unordered_map<QString, pid_t> &apps() { return apps_; }
 
-    std::tuple<uint16_t, uint16_t> getTopWindowPosition() { return getWindowPosition(window_); }
+    std::tuple<int32_t, int32_t> getTopWindowPosition() { return getWindowPosition(window_); }
 
 protected:
     void xcbEvent(const std::unique_ptr<xcb_generic_event_t> &event) override;
@@ -36,7 +36,7 @@ private:
 
     void init();
     pid_t getWindowPid(xcb_window_t window);
-    std::tuple<uint16_t, uint16_t> getWindowPosition(xcb_window_t window);
+    std::tuple<int32_t, int32_t> getWindowPosition(xcb_window_t window);
     void activeWindowChanged();
     void clientListChanged();
 };
