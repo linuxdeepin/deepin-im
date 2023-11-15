@@ -1,9 +1,9 @@
 [Unit]
 Description=deepin input method daemon service
 
-Requires=org.deepin.dde.imwl.service
-After=org.deepin.dde.imwl.service
-Wants=org.deepin.dde.imwl.service
+Requires=org.deepin.dde.dimwl.service
+After=org.deepin.dde.dimwl.service
+Wants=org.deepin.dde.dimwl.service
 
 # Limit startup frequency more than the default
 StartLimitIntervalSec=15s

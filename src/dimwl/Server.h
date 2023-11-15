@@ -51,6 +51,7 @@ public:
     ~Server();
 
     std::string addSocketAuto();
+    bool addSocket(const std::string &name);
     void run();
 
     bool startBackend();

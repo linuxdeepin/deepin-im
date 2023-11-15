@@ -9,13 +9,13 @@ configure_file(
 )
 
 configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/org.deepin.dde.imwl.service.in
-    org.deepin.dde.imwl.service
+    ${CMAKE_CURRENT_LIST_DIR}/org.deepin.dde.dimwl.service.in
+    org.deepin.dde.dimwl.service
     @ONLY
 )
 
 set(SERVICES
-    ${CMAKE_CURRENT_BINARY_DIR}/org.deepin.dde.imwl.service
+    ${CMAKE_CURRENT_BINARY_DIR}/org.deepin.dde.dimwl.service
     ${CMAKE_CURRENT_BINARY_DIR}/org.deepin.dde.dim.service
 )
 
