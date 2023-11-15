@@ -87,6 +87,7 @@ private:
     void cursorAxisNotify(void *data);
     void cursorFrameNotify(void *data);
     void backendNewInputNotify(void *data);
+    void outputPresentNotify(void *data);
     void seatRequestCursorNotify(void *data);
     void seatRequestSetSelectionNotify(void *data);
     void virtualKeyboardManagerNewVirtualKeyboardNotify(void *data);
@@ -109,6 +110,7 @@ private:
     std::unique_ptr<wlr_output_layout, Deleter<wlr_output_layout_destroy>> output_layout_;
     Output *output_ = nullptr;
     Listener<&Server::backendNewOutputNotify> backend_new_output_;
+    Listener<&Server::outputPresentNotify> output_present_;
 
     std::unique_ptr<wlr_scene> scene_;
 

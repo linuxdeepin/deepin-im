@@ -131,6 +131,49 @@ void XcbHelper::setPropertyAtom(xcb_window_t window,
                         values);
 }
 
+void XcbHelper::setPropertyAtoms(xcb_window_t window,
+                                 const std::string &property,
+                                 const std::vector<std::string> &values)
+{
+    xcb_atom_t propertyAtom = getAtom(property);
+    std::vector<xcb_atom_t> valueAtoms;
+    valueAtoms.reserve(values.size());
+    for (auto &value : values) {
+        valueAtoms.emplace_back(getAtom(value));
+    }
+    xcb_change_property(conn_,
+                        XCB_PROP_MODE_APPEND,
+                        window,
+                        propertyAtom,
+                        XCB_ATOM_ATOM,
+                        32,
+                        valueAtoms.size(),
+                        valueAtoms.data());
+}
+
+void XcbHelper::deleteProperty(xcb_window_t window, const std::string &property)
+{
+    xcb_atom_t propertyAtom = getAtom(property);
+    xcb_delete_property(conn_, window, propertyAtom);
+}
+
+void XcbHelper::changeWindowAttributes(xcb_window_t window,
+                                       uint32_t valueMask,
+                                       const uint32_t *valueList)
+{
+    xcb_change_window_attributes(conn_, window, valueMask, valueList);
+}
+
+void XcbHelper::mapWindow(xcb_window_t window)
+{
+    xcb_map_window(conn_, window);
+}
+
+void XcbHelper::unmapWindow(xcb_window_t window)
+{
+    xcb_unmap_window(conn_, window);
+}
+
 void XcbHelper::auxConfigureWindow(xcb_window_t window,
                                    uint16_t mask,
                                    const xcb_params_configure_window_t *params)

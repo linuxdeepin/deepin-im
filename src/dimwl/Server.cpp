@@ -10,7 +10,6 @@
 #include "TextInputV3.h"
 #include "View.h"
 #include "X11ActiveWindowMonitor.h"
-#include "X11KeyboardGrabber.h"
 
 extern "C" {
 #include <wlr/backend/wayland.h>
@@ -23,6 +22,7 @@ extern "C" {
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_text_input_v3.h>
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
+#include <wlr/util/log.h>
 }
 
 #include <stdexcept>
@@ -67,6 +67,7 @@ Server::Server()
     , text_input_manager_v3_text_input_(this)
     , x11ActiveWindow_(this)
     , textInputCursorRectangle_(this)
+    , output_present_(this)
 {
     if (getenv("WAYLAND_DISPLAY") || getenv("WAYLAND_SOCKET")) {
         sessionType_ = SessionType ::WL;
@@ -255,18 +256,28 @@ void Server::backendNewOutputNotify(void *data)
     assert(output_ == nullptr);
     struct wlr_output *output = static_cast<struct wlr_output *>(data);
 
-    // wlr_output_set_custom_mode(output, 200, 60, 0);
+    wlr_output_set_custom_mode(output, 1, 1, 0);
+    wl_signal_add(&output->events.present, output_present_);
 
     if (sessionType_ == SessionType::X11) {
         unsafe_wlr_x11_output *x11_output = wl_container_of(output, x11_output, wlr_output);
 
+        xcb_helper_.flush();
+    }
+
+    output_ = new Output(this, output);
+}
+
+void Server::outputPresentNotify(void *data)
+{
+    if (sessionType_ == SessionType::X11) {
+        unsafe_wlr_x11_output *x11_output = wl_container_of(output_, x11_output, wlr_output);
+        xcb_helper_.unmapWindow(x11_output->win);
         xcb_helper_.setPropertyAtom(x11_output->win,
                                     "_NET_WM_WINDOW_TYPE",
                                     "_NET_WM_WINDOW_TYPE_POPUP_MENU");
         xcb_helper_.flush();
     }
-
-    output_ = new Output(this, output);
 }
 
 void Server::xdgShellNewSurfaceNotify(void *data)
