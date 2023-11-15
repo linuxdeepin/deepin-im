@@ -15,8 +15,7 @@ int main()
     wlr_log_init(WLR_DEBUG, NULL);
 
     Server dimwl;
-    std::string socket = dimwl.addSocketAuto();
-    std::cout << socket << std::endl;
+    dimwl.addSocket("imfakewl");
     dimwl.startBackend();
     dimwl.run();
 }

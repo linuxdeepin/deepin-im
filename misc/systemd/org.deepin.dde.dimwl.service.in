@@ -1,5 +1,5 @@
 [Unit]
-Description=deepin input method imwl service(it must be used in x11 or xwayland environment)
+Description=deepin input method dimwl service(it must be used in x11 or xwayland environment)
 
 Requisite=dde-session.target
 After=dde-session.target
@@ -10,7 +10,7 @@ StartLimitBurst=1
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/imwl
+ExecStart=/usr/bin/dimwl
 # Exit code 1 means we are probably *not* dealing with an extension failure
 SuccessExitStatus=1
 
