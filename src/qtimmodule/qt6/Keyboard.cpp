@@ -4,6 +4,7 @@
 
 #include <QDebug>
 #include <QtGui/private/qguiapplication_p.h>
+#include <QtGui/qpa/qplatformcursor.h>
 #include <QtGui/qpa/qplatforminputcontext.h>
 #include <QtGui/qpa/qplatformintegration.h>
 
@@ -13,6 +14,11 @@
 Keyboard::Keyboard(wl_keyboard *val)
     : wl::client::Keyboard(val)
     , xkb_ctx_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    , device_(std::make_unique<QInputDevice>("dim virtual",
+                                             QInputDevice::primaryKeyboard()->systemId(),
+                                             QInputDevice::DeviceType::Keyboard))
+#endif
 {
     QObject::connect(&repeatTimer_, &QTimer::timeout, [&]() {
         // if (!focusWindow()) {
@@ -183,6 +189,18 @@ void Keyboard::handleKey(ulong timestamp,
     bool filtered = false;
 
     if (inputContext) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QKeyEvent event(type,
+                        key,
+                        modifiers,
+                        nativeScanCode,
+                        nativeVirtualKey,
+                        nativeModifiers,
+                        text,
+                        autorepeat,
+                        count,
+                        device_.get());
+#else
         QKeyEvent event(type,
                         key,
                         modifiers,
@@ -192,38 +210,39 @@ void Keyboard::handleKey(ulong timestamp,
                         text,
                         autorepeat,
                         count);
+#endif
         event.setTimestamp(timestamp);
         filtered = inputContext->filterEvent(&event);
     }
 
-    // if (!filtered) {
-    //     auto window = focusWindow()->window();
+    if (!filtered) {
+        auto window = qGuiApp->focusWindow();
 
-    //     if (type == QEvent::KeyPress && key == Qt::Key_Menu) {
-    //         auto cursor = window->screen()->handle()->cursor();
-    //         if (cursor) {
-    //             const QPoint globalPos = cursor->pos();
-    //             const QPoint pos = window->mapFromGlobal(globalPos);
-    //             QWindowSystemInterface::handleContextMenuEvent(window,
-    //                                                            false,
-    //                                                            pos,
-    //                                                            globalPos,
-    //                                                            modifiers);
-    //         }
-    //     }
+        if (type == QEvent::KeyPress && key == Qt::Key_Menu) {
+            auto cursor = window->screen()->handle()->cursor();
+            if (cursor) {
+                const QPoint globalPos = cursor->pos();
+                const QPoint pos = window->mapFromGlobal(globalPos);
+                QWindowSystemInterface::handleContextMenuEvent(window,
+                                                               false,
+                                                               pos,
+                                                               globalPos,
+                                                               modifiers);
+            }
+        }
 
-    //     QWindowSystemInterface::handleExtendedKeyEvent(window,
-    //                                                    timestamp,
-    //                                                    type,
-    //                                                    key,
-    //                                                    modifiers,
-    //                                                    nativeScanCode,
-    //                                                    nativeVirtualKey,
-    //                                                    nativeModifiers,
-    //                                                    text,
-    //                                                    autorepeat,
-    //                                                    count);
-    // }
+        QWindowSystemInterface::handleExtendedKeyEvent(window,
+                                                       timestamp,
+                                                       type,
+                                                       key,
+                                                       modifiers,
+                                                       nativeScanCode,
+                                                       nativeVirtualKey,
+                                                       nativeModifiers,
+                                                       text,
+                                                       autorepeat,
+                                                       count);
+    }
 }
 
 bool Keyboard::createDefaultKeymap()
