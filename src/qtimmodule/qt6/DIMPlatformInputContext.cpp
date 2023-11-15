@@ -266,6 +266,12 @@ bool DIMPlatformInputContext::filterEvent(const QEvent *event)
         return false;
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (!keyboard_->sameDevice(keyEvent->device())) {
+        return true;
+    }
+#endif
+
     // lazy initialization - we don't want to do this on an app startup
     ensureInitialized();
 

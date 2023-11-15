@@ -10,6 +10,10 @@
 #include <QList>
 #include <QTimer>
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#  include <QInputDevice>
+#endif
+
 #include <memory>
 
 class Keyboard : public wl::client::Keyboard
@@ -17,6 +21,10 @@ class Keyboard : public wl::client::Keyboard
 public:
     explicit Keyboard(wl_keyboard *val);
     ~Keyboard();
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    bool sameDevice(const QInputDevice *device) { return device_.get() == device; }
+#endif
 
 protected:
     void wl_keyboard_keymap(uint32_t format, int32_t fd, uint32_t size) override;
@@ -53,6 +61,9 @@ private:
     std::unique_ptr<struct xkb_context, Deleter<xkb_context_unref>> xkb_ctx_;
     std::unique_ptr<struct xkb_keymap, Deleter<xkb_keymap_unref>> xkb_keymap_;
     std::unique_ptr<struct xkb_state, Deleter<xkb_state_unref>> xkb_state_;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    std::unique_ptr<QInputDevice> device_;
+#endif
 
     uint32_t serial_ = 0;
 
