@@ -43,7 +43,16 @@ public:
     void setPropertyAtom(xcb_window_t window,
                          const std::string &property,
                          const std::string &value);
+    void setPropertyAtoms(xcb_window_t window,
+                          const std::string &property,
+                          const std::vector<std::string> &values);
+    void deleteProperty(xcb_window_t window, const std::string &property);
+    void changeWindowAttributes(xcb_window_t window,
+                                uint32_t valueMask,
+                                const uint32_t *valueList);
 
+    void mapWindow(xcb_window_t window);
+    void unmapWindow(xcb_window_t window);
     void auxConfigureWindow(xcb_window_t window,
                             uint16_t mask,
                             const xcb_params_configure_window_t *params);
