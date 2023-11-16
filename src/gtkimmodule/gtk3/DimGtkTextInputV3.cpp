@@ -4,8 +4,6 @@
 
 #include "DimGtkTextInputV3.h"
 
-#include "imcontext.h"
-
 DimGtkTextInputV3::DimGtkTextInputV3(struct ::zwp_text_input_v3 *text_input,
                                      DimIMContextWaylandGlobal *global)
     : wl::client::ZwpTextInputV3(text_input)

@@ -421,7 +421,7 @@ static DimIMContextWaylandGlobal *dimImContextWaylandGlobalGet(GdkDisplay *displ
     }
 
     auto seat = global->wl->getGlobal<wl::client::Seat>();
-    global->keyboard_ = std::make_shared<Keyboard>(seat->get_keyboard());
+    global->keyboard_ = std::make_shared<Keyboard>(seat->get_keyboard(), global);
     auto tiManager = global->wl->getGlobal<wl::client::ZwpTextInputManagerV3>();
 
     global->ti = std::make_shared<DimGtkTextInputV3>(tiManager->get_text_input(seat), global);
