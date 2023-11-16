@@ -2,8 +2,14 @@ set(IM_DIM_GTK3_SOURCES
   main.cpp
   imcontext.h
   imcontext.cpp
-  DimGtkTextInputV1.h
-  DimGtkTextInputV1.cpp
+  DimGtkTextInputV3.h
+  DimGtkTextInputV3.cpp
+  Keyboard.h
+  Keyboard.cpp
+  XdgSurface.h
+  XdgSurface.cpp
+  XdgToplevel.h
+  XdgToplevel.cpp
 )
 
 add_library(im-dim-gtk3 MODULE
@@ -16,7 +22,9 @@ set_target_properties(im-dim-gtk3 PROPERTIES PREFIX "" OUTPUT_NAME "im-dim")
 
 target_link_libraries(im-dim-gtk3
   PkgConfig::Gtk3
+  Qt6::GuiPrivate
   wlc
+  shm_open_anon
 )
 
 install(TARGETS im-dim-gtk3 DESTINATION "${GTK3_IM_MODULEDIR}")

@@ -2,38 +2,42 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "DimGtkTextInputV1.h"
+#include "DimGtkTextInputV3.h"
 
 #include "imcontext.h"
 
-DimGtkTextInputV1::DimGtkTextInputV1(struct ::zwp_dim_text_input_v1 *text_input,
+DimGtkTextInputV3::DimGtkTextInputV3(struct ::zwp_text_input_v3 *text_input,
                                      DimIMContextWaylandGlobal *global)
-    : wl::client::ZwpDimTextInputV1(text_input)
+    : wl::client::ZwpTextInputV3(text_input)
     , global_(global)
 {
 }
 
-void DimGtkTextInputV1::zwp_dim_text_input_v1_enter()
+void DimGtkTextInputV3::zwp_text_input_v3_enter(struct wl_surface *surface)
 {
     if (global_->current) {
+        m_surface = surface;
         DimIMContext *context = DIM_IM_CONTEXT(global_->current);
         ::enable(context, global_);
     }
 }
 
-void DimGtkTextInputV1::zwp_dim_text_input_v1_leave()
+void DimGtkTextInputV3::zwp_text_input_v3_leave(struct wl_surface *surface)
 {
     if (global_->current) {
+        if (m_surface != surface) {
+            return;
+        }
+
+        m_surface = nullptr;
         DimIMContext *context = DIM_IM_CONTEXT(global_->current);
         ::disable(context, global_);
     }
 }
 
-void DimGtkTextInputV1::zwp_dim_text_input_v1_modifiers_map(struct wl_array *map) { }
-
-void DimGtkTextInputV1::zwp_dim_text_input_v1_preedit_string(const char *text,
-                                                             int32_t cursor_begin,
-                                                             int32_t cursor_end)
+void DimGtkTextInputV3::zwp_text_input_v3_preedit_string(const char *text,
+                                                         int32_t cursor_begin,
+                                                         int32_t cursor_end)
 {
     if (!global_->current)
         return;
@@ -46,7 +50,7 @@ void DimGtkTextInputV1::zwp_dim_text_input_v1_preedit_string(const char *text,
     context->pendingPreedit.cursorEnd = cursor_end;
 }
 
-void DimGtkTextInputV1::zwp_dim_text_input_v1_commit_string(const char *text)
+void DimGtkTextInputV3::zwp_text_input_v3_commit_string(const char *text)
 {
     if (!global_->current)
         return;
@@ -57,8 +61,8 @@ void DimGtkTextInputV1::zwp_dim_text_input_v1_commit_string(const char *text)
     context->pendingCommit = g_strdup(text);
 }
 
-void DimGtkTextInputV1::zwp_dim_text_input_v1_delete_surrounding_text(uint32_t before_length,
-                                                                      uint32_t after_length)
+void DimGtkTextInputV3::zwp_text_input_v3_delete_surrounding_text(uint32_t before_length,
+                                                                  uint32_t after_length)
 {
     if (!global_->current)
         return;
@@ -78,7 +82,7 @@ void DimGtkTextInputV1::zwp_dim_text_input_v1_delete_surrounding_text(uint32_t b
     context->pendingSurroundingDelete.afterLength = char_after_length;
 }
 
-void DimGtkTextInputV1::zwp_dim_text_input_v1_done(uint32_t serial)
+void DimGtkTextInputV3::zwp_text_input_v3_done(uint32_t serial)
 {
     global_->doneSerial = serial;
 
@@ -99,38 +103,4 @@ void DimGtkTextInputV1::zwp_dim_text_input_v1_done(uint32_t serial)
         notifyImChange(context, ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD);
 }
 
-void DimGtkTextInputV1::zwp_dim_text_input_v1_keysym(
-    uint32_t serial, uint32_t time, uint32_t sym, uint32_t state, uint32_t modifiers)
-{
-    if (!global_->current)
-        return;
-
-#if GTK_CHECK_VERSION(4,0,0)
-#else
-    GdkEvent *gdk_event = gdk_event_new(state ? GDK_KEY_PRESS : GDK_KEY_RELEASE);
-    GdkEventKey *gdk_event_key = reinterpret_cast<GdkEventKey *>(gdk_event);
-
-    DimIMContext *contextWayland = DIM_IM_CONTEXT(global_->current);
-
-    gdk_event_key->type = state ? GDK_KEY_PRESS : GDK_KEY_RELEASE;
-    gdk_event_key->window = g_object_ref(contextWayland->window);
-    gdk_event_key->send_event = TRUE;
-    gdk_event_key->time = time;
-    gdk_event_key->keyval = sym;
-    gdk_event_key->length = 1;
-    gdk_event_key->string = nullptr;
-    gdk_event_key->state = modifiers;
-
-    gdk_event_key->send_event = TRUE;
-    gdk_event_key->time = time;
-
-    auto handled = gtk_im_context_filter_keypress(contextWayland->slave, &gdk_event->key);
-    gdk_event_free(gdk_event);
-
-    if (!handled) {
-        g_debug("failed to handle keypress");
-    }
-#endif
-}
-
-DimGtkTextInputV1::~DimGtkTextInputV1() { }
+DimGtkTextInputV3::~DimGtkTextInputV3() { }
