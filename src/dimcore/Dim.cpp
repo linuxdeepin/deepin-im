@@ -393,12 +393,12 @@ void Dim::launchInputMethodProxyDaemon(uint32_t modifier)
 
 bool Dim::requestSwitchIM(const std::string &addon, const std::string &name)
 {
-    auto iter = std::find_if(getCurrentInputMethods().cbegin(),
-                             getCurrentInputMethods().cend(),
+    auto iter = std::find_if(activeInputMethodEntries().cbegin(),
+                             activeInputMethodEntries().cend(),
                              [&addon, &name](const auto &pair) {
                                  return (pair.first == addon) && pair.second == name;
                              });
-    if (iter == getCurrentInputMethods().cend()) {
+    if (iter == activeInputMethodEntries().cend()) {
         qDebug() << "invalid input method " << QString::fromStdString(name);
         return false;
     }
