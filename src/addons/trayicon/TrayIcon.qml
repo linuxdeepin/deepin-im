@@ -9,38 +9,34 @@ import Qt.labs.platform 1.1
 SystemTrayIcon {
     visible: true
     icon.name: trayicon.imAddonIcon
-    // icon.source: "image://icon/" + trayicon.imAddonIcon
+    tooltip : qsTr("deepin input method trayicon")
+    icon.source: "image://icon/" + trayicon.imAddonIcon
 
     menu: Menu {
         id: contextMenu
 
-        // Instantiator {
-        //     model: trayicon.properties
+        Instantiator {
+            model: trayicon.imEntries
 
-        //     delegate: MenuItem {
-        //         text: modelData.label
-        //         icon.name: modelData.icon
-        //         onTriggered: trayicon.menuTriggered(modelData.key)
-        //     }
+            delegate: MenuItem {
+                text: model.name
+                icon.source: "image://icon/" + model.icon
+                onTriggered: trayicon.imEntryMenuTriggered(model.addon, model.name)
+            }
 
-        //     onObjectAdded: function(index, object) {
-        //         contextMenu.insertItem(index, object)
-        //     }
-        //     onObjectRemoved: function(index, object) {
-        //         contextMenu.removeItem(object)
-        //     }
-        // }
+            onObjectAdded: function(index, object) {
+                contextMenu.insertItem(index, object)
+            }
+            onObjectRemoved: function(index, object) {
+                contextMenu.removeItem(object)
+            }
+        }
 
-        // MenuSeparator {}
+        MenuSeparator {}
 
-        // MenuItem {
-        //     text: qsTr("Reload Configuration")
-        //     onTriggered: trayicon.reloadTriggered()
-        // }
-
-        // MenuItem {
-        //     text: qsTr("Settings")
-        //     onTriggered: trayicon.configureTriggered()
-        // }
+        MenuItem {
+            text: qsTr("Settings")
+            onTriggered: trayicon.configureTriggered()
+        }
     }
 }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(imdemo VERSION 0.1 LANGUAGES C CXX)
+project(deepin-im VERSION 1.0 LANGUAGES C CXX)
 
 include(GNUInstallDirs)
 
@@ -26,9 +26,14 @@ find_package(Fcitx5Qt6DBusAddons REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(WaylandScanner REQUIRED)
 find_package(Dtk6Core QUIET)
+find_package(Dtk6Gui QUIET)
 
 if (Dtk6Core_FOUND)
   add_definitions(-DDtk6Core_FOUND)
+endif()
+
+if (Dtk6Gui_FOUND)
+  add_definitions(-DDtk6Gui_FOUND)
 endif()
 
 pkg_check_modules(xcb REQUIRED IMPORTED_TARGET xcb)
