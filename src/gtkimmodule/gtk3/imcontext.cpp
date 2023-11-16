@@ -4,11 +4,17 @@
 
 #include "imcontext.h"
 
-#include "DimGtkTextInputV1.h"
+#include "DimGtkTextInputV3.h"
+#include "Keyboard.h"
+#include "XdgSurface.h"
+#include "XdgToplevel.h"
+#include "wl/client/Compositor.h"
 #include "wl/client/Connection.h"
 #include "wl/client/ConnectionRaw.h"
 #include "wl/client/Seat.h"
-#include "wl/client/ZwpDimTextInputManagerV1.h"
+#include "wl/client/Shm.h"
+#include "wl/client/XdgWmBase.h"
+#include "wl/client/ZwpTextInputManagerV3.h"
 
 #if GTK_CHECK_VERSION(4, 0, 0)
 #  include <gdk/wayland/gdkwayland.h>
@@ -394,6 +400,15 @@ static DimIMContextWaylandGlobal *dimImContextWaylandGlobalGet(GdkDisplay *displ
             return nullptr;
         }
         global->wl = wl;
+        auto shm = wl->getGlobal<wl::client::Shm>();
+        auto compositor = wl->getGlobal<wl::client::Compositor>();
+        auto surface = compositor->create_surface();
+        auto xdgWmBase = wl->getGlobal<wl::client::XdgWmBase>();
+        auto xdgSurface = xdg_wm_base_get_xdg_surface(xdgWmBase->get(), surface);
+        global->xdgSurface_ = std::make_shared<XdgSurface>(xdgSurface, surface, shm);
+        global->xdgToplevel_ = std::make_shared<XdgToplevel>(xdg_surface_get_toplevel(xdgSurface));
+        wl_surface_commit(surface);
+
         GIOChannel *channel = g_io_channel_unix_new(wl->getFd());
         g_io_add_watch(
             channel,
@@ -406,9 +421,10 @@ static DimIMContextWaylandGlobal *dimImContextWaylandGlobalGet(GdkDisplay *displ
     }
 
     auto seat = global->wl->getGlobal<wl::client::Seat>();
-    auto tiManager = global->wl->getGlobal<wl::client::ZwpDimTextInputManagerV1>();
+    global->keyboard_ = std::make_shared<Keyboard>(seat->get_keyboard());
+    auto tiManager = global->wl->getGlobal<wl::client::ZwpTextInputManagerV3>();
 
-    global->ti = std::make_shared<DimGtkTextInputV1>(tiManager->get_text_input(seat), global);
+    global->ti = std::make_shared<DimGtkTextInputV3>(tiManager->get_text_input(seat), global);
 
     global->wl->flush();
 

@@ -9,7 +9,10 @@
 
 #include <gtk/gtk.h>
 
-class DimGtkTextInputV1;
+class DimGtkTextInputV3;
+class XdgSurface;
+class XdgToplevel;
+class Keyboard;
 
 /*
  * Type macros.
@@ -20,8 +23,11 @@ class DimGtkTextInputV1;
 struct DimIMContextWaylandGlobal
 {
     GtkIMContext *current;
-    std::shared_ptr<DimGtkTextInputV1> ti;
+    std::shared_ptr<DimGtkTextInputV3> ti;
     wl::client::ConnectionBase *wl;
+    std::shared_ptr<XdgSurface> xdgSurface_;
+    std::shared_ptr<XdgToplevel> xdgToplevel_;
+    std::shared_ptr<Keyboard> keyboard_;
 
     guint serial;
     guint doneSerial;

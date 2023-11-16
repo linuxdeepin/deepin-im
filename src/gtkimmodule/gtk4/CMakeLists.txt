@@ -2,8 +2,14 @@ set(IM_DIM_GTK4_SOURCES
   main.cpp
   imcontext.h
   imcontext.cpp
-  DimGtkTextInputV1.h
-  DimGtkTextInputV1.cpp
+  DimGtkTextInputV3.h
+  DimGtkTextInputV3.cpp
+  Keyboard.h
+  Keyboard.cpp
+  XdgSurface.h
+  XdgSurface.cpp
+  XdgToplevel.h
+  XdgToplevel.cpp
 )
 
 add_library(im-dim-gtk4 MODULE
@@ -19,7 +25,9 @@ endif()
 
 target_link_libraries(im-dim-gtk4
   PkgConfig::Gtk4
+  Qt6::GuiPrivate
   wlc
+  shm_open_anon
 )
 
 install(TARGETS im-dim-gtk4 DESTINATION "${GTK4_IM_MODULEDIR}")
