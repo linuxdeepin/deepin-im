@@ -173,7 +173,7 @@ bool Dim::postEvent(Event &event)
         postInputContextCreated(reinterpret_cast<InputContextEvent &>(event));
         break;
     case EventType::InputContextDestroyed:
-        postInputContextCreated(reinterpret_cast<InputContextEvent &>(event));
+        postInputContextDestroyed(reinterpret_cast<InputContextEvent &>(event));
         break;
     case EventType::InputContextFocused:
         postInputContextFocused(reinterpret_cast<InputContextEvent &>(event));
