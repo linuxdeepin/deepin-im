@@ -8,6 +8,7 @@ Build-Depends:
  debhelper-compat (= 13),
  extra-cmake-modules,
  libdtk6core-dev,
+ libdtk6gui-dev,
  libfcitx5-qt6-dev,
  libglib2.0-dev,
  libgtk-3-dev,
