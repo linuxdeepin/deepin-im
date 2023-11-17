@@ -289,7 +289,17 @@ void DimIBusProxy::busUnregistered(const QString &str)
 
 DimIBusProxy::~DimIBusProxy()
 {
+    for (auto it = iBusICMap_.begin(); it != iBusICMap_.end(); ++it) {
+        if (it.value()) {
+            disconnect(it.value().get());
+        }
+    }
+    if (d->busInterface_ && d->busInterface_->isValid())
+        disconnect(d->busInterface_);
+    if (d->dbusConn_)
+        d->dbusConn_->disconnectFromBus(QLatin1String("DimIBusProxy"));
     iBusICMap_.clear();
+    timer_.stop();
 }
 
 void DimIBusProxy::initInputMethods()
