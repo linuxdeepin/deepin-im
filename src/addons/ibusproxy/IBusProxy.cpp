@@ -289,17 +289,7 @@ void DimIBusProxy::busUnregistered(const QString &str)
 
 DimIBusProxy::~DimIBusProxy()
 {
-    for (auto it = iBusICMap_.begin(); it != iBusICMap_.end(); ++it) {
-        if (it.value()) {
-            disconnect(it.value().get());
-        }
-    }
-    if (d->busInterface_ && d->busInterface_->isValid())
-        disconnect(d->busInterface_);
-    if (d->dbusConn_)
-        d->dbusConn_->disconnectFromBus(QLatin1String("DimIBusProxy"));
     iBusICMap_.clear();
-    timer_.stop();
 }
 
 void DimIBusProxy::initInputMethods()
@@ -377,29 +367,39 @@ void DimIBusProxy::createFcitxInputContext(InputContext *ic)
     connect(context.get(),
             &OrgFreedesktopIBusInputContextInterface::CommitText,
             this,
-            [ic](const QDBusVariant &text) {
-                const QDBusArgument arg = qvariant_cast<QDBusArgument>(text.variant());
-                IBusText t;
-                arg >> t;
+            [this, id](const QDBusVariant &text) {
+                auto ic = isValidIC(id);
+                if (ic) {
+                    const QDBusArgument arg = qvariant_cast<QDBusArgument>(text.variant());
+                    IBusText t;
+                    arg >> t;
 
-                ic->commitString(t.text);
+                    ic->commitString(t.text);
+                }
             });
     connect(context.get(),
             &OrgFreedesktopIBusInputContextInterface::UpdatePreeditText,
             this,
-            [ic](const QDBusVariant &text, uint cursorPos, bool visible) {
-                const QDBusArgument arg = qvariant_cast<QDBusArgument>(text.variant());
+            [this, id](const QDBusVariant &text, uint cursorPos, bool visible) {
+                auto ic = isValidIC(id);
+                if (ic) {
 
-                IBusText t;
-                arg >> t;
+                    const QDBusArgument arg = qvariant_cast<QDBusArgument>(text.variant());
 
-                ic->updatePreedit(t.text, cursorPos, cursorPos);
+                    IBusText t;
+                    arg >> t;
+
+                    ic->updatePreedit(t.text, cursorPos, cursorPos);
+                }
             });
     connect(context.get(),
             &OrgFreedesktopIBusInputContextInterface::ForwardKeyEvent,
             this,
-            [ic](uint keyval, uint keycode, uint state) {
-                ic->forwardKey(keycode, state);
+            [this, id](uint keyval, uint keycode, uint state) {
+                auto ic = isValidIC(id);
+                if (ic) {
+                    ic->forwardKey(keycode, state);
+                }
             });
 }
 
@@ -566,4 +566,14 @@ bool DimIBusProxy::shouldBeIgnored(const std::string &uniqueName) const
 {
     return std::mismatch(KEYBOARD_PREFIX.begin(), KEYBOARD_PREFIX.end(), uniqueName.begin()).first
         == KEYBOARD_PREFIX.end();
+}
+
+InputContext *DimIBusProxy::isValidIC(uint32_t id) const
+{
+    auto it = dim()->getInputContexts().find((id));
+    if (it == dim()->getInputContexts().cend() || id != dim()->focusedInputContext()) {
+        return nullptr;
+    }
+
+    return dim()->getInputContext(id);
 }
