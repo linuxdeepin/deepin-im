@@ -58,7 +58,7 @@ private:
 
 private:
     std::unique_ptr<GSettings, Deleter<g_object_unref>> gsettings_;
-    DimIBusInputContextPrivate *d;
+    std::unique_ptr<DimIBusInputContextPrivate> d;
     bool useSyncMode_;
     QFileSystemWatcher socketWatcher_;
     QTimer timer_;
