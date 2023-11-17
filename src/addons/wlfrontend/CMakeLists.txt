@@ -33,6 +33,7 @@ target_link_libraries(wlfrontend PRIVATE
   Qt6::DBus
   Qt6::GuiPrivate
   PkgConfig::wayland-client
+  PkgConfig::xcb
   PkgConfig::xkbcommon
   $<$<BOOL:${Dtk6Core_FOUND}>:Dtk6::Core>
   wlc
