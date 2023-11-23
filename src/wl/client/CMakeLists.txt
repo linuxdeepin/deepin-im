@@ -35,10 +35,6 @@ set(WLC_SOURCES
   ZwpTextInputManagerV3.cpp
   ZwpTextInputV3.h
   ZwpTextInputV3.cpp
-  ZwpDimTextInputManagerV1.h
-  ZwpDimTextInputManagerV1.cpp
-  ZwpDimTextInputV1.h
-  ZwpDimTextInputV1.cpp
 )
 
 add_library(wlc STATIC)
