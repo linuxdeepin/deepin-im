@@ -8,6 +8,14 @@
 
 #include <assert.h>
 
+extern "C" {
+#include <wlr/version.h>
+}
+
+#if WLR_VERSION_MINOR < 17
+#define wlr_xdg_surface_try_from_wlr_surface(SURFACE) wlr_xdg_surface_from_wlr_surface(SURFACE)
+#endif
+
 View::View(Server *server, wlr_xdg_surface *xdg_surface, wl_list *list)
     : server_(server)
     , list_(list)
@@ -26,8 +34,14 @@ View::View(Server *server, wlr_xdg_surface *xdg_surface, wl_list *list)
     xdg_surface->data = scene_tree_;
 
     /* Listen to the various events it can emit */
+#if WLR_VERSION_MINOR >= 17
+    wl_signal_add(&xdg_surface->surface->events.map, xdg_surface_map_);
+    wl_signal_add(&xdg_surface->surface->events.unmap, xdg_surface_unmap_);
+#else
     wl_signal_add(&xdg_surface->events.map, xdg_surface_map_);
     wl_signal_add(&xdg_surface->events.unmap, xdg_surface_unmap_);
+#endif
+
     wl_signal_add(&xdg_surface->events.destroy, xdg_surface_destroy_);
 
     /* cotd */
@@ -124,7 +138,7 @@ void View::focusView()
          * stop displaying a caret.
          */
         struct wlr_xdg_surface *previous =
-            wlr_xdg_surface_from_wlr_surface(seat->keyboard_state.focused_surface);
+            wlr_xdg_surface_try_from_wlr_surface(seat->keyboard_state.focused_surface);
         assert(previous->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL);
         wlr_xdg_toplevel_set_activated(previous->toplevel, false);
     }
