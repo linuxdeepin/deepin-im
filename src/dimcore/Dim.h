@@ -37,6 +37,8 @@ class InputContextCursorRectChangeEvent;
 class InputContextSetSurroundingTextEvent;
 class ProxyEvent;
 
+struct AddonDesc;
+
 class Dim : public QObject
 {
     Q_OBJECT
@@ -80,7 +82,7 @@ public Q_SLOTS:
 
 private:
     void loadAddons();
-    void loadAddon(const QString &infoFile);
+    void loadAddon(const AddonDesc &infoFile);
     void initInputMethodAddon(InputMethodAddon *imAddon);
     void postInputContextCreated(InputContextEvent &event);
     void postInputContextDestroyed(InputContextEvent &event);

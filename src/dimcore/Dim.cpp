@@ -38,6 +38,17 @@ static const QMap<QString, AddonType> AddonsType = {
     { "InputMethod", AddonType::InputMethod },
 };
 
+namespace org::deepin::dim {
+struct AddonDesc
+{
+    QString addon;
+    QString name;
+    QString category;
+    QString library;
+    QStringList dependencies;
+};
+} // namespace org::deepin::dim
+
 Dim::Dim(QObject *parent)
     : QObject(parent)
     , focusedInputContext_(0)
@@ -92,40 +103,54 @@ void Dim::loadAddons()
     QDir dir(DIM_ADDON_INFO_DIR);
     qInfo() << "addon info dir" << dir.absolutePath();
     auto addonInfoFiles = dir.entryInfoList(QDir::Filter::Files | QDir::Filter::Readable);
+
+    std::vector<AddonDesc> list;
     for (const auto &addonInfoFile : addonInfoFiles) {
         QString filename = addonInfoFile.fileName();
         if (filename.startsWith('.') || !filename.endsWith(".conf")) {
             continue;
         }
 
-        loadAddon(addonInfoFile.absoluteFilePath());
+        QSettings settings(addonInfoFile.absoluteFilePath(), QSettings::Format::IniFormat);
+        settings.beginGroup("Addon");
+        if (!settings.contains("Name") || !settings.contains("Category")
+            || !settings.contains("Library")) {
+            qDebug() << "Addon info file" << addonInfoFile << "is invalid";
+            continue;
+        }
+
+        list.emplace_back(AddonDesc{
+            addonInfoFile.baseName(),
+            settings.value("Name").toString(),
+            settings.value("Category").toString(),
+            settings.value("Library").toString(),
+            settings.value("Dependencies").toStringList(),
+        });
+
+        settings.endGroup();
+    }
+
+    std::sort(list.begin(), list.end(), [](const AddonDesc &l, const AddonDesc &r) {
+        return !l.dependencies.contains(r.addon);
+    });
+
+    for (auto &a : list) {
+        loadAddon(a);
     }
 }
 
-void Dim::loadAddon(const QString &infoFile)
+void Dim::loadAddon(const AddonDesc &info)
 {
-    QSettings settings(infoFile, QSettings::Format::IniFormat);
-    settings.beginGroup("Addon");
-    if (!settings.contains("Name") || !settings.contains("Category")
-        || !settings.contains("Library")) {
-        qWarning() << "Addon info file" << infoFile << "is invalid";
-        return;
-    }
-
-    QString name = settings.value("Name").toString();
-    QString category = settings.value("Category").toString();
-    QString library = settings.value("Library").toString();
-    settings.endGroup();
-
     QDir addonDir(DIM_ADDON_DIR);
-    QString libraryFile = library + ".so";
+    QString libraryFile = info.library + ".so";
     if (!addonDir.exists(libraryFile)) {
         qWarning() << "Addon library" << libraryFile << "not found";
         return;
     }
 
     QString libraryPath = addonDir.filePath(libraryFile);
-    void *handle = dlopen(libraryPath.toStdString().c_str(), RTLD_LAZY);
+    qDebug() << "loading addon:" << libraryPath;
+    void *handle = dlopen(libraryPath.toStdString().c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (handle == nullptr) {
         qWarning() << "Addon library" << libraryFile << "failed to load:" << dlerror();
         return;
@@ -140,7 +165,7 @@ void Dim::loadAddon(const QString &infoFile)
     auto create = reinterpret_cast<addonCreate *>(createFn);
     Addon *addon = create(this);
 
-    switch (AddonsType[category]) {
+    switch (AddonsType[info.category]) {
     case AddonType::Frontend: {
         break;
     }
@@ -152,7 +177,7 @@ void Dim::loadAddon(const QString &infoFile)
         break;
     }
     default:
-        qWarning() << "Addon" << name << "has an invalid category" << category;
+        qWarning() << "Addon" << info.name << "has an invalid category" << info.category;
         delete addon;
     }
 }
