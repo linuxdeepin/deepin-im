@@ -23,11 +23,17 @@ extern "C" {
 #include <wlr/types/wlr_text_input_v3.h>
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
 #include <wlr/util/log.h>
+#include <wlr/version.h>
 }
 
 #include <stdexcept>
 
 #include <assert.h>
+
+#if WLR_VERSION_MINOR < 17
+#define wlr_xdg_surface_try_from_wlr_surface(SURFACE) wlr_xdg_surface_from_wlr_surface(SURFACE)
+#define wlr_scene_surface_try_from_buffer(BUFFER) wlr_scene_surface_from_buffer(BUFFER)
+#endif
 
 struct unsafe_wlr_x11_backend
 {
@@ -105,7 +111,11 @@ Server::Server()
      * to dig your fingers in and play with their behavior if you want. Note that
      * the clients cannot set the selection directly without compositor approval,
      * see the handling of the request_set_selection event below.*/
+#if WLR_VERSION_MINOR >= 17
+    wlr_compositor_create(display_.get(), 5, renderer_.get());
+#else
     wlr_compositor_create(display_.get(), renderer_.get());
+#endif
     wlr_subcompositor_create(display_.get());
     wlr_data_device_manager_create(display_.get());
 
@@ -298,7 +308,7 @@ void Server::xdgShellNewSurfaceNotify(void *data)
      * scene node. */
     if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_POPUP) {
         struct wlr_xdg_surface *parent =
-            wlr_xdg_surface_from_wlr_surface(xdg_surface->popup->parent);
+            wlr_xdg_surface_try_from_wlr_surface(xdg_surface->popup->parent);
         struct wlr_scene_tree *parent_tree = static_cast<wlr_scene_tree *>(parent->data);
         xdg_surface->data = wlr_scene_xdg_surface_create(parent_tree, xdg_surface);
         return;
@@ -510,10 +520,14 @@ void Server::processCursorMotion(uint32_t time)
     struct wlr_surface *surface = NULL;
     View *view = desktopViewAt(cursor_->x, cursor_->y, &surface, &sx, &sy);
     if (!view) {
-        /* If there's no view under the cursor, set the cursor image to a
+        /* If there's no toplevel under the cursor, set the cursor image to a
          * default. This is what makes the cursor image appear when you move it
-         * around the screen, not over any views. */
+         * around the screen, not over any toplevels. */
+#if WLR_VERSION_MINOR >= 17
+        wlr_cursor_set_xcursor(cursor_.get(), cursor_mgr_.get(), "default");
+#else
         wlr_xcursor_manager_set_cursor_image(cursor_mgr_.get(), "left_ptr", cursor_.get());
+#endif
     }
     if (surface) {
         /*
@@ -540,23 +554,23 @@ View *
 Server::desktopViewAt(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy)
 {
     /* This returns the topmost node in the scene at the given layout coords.
-     * we only care about surface nodes as we are specifically looking for a
-     * surface in the surface tree of a tinywl_view. */
+     * We only care about surface nodes as we are specifically looking for a
+     * surface in the surface tree of a toplevel. */
     struct wlr_scene_node *node = wlr_scene_node_at(&scene_->tree.node, lx, ly, sx, sy);
-    if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
-        return NULL;
+    if (node == nullptr || node->type != WLR_SCENE_NODE_BUFFER) {
+        return nullptr;
     }
     struct wlr_scene_buffer *scene_buffer = wlr_scene_buffer_from_node(node);
-    struct wlr_scene_surface *scene_surface = wlr_scene_surface_from_buffer(scene_buffer);
+    struct wlr_scene_surface *scene_surface = wlr_scene_surface_try_from_buffer(scene_buffer);
     if (!scene_surface) {
-        return NULL;
+        return nullptr;
     }
 
     *surface = scene_surface->surface;
-    /* Find the node corresponding to the tinywl_view at the root of this
+    /* Find the node corresponding to the toplevel at the root of this
      * surface tree, it is the only one for which we set the data field. */
     struct wlr_scene_tree *tree = node->parent;
-    while (tree != NULL && tree->node.data == NULL) {
+    while (tree != nullptr && tree->node.data == nullptr) {
         tree = tree->node.parent;
     }
     return static_cast<View *>(tree->node.data);

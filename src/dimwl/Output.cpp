@@ -13,6 +13,7 @@ extern "C" {
 #define static
 #include <wlr/types/wlr_scene.h>
 #undef static
+#include <wlr/version.h>
 }
 
 Output::Output(Server *dimwl, struct wlr_output *output, wl_list *list)
@@ -72,7 +73,11 @@ void Output::frameNotify(void *data)
     struct wlr_scene_output *scene_output = wlr_scene_get_scene_output(scene, output_);
 
     /* Render the scene if needed and commit the output */
+#if WLR_VERSION_MINOR >= 17
+    wlr_scene_output_commit(scene_output, nullptr);
+#else
     wlr_scene_output_commit(scene_output);
+#endif
 
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
