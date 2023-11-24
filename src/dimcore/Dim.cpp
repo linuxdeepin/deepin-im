@@ -167,13 +167,14 @@ void Dim::loadAddon(const AddonDesc &info)
 
     switch (AddonsType[info.category]) {
     case AddonType::Frontend: {
+        addons_.emplace(addon->key(), addon);
         break;
     }
     case AddonType::InputMethod: {
         auto *imAddon = qobject_cast<InputMethodAddon *>(addon);
         connect(imAddon, &InputMethodAddon::addonInitFinished, this, &Dim::initInputMethodAddon);
         imAddon->initInputMethods();
-        inputMethodAddons_.emplace(imAddon->key(), imAddon);
+        addons_.emplace(addon->key(), addon);
         break;
     }
     default:
@@ -344,15 +345,18 @@ void Dim::addActiveInputMethodEntry(const std::string &addon, const std::string 
 InputMethodAddon *Dim::getInputMethodAddon(const InputState &inputState)
 {
     const std::string &addonKey = inputState.currentIMEntry().first;
-    auto j = imAddons().find(addonKey);
-    assert(j != imAddons().end());
+    auto j = addons().find(addonKey);
+    assert(j != addons().end());
 
-    return j->second;
+    auto *imAddon = qobject_cast<InputMethodAddon *>(j->second);
+    assert(imAddon);
+
+    return imAddon;
 }
 
 void Dim::loopProxyAddon(const std::function<void(ProxyAddon *addon)> callback)
 {
-    for (const auto &[_, v] : inputMethodAddons_) {
+    for (const auto &[_, v] : addons_) {
         auto addon = qobject_cast<ProxyAddon *>(v);
         if (addon) {
             callback(addon);
@@ -362,7 +366,7 @@ void Dim::loopProxyAddon(const std::function<void(ProxyAddon *addon)> callback)
 
 void Dim::switchIM(const std::pair<std::string, std::string> &imIndex)
 {
-    auto addon = qobject_cast<ProxyAddon *>(imAddons().at(imIndex.first));
+    auto addon = qobject_cast<ProxyAddon *>(addons().at(imIndex.first));
 
     if (addon) {
         addon->setCurrentIM(imIndex.second);
