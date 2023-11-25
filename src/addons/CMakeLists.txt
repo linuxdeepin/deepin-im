@@ -1,5 +1,5 @@
 add_subdirectory(keyboard)
-add_subdirectory(fcitx5proxy)
+add_subdirectory(fcitx5)
 add_subdirectory(wlfrontend)
-add_subdirectory(ibusproxy)
+add_subdirectory(ibus)
 add_subdirectory(trayicon)
