@@ -1,4 +1,4 @@
-set(FCITX5PROXY_SOURCES
+set(FCITX5_SOURCES
   Fcitx5Proxy.h
   Fcitx5Proxy.cpp
   DBusProvider.h
@@ -15,12 +15,12 @@ qt_add_dbus_interface(IC_SOURCES
   Fcitx5InputContextIface
 )
 
-add_library(fcitx5proxy MODULE
-  ${FCITX5PROXY_SOURCES}
+add_library(fcitx5 MODULE
+  ${FCITX5_SOURCES}
   ${IC_SOURCES}
 )
 
-target_link_libraries(fcitx5proxy PRIVATE
+target_link_libraries(fcitx5 PRIVATE
   dimcore
   Qt6::Core
   Qt6::DBus
@@ -29,11 +29,11 @@ target_link_libraries(fcitx5proxy PRIVATE
   $<$<BOOL:${Dtk6Core_FOUND}>:Dtk6::Core>
 )
 
-install(TARGETS fcitx5proxy
+install(TARGETS fcitx5
   LIBRARY DESTINATION ${DIM_ADDON_DIR}
 )
 
-install(FILES fcitx5proxy.conf
+install(FILES fcitx5.conf
   DESTINATION ${DIM_ADDON_INFO_DIR}
 )
 
