@@ -56,14 +56,14 @@ Dim::Dim(QObject *parent)
     , dimConf_(DconfigSettings::ConfigPtr(DimDConfigAppID, DimDConfigJson))
 #endif
 {
-    loadAddons();
-
 #ifdef Dtk6Core_FOUND
     initDConfig();
 #else
     currentActiveIM_ = std::make_pair("keyboard", "us");
-    activeInputMethodEntries_ = { { "keyboard", "us" } };
+    activeInputMethodEntries_ = { { "keyboard", "us" }, { "fcitx5", "pinyin" } };
 #endif
+
+    loadAddons();
 }
 
 Dim::~Dim() { }
@@ -218,8 +218,14 @@ bool Dim::postEvent(Event &event)
         postInputContextCursorRectChanged(
             reinterpret_cast<InputContextCursorRectChangeEvent &>(event));
         break;
+    case EventType::InputContextUpdateContentType:
+        postInputContextUpdateContentType(reinterpret_cast<InputContextEvent &>(event));
+        break;
     case EventType::InputContextUpdateSurroundingText:
-        postInputContextSetSurroundingTextEvent(reinterpret_cast<InputContextEvent &>(event));
+        postInputContextUpdateSurroundingTextEvent(reinterpret_cast<InputContextEvent &>(event));
+        break;
+    case EventType::InputContextDone:
+        postInputContextDone(reinterpret_cast<InputContextEvent &>(event));
         break;
     case EventType::ProxyActiveInputMethodsChanged:
         postProxyActivateInputMethodChanged(reinterpret_cast<ProxyEvent &>(event));
@@ -236,10 +242,6 @@ void Dim::postInputContextCreated(InputContextEvent &event)
     connect(ic, &InputContext::imSwitch, this, &Dim::switchIM);
 
     inputContexts_.emplace(ic->id(), ic);
-
-    loopProxyAddon([ic](ProxyAddon *addon) {
-        addon->createFcitxInputContext(ic);
-    });
 }
 
 void Dim::postInputContextDestroyed(InputContextEvent &event)
@@ -283,8 +285,9 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
 
     if (event.isRelease() && event.state() == DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE) {
         QTimer::singleShot(0, [ic = event.ic()]() {
-            ic->inputState().switchIMAddon();
+            ic->inputState().switchIM();
         });
+        return true;
     }
 
     auto addon = getInputMethodAddon(inputState);
@@ -311,12 +314,32 @@ void Dim::postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &e
     }
 }
 
-void Dim::postInputContextSetSurroundingTextEvent(InputContextEvent &event)
+void Dim::postInputContextUpdateContentType(InputContextEvent &event)
+{
+    auto *ic = event.ic();
+
+    loopProxyAddon([ic](ProxyAddon *addon) {
+        auto &contentType = ic->contentType();
+
+        addon->contentType(contentType.hint(), contentType.purpose());
+    });
+}
+
+void Dim::postInputContextUpdateSurroundingTextEvent(InputContextEvent &event)
 {
     auto addon = getInputMethodAddon(event.ic()->inputState());
     if (addon) {
         addon->updateSurroundingText(event);
     }
+}
+
+void Dim::postInputContextDone(InputContextEvent &event)
+{
+    auto *ic = event.ic();
+
+    loopProxyAddon([ic](ProxyAddon *addon) {
+        addon->done();
+    });
 }
 
 void Dim::postProxyActivateInputMethodChanged(ProxyEvent &event)
@@ -366,7 +389,7 @@ void Dim::loopProxyAddon(const std::function<void(ProxyAddon *addon)> callback)
 
 void Dim::switchIM(const std::pair<std::string, std::string> &imIndex)
 {
-    auto addon = qobject_cast<ProxyAddon *>(addons().at(imIndex.first));
+    auto addon = qobject_cast<ProxyAddon *>(addons_.at(imIndex.first));
 
     if (addon) {
         addon->setCurrentIM(imIndex.second);

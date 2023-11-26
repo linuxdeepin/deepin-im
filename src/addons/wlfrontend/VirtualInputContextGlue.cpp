@@ -40,6 +40,15 @@ void VirtualInputContextGlue::focusOutWrapper()
     }
 }
 
+void VirtualInputContextGlue::updateContentTypeWrapper()
+{
+    updateContentType();
+    if (auto *ic = delegatedInputContext(); ic != this) {
+        ic->contentType() = contentType();
+        ic->updateContentType();
+    }
+}
+
 void VirtualInputContextGlue::updateSurroundingTextWrapper()
 {
     updateSurroundingText();

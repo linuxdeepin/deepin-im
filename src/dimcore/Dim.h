@@ -87,7 +87,9 @@ private:
     void postInputContextUnfocused(InputContextEvent &event);
     bool postInputContextKeyEvent(InputContextKeyEvent &event);
     void postInputContextCursorRectChanged(InputContextCursorRectChangeEvent &event);
-    void postInputContextSetSurroundingTextEvent(InputContextEvent &event);
+    void postInputContextUpdateContentType(InputContextEvent &event);
+    void postInputContextUpdateSurroundingTextEvent(InputContextEvent &event);
+    void postInputContextDone(InputContextEvent &event);
     void postProxyActivateInputMethodChanged(ProxyEvent &event);
     void addActiveInputMethodEntry(const std::string &addon, const std::string &entry);
     InputMethodAddon *getInputMethodAddon(const InputState &state);

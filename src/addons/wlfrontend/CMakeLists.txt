@@ -21,6 +21,8 @@ set(WLFRONTEND_SOURCES
   Xcb.cpp
   X11AppMonitor.h
   X11AppMonitor.cpp
+  WLFrontend_public.h
+  WLFrontend_public.cpp
 )
 
 add_library(wlfrontend SHARED

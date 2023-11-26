@@ -31,12 +31,14 @@ public:
     const QList<InputMethodEntry> &getInputMethods() override;
     void initInputMethods() override;
     bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
-    void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) override;
-    void updateSurroundingText(InputContextEvent &event) override;
-    void createFcitxInputContext(InputContext *ic) override;
+
     void focusIn(uint32_t id) override;
     void focusOut(uint32_t id) override;
     void destroyed(uint32_t id) override;
+    void done() override;
+    void contentType(uint32_t hint, uint32_t purpose) override;
+    void updateSurroundingText(InputContextEvent &event) override;
+    void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) override;
     void setCurrentIM(const std::string &im) override;
 
 private:

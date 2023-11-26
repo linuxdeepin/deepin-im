@@ -28,7 +28,7 @@ public:
 
     const auto &currentIMEntry() const { return currentIMKey_; }
 
-    void switchIMAddon();
+    void switchIM();
 
 public Q_SLOTS:
     void requestSwitchIM(const std::string &framework, const std::string &name);

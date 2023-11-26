@@ -62,9 +62,25 @@ void InputContext::commitString(const QString &text)
     commitStringImpl(text);
 }
 
+void InputContext::commit()
+{
+    commitImpl();
+}
+
 void InputContext::forwardKey(uint32_t keycode, bool pressed)
 {
     forwardKeyImpl(keycode, pressed);
+}
+
+ContentType &InputContext::contentType()
+{
+    return contentType_;
+}
+
+void InputContext::updateContentType()
+{
+    InputContextEvent event(EventType::InputContextUpdateContentType, this);
+    dim_->postEvent(event);
 }
 
 SurroundingText &InputContext::surroundingText()

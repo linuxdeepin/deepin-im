@@ -27,7 +27,8 @@ public:
     virtual void focusIn(uint32_t id) = 0;
     virtual void focusOut(uint32_t id) = 0;
     virtual void destroyed(uint32_t id) = 0;
-    virtual void createFcitxInputContext(InputContext *) = 0;
+    virtual void done() = 0;
+    virtual void contentType(uint32_t hint, uint32_t purpose) = 0;
     virtual void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) = 0;
     virtual void setCurrentIM(const std::string &im) = 0;
 

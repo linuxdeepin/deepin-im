@@ -245,12 +245,8 @@ void DimIBusProxy::connectToBus()
     d->initBus();
     initEngines();
 
-    if (!d->usePortal_ && socketWatcher_.files().size() == 0)
+    if (!d->usePortal_ && socketWatcher_.files().size() == 0) {
         socketWatcher_.addPath(DimIBusInputContextPrivate::getSocketPath());
-
-    const auto &inputContexts = dim()->getInputContexts();
-    for (auto i = inputContexts.begin(); i != inputContexts.end(); ++i) {
-        createFcitxInputContext(i->second);
     }
 }
 
@@ -325,86 +321,6 @@ const QList<InputMethodEntry> &DimIBusProxy::getInputMethods()
     return inputMethods_;
 }
 
-void DimIBusProxy::createFcitxInputContext(InputContext *ic)
-{
-    if (!d->busConnected_ || !ic) {
-        return;
-    }
-
-    auto id = ic->id();
-
-    const auto &icName = QString("DimInputContext-%1").arg(id);
-    auto icDbusObj = d->usePortal_ ? d->portalBus_->CreateInputContext(icName)
-                                   : d->busInterface_->CreateInputContext(icName);
-    icDbusObj.waitForFinished();
-    if (!icDbusObj.isValid()) {
-        qWarning() << "ibus proxy: CreateInputContext failed." << icDbusObj.error().message();
-        return;
-    }
-
-    const auto &ibusIcPath = icDbusObj.value().path();
-
-    auto context = std::make_shared<OrgFreedesktopIBusInputContextInterface>(d->ibusService_,
-                                                                             ibusIcPath,
-                                                                             *d->dbusConn_);
-
-    if (!context->isValid()) {
-        qWarning("invalid input context");
-        return;
-    }
-
-    iBusICMap_[id] = context;
-
-    enum Capabilities {
-        IBUS_CAP_PREEDIT_TEXT = 1 << 0,
-        IBUS_CAP_AUXILIARY_TEXT = 1 << 1,
-        IBUS_CAP_LOOKUP_TABLE = 1 << 2,
-        IBUS_CAP_FOCUS = 1 << 3,
-        IBUS_CAP_PROPERTY = 1 << 4,
-        IBUS_CAP_SURROUNDING_TEXT = 1 << 5
-    };
-
-    context->SetCapabilities(IBUS_CAP_PREEDIT_TEXT | IBUS_CAP_FOCUS | IBUS_CAP_SURROUNDING_TEXT);
-
-    connect(context.get(),
-            &OrgFreedesktopIBusInputContextInterface::CommitText,
-            this,
-            [this, id](const QDBusVariant &text) {
-                auto ic = isValidIC(id);
-                if (ic) {
-                    const QDBusArgument arg = qvariant_cast<QDBusArgument>(text.variant());
-                    IBusText t;
-                    arg >> t;
-
-                    ic->commitString(t.text);
-                }
-            });
-    connect(context.get(),
-            &OrgFreedesktopIBusInputContextInterface::UpdatePreeditText,
-            this,
-            [this, id](const QDBusVariant &text, uint cursorPos, bool visible) {
-                auto ic = isValidIC(id);
-                if (ic) {
-
-                    const QDBusArgument arg = qvariant_cast<QDBusArgument>(text.variant());
-
-                    IBusText t;
-                    arg >> t;
-
-                    ic->updatePreedit(t.text, cursorPos, cursorPos);
-                }
-            });
-    connect(context.get(),
-            &OrgFreedesktopIBusInputContextInterface::ForwardKeyEvent,
-            this,
-            [this, id](uint keyval, uint keycode, uint state) {
-                auto ic = isValidIC(id);
-                if (ic) {
-                    ic->forwardKey(keycode, state);
-                }
-            });
-}
-
 void DimIBusProxy::focusIn(uint32_t id)
 {
     if (isICDBusInterfaceValid(id)) {
@@ -425,6 +341,10 @@ void DimIBusProxy::destroyed(uint32_t id)
         iBusICMap_[id]->Destroy();
     }
 }
+
+void DimIBusProxy::done() { }
+
+void DimIBusProxy::contentType(uint32_t hint, uint32_t purpose) { }
 
 void DimIBusProxy::setCurrentIM(const std::string &im)
 {

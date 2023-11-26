@@ -47,6 +47,8 @@ public:
                                  Dim *dim);
     ~WaylandInputContext() override;
 
+    InputMethodV2 *getInputMethodV2() { return im_.get(); }
+
 protected:
     void updatePreeditDelegate(InputContext *ic,
                                const QString &text,
@@ -54,6 +56,7 @@ protected:
                                int32_t cursorEnd) const override;
     void commitStringDelegate(InputContext *, const QString &text) const override;
     void forwardKeyDelegate(InputContext *, uint32_t keycode, bool pressed) const override;
+    void commitDelegate() const override;
     void deleteSurroundingTextDelegate(InputContext *ic,
                                        int offset,
                                        unsigned int size) const override;
@@ -76,14 +79,10 @@ private:
                            uint32_t group);
     void repeatInfoCallback(int32_t rate, int32_t delay);
 
-    void textInputRectangleCallback(int32_t x, int32_t y, int32_t width, int32_t height);
-
 private:
     std::shared_ptr<InputMethodV2> im_;
     std::shared_ptr<InputMethodKeyboardGrabV2> grab_;
     std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> vk_;
-    std::shared_ptr<wl::client::Surface> surface_;
-    std::unique_ptr<InputPopupSurfaceV2> popup_;
 
     std::shared_ptr<AppMonitor> appMonitor_;
     std::unique_ptr<VirtualInputContextManager> vicm_;

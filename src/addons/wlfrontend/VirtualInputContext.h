@@ -15,9 +15,13 @@ class VirtualInputContextGlue;
 
 class VirtualInputContext : public InputContext
 {
+    Q_OBJECT
+
 public:
     VirtualInputContext(VirtualInputContextGlue *parentIC, Dim *dim);
     ~VirtualInputContext();
+
+    VirtualInputContextGlue *parentIC() { return parentIC_; }
 
     void setWindowPos(const QPoint &leftTop);
 
@@ -26,6 +30,7 @@ public:
 protected:
     void updatePreeditImpl(const QString &text, int32_t cursorBegin, int32_t cursorEnd) override;
     void commitStringImpl(const QString &text) override;
+    void commitImpl() override;
     void forwardKeyImpl(uint32_t keycode, bool pressed) override;
 
 protected:

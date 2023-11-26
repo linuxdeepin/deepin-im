@@ -21,7 +21,7 @@ InputState::InputState(InputContext *ic)
     });
 }
 
-void InputState::switchIMAddon()
+void InputState::switchIM()
 {
     auto iter = findIMEntry();
     iter++;
