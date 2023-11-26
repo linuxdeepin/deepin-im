@@ -23,7 +23,9 @@ enum class EventType {
     InputContextUnfocused,
     InputContextKeyEvent,
     InputContextCursorRectChanged,
+    InputContextUpdateContentType,
     InputContextUpdateSurroundingText,
+    InputContextDone,
 
     ProxyActiveInputMethodsChanged,
 };

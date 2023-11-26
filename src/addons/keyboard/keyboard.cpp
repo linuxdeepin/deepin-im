@@ -115,6 +115,7 @@ bool Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &key
             }
 
             ic->commitString(buf);
+            ic->commit();
             return true;
         }
     }

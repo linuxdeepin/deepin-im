@@ -16,4 +16,6 @@ ZwpInputPopupSurfaceV2::ZwpInputPopupSurfaceV2(zwp_input_popup_surface_v2 *val)
     zwp_input_popup_surface_v2_add_listener(get(), &listener_, this);
 }
 
-ZwpInputPopupSurfaceV2::~ZwpInputPopupSurfaceV2() = default;
+ZwpInputPopupSurfaceV2::~ZwpInputPopupSurfaceV2() {
+    zwp_input_popup_surface_v2_destroy(get());
+}

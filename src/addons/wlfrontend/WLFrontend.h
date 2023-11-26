@@ -2,8 +2,10 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef DBUSFRONTEND_H
-#define DBUSFRONTEND_H
+#ifndef WLFRONTEND_H
+#define WLFRONTEND_H
+
+#include "wl/client/ConnectionBase.h"
 
 #include <dimcore/FrontendAddon.h>
 
@@ -34,6 +36,8 @@ public:
     explicit WLFrontend(Dim *dim);
     ~WLFrontend() override;
 
+    wl::client::ConnectionBase *getWl() { return wl_.get(); }
+
 private:
     std::unique_ptr<wl::client::ConnectionBase> wl_;
     std::shared_ptr<wl::client::Compositor> compositor_;
@@ -48,4 +52,4 @@ private:
 } // namespace deepin
 } // namespace org
 
-#endif // !DBUSFRONTEND_H
+#endif // !WLFRONTEND_H

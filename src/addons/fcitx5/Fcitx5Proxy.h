@@ -5,7 +5,8 @@
 #ifndef FCITX5PROXY_H
 #define FCITX5PROXY_H
 
-#include "Fcitx5InputContextIface.h"
+#include "InputPopupSurfaceV2.h"
+#include "Server.h"
 
 #include <dimcore/ProxyAddon.h>
 
@@ -29,31 +30,30 @@ public:
     void initInputMethods() override;
     const QList<InputMethodEntry> &getInputMethods() override;
     bool keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent) override;
-    void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) override;
-    void updateSurroundingText(InputContextEvent &event) override;
-    void createFcitxInputContext(InputContext *ic) override;
+
     void focusIn(uint32_t id) override;
     void focusOut(uint32_t id) override;
     void destroyed(uint32_t id) override;
+    void done() override;
+    void contentType(uint32_t hint, uint32_t purpose) override;
+    void updateSurroundingText(InputContextEvent &event) override;
+    void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) override;
     void setCurrentIM(const std::string &im) override;
-    void addCapability(uint32_t id);
 
 private:
-    inline bool isICDBusInterfaceValid(uint32_t id)
-    {
-        return !icMap_.isEmpty() && icMap_.contains(id) && icMap_[id]->isValid();
-    }
-
     void updateInputMethods();
-
     bool shouldBeIgnored(const std::string &uniqueName) const;
     void initDBusConn();
     void launchDaemon();
+    InputContext* getFocusedIC(uint32_t id) const;
 
 private:
+    std::unique_ptr<Server> wl_;
+    uint32_t focusedId_;
+    std::unique_ptr<InputPopupSurfaceV2> popup_;
+
     DBusProvider *dbusProvider_ = nullptr;
     bool available_ = false;
-    QMap<uint32_t, org::fcitx::Fcitx::InputContext1 *> icMap_;
     QList<InputMethodEntry> inputMethods_;
     QProcess *fcitx5Proc_;
 };

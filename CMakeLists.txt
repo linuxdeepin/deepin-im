@@ -36,6 +36,8 @@ if (Dtk6Gui_FOUND)
   add_definitions(-DDtk6Gui_FOUND)
 endif()
 
+add_definitions(-DWLR_USE_UNSTABLE)
+
 pkg_check_modules(xcb REQUIRED IMPORTED_TARGET xcb)
 pkg_check_modules(xcb-xinput REQUIRED IMPORTED_TARGET xcb-xinput)
 pkg_check_modules(xcb-aux REQUIRED IMPORTED_TARGET xcb-aux)

@@ -9,6 +9,7 @@
 #include "InputState.h"
 #include "ObjectId.h"
 #include "SurroundingText.h"
+#include "dimcore/ContentType.h"
 
 #include <QObject>
 
@@ -39,7 +40,10 @@ public:
 
     void updatePreedit(const QString &text, int32_t cursorBegin, int32_t cursorEnd);
     void commitString(const QString &text);
+    void commit();
     void forwardKey(uint32_t keycode, bool pressed);
+    ContentType &contentType();
+    void updateContentType();
     SurroundingText &surroundingText();
     void updateSurroundingText();
 
@@ -53,12 +57,14 @@ protected:
 
     virtual void updatePreeditImpl(const QString &text, int32_t cursorBegin, int32_t cursorEnd) = 0;
     virtual void commitStringImpl(const QString &text) = 0;
+    virtual void commitImpl() = 0;
     virtual void forwardKeyImpl(uint32_t keycode, bool pressed) = 0;
 
 private:
     Dim *dim_;
     bool hasFocus_ = false;
     InputState inputState_;
+    ContentType contentType_;
     SurroundingText surroundingText_;
 };
 

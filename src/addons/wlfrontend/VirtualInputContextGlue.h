@@ -15,6 +15,8 @@ class VirtualInputContextGlue : public VirtualInputContext
 {
     friend class VirtualInputContext;
 
+    Q_OBJECT
+
 public:
     using VirtualInputContext::VirtualInputContext;
 
@@ -39,6 +41,7 @@ public:
 
     void focusInWrapper();
     void focusOutWrapper();
+    void updateContentTypeWrapper();
     void updateSurroundingTextWrapper();
     // void setCapabilityFlagsWrapper(CapabilityFlags flags);
 
@@ -53,6 +56,7 @@ protected:
                                        int32_t cursorEnd) const = 0;
     virtual void commitStringDelegate(InputContext *, const QString &text) const = 0;
     virtual void forwardKeyDelegate(InputContext *, uint32_t keycode, bool pressed) const = 0;
+    virtual void commitDelegate() const = 0;
     virtual void deleteSurroundingTextDelegate(InputContext *ic,
                                                int offset,
                                                unsigned int size) const = 0;

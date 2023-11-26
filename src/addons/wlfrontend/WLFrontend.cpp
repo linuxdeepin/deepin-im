@@ -34,35 +34,14 @@ DIM_ADDON_FACTORY(WLFrontend)
 WLFrontend::WLFrontend(Dim *dim)
     : FrontendAddon(dim, "wlfrontend")
 {
-    if (QGuiApplication::platformName().contains("wayland")) {
-        QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
-        struct wl_display *wl_dpy =
-            (struct wl_display *)native->nativeResourceForWindow("display", NULL);
+    auto *display = wl_display_connect(nullptr);
 
-        wl_.reset(new wl::client::ConnectionRaw(wl_dpy));
-    } else {
-        const QByteArray waylandDisplay = qgetenv("DIM_WAYLAND_DISPLAY");
-        const auto displayName = waylandDisplay.toStdString();
-        if (displayName.empty()) {
-            qWarning("failed to get display env");
-            return;
-        }
-
-        auto *wl = new wl::client::Connection(displayName);
-        if (wl->display() == nullptr) {
-            return;
-        }
-        auto *notifier = new QSocketNotifier(wl->getFd(), QSocketNotifier::Read, this);
-        connect(notifier, &QSocketNotifier::activated, this, [wl]() {
-            wl->dispatch();
-        });
-
-        wl_.reset(wl);
-        QAbstractEventDispatcher *dispatcher = QThread::currentThread()->eventDispatcher();
-        QObject::connect(dispatcher, &QAbstractEventDispatcher::aboutToBlock, this, [this]() {
-            wl_->flush();
-        });
+    auto *wl = new wl::client::ConnectionRaw(display);
+    if (wl->display() == nullptr) {
+        return;
     }
+
+    wl_.reset(wl);
 
     compositor_ = wl_->getGlobal<wl::client::Compositor>();
     surface_ = std::make_shared<wl::client::Surface>(compositor_->create_surface());

@@ -31,8 +31,6 @@ WaylandInputContext::WaylandInputContext(
     : VirtualInputContextGlue(nullptr, dim)
     , im_(im)
     , vk_(vk)
-    , surface_(surface)
-    , popup_(std::make_unique<InputPopupSurfaceV2>(im_->get_input_popup_surface(surface_)))
     , state_(std::make_unique<State>())
     , xkbContext_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
 {
@@ -66,11 +64,6 @@ WaylandInputContext::WaylandInputContext(
             &InputMethodV2QObject::unavailable,
             this,
             &WaylandInputContext::unavailableCallback);
-
-    connect(popup_->getQObject(),
-            &InputPopupSurfaceV2QObj::textInputRectangle,
-            this,
-            &WaylandInputContext::textInputRectangleCallback);
 }
 
 WaylandInputContext::~WaylandInputContext() = default;
@@ -81,12 +74,15 @@ void WaylandInputContext::updatePreeditDelegate(InputContext *ic,
                                                 int32_t cursorEnd) const
 {
     im_->set_preedit_string(text.toStdString().c_str(), cursorBegin, cursorEnd);
-    im_->commit(serial_);
 }
 
 void WaylandInputContext::commitStringDelegate(InputContext *, const QString &text) const
 {
     im_->commit_string(text.toStdString().c_str());
+}
+
+void WaylandInputContext::commitDelegate() const
+{
     im_->commit(serial_);
 }
 
@@ -132,7 +128,10 @@ void WaylandInputContext::textChangeCauseCallback(uint32_t cause)
 
 void WaylandInputContext::contentTypeCallback(uint32_t hint, uint32_t purpose)
 {
-    // TODO:
+    contentType().setHint(hint);
+    contentType().setPurpose(purpose);
+
+    updateContentTypeWrapper();
 }
 
 void WaylandInputContext::doneCallback()
@@ -178,6 +177,9 @@ void WaylandInputContext::doneCallback()
 
         focusInWrapper();
     }
+
+    InputContextEvent event(EventType::InputContextDone, delegatedInputContext());
+    dim()->postEvent(event);
 }
 
 void WaylandInputContext::unavailableCallback()
@@ -259,7 +261,7 @@ void WaylandInputContext::keyCallback(uint32_t serial, uint32_t time, uint32_t k
     xkb_keysym_t sym = xkb_state_key_get_one_sym(xkbState_.get(), code);
     InputContextKeyEvent ke(ic,
                             static_cast<uint32_t>(sym),
-                            code,
+                            key,
                             state_->modifiers,
                             state == WL_KEYBOARD_KEY_STATE_RELEASED,
                             time);
@@ -332,43 +334,4 @@ void WaylandInputContext::modifiersCallback(uint32_t serial,
 void WaylandInputContext::repeatInfoCallback(int32_t rate, int32_t delay)
 {
     // TODO:
-}
-
-static QRect transformCursorRectangle(const QPoint &p, const QRect &r)
-{
-    auto screens = QGuiApplication::screens();
-    for (auto *screen : screens) {
-        auto geo = screen->geometry();
-        auto ratio = screen->devicePixelRatio();
-
-        QTransform logiToPhysTrans;
-        logiToPhysTrans *= ratio;
-        QRect physGeo = logiToPhysTrans.mapRect(geo);
-
-        if (physGeo.contains(p)) {
-            QTransform phisTologiTrans;
-            phisTologiTrans *= ratio;
-            QRect logiPoint = phisTologiTrans.mapRect(r);
-
-            return logiPoint;
-        }
-    }
-
-    return r;
-}
-
-void WaylandInputContext::textInputRectangleCallback(int32_t x,
-                                                     int32_t y,
-                                                     int32_t width,
-                                                     int32_t height)
-{
-    auto *ic = delegatedInputContext();
-    auto r = transformCursorRectangle(leftTop_, { x, y, width, height });
-
-    InputContextCursorRectChangeEvent e(ic,
-                                        leftTop_.x() + r.x(),
-                                        leftTop_.y() + r.y(),
-                                        r.width(),
-                                        r.height());
-    dim()->postEvent(e);
 }
