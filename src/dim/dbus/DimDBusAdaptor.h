@@ -36,7 +36,7 @@ public Q_SLOTS:
     bool SetCurrentInputMethod(const QString &addon, const QString &name);
     InputMethodData GetCurrentInputMethod();
     InputMethodDataList GetCurrentInputMethods();
-    InputMethodDataList GetAvailableInputMethods();
+    InputMethodEntryList GetAvailableInputMethods();
     void Configure(const QString &addon, const QString &name);
     bool SetInputMethodShortcut(const QString &keyStroke);
     bool SetInputMethodOrderShortcut(const QString &keyStroke);

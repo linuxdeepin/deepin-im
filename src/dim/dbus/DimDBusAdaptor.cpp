@@ -41,16 +41,22 @@ bool DimDBusAdaptor::SetCurrentInputMethod(const QString &addon, const QString &
 
 InputMethodData DimDBusAdaptor::GetCurrentInputMethod()
 {
-    return InputMethodData{ QString::fromStdString(parent()->getCurrentInputMethod().first),
-                            QString::fromStdString(parent()->getCurrentInputMethod().second) };
+    const auto imKey = parent()->getCurrentActiveInputMethod();
+    return InputMethodData{ QString::fromStdString(imKey.first),
+                            QString::fromStdString(imKey.second) };
 }
 
-InputMethodDataList DimDBusAdaptor::GetAvailableInputMethods()
+InputMethodEntryList DimDBusAdaptor::GetAvailableInputMethods()
 {
-    InputMethodDataList availableInputMethods = InputMethodDataList{};
-    for (const auto &im : parent()->activeInputMethodEntries()) {
+    InputMethodEntryList availableInputMethods = InputMethodEntryList{};
+    for (const auto &entry : parent()->imEntries()) {
         availableInputMethods.append(
-            InputMethodData{ QString::fromStdString(im.first), QString::fromStdString(im.second) });
+            ::InputMethodEntry{ QString::fromStdString(entry.addonKey()),
+                                QString::fromStdString(entry.uniqueName()),
+                                QString::fromStdString(entry.name()),
+                                QString::fromStdString(entry.description()),
+                                QString::fromStdString(entry.label()),
+                                QString::fromStdString(entry.iconName()) });
     }
 
     return availableInputMethods;
@@ -59,7 +65,7 @@ InputMethodDataList DimDBusAdaptor::GetAvailableInputMethods()
 InputMethodDataList DimDBusAdaptor::GetCurrentInputMethods()
 {
     InputMethodDataList currentActiveIMs = InputMethodDataList{};
-    for (const auto &im : parent()->getCurrentInputMethods()) {
+    for (const auto &im : parent()->activeInputMethodEntries()) {
         currentActiveIMs.append(
             InputMethodData{ QString::fromStdString(im.first), QString::fromStdString(im.second) });
     }

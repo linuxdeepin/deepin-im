@@ -21,8 +21,8 @@
           <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="InputMethodDataList"/>
      </method>
      <method name="GetAvailableInputMethods">
-          <arg type="a(ss)" name="name" direction="out" />
-          <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="InputMethodDataList"/>
+          <arg type="a(ssssss)" name="inputMethodEntries" direction="out" />
+          <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="InputMethodEntryList"/>
      </method>
      <method name="Configure">
           <arg type="s" name="addon" direction="in" />

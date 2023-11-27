@@ -22,7 +22,6 @@ namespace dim {
 enum AddonType {
     Frontend,
     InputMethod,
-    Proxy,
 };
 
 class InputContext;
@@ -60,13 +59,11 @@ public:
         return inputMethodAddons_;
     }
 
-    const auto &activeInputMethodEntries() const { return activeInputMethodEntries_; };
+    const auto &activeInputMethodEntries() const { return activeInputMethodEntries_; }
 
-    const auto &getCurrentInputMethod() const { return currentActiveIM; };
+    const auto &getCurrentActiveInputMethod() const { return currentActiveIM_; }
 
-    const auto &getCurrentInputMethods() const { return currentActiveIMEntries_; };
-
-    const std::vector<InputMethodEntry> &imEntries() const { return imEntries_; };
+    const std::vector<InputMethodEntry> &imEntries() const { return imEntries_; }
 
     int focusedInputContext() const { return focusedInputContext_; }
 
@@ -98,6 +95,7 @@ private:
     void loopProxyAddon(const std::function<void(ProxyAddon *addon)> callback);
 #ifdef Dtk6Core_FOUND
     void initDConfig();
+    void updateDconfInputMethodEntries() const;
 #endif
 
 private:
@@ -106,9 +104,7 @@ private:
     std::unordered_map<std::string, InputMethodAddon *> inputMethodAddons_;
     std::vector<InputMethodEntry> imEntries_;
     std::set<std::pair<std::string, std::string>> activeInputMethodEntries_;
-    std::set<FrontendAddon *> frontends_;
-    std::pair<std::string, std::string> currentActiveIM;
-    std::set<std::pair<std::string, std::string>> currentActiveIMEntries_;
+    std::pair<std::string, std::string> currentActiveIM_;
 #ifdef Dtk6Core_FOUND
     DTK_CORE_NAMESPACE::DConfig *dimConf_;
 #endif
