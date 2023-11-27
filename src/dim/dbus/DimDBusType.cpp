@@ -11,12 +11,16 @@ void registerDimQtDBusTypes()
     qRegisterMetaType<Config>("Config");
     qRegisterMetaType<ConfigOption>("ConfigOption");
     qRegisterMetaType<InputMethodConfigList>("InputMethodConfigList");
+    qRegisterMetaType<InputMethodEntry>("InputMethodEntry");
+    qRegisterMetaType<InputMethodEntryList>("InputMethodEntryList");
 
     qDBusRegisterMetaType<InputMethodData>();
     qDBusRegisterMetaType<InputMethodDataList>();
     qDBusRegisterMetaType<Config>();
     qDBusRegisterMetaType<ConfigOption>();
     qDBusRegisterMetaType<InputMethodConfigList>();
+    qDBusRegisterMetaType<InputMethodEntry>();
+    qDBusRegisterMetaType<InputMethodEntryList>();
 }
 
 QDBusArgument &operator<<(QDBusArgument &argument, const InputMethodData &data)
@@ -80,6 +84,26 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, Config &data)
         data.opt.append(element);
     }
     argument.endArray();
+    argument.endStructure();
+
+    return argument;
+}
+
+QDBusArgument &operator<<(QDBusArgument &argument, const InputMethodEntry &data)
+{
+    argument.beginStructure();
+    argument << data.addonKey << data.uniqueName << data.name << data.description
+             << data.label << data.iconName;
+    argument.endStructure();
+
+    return argument;
+}
+
+const QDBusArgument &operator>>(const QDBusArgument &argument, InputMethodEntry &data)
+{
+    argument.beginStructure();
+    argument >> data.addonKey >> data.uniqueName >> data.name >> data.description
+        >> data.label >> data.iconName;
     argument.endStructure();
 
     return argument;

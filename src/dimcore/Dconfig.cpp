@@ -56,11 +56,11 @@ bool DconfigSettings::ConfigSaveValue(const QString &appId,
     if (config && config->isValid() && config->keyList().contains(key)) {
         config->setValue(key, value);
         // dconf频繁读写，大概率有写失败错误
-        qWarning() << "set value: " << key << value;
+        qDebug() << "set value: " << key << value;
         return true;
     }
 
-    qDebug() << " key:" << key;
+    qWarning() << " key:" << key;
     return false;
 }
 

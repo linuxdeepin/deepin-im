@@ -13,7 +13,7 @@
             "visibility": "private"
         },
         "CurrentInputSource": {
-            "value": [],
+            "value": "keyboard:us",
             "serial": 0,
             "flags": [],
             "name": "CurrentInput_Source",
@@ -23,7 +23,7 @@
             "visibility": "private"
         },
         "CurrentUserInputSources": {
-            "value": [],
+            "value": ["keyboard:us"],
             "serial": 0,
             "flags": [],
             "name": "CurrentUserInputSources",

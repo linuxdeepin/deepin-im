@@ -26,10 +26,9 @@ constexpr uint32_t DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE = SHIFT_MASK | CONTRO
 #ifdef Dtk6Core_FOUND
 const QString DimDConfigAppID = QStringLiteral("org.deepin.dde.dim");
 const QString DimDConfigJson = QStringLiteral("org.deepin.dde.dim");
-const QString KeyPerWindow = QStringLiteral("Per_Window");
-const QString KeyCurrentInputSource = QStringLiteral("Current_Input_Source");
-const QString KeyAllInputSources = QStringLiteral("All_Input_Sources");
-const QString KeyCurrentUserInputSources = QStringLiteral("Current_User_Input_Sources");
+const QString ShareInputState = QStringLiteral("ShareInputState");
+const QString KeyCurrentInputSource = QStringLiteral("CurrentInputSource");
+const QString KeyCurrentUserInputSources = QStringLiteral("CurrentUserInputSources");
 #endif
 
 using namespace org::deepin::dim;
@@ -42,18 +41,17 @@ static const QMap<QString, AddonType> AddonsType = {
 Dim::Dim(QObject *parent)
     : QObject(parent)
     , focusedInputContext_(0)
-    , activeInputMethodEntries_({ { "keyboard", "us" } }) // todo: load from config file
-    , currentActiveIMEntries_({ { "keyboard", "us" } })
 #ifdef Dtk6Core_FOUND
     , dimConf_(DconfigSettings::ConfigPtr(DimDConfigAppID, DimDConfigJson))
 #endif
 {
     loadAddons();
 
-    // TODO: read current active ims(currentActiveIMEntries_) and current active
-    // im(currentActiveIM_) from config file, and to start daemon of ims
 #ifdef Dtk6Core_FOUND
     initDConfig();
+#else
+    currentActiveIM_ = std::make_pair("keyboard", "us");
+    activeInputMethodEntries_ = { { "keyboard", "us" } };
 #endif
 }
 
@@ -65,10 +63,26 @@ void Dim::initDConfig()
     // 绑定dsg属性
     if (dimConf_) {
         connect(dimConf_, &DConfig::valueChanged, this, [&](const QString &key) {
-            if (key == KeyPerWindow) {
+            if (key == ShareInputState) {
                 // TODO:
             }
         });
+    }
+
+    QVariant dconfIMKey =
+        DconfigSettings::ConfigValue(DimDConfigAppID, DimDConfigJson, KeyCurrentInputSource, "");
+    if (dconfIMKey.isValid()) {
+        currentActiveIM_ = keyToIndex(dconfIMKey.toString());
+    }
+
+    QVariant dconfIMKeys = DconfigSettings::ConfigValue(DimDConfigAppID,
+                                                        DimDConfigJson,
+                                                        KeyCurrentUserInputSources,
+                                                        "");
+    if (dconfIMKeys.isValid()) {
+        for (const auto &imKey : dconfIMKeys.toStringList()) {
+            activeInputMethodEntries_.emplace(keyToIndex(imKey));
+        }
     }
 }
 #endif
@@ -128,8 +142,6 @@ void Dim::loadAddon(const QString &infoFile)
 
     switch (AddonsType[category]) {
     case AddonType::Frontend: {
-        auto *frontend = qobject_cast<FrontendAddon *>(addon);
-        frontends_.insert(frontend);
         break;
     }
     case AddonType::InputMethod: {
@@ -299,7 +311,9 @@ void Dim::addActiveInputMethodEntry(const std::string &addon, const std::string 
         return;
     }
 
-    // todo: save config
+#ifdef Dtk6Core_FOUND
+    updateDconfInputMethodEntries();
+#endif
 }
 
 InputMethodAddon *Dim::getInputMethodAddon(const InputState &inputState)
@@ -325,12 +339,17 @@ void Dim::switchIM(const std::pair<std::string, std::string> &imIndex)
 {
     auto addon = qobject_cast<ProxyAddon *>(imAddons().at(imIndex.first));
 
-    // TODO: update currentActiveIM_ to config file
-
     if (addon) {
         addon->setCurrentIM(imIndex.second);
 
-        currentActiveIM = imIndex;
+        currentActiveIM_ = imIndex;
+
+#ifdef Dtk6Core_FOUND
+        DconfigSettings::ConfigSaveValue(DimDConfigAppID,
+                                         DimDConfigJson,
+                                         KeyCurrentInputSource,
+                                         QVariant::fromValue(indexToKey(currentActiveIM_)));
+#endif
     }
 }
 
@@ -357,10 +376,33 @@ bool Dim::requestSwitchIM(const std::string &addon, const std::string &name)
 
 /*
  * Description: add input method
- * addon: input method framework(ibus or fcitx5)
+ * addon: input method framework(ibus or fcitx5 or keyboard)
  * name: input method name
  */
 void Dim::addInputMethod(const std::string &addon, const std::string &name)
+{
+    auto iter = std::find_if(imEntries().cbegin(),
+                             imEntries().cend(),
+                             [&addon, &name](const InputMethodEntry &entry) {
+                                 return (entry.addonKey() == addon) && entry.uniqueName() == name;
+                             });
+    if (iter == imEntries().cend()) {
+        qDebug() << "invalid input method " << QString::fromStdString(name);
+        return;
+    }
+
+    activeInputMethodEntries_.emplace(std::make_pair(iter->addonKey(), iter->uniqueName()));
+#ifdef Dtk6Core_FOUND
+    updateDconfInputMethodEntries();
+#endif
+}
+
+/*
+ * Description: remove input method
+ * addon: input method framework(ibus or fcitx)
+ * name: input method name
+ */
+void Dim::removeInputMethod(const std::string &addon, const std::string &name)
 {
     auto iter = std::find_if(activeInputMethodEntries().cbegin(),
                              activeInputMethodEntries().cend(),
@@ -372,27 +414,51 @@ void Dim::addInputMethod(const std::string &addon, const std::string &name)
         return;
     }
 
-    currentActiveIMEntries_.emplace(*iter);
-    // TODO: save to config
+    activeInputMethodEntries_.erase(iter);
+#ifdef Dtk6Core_FOUND
+    updateDconfInputMethodEntries();
+#endif
 }
 
-/*
- * Description: remove input method
- * addon: input method framework(ibus or fcitx)
- * name: input method name
- */
-void Dim::removeInputMethod(const std::string &addon, const std::string &name)
+QString Dim::indexToKey(const std::pair<std::string, std::string> &imIndex) const
 {
-    auto iter = std::find_if(getCurrentInputMethods().cbegin(),
-                             getCurrentInputMethods().cend(),
-                             [&addon, &name](const auto &pair) {
-                                 return (pair.first == addon) && pair.second == name;
-                             });
-    if (iter == getCurrentInputMethods().cend()) {
-        qDebug() << "invalid input method " << QString::fromStdString(name);
+    return QString("%1:%2")
+        .arg(QString::fromStdString(imIndex.first))
+        .arg(QString::fromStdString(imIndex.second));
+}
+
+const std::pair<std::string, std::string> Dim::keyToIndex(const QString &imKey) const
+{
+    QStringList keys = imKey.split(":");
+
+    // TODO: need to judge validity of imKey
+    Q_ASSERT(keys.size() == 2);
+
+    return std::make_pair(keys[0].toStdString(), keys[1].toStdString());
+}
+
+#ifdef Dtk6Core_FOUND
+void Dim::updateDconfInputMethodEntries() const
+{
+    QVariant dconfIMKeys = DconfigSettings::ConfigValue(DimDConfigAppID,
+                                                        DimDConfigJson,
+                                                        KeyCurrentUserInputSources,
+                                                        "");
+    if (!dconfIMKeys.isValid()) {
         return;
     }
+    auto imKeys = dconfIMKeys.toStringList();
 
-    currentActiveIMEntries_.erase(iter);
-    // TODO: remove from config
+    for (const auto &entry : activeInputMethodEntries()) {
+        const auto &key = indexToKey(entry);
+        if (!imKeys.contains(key)) {
+            imKeys.append(key);
+        }
+    }
+
+    DconfigSettings::ConfigSaveValue(DimDConfigAppID,
+                                     DimDConfigJson,
+                                     KeyCurrentUserInputSources,
+                                     QVariant::fromValue(imKeys));
 }
+#endif

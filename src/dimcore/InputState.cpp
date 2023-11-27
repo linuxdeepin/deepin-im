@@ -13,7 +13,7 @@ using namespace org::deepin::dim;
 
 InputState::InputState(InputContext *ic)
     : ic_(ic)
-    , currentIMKey_(std::make_pair("keyboard", "us"))
+    , currentIMKey_(ic->dim_->getCurrentActiveInputMethod())
 {
     connect(ic_->dim_, &Dim::inputMethodEntryChanged, this, [this]() {
         auto iter = findIMEntry();
