@@ -10,6 +10,7 @@
 #include "dimcore/InputMethodEntry.h"
 
 #include <common/common.h>
+#include <libintl.h>
 
 #include <QDir>
 #include <QDomDocument>
@@ -148,7 +149,12 @@ void Keyboard::parseLayoutList(const QDomElement &layoutListEle)
         // QString languageList =
         // parseLanguageList(configItemEle.firstChildElement("languageList"));
 
-        keyboards_.append(InputMethodEntry(key(), name, name, shortDescription, description, ""));
+        keyboards_.append(InputMethodEntry(key(),
+                                           name,
+                                           name,
+                                           shortDescription,
+                                           dgettext("xkeyboard-config", description.c_str()),
+                                           ""));
 
         parseVariantList(name, layoutEle.firstChildElement("variantList"));
     }
@@ -170,8 +176,12 @@ void Keyboard::parseVariantList(const std::string &layoutName, const QDomElement
 
         const std::string fullname = layoutName + "_" + name;
 
-        keyboards_.append(
-            InputMethodEntry(key(), fullname, fullname, shortDescription, description, ""));
+        keyboards_.append(InputMethodEntry(key(),
+                                           fullname,
+                                           fullname,
+                                           shortDescription,
+                                           dgettext("xkeyboard-config", description.c_str()),
+                                           ""));
     }
 }
 
