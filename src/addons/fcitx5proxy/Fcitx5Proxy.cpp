@@ -60,19 +60,25 @@ DIM_ADDON_FACTORY(Fcitx5Proxy);
 
 Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
     : ProxyAddon(dim, "fcitx", "org.fcitx.Fcitx5")
-    , dbusProvider_(new DBusProvider(this))
-    , available_(dbusProvider_->available())
+    , fcitx5Proc_(new QProcess(this))
 {
     registerBatchEventQtDBusTypes();
+    launchDaemon();
+}
 
-    connect(dbusProvider_, &DBusProvider::availabilityChanged, this, [dim, this](bool available) {
+void Fcitx5Proxy::initDBusConn()
+{
+    dbusProvider_ = new DBusProvider(this);
+    available_ = dbusProvider_->available();
+
+    connect(dbusProvider_, &DBusProvider::availabilityChanged, this, [this](bool available) {
         if (available_ != available) {
             available_ = available;
 
             updateInputMethods();
 
             if (available_) {
-                const auto &inputContexts = dim->getInputContexts();
+                const auto &inputContexts = dim()->getInputContexts();
 
                 for (auto i = inputContexts.begin(); i != inputContexts.end(); ++i) {
                     createFcitxInputContext(i->second);
@@ -80,6 +86,8 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
             }
         }
     });
+
+    updateInputMethods();
 }
 
 void Fcitx5Proxy::initInputMethods()
@@ -99,11 +107,7 @@ const QList<InputMethodEntry> &Fcitx5Proxy::getInputMethods()
 
 void Fcitx5Proxy::createFcitxInputContext(InputContext *ic)
 {
-    if (!ic) {
-        return;
-    }
-
-    if (!available_) {
+    if (!ic || !available_ || !dbusProvider_) {
         return;
     }
 
@@ -283,7 +287,7 @@ void Fcitx5Proxy::updateSurroundingText(InputContextEvent &event)
 
 void Fcitx5Proxy::updateInputMethods()
 {
-    if (!available_) {
+    if (!available_ || !dbusProvider_) {
         inputMethods_.clear();
         return;
     }
@@ -357,4 +361,24 @@ bool Fcitx5Proxy::shouldBeIgnored(const std::string &uniqueName) const
 {
     return std::mismatch(KEYBOARD_PREFIX.begin(), KEYBOARD_PREFIX.end(), uniqueName.begin()).first
         == KEYBOARD_PREFIX.end();
+}
+
+void Fcitx5Proxy::launchDaemon()
+{
+    if (!isExecutableExisted(QStringLiteral("fcitx5"))) {
+        qDebug() << "can not find fcitx5 executable, maybe it should be installed";
+        return;
+    }
+
+    fcitx5Proc_->start(
+        QStringLiteral("fcitx5"),
+        QStringList{ QStringLiteral("--disable"),
+                     QStringLiteral("fcitx4frontend,ibusfrontend,xim,waylandim,notificationitem"),
+                     QStringLiteral("-r"),
+                     QStringLiteral("-d") });
+
+    connect(fcitx5Proc_, &QProcess::started, this, [this] {
+        qDebug() << "launch fcitx5 success";
+        initDBusConn();
+    });
 }

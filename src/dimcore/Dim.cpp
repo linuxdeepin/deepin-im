@@ -16,9 +16,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QPluginLoader>
-#include <QProcess>
 #include <QSettings>
-#include <QStandardPaths>
 #include <QTimer>
 
 #include <dlfcn.h>
@@ -41,11 +39,6 @@ static const QMap<QString, AddonType> AddonsType = {
     { "InputMethod", AddonType::InputMethod },
 };
 
-static bool isExecutableExisted(const QString &name)
-{
-    return !QStandardPaths::findExecutable(name, QStringList()).isEmpty();
-}
-
 Dim::Dim(QObject *parent)
     : QObject(parent)
     , focusedInputContext_(0)
@@ -55,7 +48,6 @@ Dim::Dim(QObject *parent)
     , dimConf_(DconfigSettings::ConfigPtr(DimDConfigAppID, DimDConfigJson))
 #endif
 {
-    launchInputMethodProxyDaemon(Fcitx5DaemonMask | IBusDaemonMask);
     loadAddons();
 
     // TODO: read current active ims(currentActiveIMEntries_) and current active
@@ -339,55 +331,6 @@ void Dim::switchIM(const std::pair<std::string, std::string> &imIndex)
         addon->setCurrentIM(imIndex.second);
 
         currentActiveIM = imIndex;
-    }
-}
-
-void Dim::launchFcitx5Daemon()
-{
-    if (!isExecutableExisted(QStringLiteral("fcitx5"))) {
-        qDebug() << "can not find fcitx5 executable, maybe it should be installed";
-        return;
-    }
-
-    QProcess fcitx5Proc;
-
-    fcitx5Proc.startDetached(
-        QStringLiteral("fcitx5"),
-        QStringList{ QStringLiteral("--disable"),
-                     QStringLiteral("fcitx4frontend,ibusfrontend,xim,waylandim,notificationitem"),
-                     QStringLiteral("-r"),
-                     QStringLiteral("-d") });
-    auto ret = fcitx5Proc.waitForStarted(500);
-    if (!ret) {
-        qWarning() << "launch fcitx5 failed";
-    }
-}
-
-void Dim::launchIbusDaemon()
-{
-    if (!isExecutableExisted(QStringLiteral("ibus-daemon"))) {
-        qDebug() << "can not find ibus daemon executable, maybe it should be installed";
-        return;
-    }
-
-    QProcess ibusDaemonProc;
-
-    ibusDaemonProc.startDetached(QStringLiteral("ibus-daemon"),
-                                 QStringList{ QStringLiteral("-r"), QStringLiteral("-d") });
-    auto ret = ibusDaemonProc.waitForStarted(500);
-    if (!ret) {
-        qWarning() << "launch ibus daemon failed";
-    }
-}
-
-void Dim::launchInputMethodProxyDaemon(uint32_t modifier)
-{
-    if (modifier & Fcitx5DaemonMask) {
-        launchFcitx5Daemon();
-    }
-
-    if (modifier & IBusDaemonMask) {
-        launchIbusDaemon();
     }
 }
 

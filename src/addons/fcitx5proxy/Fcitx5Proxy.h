@@ -12,6 +12,7 @@
 #include <QDBusInterface>
 #include <QDBusObjectPath>
 #include <QDBusPendingReply>
+#include <QProcess>
 
 namespace org {
 namespace deepin {
@@ -35,7 +36,6 @@ public:
     void focusOut(uint32_t id) override;
     void destroyed(uint32_t id) override;
     void setCurrentIM(const std::string &im) override;
-
     void addCapability(uint32_t id);
 
 private:
@@ -47,12 +47,15 @@ private:
     void updateInputMethods();
 
     bool shouldBeIgnored(const std::string &uniqueName) const;
+    void initDBusConn();
+    void launchDaemon();
 
 private:
-    DBusProvider *dbusProvider_;
-    bool available_;
+    DBusProvider *dbusProvider_ = nullptr;
+    bool available_ = false;
     QMap<uint32_t, org::fcitx::Fcitx::InputContext1 *> icMap_;
     QList<InputMethodEntry> inputMethods_;
+    QProcess *fcitx5Proc_;
 };
 
 } // namespace dim

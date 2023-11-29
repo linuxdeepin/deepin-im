@@ -6,6 +6,8 @@
 
 #include "Dim.h"
 
+#include <QStandardPaths>
+
 using namespace org::deepin::dim;
 
 ProxyAddon::ProxyAddon(Dim *dim, const std::string &key, const QString &iconName)
@@ -21,4 +23,9 @@ void ProxyAddon::updateActiveInputMethods(const std::vector<std::string> &value)
 
     ProxyEvent event(EventType::ProxyActiveInputMethodsChanged, this);
     dim()->postEvent(event);
+}
+
+bool ProxyAddon::isExecutableExisted(const QString &name)
+{
+    return !QStandardPaths::findExecutable(name, QStringList()).isEmpty();
 }

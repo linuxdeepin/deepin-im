@@ -25,11 +25,6 @@ enum AddonType {
     Proxy,
 };
 
-enum InputMethodDaemonMask {
-    Fcitx5DaemonMask = 1 << 0,
-    IBusDaemonMask = 1 << 1,
-};
-
 class InputContext;
 class InputState;
 class InputMethodAddon;
@@ -101,9 +96,6 @@ private:
     void addActiveInputMethodEntry(const std::string &addon, const std::string &entry);
     InputMethodAddon *getInputMethodAddon(const InputState &state);
     void loopProxyAddon(const std::function<void(ProxyAddon *addon)> callback);
-    void launchFcitx5Daemon();
-    void launchIbusDaemon();
-    void launchInputMethodProxyDaemon(uint32_t modifier);
 #ifdef Dtk6Core_FOUND
     void initDConfig();
 #endif
