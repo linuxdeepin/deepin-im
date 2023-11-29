@@ -31,6 +31,8 @@ public:
     virtual void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) = 0;
     virtual void setCurrentIM(const std::string &im) = 0;
 
+    static bool isExecutableExisted(const QString &name);
+
 protected:
     void updateActiveInputMethods(const std::vector<std::string> &value);
 

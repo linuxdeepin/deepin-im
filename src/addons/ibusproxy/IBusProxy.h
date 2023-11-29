@@ -11,6 +11,8 @@
 #include <dimcore/ProxyAddon.h>
 #include <gio/gio.h>
 
+#include <QProcess>
+
 #include <memory>
 
 class IBusEngineDesc;
@@ -45,6 +47,7 @@ private:
     {
         return !iBusICMap_.isEmpty() && iBusICMap_.contains(id) && iBusICMap_[id]->isValid();
     }
+    void launchDaemon();
 
 public Q_SLOTS:
     void connectToBus();
@@ -55,7 +58,7 @@ public Q_SLOTS:
 
 private:
     bool shouldBeIgnored(const std::string &uniqueName) const;
-    InputContext* isValidIC(uint32_t id) const;
+    InputContext *isValidIC(uint32_t id) const;
 
 private:
     std::unique_ptr<GSettings, Deleter<g_object_unref>> gsettings_;
@@ -65,6 +68,7 @@ private:
     QTimer timer_;
     QList<InputMethodEntry> inputMethods_;
     QMap<uint32_t, std::shared_ptr<OrgFreedesktopIBusInputContextInterface>> iBusICMap_;
+    QProcess *ibusDaemonProc_;
 };
 
 } // namespace dim

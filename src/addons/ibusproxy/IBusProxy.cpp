@@ -187,7 +187,9 @@ DimIBusProxy::DimIBusProxy(Dim *dim)
     : ProxyAddon(dim, "ibus", "ibus")
     , d(new DimIBusInputContextPrivate())
     , useSyncMode_(false)
+    , ibusDaemonProc_(new QProcess(this))
 {
+    launchDaemon();
     qDBusRegisterMetaType<IBusText>();
     qDBusRegisterMetaType<IBusEngineDesc>();
 
@@ -576,4 +578,18 @@ InputContext *DimIBusProxy::isValidIC(uint32_t id) const
     }
 
     return dim()->getInputContext(id);
+}
+
+void DimIBusProxy::launchDaemon()
+{
+    if (!isExecutableExisted(QStringLiteral("ibus-daemon"))) {
+        qDebug() << "can not find ibus daemon executable, maybe it should be installed";
+        return;
+    }
+
+    ibusDaemonProc_->start(QStringLiteral("ibus-daemon"),
+                           QStringList{ QStringLiteral("-r"), QStringLiteral("-d") });
+    connect(ibusDaemonProc_, &QProcess::started, this, [] {
+        qDebug() << "launch ibus daemon success";
+    });
 }

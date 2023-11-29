@@ -54,5 +54,5 @@ void DBusProvider::fcitxAvailabilityChanged(bool avail)
                                         this);
     }
 
-    emit availabilityChanged(controller_);
+    emit availabilityChanged(available());
 }
