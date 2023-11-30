@@ -142,6 +142,7 @@ void Dim::loadAddon(const QString &infoFile)
 
     switch (AddonsType[category]) {
     case AddonType::Frontend: {
+        auto *frontend = qobject_cast<FrontendAddon *>(addon);
         break;
     }
     case AddonType::InputMethod: {
