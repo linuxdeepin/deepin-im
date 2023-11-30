@@ -93,6 +93,8 @@ private:
     void addActiveInputMethodEntry(const std::string &addon, const std::string &entry);
     InputMethodAddon *getInputMethodAddon(const InputState &state);
     void loopProxyAddon(const std::function<void(ProxyAddon *addon)> callback);
+    QString indexToKey(const std::pair<std::string, std::string> &imIndex) const;
+    const std::pair<std::string, std::string> keyToIndex(const QString &imKey) const;
 #ifdef Dtk6Core_FOUND
     void initDConfig();
     void updateDconfInputMethodEntries() const;
