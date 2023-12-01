@@ -19,7 +19,7 @@ SystemTrayIcon {
             model: trayicon.imEntries
 
             delegate: MenuItem {
-                text: model.name
+                text: model.description
                 icon.source: "image://icon/" + model.icon
                 onTriggered: trayicon.imEntryMenuTriggered(model.addon, model.name)
             }
@@ -37,6 +37,12 @@ SystemTrayIcon {
         MenuItem {
             text: qsTr("Settings")
             onTriggered: trayicon.configureTriggered()
+        }
+    }
+
+    onActivated: {
+        if (reason === SystemTrayIcon.Trigger) {
+            trayicon.toggle();
         }
     }
 }

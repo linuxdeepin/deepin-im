@@ -8,6 +8,7 @@
 #include "dimcore/Dim.h"
 #include "dimcore/InputContext.h"
 
+#include <DDBusSender>
 #include <DGuiApplicationHelper>
 
 #include <QQmlContext>
@@ -21,9 +22,11 @@ static const QString DEFAULT_IM_ADDON_NAME = "none";
 
 TrayIconInputMethodEntry::TrayIconInputMethodEntry(const QString &addon,
                                                    const QString &name,
+                                                   const QString &description,
                                                    const QString &icon)
     : addon_(addon)
     , name_(name)
+    , description_(description)
     , icon_(icon)
 {
 }
@@ -71,9 +74,10 @@ TrayIcon::TrayIcon(Dim *dim)
                     }
 
                     trayIconIMEntries_.append(new TrayIconInputMethodEntry{
-                        QString::fromStdString(it->first),
-                        QString::fromStdString(it->second),
-                        QString::fromStdString(entryIter->iconName()) });
+                        QString::fromStdString(entryIter->addonKey()),
+                        QString::fromStdString(entryIter->uniqueName()),
+                        QString::fromStdString(entryIter->description()),
+                        QString::fromStdString(entryIter->label()) });
                 }
 
                 updateTrayIconIMEntries();
@@ -91,7 +95,9 @@ void TrayIcon::onFocusedInputContextChanged(int focusedInputContext)
     }
 
     auto *ic = dim()->getInputContext(focusedInputContext);
-    oldConnection_ = connect(ic, &InputContext::imSwitch, this, &TrayIcon::onImSwitched);
+    if (ic) {
+        oldConnection_ = connect(ic, &InputContext::imSwitch, this, &TrayIcon::onImSwitched);
+    }
 }
 
 void TrayIcon::onImSwitched(const std::pair<std::string, std::string> &imIndex)
@@ -108,7 +114,7 @@ void TrayIcon::onImSwitched(const std::pair<std::string, std::string> &imIndex)
         return;
     }
 
-    imAddonIcon_ = QString::fromStdString(entryIter->iconName());
+    imAddonIcon_ = QString::fromStdString(entryIter->label());
     qDebug() << "imAddonIcon" << imAddonIcon_;
     emit imAddonIconChanged(imAddonIcon_);
 }
@@ -133,13 +139,28 @@ void TrayIcon::imEntryMenuTriggered(const QString &addon, const QString &name)
 void TrayIcon::configureTriggered()
 {
     qDebug() << "configureTriggered";
-    // TODO:implement
+
+    DDBusSender()
+        .service("org.deepin.dde.ControlCenter1")
+        .interface("org.deepin.dde.ControlCenter1")
+        .path("/org/deepin/dde/ControlCenter1")
+        .method(QString("ShowPage"))
+        .arg(QString("keyboard/Manage Input Methods"))
+        .call();
+}
+
+void TrayIcon::toggle()
+{
+    qDebug() << "toggle";
+    dim()->toggle();
 }
 
 bool TrayIcon::loadTranslator()
 {
 #ifdef TRANSLATE_DIR
     const QString translateDir(TRANSLATE_DIR);
-    return Dtk::Gui::DGuiApplicationHelper::loadTranslator("trayicon", QStringList{translateDir}, QList<QLocale>() << QLocale::system());
+    return Dtk::Gui::DGuiApplicationHelper::loadTranslator("trayicon",
+                                                           QStringList{ translateDir },
+                                                           QList<QLocale>() << QLocale::system());
 #endif
 }

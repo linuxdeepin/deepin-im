@@ -96,3 +96,8 @@ void DimDBusAdaptor::SetConfig(const QString &addon,
                                const QDBusVariant &config)
 {
 }
+
+void DimDBusAdaptor::Toggle()
+{
+    parent()->toggle();
+}

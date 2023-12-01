@@ -54,7 +54,7 @@ public:
         return inputContexts_;
     }
 
-    InputContext *getInputContext(uint32_t id) const { return inputContexts_.at(id); }
+    InputContext *getInputContext(uint32_t id) const;
 
     const std::unordered_map<std::string, InputMethodAddon *> &imAddons() const
     {
@@ -79,6 +79,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void switchIM(const std::pair<std::string, std::string> &imIndex);
     bool requestSwitchIM(const std::string &addon, const std::string &name);
+    void toggle();
 
 private:
     void loadAddons();
