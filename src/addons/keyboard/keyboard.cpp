@@ -144,6 +144,7 @@ void Keyboard::parseLayoutList(const QDomElement &layoutListEle)
         const std::string name = configItemEle.firstChildElement("name").text().toStdString();
         const std::string shortDescription =
             configItemEle.firstChildElement("shortDescription").text().toStdString();
+        const auto label = shortDescription.empty() ? name : shortDescription;
         const std::string description =
             configItemEle.firstChildElement("description").text().toStdString();
         // QString languageList =
@@ -152,9 +153,9 @@ void Keyboard::parseLayoutList(const QDomElement &layoutListEle)
         keyboards_.append(InputMethodEntry(key(),
                                            name,
                                            name,
-                                           shortDescription,
                                            dgettext("xkeyboard-config", description.c_str()),
-                                           ""));
+                                           label,
+                                           "input-keyboard"));
 
         parseVariantList(name, layoutEle.firstChildElement("variantList"));
     }
@@ -169,6 +170,7 @@ void Keyboard::parseVariantList(const std::string &layoutName, const QDomElement
         const std::string name = configItemEle.firstChildElement("name").text().toStdString();
         const std::string shortDescription =
             configItemEle.firstChildElement("shortDescription").text().toStdString();
+        const auto label = shortDescription.empty() ? name : shortDescription;
         const std::string description =
             configItemEle.firstChildElement("description").text().toStdString();
         // QString languageList =
@@ -179,9 +181,9 @@ void Keyboard::parseVariantList(const std::string &layoutName, const QDomElement
         keyboards_.append(InputMethodEntry(key(),
                                            fullname,
                                            fullname,
-                                           shortDescription,
                                            dgettext("xkeyboard-config", description.c_str()),
-                                           ""));
+                                           label,
+                                           "input-keyboard"));
     }
 }
 
