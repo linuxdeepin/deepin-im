@@ -42,6 +42,7 @@ public Q_SLOTS:
     bool SetInputMethodOrderShortcut(const QString &keyStroke);
     QDBusVariant GetConfig(const QString &addon, const QString &name);
     void SetConfig(const QString &addon, const QString &name, const QDBusVariant &config);
+    void Toggle();
 
 signals:
     // signals on dbus

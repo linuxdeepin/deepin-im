@@ -399,6 +399,14 @@ bool Dim::requestSwitchIM(const std::string &addon, const std::string &name)
     return false;
 }
 
+void Dim::toggle()
+{
+    auto currentFocusedIc = getInputContext(focusedInputContext());
+    if (currentFocusedIc) {
+        currentFocusedIc->inputState().switchIMAddon();
+    }
+}
+
 /*
  * Description: add input method
  * addon: input method framework(ibus or fcitx5 or keyboard)
@@ -487,3 +495,14 @@ void Dim::updateDconfInputMethodEntries() const
                                      QVariant::fromValue(imKeys));
 }
 #endif
+
+InputContext *Dim::getInputContext(uint32_t id) const
+{
+    const auto &iter = inputContexts_.find(id);
+    if (iter == inputContexts_.cend()) {
+        qWarning() << "invalid input context id" << id;
+        return nullptr;
+    }
+
+    return iter->second;
+}
