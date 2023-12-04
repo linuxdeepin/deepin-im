@@ -4,7 +4,12 @@
 
 #include "InputMethodV2.h"
 
+#include "Output.h"
 #include "Server.h"
+
+extern "C" {
+#include <wlr/types/wlr_compositor.h>
+}
 
 InputMethodV2::InputMethodV2(Server *server, wlr_input_method_v2 *input_method)
     : server_(server)
@@ -14,6 +19,7 @@ InputMethodV2::InputMethodV2(Server *server, wlr_input_method_v2 *input_method)
     , grab_keyboard_(this)
     , destroy_(this)
     , popup_destroy_(this)
+    , popup_surface_commit_(this)
     , keyboard_grab_destroy_(this)
 {
     wl_signal_add(&input_method_->events.commit, commit_);
@@ -85,6 +91,7 @@ void InputMethodV2::newPopupSurfaceNotify(void *data)
 {
     popup_ = static_cast<wlr_input_popup_surface_v2 *>(data);
     wl_signal_add(&popup_->events.destroy, popup_destroy_);
+    wl_signal_add(&popup_->surface->events.commit, popup_surface_commit_);
 
     if (popupCreateCallback_) {
         popupCreateCallback_();
@@ -115,6 +122,12 @@ void InputMethodV2::popupDestroyNotify(void *data)
     if (popupDestroyCallback_) {
         popupDestroyCallback_();
     }
+}
+
+void InputMethodV2::popupSurfaceCommitNotify(void *data)
+{
+    auto &state = popup_->surface->current;
+    server_->output()->setSize(state.width, state.height);
 }
 
 void InputMethodV2::keyboardGrabDestroyNotify(void *data)

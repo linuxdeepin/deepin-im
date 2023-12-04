@@ -56,6 +56,7 @@ private:
     void grabKeyboardNotify(void *data);
     void destroyNotify(void *data);
     void popupDestroyNotify(void *data);
+    void popupSurfaceCommitNotify(void *data);
     void keyboardGrabDestroyNotify(void *data);
     void grabberKeyNotify(void *data);
     void grabberModifiersNotify(void *data);
@@ -71,6 +72,7 @@ private:
 
     wlr_input_popup_surface_v2 *popup_ = nullptr;
     Listener<&InputMethodV2::popupDestroyNotify> popup_destroy_;
+    Listener<&InputMethodV2::popupSurfaceCommitNotify> popup_surface_commit_;
 
     Listener<&InputMethodV2::keyboardGrabDestroyNotify> keyboard_grab_destroy_;
 

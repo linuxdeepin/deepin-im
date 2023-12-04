@@ -160,11 +160,6 @@ void Server::run()
     wl_display_run(display_.get());
 }
 
-wlr_output *Server::createOutput(wl_surface *surface)
-{
-    return wlr_wl_output_create_from_surface(backend_.get(), surface);
-}
-
 void Server::backendNewOutputNotify(void *data)
 {
     /* This event is raised by the backend when a new output (aka a display or
