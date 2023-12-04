@@ -160,6 +160,11 @@ void Server::run()
     wl_display_run(display_.get());
 }
 
+wlr_output *Server::createOutput(wl_surface *surface)
+{
+    return wlr_wl_output_create_from_surface(backend_.get(), surface);
+}
+
 void Server::backendNewOutputNotify(void *data)
 {
     /* This event is raised by the backend when a new output (aka a display or
@@ -209,9 +214,9 @@ void Server::backendNewInputNotify(void *data)
      * available. */
     struct wlr_input_device *device = static_cast<wlr_input_device *>(data);
     switch (device->type) {
-    case WLR_INPUT_DEVICE_KEYBOARD:
-        new Keyboard(this, device, &keyboards_);
-        break;
+    case WLR_INPUT_DEVICE_KEYBOARD: {
+        auto *keyboard = new Keyboard(this, device, &keyboards_);
+    } break;
     case WLR_INPUT_DEVICE_POINTER:
         /* We don't do anything special with pointers. All of our pointer handling
          * is proxied through wlr_cursor. On another compositor, you might take this
@@ -236,12 +241,15 @@ void Server::seatRequestCursorNotify(void *data) { }
 
 void Server::seatRequestSetSelectionNotify(void *data) { }
 
+void Server::keyboardKeyNotify(void *data) { }
+
 void Server::virtualKeyboardManagerNewVirtualKeyboardNotify(void *data)
 {
     struct wlr_virtual_keyboard_v1 *keyboard = static_cast<wlr_virtual_keyboard_v1 *>(data);
     struct wlr_input_device *device = &keyboard->keyboard.base;
 
-    new Keyboard(this, device, &keyboards_);
+    auto *kbd = new Keyboard(this, device, &keyboards_, true);
+    virtualKeyboardCallback_(kbd);
 }
 
 void Server::inputMethodManagerV2InputMethodNotify(void *data)

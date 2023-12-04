@@ -34,6 +34,7 @@ struct wlr_input_method_manager_v2;
 
 class Output;
 class View;
+class Keyboard;
 class InputMethodV2;
 
 class Server
@@ -48,6 +49,13 @@ public:
     wl_event_loop *getEventLoop();
     void flushClients();
     void run();
+
+    wlr_output *createOutput(wl_surface *surface);
+
+    void setVirtualKeyboardCallback(const std::function<void(Keyboard *)> &callback)
+    {
+        virtualKeyboardCallback_ = callback;
+    }
 
     void setInputMethodCallback(const std::function<void()> &callback)
     {
@@ -74,6 +82,7 @@ private:
     void outputPresentNotify(void *data);
     void seatRequestCursorNotify(void *data);
     void seatRequestSetSelectionNotify(void *data);
+    void keyboardKeyNotify(void *data);
     void virtualKeyboardManagerNewVirtualKeyboardNotify(void *data);
     void inputMethodManagerV2InputMethodNotify(void *data);
     void inputMethodV2DestroyNotify(void *data);
@@ -111,6 +120,8 @@ private:
     Listener<&Server::inputMethodManagerV2InputMethodNotify> input_method_manager_v2_input_method_;
     InputMethodV2 *input_method_ = nullptr;
     Listener<&Server::inputMethodV2DestroyNotify> input_method_v2_destroy_;
+
+    std::function<void(Keyboard *)> virtualKeyboardCallback_;
     std::function<void()> inputMethodCallback_;
 };
 
