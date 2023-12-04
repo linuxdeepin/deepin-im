@@ -50,8 +50,6 @@ public:
     void flushClients();
     void run();
 
-    wlr_output *createOutput(wl_surface *surface);
-
     void setVirtualKeyboardCallback(const std::function<void(Keyboard *)> &callback)
     {
         virtualKeyboardCallback_ = callback;
@@ -67,6 +65,8 @@ public:
     wlr_renderer *renderer() { return renderer_.get(); }
 
     wlr_scene *scene() { return scene_.get(); }
+
+    Output *output() { return output_; }
 
     wl_list *views() { return &views_; }
 

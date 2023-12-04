@@ -21,6 +21,8 @@ public:
 
     wlr_output *output() { return output_; }
 
+    void setSize(int width, int height);
+
 private:
     void frameNotify(void *data);
     void destroyNotify(void *data);

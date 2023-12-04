@@ -31,13 +31,6 @@ Output::Output(Server *dimwl, struct wlr_output *output, wl_list *list)
     wl_signal_add(&output_->events.destroy, destroy_);
     wl_signal_add(&output_->events.frame, frame_);
 
-    wlr_output_state state;
-    wlr_output_state_init(&state);
-    wlr_output_state_set_enabled(&state, true);
-    wlr_output_state_set_custom_mode(&state, 300, 30, 0);
-    wlr_output_commit_state(output_, &state);
-    wlr_output_state_finish(&state);
-
     if (list) {
         wl_list_insert(list, &link_);
     }
@@ -46,6 +39,21 @@ Output::Output(Server *dimwl, struct wlr_output *output, wl_list *list)
 Output::~Output()
 {
     wl_list_remove(&link_);
+}
+
+void Output::setSize(int width, int height)
+{
+    if (width == 0 || height == 0) {
+        return;
+    }
+
+    wlr_output_state state;
+    wlr_output_state_init(&state);
+    wlr_output_state_set_enabled(&state, true);
+    wlr_output_state_set_custom_mode(&state, width, height, 0);
+    wlr_output_state_set_adaptive_sync_enabled(&state, true);
+    wlr_output_commit_state(output_, &state);
+    wlr_output_state_finish(&state);
 }
 
 void Output::frameNotify(void *data)
