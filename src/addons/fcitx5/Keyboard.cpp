@@ -14,10 +14,11 @@ extern "C" {
 #include <wlr/util/log.h>
 }
 
-Keyboard::Keyboard(Server *server, wlr_input_device *device, wl_list *list)
+Keyboard::Keyboard(Server *server, wlr_input_device *device, wl_list *list, bool isVirtual)
     : server_(server)
     , device_(device)
     , keyboard_(wlr_keyboard_from_input_device(device))
+    , isVirtual_(isVirtual)
     , key_(this)
     , modifiers_(this)
     , keymap_(this)
@@ -69,9 +70,15 @@ void Keyboard::keyNotify(void *data)
     }
 
     if (!handled) {
-        /* Otherwise, we pass it along to the client. */
-        wlr_seat_set_keyboard(seat, keyboard_);
-        wlr_seat_keyboard_notify_key(seat, event->time_msec, event->keycode, event->state);
+        if (isVirtual_) {
+            if (keyEventCallback_) {
+                keyEventCallback_(event);
+            }
+        } else {
+            /* Otherwise, we pass it along to the client. */
+            wlr_seat_set_keyboard(seat, keyboard_);
+            wlr_seat_keyboard_notify_key(seat, event->time_msec, event->keycode, event->state);
+        }
     }
 }
 

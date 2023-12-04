@@ -6,6 +6,7 @@
 
 #include "DBusProvider.h"
 #include "InputMethodV2.h"
+#include "Keyboard.h"
 #include "addons/wlfrontend/WLFrontend_public.h"
 #include "dimcore/Dim.h"
 #include "dimcore/Events.h"
@@ -37,26 +38,17 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
     auto *surface = compositor->create_surface();
 
     wl_ = std::make_unique<Server>(display->display(), surface);
-    wl_->addSocket(SOCKET_NAME);
 
-    auto *loop = wl_->getEventLoop();
-    int fd = wl_event_loop_get_fd(loop);
+    wl_->setVirtualKeyboardCallback([this](Keyboard *keyboard) {
+        keyboard->setKeyEventCallback([this](wlr_keyboard_key_event *event) {
+            auto *ic = getFocusedIC(focusedId_);
+            if (!ic) {
+                return;
+            }
 
-    auto processWaylandEvents = [this, loop] {
-        int ret = wl_event_loop_dispatch(loop, 0);
-        if (ret) {
-            qWarning() << "wl_event_loop_dispatch error:" << ret;
-        }
-        wl_->flushClients();
-    };
-
-    auto *notifier = new QSocketNotifier(fd, QSocketNotifier::Read);
-    QObject::connect(notifier, &QSocketNotifier::activated, processWaylandEvents);
-
-    QAbstractEventDispatcher *dispatcher = QThread::currentThread()->eventDispatcher();
-    QObject::connect(dispatcher, &QAbstractEventDispatcher::aboutToBlock, processWaylandEvents);
-
-    wl_->flushClients();
+            ic->forwardKey(event->keycode, event->state);
+        });
+    });
 
     wl_->setInputMethodCallback([this, surface]() {
         auto *im = wl_->inputMethod();
@@ -96,6 +88,27 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
             popup_.reset();
         });
     });
+
+    wl_->addSocket(SOCKET_NAME);
+
+    auto *loop = wl_->getEventLoop();
+    int fd = wl_event_loop_get_fd(loop);
+
+    auto processWaylandEvents = [this, loop] {
+        int ret = wl_event_loop_dispatch(loop, 0);
+        if (ret) {
+            qWarning() << "wl_event_loop_dispatch error:" << ret;
+        }
+        wl_->flushClients();
+    };
+
+    auto *notifier = new QSocketNotifier(fd, QSocketNotifier::Read);
+    QObject::connect(notifier, &QSocketNotifier::activated, processWaylandEvents);
+
+    QAbstractEventDispatcher *dispatcher = QThread::currentThread()->eventDispatcher();
+    QObject::connect(dispatcher, &QAbstractEventDispatcher::aboutToBlock, processWaylandEvents);
+
+    wl_->flushClients();
 
     launchDaemon();
 }
@@ -313,10 +326,9 @@ void Fcitx5Proxy::launchDaemon()
     env.insert("WAYLAND_DISPLAY", SOCKET_NAME);
 
     fcitx5Proc_->setProgram(QStringLiteral("fcitx5"));
-    fcitx5Proc_->setArguments(
-        QStringList{ QStringLiteral("--disable"),
-                     QStringLiteral("fcitx4frontend,ibusfrontend,xim"),
-                     QStringLiteral("-r") });
+    fcitx5Proc_->setArguments(QStringList{ QStringLiteral("--disable"),
+                                           QStringLiteral("fcitx4frontend,ibusfrontend,xim"),
+                                           QStringLiteral("-r") });
     fcitx5Proc_->setProcessEnvironment(env);
     fcitx5Proc_->setStandardOutputFile("/tmp/fcitx5.log");
     fcitx5Proc_->setStandardErrorFile("/tmp/fcitx5.log");
