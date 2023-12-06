@@ -41,11 +41,12 @@ static const QMap<QString, AddonType> AddonsType = {
 namespace org::deepin::dim {
 struct AddonDesc
 {
-    QString addon;
+    std::string addon;
     QString name;
     QString category;
     QString library;
     QStringList dependencies;
+    QStringList optionalDependencies;
 };
 } // namespace org::deepin::dim
 
@@ -100,42 +101,75 @@ void Dim::initDConfig()
 
 void Dim::loadAddons()
 {
-    QDir dir(DIM_ADDON_INFO_DIR);
-    qInfo() << "addon info dir" << dir.absolutePath();
-    auto addonInfoFiles = dir.entryInfoList(QDir::Filter::Files | QDir::Filter::Readable);
+    std::filesystem::path dir(DIM_ADDON_INFO_DIR);
+    qInfo() << "addon info dir" << dir;
 
-    std::vector<AddonDesc> list;
-    for (const auto &addonInfoFile : addonInfoFiles) {
-        QString filename = addonInfoFile.fileName();
-        if (filename.startsWith('.') || !filename.endsWith(".conf")) {
+    std::unordered_map<std::string, AddonDesc> list;
+    for (const auto &addonInfoFile : std::filesystem::directory_iterator(dir)) {
+        if (!addonInfoFile.is_regular_file()) {
             continue;
         }
 
-        QSettings settings(addonInfoFile.absoluteFilePath(), QSettings::Format::IniFormat);
+        const auto &path = addonInfoFile.path();
+        auto filename = path.filename();
+        if (filename == ".." || filename == "." || filename.string()[0] == '.'
+            || filename.extension() != ".conf") {
+            continue;
+        }
+
+        QSettings settings(QString::fromStdString(path), QSettings::Format::IniFormat);
         settings.beginGroup("Addon");
         if (!settings.contains("Name") || !settings.contains("Category")
             || !settings.contains("Library")) {
-            qDebug() << "Addon info file" << addonInfoFile << "is invalid";
+            qDebug() << "Addon info file" << filename << "is invalid";
             continue;
         }
 
-        list.emplace_back(AddonDesc{
-            addonInfoFile.baseName(),
-            settings.value("Name").toString(),
-            settings.value("Category").toString(),
-            settings.value("Library").toString(),
-            settings.value("Dependencies").toStringList(),
-        });
+        list.emplace(filename.stem(),
+                     AddonDesc{
+                         filename.stem(),
+                         settings.value("Name").toString(),
+                         settings.value("Category").toString(),
+                         settings.value("Library").toString(),
+                         settings.value("Dependencies").toStringList(),
+                         settings.value("OptionalDependencies").toStringList(),
+                     });
 
         settings.endGroup();
     }
 
-    std::sort(list.begin(), list.end(), [](const AddonDesc &l, const AddonDesc &r) {
-        return !l.dependencies.contains(r.addon);
-    });
+    std::function<void(const AddonDesc &info)> loadAddonAux;
 
-    for (auto &a : list) {
-        loadAddon(a);
+    auto loadDeps = [this, &list, &loadAddonAux](const QStringList &deps, bool optional = false) {
+        for (auto &dep : deps) {
+            auto dep1 = dep.toStdString();
+            if (list.find(dep1) == list.end()) {
+                if (optional) {
+                    continue;
+                } else {
+                    std::string err = "Dependency ";
+                    err += dep1 + " cannot be found";
+                    throw std::runtime_error(err);
+                }
+            }
+
+            loadAddonAux(list.at(dep1));
+        }
+    };
+
+    loadAddonAux = [this, &loadDeps, &loadAddonAux](const AddonDesc &info) {
+        if (addons_.find(info.addon) != addons_.end()) {
+            return;
+        }
+
+        loadDeps(info.dependencies);
+        loadDeps(info.optionalDependencies, true);
+
+        loadAddon(info);
+    };
+
+    for (auto &[addon, info] : list) {
+        loadAddonAux(info);
     }
 }
 
@@ -430,7 +464,7 @@ void Dim::toggle()
 {
     auto currentFocusedIc = getInputContext(focusedInputContext());
     if (currentFocusedIc) {
-        currentFocusedIc->inputState().switchIMAddon();
+        currentFocusedIc->inputState().switchIM();
     }
 }
 
