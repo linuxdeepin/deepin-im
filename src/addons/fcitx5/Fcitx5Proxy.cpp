@@ -7,6 +7,7 @@
 #include "DBusProvider.h"
 #include "InputMethodV2.h"
 #include "Keyboard.h"
+#include "addons/waylandserver/WaylandServer_public.h"
 #include "addons/wlfrontend/WLFrontend_public.h"
 #include "dimcore/Dim.h"
 #include "dimcore/Events.h"
@@ -14,6 +15,7 @@
 #include "dimcore/InputMethodEntry.h"
 #include "wl/client/Compositor.h"
 #include "wl/client/ConnectionBase.h"
+#include "wl/client/ConnectionRaw.h"
 #include "wl/client/ZwpInputMethodV2.h"
 
 #include <QGuiApplication>
@@ -23,7 +25,7 @@ using namespace org::deepin::dim;
 static const QString DIM_IM_GROUP = "dim";
 static const std::string KEYBOARD_PREFIX = "keyboard-";
 
-static const char *SOCKET_NAME = "dimfcitx5";
+static const char *SOCKET_NAME = "dim";
 
 DIM_ADDON_FACTORY(Fcitx5Proxy);
 
@@ -32,12 +34,17 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
     , focusedId_(0)
     , fcitx5Proc_(new QProcess(this))
 {
-    Addon *wlf = dim->addons().at("wlfrontend");
-    auto *display = wlfrontend::getWl(wlf);
-    auto compositor = display->getGlobal<wl::client::Compositor>();
+    Addon *wls = dim->addons().at("waylandserver");
+    auto remote = waylandserver::getRemote(wls);
+    auto local = waylandserver::getLocal(wls);
+    auto backend = waylandserver::getBackend(wls);
+
+    auto remote1 = std::make_shared<wl::client::ConnectionRaw>(remote.get());
+    auto compositor = remote1->getGlobal<wl::client::Compositor>();
     auto *surface = compositor->create_surface();
 
-    wl_ = std::make_unique<Server>(display->display(), surface);
+    wl_ = std::make_unique<Server>(local, backend);
+    wl_->createOutputFromSurface(surface);
 
     wl_->setVirtualKeyboardCallback([this](Keyboard *keyboard) {
         keyboard->setKeyEventCallback([this](wlr_keyboard_key_event *event) {
@@ -88,27 +95,6 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
             popup_.reset();
         });
     });
-
-    wl_->addSocket(SOCKET_NAME);
-
-    auto *loop = wl_->getEventLoop();
-    int fd = wl_event_loop_get_fd(loop);
-
-    auto processWaylandEvents = [this, loop] {
-        int ret = wl_event_loop_dispatch(loop, 0);
-        if (ret) {
-            qWarning() << "wl_event_loop_dispatch error:" << ret;
-        }
-        wl_->flushClients();
-    };
-
-    auto *notifier = new QSocketNotifier(fd, QSocketNotifier::Read);
-    QObject::connect(notifier, &QSocketNotifier::activated, processWaylandEvents);
-
-    QAbstractEventDispatcher *dispatcher = QThread::currentThread()->eventDispatcher();
-    QObject::connect(dispatcher, &QAbstractEventDispatcher::aboutToBlock, processWaylandEvents);
-
-    wl_->flushClients();
 
     launchDaemon();
 }

@@ -32,8 +32,10 @@ extern "C" {
 #  define wlr_scene_surface_try_from_buffer(BUFFER) wlr_scene_surface_from_buffer(BUFFER)
 #endif
 
-Server::Server(wl_display *remoteDisplay, wl_surface *surface)
-    : display_(wl_display_create())
+Server::Server(const std::shared_ptr<wl_display> &local,
+               const std::shared_ptr<wlr_backend> &backend)
+    : display_(local)
+    , backend_(backend)
     , backend_new_output_(this)
     , compositor_new_surface_(this)
     , xdg_shell_new_surface_(this)
@@ -45,12 +47,6 @@ Server::Server(wl_display *remoteDisplay, wl_surface *surface)
     , input_method_v2_destroy_(this)
     , output_present_(this)
 {
-    backend_.reset(wlr_wl_backend_create(display_.get(), remoteDisplay));
-
-    if (!backend_) {
-        throw std::runtime_error("failed to create backend");
-    }
-
     renderer_.reset(wlr_renderer_autocreate(backend_.get()));
     if (!renderer_) {
         throw std::runtime_error("failed to create wlr_renderer");
@@ -101,11 +97,6 @@ Server::Server(wl_display *remoteDisplay, wl_surface *surface)
     wl_list_init(&views_);
     xdg_shell_.reset(wlr_xdg_shell_create(display_.get(), 3));
     wl_signal_add(&xdg_shell_->events.new_surface, xdg_shell_new_surface_);
-
-    wlr_backend_start(backend_.get());
-
-    wlr_wl_output_create_from_surface(backend_.get(), surface);
-    // wlr_wl_output_create(backend_.get());
 
     /*
      * Configures a seat, which is a single "seat" at which a user sits and
@@ -158,6 +149,16 @@ void Server::flushClients()
 void Server::run()
 {
     wl_display_run(display_.get());
+}
+
+void Server::createOutput()
+{
+    wlr_wl_output_create(backend_.get());
+}
+
+void Server::createOutputFromSurface(wl_surface *surface)
+{
+    wlr_wl_output_create_from_surface(backend_.get(), surface);
 }
 
 void Server::backendNewOutputNotify(void *data)

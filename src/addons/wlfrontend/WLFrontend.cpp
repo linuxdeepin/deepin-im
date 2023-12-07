@@ -6,6 +6,7 @@
 
 #include "InputMethodV2.h"
 #include "WaylandInputContext.h"
+#include "addons/waylandserver/WaylandServer_public.h"
 #include "wl/client/Compositor.h"
 #include "wl/client/Connection.h"
 #include "wl/client/ConnectionRaw.h"
@@ -34,14 +35,42 @@ DIM_ADDON_FACTORY(WLFrontend)
 WLFrontend::WLFrontend(Dim *dim)
     : FrontendAddon(dim, "wlfrontend")
 {
-    auto *display = wl_display_connect(nullptr);
+    Addon *wls = dim->addons().find("waylandserver")->second;
 
-    auto *wl = new wl::client::ConnectionRaw(display);
-    if (wl->display() == nullptr) {
-        return;
+    if (!wls) {
+        if (QGuiApplication::platformName().contains("wayland")) {
+            QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
+            struct wl_display *wl_dpy =
+                (struct wl_display *)native->nativeResourceForWindow("display", NULL);
+
+            wl_.reset(new wl::client::ConnectionRaw(wl_dpy));
+        } else {
+            const QByteArray waylandDisplay = qgetenv("DIM_WAYLAND_DISPLAY");
+            const auto displayName = waylandDisplay.toStdString();
+            if (displayName.empty()) {
+                qWarning("failed to get display env");
+                return;
+            }
+
+            auto wl = std::make_shared<wl::client::Connection>(displayName);
+            if (wl->display() == nullptr) {
+                return;
+            }
+            auto *notifier = new QSocketNotifier(wl->getFd(), QSocketNotifier::Read, this);
+            connect(notifier, &QSocketNotifier::activated, this, [wl]() {
+                wl->dispatch();
+            });
+
+            wl_ = wl;
+            QAbstractEventDispatcher *dispatcher = QThread::currentThread()->eventDispatcher();
+            QObject::connect(dispatcher, &QAbstractEventDispatcher::aboutToBlock, this, [this]() {
+                wl_->flush();
+            });
+        }
+    } else {
+        auto display = waylandserver::getRemote(wls);
+        wl_ = std::make_shared<wl::client::ConnectionRaw>(display.get());
     }
-
-    wl_.reset(wl);
 
     compositor_ = wl_->getGlobal<wl::client::Compositor>();
     surface_ = std::make_shared<wl::client::Surface>(compositor_->create_surface());

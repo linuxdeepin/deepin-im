@@ -40,7 +40,7 @@ class InputMethodV2;
 class Server
 {
 public:
-    Server(wl_display *remoteDisplay, wl_surface *surface);
+    Server(const std::shared_ptr<wl_display> &local, const std::shared_ptr<wlr_backend> &backend);
     ~Server();
 
     std::string addSocketAuto();
@@ -59,6 +59,9 @@ public:
     {
         inputMethodCallback_ = callback;
     }
+
+    void createOutput();
+    void createOutputFromSurface(wl_surface *surface);
 
     wlr_allocator *allocator() { return allocator_.get(); }
 
@@ -90,8 +93,8 @@ private:
     View *desktopViewAt(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy);
 
 private:
-    std::unique_ptr<wl_display, Deleter<wl_display_destroy>> display_;
-    std::unique_ptr<wlr_backend, Deleter<wlr_backend_destroy>> backend_;
+    std::shared_ptr<wl_display> display_;
+    std::shared_ptr<wlr_backend> backend_;
     std::unique_ptr<wlr_renderer, Deleter<wlr_renderer_destroy>> renderer_;
     std::unique_ptr<wlr_allocator, Deleter<wlr_allocator_destroy>> allocator_;
     Output *output_ = nullptr;

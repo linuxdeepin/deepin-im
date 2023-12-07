@@ -39,7 +39,7 @@ public:
     wl::client::ConnectionBase *getWl() { return wl_.get(); }
 
 private:
-    std::unique_ptr<wl::client::ConnectionBase> wl_;
+    std::shared_ptr<wl::client::ConnectionBase> wl_;
     std::shared_ptr<wl::client::Compositor> compositor_;
     std::shared_ptr<wl::client::Surface> surface_;
     std::unordered_map<std::shared_ptr<wl::client::Seat>, std::unique_ptr<WaylandInputContext>>
