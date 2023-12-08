@@ -451,7 +451,7 @@ bool Dim::requestSwitchIM(const std::string &addon, const std::string &name)
         return false;
     }
 
-    auto currentFocusedIc = getInputContext(focusedInputContext());
+    auto currentFocusedIc = getFocusedIC(focusedInputContext());
     if (currentFocusedIc) {
         currentFocusedIc->inputState().requestSwitchIM(addon, name);
         return true;
@@ -462,7 +462,7 @@ bool Dim::requestSwitchIM(const std::string &addon, const std::string &name)
 
 void Dim::toggle()
 {
-    auto currentFocusedIc = getInputContext(focusedInputContext());
+    auto currentFocusedIc = getFocusedIC(focusedInputContext());
     if (currentFocusedIc) {
         currentFocusedIc->inputState().switchIM();
     }
@@ -557,13 +557,17 @@ void Dim::updateDconfInputMethodEntries() const
 }
 #endif
 
-InputContext *Dim::getInputContext(uint32_t id) const
+InputContext *Dim::getFocusedIC(uint32_t id) const
 {
-    const auto &iter = inputContexts_.find(id);
-    if (iter == inputContexts_.cend()) {
-        qWarning() << "invalid input context id" << id;
+    if (focusedInputContext() != id) {
         return nullptr;
     }
 
-    return iter->second;
+    auto &ics = getInputContexts();
+    auto it = ics.find((id));
+    if (it == ics.cend()) {
+        return nullptr;
+    }
+
+    return it->second;
 }

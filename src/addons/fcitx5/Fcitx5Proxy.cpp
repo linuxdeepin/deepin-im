@@ -5,8 +5,8 @@
 #include "Fcitx5Proxy.h"
 
 #include "DBusProvider.h"
-#include "InputMethodV2.h"
-#include "Keyboard.h"
+#include "wladdonsbase/InputMethodV2.h"
+#include "wladdonsbase/Keyboard.h"
 #include "addons/waylandserver/WaylandServer_public.h"
 #include "addons/wlfrontend/WLFrontend_public.h"
 #include "dimcore/Dim.h"
@@ -21,6 +21,7 @@
 #include <QGuiApplication>
 
 using namespace org::deepin::dim;
+WL_ADDONS_BASE_USE_NAMESPACE
 
 static const QString DIM_IM_GROUP = "dim";
 static const std::string KEYBOARD_PREFIX = "keyboard-";
@@ -58,7 +59,7 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
     });
 
     wl_->setInputMethodCallback([this, surface]() {
-        auto *im = wl_->inputMethod();
+        auto *im = wl_->inputMethodV2();
 
         im->setCommitCallback([this, im]() {
             auto *ic = getFocusedIC(focusedId_);
@@ -129,7 +130,7 @@ const QList<InputMethodEntry> &Fcitx5Proxy::getInputMethods()
 
 void Fcitx5Proxy::focusIn(uint32_t id)
 {
-    auto *im = wl_->inputMethod();
+    auto *im = wl_->inputMethodV2();
     if (!im) {
         return;
     }
@@ -144,7 +145,7 @@ void Fcitx5Proxy::focusOut(uint32_t id)
         return;
     }
 
-    auto *im = wl_->inputMethod();
+    auto *im = wl_->inputMethodV2();
     if (!im) {
         return;
     }
@@ -156,7 +157,7 @@ void Fcitx5Proxy::destroyed(uint32_t id) { }
 
 void Fcitx5Proxy::done()
 {
-    auto *im = wl_->inputMethod();
+    auto *im = wl_->inputMethodV2();
     if (!im) {
         return;
     }
@@ -166,7 +167,7 @@ void Fcitx5Proxy::done()
 
 void Fcitx5Proxy::contentType(uint32_t hint, uint32_t purpose)
 {
-    auto *im = wl_->inputMethod();
+    auto *im = wl_->inputMethodV2();
     if (!im) {
         return;
     }
@@ -189,7 +190,7 @@ bool Fcitx5Proxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
         return false;
     }
 
-    auto *im = wl_->inputMethod();
+    auto *im = wl_->inputMethodV2();
     if (!im) {
         return false;
     }
@@ -201,7 +202,7 @@ bool Fcitx5Proxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
 
 void Fcitx5Proxy::cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event)
 {
-    auto *im = wl_->inputMethod();
+    auto *im = wl_->inputMethodV2();
     if (!im) {
         return;
     }
@@ -213,7 +214,7 @@ void Fcitx5Proxy::updateSurroundingText(InputContextEvent &event)
 {
     auto &surroundingText = event.ic()->surroundingText();
 
-    auto *im = wl_->inputMethod();
+    auto *im = wl_->inputMethodV2();
     if (!im) {
         return;
     }
@@ -328,15 +329,5 @@ void Fcitx5Proxy::launchDaemon()
 
 InputContext *Fcitx5Proxy::getFocusedIC(uint32_t id) const
 {
-    if (dim()->focusedInputContext() != id) {
-        return nullptr;
-    }
-
-    auto &ics = dim()->getInputContexts();
-    auto it = ics.find((id));
-    if (it == ics.cend()) {
-        return nullptr;
-    }
-
-    return it->second;
+    return dim()->getFocusedIC(id);
 }

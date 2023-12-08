@@ -21,6 +21,8 @@ struct wlr_input_method_keyboard_grab_v2;
 struct wlr_keyboard_key_event;
 struct wlr_keyboard_modifiers;
 
+WL_ADDONS_BASE_BEGIN_NAMESPACE
+
 class Server;
 
 class Keyboard
@@ -61,5 +63,7 @@ private:
 
     std::function<void(wlr_keyboard_key_event *event)> keyEventCallback_;
 };
+
+WL_ADDONS_BASE_END_NAMESPACE
 
 #endif // !KEYBAORD_H

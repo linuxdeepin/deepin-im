@@ -15,6 +15,8 @@ extern "C" {
 #include <wlr/types/wlr_xdg_shell.h>
 }
 
+WL_ADDONS_BASE_BEGIN_NAMESPACE
+
 class Server;
 
 class View
@@ -61,5 +63,7 @@ private:
 
     pid_t pid_;
 };
+
+WL_ADDONS_BASE_END_NAMESPACE
 
 #endif // !VIEW_H

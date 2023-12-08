@@ -94,7 +94,7 @@ void TrayIcon::onFocusedInputContextChanged(int focusedInputContext)
         return;
     }
 
-    auto *ic = dim()->getInputContext(focusedInputContext);
+    auto *ic = dim()->getFocusedIC(focusedInputContext);
     if (ic) {
         oldConnection_ = connect(ic, &InputContext::imSwitch, this, &TrayIcon::onImSwitched);
     }

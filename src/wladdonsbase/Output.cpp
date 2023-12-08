@@ -16,6 +16,8 @@ extern "C" {
 #include <wlr/version.h>
 }
 
+WL_ADDONS_BASE_USE_NAMESPACE
+
 Output::Output(Server *dimwl, struct wlr_output *output, wl_list *list)
     : server_(dimwl)
     , output_(output)

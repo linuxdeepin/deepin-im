@@ -11,6 +11,8 @@ extern "C" {
 #include <wlr/types/wlr_compositor.h>
 }
 
+WL_ADDONS_BASE_USE_NAMESPACE
+
 InputMethodV2::InputMethodV2(Server *server, wlr_input_method_v2 *input_method)
     : server_(server)
     , input_method_(input_method)

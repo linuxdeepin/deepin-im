@@ -5,7 +5,10 @@
 #ifndef LISTENER_H
 #define LISTENER_H
 
+#include "Global.h"
 #include <wayland-server-core.h>
+
+WL_ADDONS_BASE_BEGIN_NAMESPACE
 
 template<auto F>
 class Listener;
@@ -34,5 +37,7 @@ private:
     C *parent_;
     wl_listener listener_;
 };
+
+WL_ADDONS_BASE_END_NAMESPACE
 
 #endif // !LISTENER_H

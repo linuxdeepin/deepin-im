@@ -32,10 +32,13 @@ struct wlr_xdg_shell;
 struct wlr_virtual_keyboard_manager_v1;
 struct wlr_input_method_manager_v2;
 
+WL_ADDONS_BASE_BEGIN_NAMESPACE
+
 class Output;
 class View;
 class Keyboard;
 class InputMethodV2;
+class InputMethodV1;
 
 class Server
 {
@@ -75,7 +78,10 @@ public:
 
     wlr_seat *seat() { return seat_.get(); }
 
-    InputMethodV2 *inputMethod() { return input_method_; }
+    wl_display *display() { return display_.get(); }
+
+    InputMethodV2 *inputMethodV2() { return inputMethodV2_; }
+    InputMethodV1 *inputMethodV1() { return inputMethodV1_.get(); }
 
 private:
     void backendNewOutputNotify(void *data);
@@ -121,11 +127,14 @@ private:
 
     std::unique_ptr<wlr_input_method_manager_v2> input_method_manager_v2_;
     Listener<&Server::inputMethodManagerV2InputMethodNotify> input_method_manager_v2_input_method_;
-    InputMethodV2 *input_method_ = nullptr;
+    InputMethodV2 *inputMethodV2_ = nullptr;
     Listener<&Server::inputMethodV2DestroyNotify> input_method_v2_destroy_;
+    std::unique_ptr<InputMethodV1> inputMethodV1_;
 
     std::function<void(Keyboard *)> virtualKeyboardCallback_;
     std::function<void()> inputMethodCallback_;
 };
+
+WL_ADDONS_BASE_END_NAMESPACE
 
 #endif // !SERVER_H

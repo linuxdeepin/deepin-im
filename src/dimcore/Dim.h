@@ -54,7 +54,7 @@ public:
         return inputContexts_;
     }
 
-    InputContext *getInputContext(uint32_t id) const;
+    InputContext *getFocusedIC(uint32_t id) const;
 
     const std::unordered_map<std::string, Addon *> &addons() const { return addons_; }
 

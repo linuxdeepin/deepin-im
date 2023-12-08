@@ -40,7 +40,10 @@ target_link_libraries(ibus PRIVATE
     Qt::Gui
     Qt::GuiPrivate
     PkgConfig::gio
+    PkgConfig::wlroots
     $<$<BOOL:${Dtk6Core_FOUND}>:Dtk6::Core>
+    wlc
+    wl_addons_base
 )
 
 install(TARGETS ibus
