@@ -11,6 +11,8 @@
 
 struct wlr_output;
 
+WL_ADDONS_BASE_BEGIN_NAMESPACE
+
 class Server;
 
 class Output
@@ -35,5 +37,7 @@ private:
     Listener<&Output::frameNotify> frame_;
     Listener<&Output::destroyNotify> destroy_;
 };
+
+WL_ADDONS_BASE_END_NAMESPACE
 
 #endif // !OUTPUT_H

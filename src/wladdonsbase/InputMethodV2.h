@@ -16,13 +16,12 @@ extern "C" {
 #undef delete
 }
 
+WL_ADDONS_BASE_BEGIN_NAMESPACE
+
 class Server;
-class TextInputV3;
-class X11KeyboardGrabber;
 
 class InputMethodV2
 {
-    friend class TextInputV3;
     friend class Keyboard;
 
 public:
@@ -80,5 +79,7 @@ private:
     std::function<void()> popupCreateCallback_;
     std::function<void()> popupDestroyCallback_;
 };
+
+WL_ADDONS_BASE_END_NAMESPACE
 
 #endif // !INPUTMETHODV2_H

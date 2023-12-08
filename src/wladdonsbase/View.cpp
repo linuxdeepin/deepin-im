@@ -16,6 +16,8 @@ extern "C" {
 #define wlr_xdg_surface_try_from_wlr_surface(SURFACE) wlr_xdg_surface_from_wlr_surface(SURFACE)
 #endif
 
+WL_ADDONS_BASE_USE_NAMESPACE
+
 View::View(Server *server, wlr_xdg_surface *xdg_surface, wl_list *list)
     : server_(server)
     , list_(list)

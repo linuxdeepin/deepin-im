@@ -73,6 +73,11 @@ ecm_add_wayland_server_protocol(wayland_protocols
 )
 
 ecm_add_wayland_server_protocol(wayland_protocols
+  PROTOCOL misc/wayland-protocols/input-method-unstable-v1.xml
+  BASENAME input-method-unstable-v1
+)
+
+ecm_add_wayland_server_protocol(wayland_protocols
   PROTOCOL misc/wayland-protocols/input-method-unstable-v2.xml
   BASENAME input-method-unstable-v2
 )

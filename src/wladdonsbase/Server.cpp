@@ -4,7 +4,9 @@
 
 #include "Server.h"
 
+#include "InputMethodV1.h"
 #include "InputMethodV2.h"
+#include "inputmethodv1/ZwpInputMethodV1.h"
 #include "Keyboard.h"
 #include "Output.h"
 #include "View.h"
@@ -31,6 +33,8 @@ extern "C" {
 #  define wlr_xdg_surface_try_from_wlr_surface(SURFACE) wlr_xdg_surface_from_wlr_surface(SURFACE)
 #  define wlr_scene_surface_try_from_buffer(BUFFER) wlr_scene_surface_from_buffer(BUFFER)
 #endif
+
+WL_ADDONS_BASE_USE_NAMESPACE
 
 Server::Server(const std::shared_ptr<wl_display> &local,
                const std::shared_ptr<wlr_backend> &backend)
@@ -117,6 +121,7 @@ Server::Server(const std::shared_ptr<wl_display> &local,
     input_method_manager_v2_.reset(wlr_input_method_manager_v2_create(display_.get()));
     wl_signal_add(&input_method_manager_v2_->events.input_method,
                   input_method_manager_v2_input_method_);
+    inputMethodV1_.reset(new InputMethodV1(this, new ZwpInputMethodV1()));
 }
 
 Server::~Server() = default;
@@ -250,12 +255,12 @@ void Server::virtualKeyboardManagerNewVirtualKeyboardNotify(void *data)
 
 void Server::inputMethodManagerV2InputMethodNotify(void *data)
 {
-    if (input_method_) {
+    if (inputMethodV2_) {
         return;
     }
 
     auto *im2 = static_cast<wlr_input_method_v2 *>(data);
-    input_method_ = new InputMethodV2(this, im2);
+    inputMethodV2_ = new InputMethodV2(this, im2);
     wl_signal_add(&im2->events.destroy, input_method_v2_destroy_);
 
     if (inputMethodCallback_) {
@@ -265,7 +270,7 @@ void Server::inputMethodManagerV2InputMethodNotify(void *data)
 
 void Server::inputMethodV2DestroyNotify(void *data)
 {
-    input_method_ = nullptr;
+    inputMethodV2_ = nullptr;
 }
 
 View *

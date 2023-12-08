@@ -14,6 +14,8 @@ extern "C" {
 #include <wlr/util/log.h>
 }
 
+WL_ADDONS_BASE_USE_NAMESPACE
+
 Keyboard::Keyboard(Server *server, wlr_input_device *device, wl_list *list, bool isVirtual)
     : server_(server)
     , device_(device)
@@ -118,7 +120,7 @@ void Keyboard::destroyNotify(void *data)
 
 wlr_input_method_keyboard_grab_v2 *Keyboard::getKeyboardGrab()
 {
-    auto *inputMethod = server_->inputMethod();
+    auto *inputMethod = server_->inputMethodV2();
     if (!inputMethod) {
         return nullptr;
     }

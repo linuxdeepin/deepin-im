@@ -490,16 +490,6 @@ bool DimIBusProxy::shouldBeIgnored(const std::string &uniqueName) const
         == KEYBOARD_PREFIX.end();
 }
 
-InputContext *DimIBusProxy::isValidIC(uint32_t id) const
-{
-    auto it = dim()->getInputContexts().find((id));
-    if (it == dim()->getInputContexts().cend() || id != dim()->focusedInputContext()) {
-        return nullptr;
-    }
-
-    return dim()->getInputContext(id);
-}
-
 void DimIBusProxy::launchDaemon()
 {
     if (!isExecutableExisted(QStringLiteral("ibus-daemon"))) {

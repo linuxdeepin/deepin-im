@@ -5,8 +5,9 @@
 #ifndef FCITX5PROXY_H
 #define FCITX5PROXY_H
 
-#include "InputPopupSurfaceV2.h"
-#include "Server.h"
+#include "wladdonsbase/InputPopupSurfaceV2.h"
+#include "wladdonsbase/Global.h"
+#include "wladdonsbase/Server.h"
 
 #include <dimcore/ProxyAddon.h>
 
@@ -48,7 +49,7 @@ private:
     InputContext* getFocusedIC(uint32_t id) const;
 
 private:
-    std::unique_ptr<Server> wl_;
+    std::unique_ptr<WL_ADDONS_BASE_NAMESPACE::Server> wl_;
     uint32_t focusedId_;
     std::unique_ptr<InputPopupSurfaceV2> popup_;
 

@@ -60,7 +60,6 @@ public Q_SLOTS:
 
 private:
     bool shouldBeIgnored(const std::string &uniqueName) const;
-    InputContext *isValidIC(uint32_t id) const;
 
 private:
     std::unique_ptr<GSettings, Deleter<g_object_unref>> gsettings_;
