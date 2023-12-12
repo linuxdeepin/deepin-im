@@ -18,7 +18,7 @@ public:
     X11AppMonitor();
     ~X11AppMonitor() override;
 
-    const std::unordered_map<QString, pid_t> &apps() { return apps_; }
+    const std::unordered_map<std::string, std::string> &apps() { return apps_; }
 
     std::tuple<int32_t, int32_t> getTopWindowPosition() { return getWindowPosition(window_); }
 
@@ -30,9 +30,9 @@ private:
     const std::string netClientList_;
     const std::string wmPid_;
 
-    std::unordered_map<QString, pid_t> apps_;
+    std::unordered_map<std::string, std::string> apps_;
     xcb_window_t window_;
-    QString focus_;
+    std::string focus_;
 
     void init();
     pid_t getWindowPid(xcb_window_t window);

@@ -423,6 +423,7 @@ void Dim::loopProxyAddon(const std::function<void(ProxyAddon *addon)> callback)
 
 void Dim::switchIM(const std::pair<std::string, std::string> &imIndex)
 {
+    qWarning() << "imIndex.first:" << imIndex.first.c_str();
     auto addon = qobject_cast<ProxyAddon *>(addons_.at(imIndex.first));
 
     if (addon) {

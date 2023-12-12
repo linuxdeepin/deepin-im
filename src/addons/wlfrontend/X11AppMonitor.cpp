@@ -52,7 +52,7 @@ void X11AppMonitor::init()
         xcb_window_t window = *reinterpret_cast<xcb_window_t *>(data.data() + i);
         pid_t pid = getWindowPid(window);
 
-        apps_.emplace(windowToString(window), pid);
+        apps_.emplace(windowToString(window), std::to_string(pid));
     }
 }
 
@@ -135,7 +135,7 @@ void X11AppMonitor::clientListChanged()
         auto iter = apps_.find(windowIdStr);
         if (iter == apps_.end()) {
             pid_t pid = getWindowPid(windowId);
-            apps_.emplace(windowIdStr, pid);
+            apps_.emplace(windowIdStr, std::to_string(pid));
         }
     }
 

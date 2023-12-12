@@ -19,7 +19,9 @@ class VirtualInputContextGlue;
 class VirtualInputContextManager : public QObject
 {
 public:
-    VirtualInputContextManager(VirtualInputContextGlue *parentIC, AppMonitor *appMonitor, Dim *dim);
+    VirtualInputContextManager(VirtualInputContextGlue *parentIC,
+                               const std::shared_ptr<AppMonitor> &appMonitor,
+                               Dim *dim);
     ~VirtualInputContextManager();
 
     void setRealFocus(bool focus);
@@ -28,12 +30,13 @@ public:
 private:
     Dim *dim_;
     VirtualInputContextGlue *parentIC_;
-    AppMonitor *appMonitor_;
-    std::unordered_map<QString, pid_t> lastAppState_;
-    std::unordered_map<QString, std::unique_ptr<VirtualInputContext>> managed_;
-    QString focus_;
+    std::shared_ptr<AppMonitor> appMonitor_;
+    std::unordered_map<std::string, std::string> lastAppState_;
+    std::unordered_map<std::string, std::unique_ptr<VirtualInputContext>> managed_;
+    std::string focus_;
 
-    void appUpdated(const std::unordered_map<QString, pid_t> &appState, const QString &focus);
+    void appUpdated(const std::unordered_map<std::string, std::string> &appState,
+                    const std::string &focus);
     void updateFocus();
 };
 

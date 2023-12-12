@@ -42,8 +42,8 @@ public:
     std::vector<char> getProperty(xcb_window_t window, const std::string &property, uint32_t size);
     std::vector<char> getProperty(xcb_window_t window, const std::string &property);
 
-    static QString windowToString(xcb_window_t window);
-    static xcb_window_t stringToWindow(const QString &string);
+    static std::string windowToString(xcb_window_t window);
+    static xcb_window_t stringToWindow(const std::string &string);
 
 protected:
     std::unique_ptr<xcb_connection_t, Deleter<xcb_disconnect>> xconn_;

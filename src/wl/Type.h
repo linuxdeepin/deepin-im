@@ -9,6 +9,7 @@
 #include "wayland-input-method-unstable-v2-client-protocol.h"
 #include "wayland-text-input-unstable-v3-client-protocol.h"
 #include "wayland-virtual-keyboard-unstable-v1-client-protocol.h"
+#include "wayland-wlr-foreign-toplevel-management-unstable-v1-client-protocol.h"
 #include "wayland-xdg-shell-client-protocol.h"
 
 #include <wayland-client-protocol.h>
@@ -55,6 +56,8 @@ INIT_WL_TYPE(zwp_input_method_v1);
 INIT_WL_TYPE(zwp_input_method_context_v1);
 INIT_WL_TYPE(zwp_input_panel_surface_v1);
 INIT_WL_TYPE(zwp_input_panel_v1);
+INIT_WL_TYPE(zwlr_foreign_toplevel_manager_v1);
+INIT_WL_TYPE(zwlr_foreign_toplevel_handle_v1);
 
 } // namespace wl
 
