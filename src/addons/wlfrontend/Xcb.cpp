@@ -7,6 +7,8 @@
 #include <QDebug>
 #include <QSocketNotifier>
 
+#include <iomanip>
+
 Xcb::Xcb()
     : QObject()
 {
@@ -71,7 +73,7 @@ std::vector<char> Xcb::getProperty(xcb_window_t window, const std::string &prope
                            0,
                            0);
     if (!reply || reply->type == XCB_NONE) {
-        qWarning() << "no reply:" << windowToString(window) << property.c_str();
+        qWarning() << "no reply:" << windowToString(window).c_str() << property.c_str();
         return {};
     }
 
@@ -99,19 +101,22 @@ xcb_screen_t *Xcb::screenOfDisplay(int screen)
     return nullptr;
 }
 
-QString Xcb::windowToString(xcb_window_t window)
+std::string Xcb::windowToString(xcb_window_t window)
 {
     if (window == 0) {
-        return QString{};
+        return {};
     }
 
-    return QString("0x%1").arg(window, 8, 16, QLatin1Char('0'));
+    std::stringstream stream;
+    stream << "0x" << std::setfill('0') << std::setw(sizeof(xcb_window_t) * 2) << std::hex
+           << window;
+    return stream.str();
 }
 
-xcb_window_t Xcb::stringToWindow(const QString &string)
+xcb_window_t Xcb::stringToWindow(const std::string &string)
 {
     bool ok = false;
-    return string.toUInt(&ok, 16);
+    return std::stoul(string, nullptr, 16);
 }
 
 void Xcb::onXCBEvent(QSocketDescriptor socket, QSocketNotifier::Type activationEvent)
@@ -139,7 +144,7 @@ std::tuple<uint32_t, uint32_t> Xcb::getPropertyAux(std::vector<char> &buff,
                            xcbOffset,
                            size / 4);
     if (!reply || reply->type == XCB_NONE) {
-        qWarning() << "no reply:" << windowToString(window) << property.c_str();
+        qWarning() << "no reply:" << windowToString(window).c_str() << property.c_str();
         return { 0, 0 };
     }
 

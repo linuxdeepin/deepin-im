@@ -6,9 +6,7 @@
 
 #include "InputMethodKeyboardGrabV2.h"
 #include "InputMethodV2.h"
-#include "InputPopupSurfaceV2.h"
 #include "VirtualInputContextManager.h"
-#include "X11AppMonitor.h"
 #include "common/common.h"
 #include "dimcore/Dim.h"
 #include "wl/client/ZwpVirtualKeyboardV1.h"
@@ -27,6 +25,7 @@ WaylandInputContext::WaylandInputContext(
     const std::shared_ptr<InputMethodV2> &im,
     const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk,
     const std::shared_ptr<wl::client::Surface> &surface,
+    const std::shared_ptr<AppMonitor> &appMonitor,
     Dim *dim)
     : VirtualInputContextGlue(nullptr, dim)
     , im_(im)
@@ -34,10 +33,7 @@ WaylandInputContext::WaylandInputContext(
     , state_(std::make_unique<State>())
     , xkbContext_(xkb_context_new(XKB_CONTEXT_NO_FLAGS))
 {
-    // TODO: detect environment
-    appMonitor_ = std::make_unique<X11AppMonitor>();
-
-    vicm_ = std::make_unique<VirtualInputContextManager>(this, appMonitor_.get(), dim);
+    vicm_ = std::make_unique<VirtualInputContextManager>(this, appMonitor, dim);
 
     connect(im->qobject(),
             &InputMethodV2QObject::activate,

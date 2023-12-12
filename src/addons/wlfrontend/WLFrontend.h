@@ -26,6 +26,7 @@ namespace org {
 namespace deepin {
 namespace dim {
 
+class AppMonitor;
 class WaylandInputContext;
 
 class WLFrontend : public FrontendAddon
@@ -44,6 +45,8 @@ private:
     std::shared_ptr<wl::client::Surface> surface_;
     std::unordered_map<std::shared_ptr<wl::client::Seat>, std::unique_ptr<WaylandInputContext>>
         ims_;
+
+    std::shared_ptr<AppMonitor> appMonitor_;
 
     void reloadSeats();
 };

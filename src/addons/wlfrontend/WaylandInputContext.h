@@ -44,6 +44,7 @@ public:
     explicit WaylandInputContext(const std::shared_ptr<InputMethodV2> &im,
                                  const std::shared_ptr<wl::client::ZwpVirtualKeyboardV1> &vk,
                                  const std::shared_ptr<wl::client::Surface> &surface,
+                                 const std::shared_ptr<AppMonitor> &appMonitor,
                                  Dim *dim);
     ~WaylandInputContext() override;
 

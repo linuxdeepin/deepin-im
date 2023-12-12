@@ -35,6 +35,8 @@ set(WLC_SOURCES
   ZwpTextInputManagerV3.cpp
   ZwpTextInputV3.h
   ZwpTextInputV3.cpp
+  ZwlrForeignToplevelManagementV1.h
+  ZwlrForeignToplevelManagementV1.cpp
 )
 
 add_library(wlc STATIC)

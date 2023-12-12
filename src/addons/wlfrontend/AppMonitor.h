@@ -14,7 +14,7 @@ public:
     virtual ~AppMonitor();
 
 signals:
-    void appUpdated(const std::unordered_map<QString, pid_t> &appState, const QString &focus);
+    void appUpdated(const std::unordered_map<std::string, std::string> &appState, const std::string &focus);
 };
 
 } // namespace org::deepin::dim

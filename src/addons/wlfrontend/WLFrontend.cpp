@@ -6,6 +6,8 @@
 
 #include "InputMethodV2.h"
 #include "WaylandInputContext.h"
+#include "WlrAppMonitor.h"
+#include "X11AppMonitor.h"
 #include "addons/waylandserver/WaylandServer_public.h"
 #include "wl/client/Compositor.h"
 #include "wl/client/Connection.h"
@@ -75,6 +77,12 @@ WLFrontend::WLFrontend(Dim *dim)
     compositor_ = wl_->getGlobal<wl::client::Compositor>();
     surface_ = std::make_shared<wl::client::Surface>(compositor_->create_surface());
 
+    if (getenv("WAYLAND_DISPLAY") || getenv("WAYLAND_SOCKET")) {
+        appMonitor_ = std::make_unique<WlrAppMonitor>(wl_);
+    } else {
+        appMonitor_ = std::make_unique<X11AppMonitor>();
+    }
+
     reloadSeats();
 }
 
@@ -90,7 +98,7 @@ void WLFrontend::reloadSeats()
         auto vk = std::make_shared<wl::client::ZwpVirtualKeyboardV1>(
             vkManager->create_virtual_keyboard(seat));
         auto im = std::make_shared<InputMethodV2>(imManager->get_input_method(seat), dim());
-        auto wic = std::make_unique<WaylandInputContext>(im, vk, surface_, dim());
+        auto wic = std::make_unique<WaylandInputContext>(im, vk, surface_, appMonitor_, dim());
 
         ims_.emplace(seat, std::move(wic));
     }

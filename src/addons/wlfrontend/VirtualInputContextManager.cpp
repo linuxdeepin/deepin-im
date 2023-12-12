@@ -14,16 +14,15 @@
 
 using namespace org::deepin::dim;
 
-VirtualInputContextManager::VirtualInputContextManager(VirtualInputContextGlue *parentIC,
-                                                       AppMonitor *appMonitor,
-                                                       Dim *dim)
+VirtualInputContextManager::VirtualInputContextManager(
+    VirtualInputContextGlue *parentIC, const std::shared_ptr<AppMonitor> &appMonitor, Dim *dim)
     : dim_(dim)
     , parentIC_(parentIC)
     , appMonitor_(appMonitor)
 {
     parentIC_->setVirtualInputContextManager(this);
 
-    connect(appMonitor_, &AppMonitor::appUpdated, this, &VirtualInputContextManager::appUpdated);
+    connect(appMonitor_.get(), &AppMonitor::appUpdated, this, &VirtualInputContextManager::appUpdated);
 }
 
 VirtualInputContextManager::~VirtualInputContextManager() = default;
@@ -36,15 +35,15 @@ void VirtualInputContextManager::setRealFocus(bool focus)
 
 VirtualInputContext *VirtualInputContextManager::focusedVirtualIC()
 {
-    if (focus_.isEmpty()) {
+    if (focus_.empty()) {
         return nullptr;
     }
 
     return managed_.at(focus_).get();
 }
 
-void VirtualInputContextManager::appUpdated(const std::unordered_map<QString, pid_t> &appState,
-                                            const QString &focus)
+void VirtualInputContextManager::appUpdated(const std::unordered_map<std::string, std::string> &appState,
+                                            const std::string &focus)
 {
     std::experimental::erase_if(managed_, [&appState](const auto &item) {
         const auto &[key, pid] = item;
@@ -54,7 +53,7 @@ void VirtualInputContextManager::appUpdated(const std::unordered_map<QString, pi
     lastAppState_ = appState;
     focus_ = focus;
 
-    auto *x11AppMonitor = dynamic_cast<X11AppMonitor *>(appMonitor_);
+    auto *x11AppMonitor = dynamic_cast<X11AppMonitor *>(appMonitor_.get());
     if (x11AppMonitor) {
         auto pos = x11AppMonitor->getTopWindowPosition();
         parentIC_->setWindowPos({ std::get<0>(pos), std::get<1>(pos) });
@@ -66,7 +65,7 @@ void VirtualInputContextManager::appUpdated(const std::unordered_map<QString, pi
 void VirtualInputContextManager::updateFocus()
 {
     VirtualInputContext *ic = nullptr;
-    if (!focus_.isEmpty()) {
+    if (!focus_.empty()) {
         auto iter = managed_.find(focus_);
         if (iter != managed_.end()) {
             ic = iter->second.get();

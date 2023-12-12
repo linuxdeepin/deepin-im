@@ -17,6 +17,10 @@ set(WLFRONTEND_SOURCES
   InputPopupSurfaceV2.cpp
   AppMonitor.h
   AppMonitor.cpp
+  WlrAppMonitor.h
+  WlrAppMonitor.cpp
+  ForeignToplevelManagementV1.h
+  ForeignToplevelManagementV1.cpp
   Xcb.h
   Xcb.cpp
   X11AppMonitor.h
