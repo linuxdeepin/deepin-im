@@ -22,6 +22,7 @@
 #include <dlfcn.h>
 
 constexpr uint32_t DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE = SHIFT_MASK | CONTROL_MASK;
+const auto &defaultLoadedIM = std::make_pair("keyboard", "us");
 
 #ifdef Dtk6Core_FOUND
 const QString DimDConfigAppID = QStringLiteral("org.deepin.dde.dim");
@@ -56,15 +57,14 @@ Dim::Dim(QObject *parent)
 #ifdef Dtk6Core_FOUND
     , dimConf_(DconfigSettings::ConfigPtr(DimDConfigAppID, DimDConfigJson))
 #endif
+    , currentActiveIM_(defaultLoadedIM)
+    , activeInputMethodEntries_({ defaultLoadedIM })
 {
+    loadAddons();
+
 #ifdef Dtk6Core_FOUND
     initDConfig();
-#else
-    currentActiveIM_ = std::make_pair("keyboard", "us");
-    activeInputMethodEntries_ = { { "keyboard", "us" }, { "fcitx5", "pinyin" } };
 #endif
-
-    loadAddons();
 }
 
 Dim::~Dim() { }
@@ -83,7 +83,7 @@ void Dim::initDConfig()
 
     QVariant dconfIMKey =
         DconfigSettings::ConfigValue(DimDConfigAppID, DimDConfigJson, KeyCurrentInputSource, "");
-    if (dconfIMKey.isValid()) {
+    if (dconfIMKey.isValid() && addons_.count(dconfIMKey.toString().toStdString())) {
         currentActiveIM_ = keyToIndex(dconfIMKey.toString());
     }
 
@@ -93,7 +93,9 @@ void Dim::initDConfig()
                                                         "");
     if (dconfIMKeys.isValid()) {
         for (const auto &imKey : dconfIMKeys.toStringList()) {
-            activeInputMethodEntries_.emplace(keyToIndex(imKey));
+            if (addons_.count(imKey.toStdString())) {
+                activeInputMethodEntries_.emplace(keyToIndex(imKey));
+            }
         }
     }
 }
