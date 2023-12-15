@@ -24,6 +24,7 @@ target_link_libraries(waylandserver PRIVATE
   PkgConfig::wayland-server
   wlc
   Qt6::Core
+  wl_addons_base
 )
 
 install(TARGETS waylandserver
