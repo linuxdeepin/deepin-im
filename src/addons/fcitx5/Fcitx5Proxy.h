@@ -49,7 +49,7 @@ private:
     InputContext* getFocusedIC(uint32_t id) const;
 
 private:
-    std::unique_ptr<WL_ADDONS_BASE_NAMESPACE::Server> wl_;
+    std::shared_ptr<WL_ADDONS_BASE_NAMESPACE::Server> wl_;
     uint32_t focusedId_;
     std::unique_ptr<InputPopupSurfaceV2> popup_;
 

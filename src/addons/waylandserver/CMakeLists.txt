@@ -3,17 +3,6 @@ set(WAYLANDSERVER_SOURCES
   WaylandServer_public.cpp
   WaylandServer.h
   WaylandServer.cpp
-  # Listener.h
-  # Server.h
-  # Server.cpp
-  # Output.h
-  # Output.cpp
-  # View.h
-  # View.cpp
-  # Keyboard.h
-  # Keyboard.cpp
-  # InputMethodV2.h
-  # InputMethodV2.cpp
 )
 
 add_library(waylandserver MODULE

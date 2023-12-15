@@ -36,16 +36,10 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
     , fcitx5Proc_(new QProcess(this))
 {
     Addon *wls = dim->addons().at("waylandserver");
-    auto remote = waylandserver::getRemote(wls);
-    auto local = waylandserver::getLocal(wls);
-    auto backend = waylandserver::getBackend(wls);
+    auto wl = waylandserver::getServer(wls);
+    auto *surface = waylandserver::getSurface(wls);
 
-    auto remote1 = std::make_shared<wl::client::ConnectionRaw>(remote.get());
-    auto compositor = remote1->getGlobal<wl::client::Compositor>();
-    auto *surface = compositor->create_surface();
-
-    wl_ = std::make_unique<Server>(local, backend);
-    wl_->createOutputFromSurface(surface);
+    wl_ = wl;
 
     wl_->setVirtualKeyboardCallback([this](Keyboard *keyboard) {
         keyboard->setKeyEventCallback([this](wlr_keyboard_key_event *event) {
