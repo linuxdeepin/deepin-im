@@ -5,6 +5,7 @@
 #include "Server.h"
 
 #include "InputMethodContextV1.h"
+#include "InputMethodV1.h"
 #include "InputMethodV2.h"
 #include "Keyboard.h"
 #include "Output.h"
@@ -123,6 +124,7 @@ Server::Server(const std::shared_ptr<wl_display> &local,
     input_method_manager_v2_.reset(wlr_input_method_manager_v2_create(display_.get()));
     wl_signal_add(&input_method_manager_v2_->events.input_method,
                   input_method_manager_v2_input_method_);
+    inputMethodV1_.reset(new InputMethodV1(this));
 }
 
 Server::~Server() = default;
@@ -315,4 +317,9 @@ Server::desktopViewAt(double lx, double ly, struct wlr_surface **surface, double
         tree = tree->node.parent;
     }
     return static_cast<View *>(tree->node.data);
+}
+
+InputMethodContextV1 *Server::inputMethodContextV1() const
+{
+    return inputMethodV1_->inputMethodContextV1().get();
 }

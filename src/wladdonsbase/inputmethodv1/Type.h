@@ -5,9 +5,9 @@
 #ifndef WL_ADDONS_BASE_TYPE_H
 #define WL_ADDONS_BASE_TYPE_H
 
+#include "../Global.h"
 #include "Resource.h"
 #include "common/common.h"
-#include "../Global.h"
 #include "wl/Type.h"
 
 #include <wayland-server-core.h>
@@ -42,7 +42,7 @@ public:
 
     virtual ~Type() = default;
 
-    void init(struct wl_display *display)
+    void global(struct wl_display *display)
     {
         global_.reset(wl_global_create(display,
                                        this->wl_interface,
@@ -51,11 +51,11 @@ public:
                                        GlobalCallbackWrapper<&Type::bindCb>::func));
     }
 
-    void add(struct wl_client *client, uint32_t id)
+    void init(struct wl_client *client, uint32_t id)
     {
         assert(this->wl_interface != nullptr);
         auto resource = bind(client, this->wl_interface->version, id);
-        resource_ = std::make_pair(client, resource);
+        resource_ = resource;
     }
 
     static C *fromResource(struct wl_resource *resource)
@@ -65,6 +65,8 @@ public:
         return dynamic_cast<C *>(t);
     }
 
+    const auto getResource() const { return resource_; }
+
 protected:
     virtual void resource_bind(Resource *resource) { }
 
@@ -72,7 +74,7 @@ protected:
 
 private:
     std::unique_ptr<struct wl_global, Deleter<wl_global_destroy>> global_;
-    std::pair<struct wl_client *, std::shared_ptr<Resource>> resource_{ nullptr, nullptr };
+    std::shared_ptr<Resource> resource_;
 
     std::shared_ptr<Resource> bind(struct wl_client *client, uint32_t version, uint32_t id)
     {
@@ -89,15 +91,10 @@ private:
     void bindCb(struct wl_client *client, uint32_t version, uint32_t id)
     {
         auto resource = bind(client, version, id);
-        resource_ = std::make_pair(client, resource);
+        resource_ = resource;
     }
 
-    void resourceDestroyCb(Resource *resource)
-    {
-        resource_destroy(resource);
-        resource_.first = nullptr;
-        resource_.second = nullptr;
-    }
+    void resourceDestroyCb(Resource *resource) { }
 };
 
 WL_ADDONS_BASE_END_NAMESPACE

@@ -4,6 +4,9 @@
 
 #include "ZwpInputMethodContextV1.h"
 
+#include "../InputMethodV1.h"
+#include "InputMethodGrabV1.h"
+
 WL_ADDONS_BASE_USE_NAMESPACE
 
 const struct zwp_input_method_context_v1_interface ZwpInputMethodContextV1::impl = {
@@ -32,8 +35,9 @@ const struct zwp_input_method_context_v1_interface ZwpInputMethodContextV1::impl
         &ZwpInputMethodContextV1::zwp_input_method_context_v1_text_direction>::func,
 };
 
-ZwpInputMethodContextV1::ZwpInputMethodContextV1()
+ZwpInputMethodContextV1::ZwpInputMethodContextV1(InputMethodV1 *inputMethodV1)
     : Type()
+    , inputMethodV1_(inputMethodV1)
 {
 }
 
@@ -83,6 +87,12 @@ void ZwpInputMethodContextV1::zwp_input_method_context_v1_commit_string(Resource
                                                                         uint32_t serial,
                                                                         const char *text)
 {
+    if (inputMethodV1_->inputMethodContextV1CommitCallback_) {
+        const std::string str = text;
+        if (!str.empty()) {
+            inputMethodV1_->inputMethodContextV1CommitCallback_(serial, text);
+        }
+    }
 }
 
 void ZwpInputMethodContextV1::zwp_input_method_context_v1_preedit_string(Resource *resource,
@@ -90,6 +100,13 @@ void ZwpInputMethodContextV1::zwp_input_method_context_v1_preedit_string(Resourc
                                                                          const char *text,
                                                                          const char *commit)
 {
+    if (inputMethodV1_->inputMethodContextV1PreeditCallback_) {
+        const std::string str = text;
+
+        if (!str.empty()) {
+            inputMethodV1_->inputMethodContextV1PreeditCallback_(serial, text, commit);
+        }
+    }
 }
 
 void ZwpInputMethodContextV1::zwp_input_method_context_v1_preedit_styling(Resource *resource,
@@ -132,11 +149,16 @@ void ZwpInputMethodContextV1::zwp_input_method_context_v1_keysym(Resource *resou
 void ZwpInputMethodContextV1::zwp_input_method_context_v1_grab_keyboard(Resource *resource,
                                                                         uint32_t keyboard)
 {
+    keyboardGrabV1_.reset(new InputMethodGrabV1(this));
+    keyboardGrabV1_->init(resource->client(), keyboard);
 }
 
 void ZwpInputMethodContextV1::zwp_input_method_context_v1_key(
     Resource *resource, uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
 {
+    if (inputMethodV1_->inputMethodContextV1ForwardKeyCallback_) {
+        inputMethodV1_->inputMethodContextV1ForwardKeyCallback_(key, state);
+    }
 }
 
 void ZwpInputMethodContextV1::zwp_input_method_context_v1_modifiers(Resource *resource,
@@ -158,4 +180,9 @@ void ZwpInputMethodContextV1::zwp_input_method_context_v1_text_direction(Resourc
                                                                          uint32_t serial,
                                                                          uint32_t direction)
 {
+}
+
+void ZwpInputMethodContextV1::resetKeyboardGrab()
+{
+    keyboardGrabV1_.reset();
 }

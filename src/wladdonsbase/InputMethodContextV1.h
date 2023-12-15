@@ -5,43 +5,23 @@
 #ifndef INPUTMETHODCONTEXTV1_H
 #define INPUTMETHODCONTEXTV1_H
 
-#include "Listener.h"
-#include "inputmethodv1/ZwpInputMethodV1.h"
-
-#include <functional>
-#include <memory>
+#include "inputmethodv1/ZwpInputMethodContextV1.h"
 
 WL_ADDONS_BASE_BEGIN_NAMESPACE
 
 class Server;
+class InputMethodV1;
 
-class InputMethodContextV1
+class InputMethodContextV1 : public ZwpInputMethodContextV1
 {
-    friend class Keyboard;
-
 public:
-    InputMethodContextV1(Server *server, ZwpInputMethodV1 *input_method);
-    ~InputMethodContextV1();
+    explicit InputMethodContextV1(InputMethodV1 *inputMethodV1);
+    ~InputMethodContextV1() override;
 
-    void setCommitCallback(const std::function<void()> &callback) { commitCallback_ = callback; }
-    void setPanelCreateCallback(const std::function<void()> &callback) { panelCreateCallback_ = callback; }
-    void setPanelDestroyCallback(const std::function<void()> &callback) { panelDestroyCallback_ = callback; }
-
-    void sendActivate();
-    void sendDeactivate();
     void sendContentType(uint32_t hint, uint32_t purpose);
     void sendSurroundingText(const char *text, uint32_t cursor, uint32_t anchor);
-    void sendDone();
     void setCursorRectangle(int x, int y, int width, int height);
     void sendKey(uint32_t keycode, bool isRelease);
-
-private:
-    Server *server_;
-    ZwpInputMethodV1 *input_method_;
-
-    std::function<void()> commitCallback_;
-    std::function<void()> panelCreateCallback_;
-    std::function<void()> panelDestroyCallback_;
 };
 
 WL_ADDONS_BASE_END_NAMESPACE

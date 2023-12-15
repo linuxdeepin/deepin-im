@@ -4,6 +4,8 @@
 
 #include "ZwpInputPanelSurfaceV1.h"
 
+#include "../InputMethodV1.h"
+
 WL_ADDONS_BASE_USE_NAMESPACE
 
 const struct zwp_input_panel_surface_v1_interface ZwpInputPanelSurfaceV1::impl = {

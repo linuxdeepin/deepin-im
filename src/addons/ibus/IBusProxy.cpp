@@ -6,11 +6,22 @@
 
 #include "IBUSIface.h"
 #include "IBUSPortIface.h"
+#include "addons/waylandserver/WaylandServer_public.h"
+#include "addons/wlfrontend/WLFrontend_public.h"
 #include "dimcore/Dim.h"
 #include "dimcore/InputContext.h"
 #include "ibustypes.h"
+#include "wl/client/Compositor.h"
+#include "wl/client/ConnectionBase.h"
+#include "wl/client/ConnectionRaw.h"
+#include "wl/client/ZwpInputMethodV2.h"
+#include "wladdonsbase/InputMethodContextV1.h"
+#include "wladdonsbase/InputMethodV1.h"
+#include "wladdonsbase/Keyboard.h"
 
 #include <gio/gsettingsschema.h>
+
+#include <functional>
 
 #include <signal.h>
 
@@ -22,7 +33,10 @@
 #  define IBUS_META_MASK (1 << 28)
 #endif
 
+static const char *SOCKET_NAME = "dim";
+
 using namespace org::deepin::dim;
+WL_ADDONS_BASE_USE_NAMESPACE
 
 DIM_ADDON_FACTORY(DimIBusProxy);
 
@@ -146,6 +160,8 @@ QString DimIBusInputContextPrivate::getSocketPath()
         displayNumber = pos2 > 0 ? display.mid(pos, pos2 - pos) : display.mid(pos);
     }
 
+    displayNumber = SOCKET_NAME;
+
     return QStandardPaths::writableLocation(QStandardPaths::ConfigLocation)
         + QLatin1String("/ibus/bus/") + QLatin1String(QDBusConnection::localMachineId())
         + QLatin1Char('-') + QString::fromLocal8Bit(host) + QLatin1Char('-')
@@ -187,9 +203,38 @@ DimIBusProxy::DimIBusProxy(Dim *dim)
     : ProxyAddon(dim, "ibus", "ibus")
     , d(new DimIBusInputContextPrivate())
     , useSyncMode_(false)
-    , ibusDaemonProc_(new QProcess(this))
+    , daemonLaunched_(false)
 {
-    launchDaemon();
+    Addon *wls = dim->addons().at("waylandserver");
+    auto wl = waylandserver::getServer(wls);
+    wl_ = wl;
+    surface_ = waylandserver::getSurface(wls);
+
+    auto im = wl_->inputMethodV1();
+
+    if (im) {
+        im->inputMethodContextV1ForwardKeyCallback_ = std::bind(&DimIBusProxy::forwardKey,
+                                                                this,
+                                                                std::placeholders::_1,
+                                                                std::placeholders::_2);
+        im->inputMethodContextV1CommitCallback_ =
+            std::bind(&DimIBusProxy::commit, this, std::placeholders::_1, std::placeholders::_2);
+        im->inputMethodContextV1PreeditCallback_ = std::bind(&DimIBusProxy::preedit,
+                                                             this,
+                                                             std::placeholders::_1,
+                                                             std::placeholders::_2,
+                                                             std::placeholders::_3);
+        im->inputPanelV1CreateCallback_ = std::bind(&DimIBusProxy::panelCreate, this);
+        im->inputPanelV1DestoryCallback_ = std::bind(&DimIBusProxy::panelDestroy, this);
+    }
+
+    // Stop restarting the ibus daemon if it starts crashing very frequently
+    daemonCrashTimer_.setInterval(20000);
+    daemonCrashTimer_.setSingleShot(true);
+    connect(&daemonCrashTimer_, &QTimer::timeout, this, [this] {
+        daemonCrashes_ = 0;
+    });
+
     qDBusRegisterMetaType<IBusText>();
     qDBusRegisterMetaType<IBusEngineDesc>();
 
@@ -236,6 +281,65 @@ DimIBusProxy::DimIBusProxy(Dim *dim)
             &QDBusServiceWatcher::serviceUnregistered,
             this,
             &DimIBusProxy::busUnregistered);
+    launchDaemon();
+}
+
+void DimIBusProxy::forwardKey(uint32_t keycode, uint32_t state)
+{
+    auto *ic = getFocusedIC(focusedId_);
+    if (!ic) {
+        return;
+    }
+
+    ic->forwardKey(keycode, state);
+}
+
+void DimIBusProxy::commit(uint32_t serial, const char *text)
+{
+    auto *ic = getFocusedIC(focusedId_);
+    if (!ic) {
+        return;
+    }
+
+    if (text) {
+        ic->commitString(text);
+    }
+    ic->commit();
+}
+
+void DimIBusProxy::preedit(uint32_t serial, const char *text, const char *commit)
+{
+    auto *ic = getFocusedIC(focusedId_);
+    if (!ic) {
+        return;
+    }
+
+    if (text) {
+        ic->updatePreedit(text, 0, 0);
+    }
+
+    ic->commit();
+}
+
+void DimIBusProxy::panelCreate()
+{
+    popup_.reset();
+
+    auto *ic = getFocusedIC(focusedId_);
+    assert(ic);
+
+    auto *im = wlfrontend::getInputMethodV2(ic);
+    auto *pop = im->get_input_popup_surface(surface_);
+    if (!pop) {
+        qWarning() << "failed to get popup surface";
+    }
+
+    popup_.reset(new InputPopupSurfaceV2(pop));
+}
+
+void DimIBusProxy::panelDestroy()
+{
+    popup_.reset();
 }
 
 void DimIBusProxy::connectToBus()
@@ -287,6 +391,7 @@ void DimIBusProxy::busUnregistered(const QString &str)
 
 DimIBusProxy::~DimIBusProxy()
 {
+    stopInputMethod();
     iBusICMap_.clear();
 }
 
@@ -323,16 +428,30 @@ const QList<InputMethodEntry> &DimIBusProxy::getInputMethods()
 
 void DimIBusProxy::focusIn(uint32_t id)
 {
-    if (isICDBusInterfaceValid(id)) {
-        iBusICMap_[id]->FocusIn();
+    auto im = wl_->inputMethodV1();
+
+    if (!im) {
+        return;
     }
+
+    focusedId_ = id;
+
+    im->sendActivate();
 }
 
 void DimIBusProxy::focusOut(uint32_t id)
 {
-    if (isICDBusInterfaceValid(id)) {
-        iBusICMap_[id]->FocusOut();
+    if (focusedId_ != id) {
+        return;
     }
+
+    auto im = wl_->inputMethodV1();
+
+    if (!im) {
+        return;
+    }
+
+    im->sendDeactivate();
 }
 
 void DimIBusProxy::destroyed(uint32_t id)
@@ -344,7 +463,19 @@ void DimIBusProxy::destroyed(uint32_t id)
 
 void DimIBusProxy::done() { }
 
-void DimIBusProxy::contentType(uint32_t hint, uint32_t purpose) { }
+void DimIBusProxy::contentType(uint32_t hint, uint32_t purpose)
+{
+    if (!daemonLaunched_) {
+        return;
+    }
+
+    auto *context = wl_->inputMethodContextV1();
+    if (!context) {
+        return;
+    }
+
+    context->sendContentType(hint, purpose);
+}
 
 void DimIBusProxy::setCurrentIM(const std::string &im)
 {
@@ -363,35 +494,28 @@ void DimIBusProxy::setCurrentIM(const std::string &im)
 bool DimIBusProxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
                             InputContextKeyEvent &keyEvent)
 {
-    bool result = false;
-
-    quint32 ibusState = keyEvent.state();
-
-    if (keyEvent.isRelease())
-        ibusState |= IBUS_RELEASE_MASK;
-
     auto id = keyEvent.ic()->id();
 
-    if (isICDBusInterfaceValid(id)) {
-        auto reply =
-            iBusICMap_[id]->ProcessKeyEvent(keyEvent.keySym(), keyEvent.keycode(), ibusState);
-        reply.waitForFinished();
-
-        if (reply.isError()) {
-            qWarning() << "processKeyEvent error: " << reply.error().message();
-            return false;
-        }
-
-        if (useSyncMode_ || reply.isFinished()) {
-            result = reply.value();
-        }
+    if (focusedId_ != id || !daemonLaunched_) {
+        return false;
     }
 
-    return result;
+    auto *context = wl_->inputMethodContextV1();
+    if (!context) {
+        return false;
+    }
+
+    context->sendKey(keyEvent.keycode(), keyEvent.isRelease());
+
+    return true;
 }
 
 void DimIBusProxy::cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event)
 {
+    if (!daemonLaunched_) {
+        return;
+    }
+
     auto id = event.ic()->id();
 
     if (!isICDBusInterfaceValid(id)) {
@@ -403,22 +527,20 @@ void DimIBusProxy::cursorRectangleChangeEvent(InputContextCursorRectChangeEvent 
 
 void DimIBusProxy::updateSurroundingText(InputContextEvent &event)
 {
-    auto id = event.ic()->id();
-    if (!isICDBusInterfaceValid(id)) {
+    if (!daemonLaunched_) {
         return;
     }
 
-    IBusText text;
     auto &surroundingText = event.ic()->surroundingText();
-    text.text = surroundingText.text();
 
-    QVariant variant;
-    variant.setValue(text);
-    QDBusVariant dbusText(variant);
+    auto *context = wl_->inputMethodContextV1();
+    if (!context) {
+        return;
+    }
 
-    iBusICMap_[id]->SetSurroundingText(dbusText,
-                                       surroundingText.cursor(),
-                                       surroundingText.anchor());
+    context->sendSurroundingText(surroundingText.text().toUtf8().data(),
+                                 surroundingText.cursor(),
+                                 surroundingText.anchor());
 }
 
 void DimIBusProxy::initEngines()
@@ -497,9 +619,72 @@ void DimIBusProxy::launchDaemon()
         return;
     }
 
-    ibusDaemonProc_->start(QStringLiteral("ibus-daemon"),
-                           QStringList{ QStringLiteral("-r"), QStringLiteral("-d") });
-    connect(ibusDaemonProc_, &QProcess::started, this, [] {
-        qDebug() << "launch ibus daemon success";
-    });
+    if (ibusDaemonProc_) {
+        stopInputMethod();
+    }
+
+    ibusDaemonProc_ = new QProcess(this);
+
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("WAYLAND_DISPLAY", SOCKET_NAME);
+
+    ibusDaemonProc_->setProgram(QStringLiteral("/usr/libexec/ibus-ui-gtk3"));
+    ibusDaemonProc_->setArguments(QStringList{ QStringLiteral("-i"),
+                                               QStringLiteral("-d"),
+                                               QStringLiteral("-g"),
+                                               QStringLiteral("--xim --panel disable") });
+    ibusDaemonProc_->setProcessEnvironment(env);
+    ibusDaemonProc_->setStandardOutputFile("/tmp/ibus.log");
+    ibusDaemonProc_->setStandardErrorFile("/tmp/ibus.log");
+    ibusDaemonProc_->start();
+
+    connect(ibusDaemonProc_,
+            &QProcess::stateChanged,
+            this,
+            [this](const QProcess::ProcessState &state) {
+                daemonLaunched_ = state == QProcess::ProcessState::Running;
+            });
+
+    connect(ibusDaemonProc_,
+            QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            this,
+            [this](int exitCode, QProcess::ExitStatus exitStatus) {
+                if (exitStatus == QProcess::CrashExit) {
+                    qWarning() << "Input Method crashed" << ibusDaemonProc_->program()
+                               << ibusDaemonProc_->arguments() << exitCode << exitStatus;
+
+                    daemonCrashes_++;
+                    daemonCrashTimer_.start();
+                    if (daemonCrashes_ < 5) {
+                        launchDaemon();
+                    } else {
+                        qWarning() << "ibus daemon keeps crashing, please fix"
+                                   << ibusDaemonProc_->program() << ibusDaemonProc_->arguments();
+                        stopInputMethod();
+                    }
+                }
+            });
+}
+
+void DimIBusProxy::stopInputMethod()
+{
+    if (!ibusDaemonProc_) {
+        return;
+    }
+
+    disconnect(ibusDaemonProc_, nullptr, this, nullptr);
+
+    ibusDaemonProc_->terminate();
+    if (!ibusDaemonProc_->waitForFinished()) {
+        ibusDaemonProc_->kill();
+        ibusDaemonProc_->waitForFinished();
+    }
+
+    ibusDaemonProc_->deleteLater();
+    ibusDaemonProc_ = nullptr;
+}
+
+InputContext *DimIBusProxy::getFocusedIC(uint32_t id) const
+{
+    return dim()->getFocusedIC(id);
 }
