@@ -43,6 +43,7 @@ class Output;
 class View;
 class Keyboard;
 class InputMethodV2;
+class InputMethodV1;
 class InputMethodContextV1;
 
 class Server
@@ -86,6 +87,10 @@ public:
     wl_display *display() { return display_.get(); }
 
     const auto &inputMethodV2s() { return inputMethodV2s_; }
+
+    const auto &inputMethodV1() const { return inputMethodV1_; }
+
+    InputMethodContextV1 *inputMethodContextV1() const;
 
     InputMethodV2 *inputMethodV2(IMType t)
     {
@@ -153,8 +158,8 @@ private:
     Listener<&Server::inputMethodManagerV2InputMethodNotify> input_method_manager_v2_input_method_;
     std::unordered_map<IMType, std::unique_ptr<InputMethodV2>> inputMethodV2s_;
     Listener<&Server::inputMethodV2DestroyNotify> input_method_v2_destroy_;
-    // std::unique_ptr<InputMethodV1> inputMethodV1_;
     std::unordered_map<IMType, std::unique_ptr<InputMethodContextV1>> inputMethodContextV1s_;
+    std::shared_ptr<InputMethodV1> inputMethodV1_;
 
     std::function<void(Keyboard *)> virtualKeyboardCallback_;
     std::function<void()> inputMethodCallback_;

@@ -7,11 +7,15 @@
 
 #include "IBUSInputContextIface.h"
 #include "common/common.h"
+#include "wladdonsbase/Global.h"
+#include "wladdonsbase/InputPopupSurfaceV2.h"
+#include "wladdonsbase/Server.h"
 
 #include <dimcore/ProxyAddon.h>
 #include <gio/gio.h>
 
 #include <QProcess>
+#include <QTimer>
 
 #include <memory>
 
@@ -41,6 +45,12 @@ public:
     void cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event) override;
     void setCurrentIM(const std::string &im) override;
 
+    void forwardKey(uint32_t keycode, uint32_t state);
+    void commit(uint32_t serial, const char *text);
+    void preedit(uint32_t serial, const char *text, const char *commit);
+    void panelCreate();
+    void panelDestroy();
+
 private:
     QList<IBusEngineDesc> listEngines();
     void initEngines();
@@ -49,6 +59,7 @@ private:
     {
         return !iBusICMap_.isEmpty() && iBusICMap_.contains(id) && iBusICMap_[id]->isValid();
     }
+
     void launchDaemon();
 
 public Q_SLOTS:
@@ -60,16 +71,25 @@ public Q_SLOTS:
 
 private:
     bool shouldBeIgnored(const std::string &uniqueName) const;
+    void stopInputMethod();
+    InputContext *getFocusedIC(uint32_t id) const;
 
 private:
     std::unique_ptr<GSettings, Deleter<g_object_unref>> gsettings_;
     std::unique_ptr<DimIBusInputContextPrivate> d;
     bool useSyncMode_;
+    bool daemonLaunched_;
     QFileSystemWatcher socketWatcher_;
     QTimer timer_;
     QList<InputMethodEntry> inputMethods_;
     QMap<uint32_t, std::shared_ptr<OrgFreedesktopIBusInputContextInterface>> iBusICMap_;
-    QProcess *ibusDaemonProc_;
+    QProcess *ibusDaemonProc_ = nullptr;
+    std::shared_ptr<WL_ADDONS_BASE_NAMESPACE::Server> wl_;
+    QTimer daemonCrashTimer_;
+    uint daemonCrashes_ = 0;
+    uint32_t focusedId_ = 0;
+    std::unique_ptr<InputPopupSurfaceV2> popup_;
+    wl_surface * surface_ = nullptr;
 };
 
 } // namespace dim

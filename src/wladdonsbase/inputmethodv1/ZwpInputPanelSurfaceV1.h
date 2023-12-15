@@ -10,12 +10,14 @@
 
 WL_ADDONS_BASE_BEGIN_NAMESPACE
 
+class InputMethodV1;
+
 class ZwpInputPanelSurfaceV1 : public Type<ZwpInputPanelSurfaceV1, zwp_input_panel_surface_v1>
 {
     friend class Type;
 
 public:
-    ZwpInputPanelSurfaceV1();
+    explicit ZwpInputPanelSurfaceV1();
     ~ZwpInputPanelSurfaceV1() override;
 
 protected:

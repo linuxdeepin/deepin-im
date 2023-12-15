@@ -10,13 +10,20 @@
 
 WL_ADDONS_BASE_BEGIN_NAMESPACE
 
+class InputMethodGrabV1;
+class InputMethodV1;
+
 class ZwpInputMethodContextV1 : public Type<ZwpInputMethodContextV1, zwp_input_method_context_v1>
 {
     friend class Type;
 
 public:
-    ZwpInputMethodContextV1();
+    explicit ZwpInputMethodContextV1(InputMethodV1 *inputMethodV1);
     ~ZwpInputMethodContextV1() override;
+
+    const auto &getKeyboardGrab() const { return keyboardGrabV1_; }
+
+    void resetKeyboardGrab();
 
     void send_surrounding_text(struct wl_resource *resource,
                                const char *text,
@@ -71,6 +78,8 @@ public:
 
 private:
     static const struct zwp_input_method_context_v1_interface impl;
+    std::unique_ptr<InputMethodGrabV1> keyboardGrabV1_ = nullptr;
+    InputMethodV1 *inputMethodV1_ = nullptr;
 };
 
 WL_ADDONS_BASE_END_NAMESPACE
