@@ -4,6 +4,8 @@
 
 #include "ZwpInputPanelSurfaceV1.h"
 
+#include "../InputMethodV1.h"
+
 WL_ADDONS_BASE_USE_NAMESPACE
 
 const struct zwp_input_panel_surface_v1_interface ZwpInputPanelSurfaceV1::impl = {
@@ -12,12 +14,20 @@ const struct zwp_input_panel_surface_v1_interface ZwpInputPanelSurfaceV1::impl =
         &ZwpInputPanelSurfaceV1::zwp_input_panel_surface_v1_set_overlay_panel>::func,
 };
 
-ZwpInputPanelSurfaceV1::ZwpInputPanelSurfaceV1()
+ZwpInputPanelSurfaceV1::ZwpInputPanelSurfaceV1(InputMethodV1 *inputmethodV1)
     : Type()
+    , inputmethodV1_(inputmethodV1)
 {
 }
 
 ZwpInputPanelSurfaceV1::~ZwpInputPanelSurfaceV1() = default;
+
+void ZwpInputPanelSurfaceV1::resource_destroy(Resource *resource)
+{
+    if (inputmethodV1_ && inputmethodV1_->panelDestroyCallback_) {
+        inputmethodV1_->panelDestroyCallback_();
+    }
+}
 
 void ZwpInputPanelSurfaceV1::zwp_input_panel_surface_v1_set_toplevel(Resource *resource,
                                                                      struct wl_resource *output,

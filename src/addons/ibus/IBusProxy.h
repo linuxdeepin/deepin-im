@@ -7,11 +7,15 @@
 
 #include "IBUSInputContextIface.h"
 #include "common/common.h"
+#include "wladdonsbase/Global.h"
+#include "wladdonsbase/InputPopupSurfaceV2.h"
+#include "wladdonsbase/Server.h"
 
 #include <dimcore/ProxyAddon.h>
 #include <gio/gio.h>
 
 #include <QProcess>
+#include <QTimer>
 
 #include <memory>
 
@@ -49,6 +53,7 @@ private:
     {
         return !iBusICMap_.isEmpty() && iBusICMap_.contains(id) && iBusICMap_[id]->isValid();
     }
+
     void launchDaemon();
 
 public Q_SLOTS:
@@ -60,6 +65,8 @@ public Q_SLOTS:
 
 private:
     bool shouldBeIgnored(const std::string &uniqueName) const;
+    void stopInputMethod();
+    InputContext *getFocusedIC(uint32_t id) const;
 
 private:
     std::unique_ptr<GSettings, Deleter<g_object_unref>> gsettings_;
@@ -69,7 +76,12 @@ private:
     QTimer timer_;
     QList<InputMethodEntry> inputMethods_;
     QMap<uint32_t, std::shared_ptr<OrgFreedesktopIBusInputContextInterface>> iBusICMap_;
-    QProcess *ibusDaemonProc_;
+    QProcess *ibusDaemonProc_ = nullptr;
+    std::shared_ptr<WL_ADDONS_BASE_NAMESPACE::Server> wl_;
+    QTimer daemonCrashTimer_;
+    uint daemonCrashes_ = 0;
+    uint32_t focusedId_ = 0;
+    std::unique_ptr<InputPopupSurfaceV2> popup_;
 };
 
 } // namespace dim

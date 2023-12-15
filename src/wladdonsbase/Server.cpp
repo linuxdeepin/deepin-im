@@ -121,7 +121,7 @@ Server::Server(const std::shared_ptr<wl_display> &local,
     input_method_manager_v2_.reset(wlr_input_method_manager_v2_create(display_.get()));
     wl_signal_add(&input_method_manager_v2_->events.input_method,
                   input_method_manager_v2_input_method_);
-    inputMethodV1_.reset(new InputMethodV1(this, new ZwpInputMethodV1()));
+    inputMethodV1_.reset(new InputMethodV1(this));
 }
 
 Server::~Server() = default;
