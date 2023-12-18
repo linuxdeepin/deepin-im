@@ -1,3 +1,9 @@
+deepin-im (1.0.1) unstable; urgency=medium
+
+  * release deepin input method 1.0.1.
+
+ -- dengbo <dengbo@deepin.org>  Mon, 18 Dec 2023 11:36:05 +0800
+
 deepin-im (1.0.0) unstable; urgency=medium
 
   * Initial release.
