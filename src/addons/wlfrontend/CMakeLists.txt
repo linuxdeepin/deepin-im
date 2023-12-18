@@ -27,6 +27,8 @@ set(WLFRONTEND_SOURCES
   X11AppMonitor.cpp
   WLFrontend_public.h
   WLFrontend_public.cpp
+  TreelandForeignToplevelManagementV1.h
+  TreelandForeignToplevelManagementV1.cpp
 )
 
 add_library(wlfrontend SHARED
