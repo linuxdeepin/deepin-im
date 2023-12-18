@@ -16,6 +16,7 @@ class ConnectionBase;
 namespace org::deepin::dim {
 
 class ForeignToplevelManagerV1;
+class TreelandForeignToplevelManagerV1;
 
 class WlrAppMonitor : public AppMonitor
 {
@@ -24,10 +25,12 @@ public:
     ~WlrAppMonitor() override;
 
     void refresh();
+    void treelandRefresh();
 
 private:
     const std::shared_ptr<wl::client::ConnectionBase> conn_;
     std::shared_ptr<ForeignToplevelManagerV1> toplevelManager_;
+    std::shared_ptr<TreelandForeignToplevelManagerV1> treelandToplevelManager_;
 };
 
 } // namespace org::deepin::dim
