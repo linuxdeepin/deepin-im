@@ -17,8 +17,8 @@ export DIM_WAYLAND_DISPLAY=imfakewl
 XMODIFIERS=@im=${IM}
 
 # Let's assume all required modules are installed
-GTK_IM_MODULE=dim
-QT_IM_MODULE=dim
+GTK_IM_MODULE=wayland
+QT_IM_MODULE=wayland
 CLUTTER_IM_MODULE=${IM}
 SDL_IM_MODULE=${IM}
 
