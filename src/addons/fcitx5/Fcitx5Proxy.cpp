@@ -308,7 +308,7 @@ void Fcitx5Proxy::launchDaemon()
 
     fcitx5Proc_->setProgram(QStringLiteral("fcitx5"));
     fcitx5Proc_->setArguments(QStringList{ QStringLiteral("--disable"),
-                                           QStringLiteral("fcitx4frontend,ibusfrontend,xim"),
+                                           QStringLiteral("fcitx4frontend,ibusfrontend,xim,notificationitem"),
                                            QStringLiteral("-r") });
     fcitx5Proc_->setProcessEnvironment(env);
     fcitx5Proc_->setStandardOutputFile("/tmp/fcitx5.log");
