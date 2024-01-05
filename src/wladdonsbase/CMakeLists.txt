@@ -27,6 +27,8 @@ set(WL_ADDONS_BASE_SOURCES
   inputmethodv1/ZwpInputPanelSurfaceV1.h
   inputmethodv1/ZwpInputPanelV1.cpp
   inputmethodv1/ZwpInputPanelV1.h
+  inputmethodv1/InputMethodGrabV1.cpp
+  inputmethodv1/InputMethodGrabV1.h
 )
 
 include(${PROJECT_SOURCE_DIR}/cmake/WaylandScannerHelpers.cmake)
@@ -52,4 +54,5 @@ target_link_libraries(wl_addons_base PRIVATE
   PkgConfig::wayland-server
   wlc
   Qt6::Core
+  shm_open_anon
 )

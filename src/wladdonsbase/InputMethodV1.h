@@ -14,34 +14,55 @@
 WL_ADDONS_BASE_BEGIN_NAMESPACE
 
 class Server;
+class ZwpInputMethodContextV1;
+class ZwpInputPanelV1;
+class ZwpInputPanelSurfaceV1;
 
-class InputMethodV1
+typedef std::function<void()> Cb;
+typedef std::function<void(uint32_t serial, const char *text)> commitCb;
+typedef std::function<void(uint32_t serial, const char *text, const char *commit)> preeditCb;
+typedef std::function<void(uint32_t key, uint32_t state)> forwardKeyCb;
+
+class InputMethodV1 : public ZwpInputMethodV1
 {
-    friend class Keyboard;
+    friend class ZwpInputPanelV1;
+    friend class ZwpInputPanelSurfaceV1;
+    friend class ZwpInputMethodContextV1;
 
 public:
-    InputMethodV1(Server *server, ZwpInputMethodV1 *input_method);
+    explicit InputMethodV1(Server *server);
     ~InputMethodV1();
 
-    void setCommitCallback(const std::function<void()> &callback) { commitCallback_ = callback; }
-    void setPanelCreateCallback(const std::function<void()> &callback) { panelCreateCallback_ = callback; }
-    void setPanelDestroyCallback(const std::function<void()> &callback) { panelDestroyCallback_ = callback; }
+    void setCommitCallback(const commitCb &callback) { commitCallback_ = callback; }
+
+    void setPreeditCallback(const preeditCb &callback) { preeditCallback_ = callback; }
+
+    void setForwardKeyCallback(const forwardKeyCb &callback) { forwardKeyCallback_ = callback; }
+
+    void setPanelCreateCallback(const Cb &callback) { panelCreateCallback_ = callback; }
+
+    void setPanelDestroyCallback(const Cb &callback) { panelDestroyCallback_ = callback; }
 
     void sendActivate();
     void sendDeactivate();
     void sendContentType(uint32_t hint, uint32_t purpose);
     void sendSurroundingText(const char *text, uint32_t cursor, uint32_t anchor);
-    void sendDone();
     void setCursorRectangle(int x, int y, int width, int height);
     void sendKey(uint32_t keycode, bool isRelease);
 
 private:
-    Server *server_;
-    ZwpInputMethodV1 *input_method_;
+    bool isInputMethodContextResourceValid() const;
 
-    std::function<void()> commitCallback_;
-    std::function<void()> panelCreateCallback_;
-    std::function<void()> panelDestroyCallback_;
+private:
+    Server *server_;
+    std::shared_ptr<ZwpInputMethodContextV1> inputMethodContext_;
+    std::shared_ptr<ZwpInputPanelV1> inputPanelV1_;
+
+    commitCb commitCallback_;
+    preeditCb preeditCallback_;
+    forwardKeyCb forwardKeyCallback_;
+    Cb panelCreateCallback_;
+    Cb panelDestroyCallback_;
 };
 
 WL_ADDONS_BASE_END_NAMESPACE

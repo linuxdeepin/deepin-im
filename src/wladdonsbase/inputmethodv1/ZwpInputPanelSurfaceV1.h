@@ -10,13 +10,18 @@
 
 WL_ADDONS_BASE_BEGIN_NAMESPACE
 
+class InputMethodV1;
+
 class ZwpInputPanelSurfaceV1 : public Type<ZwpInputPanelSurfaceV1, zwp_input_panel_surface_v1>
 {
     friend class Type;
 
 public:
-    ZwpInputPanelSurfaceV1();
+    ZwpInputPanelSurfaceV1(InputMethodV1 *inputmethodV1);
     ~ZwpInputPanelSurfaceV1() override;
+
+protected:
+    void resource_destroy(Resource *resource) override;
 
 protected:
     void zwp_input_panel_surface_v1_set_toplevel(Resource *resource,
@@ -26,6 +31,7 @@ protected:
 
 private:
     static const struct zwp_input_panel_surface_v1_interface impl;
+    InputMethodV1 *inputmethodV1_ = nullptr;
 };
 
 WL_ADDONS_BASE_END_NAMESPACE
