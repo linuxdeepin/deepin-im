@@ -80,7 +80,7 @@ public:
 
     wl_display *display() { return display_.get(); }
 
-    InputMethodV2 *inputMethodV2() { return inputMethodV2_; }
+    InputMethodV2 *inputMethodV2() { return inputMethodV2_.get(); }
     InputMethodV1 *inputMethodV1() { return inputMethodV1_.get(); }
 
 private:
@@ -127,7 +127,7 @@ private:
 
     std::unique_ptr<wlr_input_method_manager_v2> input_method_manager_v2_;
     Listener<&Server::inputMethodManagerV2InputMethodNotify> input_method_manager_v2_input_method_;
-    InputMethodV2 *inputMethodV2_ = nullptr;
+    std::unique_ptr<InputMethodV2> inputMethodV2_;
     Listener<&Server::inputMethodV2DestroyNotify> input_method_v2_destroy_;
     std::unique_ptr<InputMethodV1> inputMethodV1_;
 
