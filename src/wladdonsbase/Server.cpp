@@ -260,7 +260,7 @@ void Server::inputMethodManagerV2InputMethodNotify(void *data)
     }
 
     auto *im2 = static_cast<wlr_input_method_v2 *>(data);
-    inputMethodV2_ = new InputMethodV2(this, im2);
+    inputMethodV2_.reset(new InputMethodV2(this, im2));
     wl_signal_add(&im2->events.destroy, input_method_v2_destroy_);
 
     if (inputMethodCallback_) {
@@ -270,7 +270,7 @@ void Server::inputMethodManagerV2InputMethodNotify(void *data)
 
 void Server::inputMethodV2DestroyNotify(void *data)
 {
-    inputMethodV2_ = nullptr;
+    inputMethodV2_.reset();
 }
 
 View *
