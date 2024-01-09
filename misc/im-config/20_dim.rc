@@ -10,16 +10,34 @@ elif [ -f "/usr/bin/ibus" ]; then
 fi
 
 if [ "$IM_CONFIG_PHASE" = 1 ]; then
-# export DISPLAY env for app in x11 or xwayland
-export DIM_WAYLAND_DISPLAY=imfakewl
+    if [ -n "$WAYLAND_DISPLAY" ]; then
+        # export DISPLAY env for app in x11 or xwayland
+        export DIM_WAYLAND_DISPLAY=imfakewl
 
-# set variables for the plain XIM
-XMODIFIERS=@im=${IM}
+        # set variables for the plain XIM
+        XMODIFIERS=@im=${IM}
 
-# Let's assume all required modules are installed
-GTK_IM_MODULE=wayland
-QT_IM_MODULE=wayland
-CLUTTER_IM_MODULE=${IM}
-SDL_IM_MODULE=${IM}
+        # Let's assume all required modules are installed
+        GTK_IM_MODULE=wayland
+        QT_IM_MODULE=wayland
+        CLUTTER_IM_MODULE=${IM}
+        SDL_IM_MODULE=${IM}
+    else
+        # set variables for the plain XIM
+        XMODIFIERS=@im=fcitx
 
+        # Let's assume all required modules are installed
+        GTK_IM_MODULE=fcitx
+        QT_IM_MODULE=fcitx
+        CLUTTER_IM_MODULE=fcitx
+        SDL_IM_MODULE=fcitx
+    fi
+
+fi
+
+if [ "$IM_CONFIG_PHASE" = 1 ]; then
+    if [ -z "$WAYLAND_DISPLAY" ]; then
+        # start fcitx5 daemon
+        /usr/bin/fcitx5 -d 2> /dev/null
+    fi
 fi
