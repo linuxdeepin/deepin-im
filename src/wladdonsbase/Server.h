@@ -34,11 +34,16 @@ struct wlr_input_method_manager_v2;
 
 WL_ADDONS_BASE_BEGIN_NAMESPACE
 
+enum class IMType {
+    FCITX5,
+    IBUS,
+};
+
 class Output;
 class View;
 class Keyboard;
 class InputMethodV2;
-class InputMethodV1;
+class InputMethodContextV1;
 
 class Server
 {
@@ -80,8 +85,27 @@ public:
 
     wl_display *display() { return display_.get(); }
 
-    InputMethodV2 *inputMethodV2() { return inputMethodV2_.get(); }
-    InputMethodV1 *inputMethodV1() { return inputMethodV1_.get(); }
+    const auto &inputMethodV2s() { return inputMethodV2s_; }
+
+    InputMethodV2 *inputMethodV2(IMType t)
+    {
+        auto i = inputMethodV2s_.find(t);
+        if (i == inputMethodV2s_.end()) {
+            return nullptr;
+        }
+
+        return i->second.get();
+    }
+
+    InputMethodContextV1 *inputMethodContextV1(IMType t)
+    {
+        auto i = inputMethodContextV1s_.find(t);
+        if (i == inputMethodContextV1s_.end()) {
+            return nullptr;
+        }
+
+        return i->second.get();
+    }
 
 private:
     void backendNewOutputNotify(void *data);
@@ -127,9 +151,10 @@ private:
 
     std::unique_ptr<wlr_input_method_manager_v2> input_method_manager_v2_;
     Listener<&Server::inputMethodManagerV2InputMethodNotify> input_method_manager_v2_input_method_;
-    std::unique_ptr<InputMethodV2> inputMethodV2_;
+    std::unordered_map<IMType, std::unique_ptr<InputMethodV2>> inputMethodV2s_;
     Listener<&Server::inputMethodV2DestroyNotify> input_method_v2_destroy_;
-    std::unique_ptr<InputMethodV1> inputMethodV1_;
+    // std::unique_ptr<InputMethodV1> inputMethodV1_;
+    std::unordered_map<IMType, std::unique_ptr<InputMethodContextV1>> inputMethodContextV1s_;
 
     std::function<void(Keyboard *)> virtualKeyboardCallback_;
     std::function<void()> inputMethodCallback_;

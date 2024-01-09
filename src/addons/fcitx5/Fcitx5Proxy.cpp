@@ -53,7 +53,7 @@ Fcitx5Proxy::Fcitx5Proxy(Dim *dim)
     });
 
     wl_->setInputMethodCallback([this, surface]() {
-        auto *im = wl_->inputMethodV2();
+        auto *im = wl_->inputMethodV2(IMType::FCITX5);
 
         im->setCommitCallback([this, im]() {
             auto *ic = getFocusedIC(focusedId_);
@@ -124,7 +124,7 @@ const QList<InputMethodEntry> &Fcitx5Proxy::getInputMethods()
 
 void Fcitx5Proxy::focusIn(uint32_t id)
 {
-    auto *im = wl_->inputMethodV2();
+    auto *im = wl_->inputMethodV2(IMType::FCITX5);
     if (!im) {
         return;
     }
@@ -139,7 +139,7 @@ void Fcitx5Proxy::focusOut(uint32_t id)
         return;
     }
 
-    auto *im = wl_->inputMethodV2();
+    auto *im = wl_->inputMethodV2(IMType::FCITX5);
     if (!im) {
         return;
     }
@@ -151,7 +151,7 @@ void Fcitx5Proxy::destroyed(uint32_t id) { }
 
 void Fcitx5Proxy::done()
 {
-    auto *im = wl_->inputMethodV2();
+    auto *im = wl_->inputMethodV2(IMType::FCITX5);
     if (!im) {
         return;
     }
@@ -161,7 +161,7 @@ void Fcitx5Proxy::done()
 
 void Fcitx5Proxy::contentType(uint32_t hint, uint32_t purpose)
 {
-    auto *im = wl_->inputMethodV2();
+    auto *im = wl_->inputMethodV2(IMType::FCITX5);
     if (!im) {
         return;
     }
@@ -184,7 +184,7 @@ bool Fcitx5Proxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
         return false;
     }
 
-    auto *im = wl_->inputMethodV2();
+    auto *im = wl_->inputMethodV2(IMType::FCITX5);
     if (!im) {
         return false;
     }
@@ -196,7 +196,7 @@ bool Fcitx5Proxy::keyEvent([[maybe_unused]] const InputMethodEntry &entry,
 
 void Fcitx5Proxy::cursorRectangleChangeEvent(InputContextCursorRectChangeEvent &event)
 {
-    auto *im = wl_->inputMethodV2();
+    auto *im = wl_->inputMethodV2(IMType::FCITX5);
     if (!im) {
         return;
     }
@@ -208,7 +208,7 @@ void Fcitx5Proxy::updateSurroundingText(InputContextEvent &event)
 {
     auto &surroundingText = event.ic()->surroundingText();
 
-    auto *im = wl_->inputMethodV2();
+    auto *im = wl_->inputMethodV2(IMType::FCITX5);
     if (!im) {
         return;
     }

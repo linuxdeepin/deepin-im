@@ -28,9 +28,19 @@ public:
     InputMethodV2(Server *server, wlr_input_method_v2 *input_method);
     ~InputMethodV2();
 
+    bool is(wlr_input_method_v2 *im2) { return input_method_ == im2; }
+
     void setCommitCallback(const std::function<void()> &callback) { commitCallback_ = callback; }
-    void setPopupCreateCallback(const std::function<void()> &callback) { popupCreateCallback_ = callback; }
-    void setPopupDestroyCallback(const std::function<void()> &callback) { popupDestroyCallback_ = callback; }
+
+    void setPopupCreateCallback(const std::function<void()> &callback)
+    {
+        popupCreateCallback_ = callback;
+    }
+
+    void setPopupDestroyCallback(const std::function<void()> &callback)
+    {
+        popupDestroyCallback_ = callback;
+    }
 
     void sendActivate();
     void sendDeactivate();

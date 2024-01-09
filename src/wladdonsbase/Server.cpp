@@ -4,12 +4,16 @@
 
 #include "Server.h"
 
-#include "InputMethodV1.h"
+#include "InputMethodContextV1.h"
 #include "InputMethodV2.h"
-#include "inputmethodv1/ZwpInputMethodV1.h"
 #include "Keyboard.h"
 #include "Output.h"
 #include "View.h"
+#include "inputmethodv1/ZwpInputMethodV1.h"
+
+#include <experimental/unordered_map>
+
+#include <stdexcept>
 
 extern "C" {
 #include <wlr/backend/wayland.h>
@@ -24,8 +28,6 @@ extern "C" {
 #include <wlr/util/log.h>
 #include <wlr/version.h>
 }
-
-#include <stdexcept>
 
 #include <assert.h>
 
@@ -121,7 +123,6 @@ Server::Server(const std::shared_ptr<wl_display> &local,
     input_method_manager_v2_.reset(wlr_input_method_manager_v2_create(display_.get()));
     wl_signal_add(&input_method_manager_v2_->events.input_method,
                   input_method_manager_v2_input_method_);
-    inputMethodV1_.reset(new InputMethodV1(this, new ZwpInputMethodV1()));
 }
 
 Server::~Server() = default;
@@ -255,12 +256,21 @@ void Server::virtualKeyboardManagerNewVirtualKeyboardNotify(void *data)
 
 void Server::inputMethodManagerV2InputMethodNotify(void *data)
 {
-    if (inputMethodV2_) {
+    auto *im2 = static_cast<wlr_input_method_v2 *>(data);
+    std::string path = getExePathByPid(getPid(im2->resource));
+
+    IMType imType = IMType::FCITX5;
+    if (endsWith(path, "fcitx5")) {
+        imType = IMType::FCITX5;
+    } else if (endsWith(path, "ibus-daemon")) {
+        imType = IMType::IBUS;
+    } else {
+        // unknown
         return;
     }
 
-    auto *im2 = static_cast<wlr_input_method_v2 *>(data);
-    inputMethodV2_.reset(new InputMethodV2(this, im2));
+    auto im = std::make_unique<InputMethodV2>(this, im2);
+    inputMethodV2s_.emplace(imType, std::move(im));
     wl_signal_add(&im2->events.destroy, input_method_v2_destroy_);
 
     if (inputMethodCallback_) {
@@ -270,7 +280,15 @@ void Server::inputMethodManagerV2InputMethodNotify(void *data)
 
 void Server::inputMethodV2DestroyNotify(void *data)
 {
-    inputMethodV2_.reset();
+    auto *wlrIM2 = static_cast<wlr_input_method_v2 *>(data);
+    std::experimental::erase_if(inputMethodV2s_, [wlrIM2](const auto &item) {
+        const auto &[key, im2] = item;
+        if (im2->is(wlrIM2)) {
+            return true;
+        }
+
+        return false;
+    });
 }
 
 View *

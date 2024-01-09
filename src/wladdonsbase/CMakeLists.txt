@@ -13,8 +13,8 @@ set(WL_ADDONS_BASE_SOURCES
   InputMethodV2.cpp
   InputPopupSurfaceV2.cpp
   InputPopupSurfaceV2.h
-  InputMethodV1.h
-  InputMethodV1.cpp
+  InputMethodContextV1.h
+  InputMethodContextV1.cpp
 
   inputmethodv1/Type.h
   inputmethodv1/Resource.h
