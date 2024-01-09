@@ -120,13 +120,19 @@ void Keyboard::destroyNotify(void *data)
 
 wlr_input_method_keyboard_grab_v2 *Keyboard::getKeyboardGrab()
 {
-    auto *inputMethod = server_->inputMethodV2();
-    if (!inputMethod) {
+    auto &inputMethodV2s = server_->inputMethodV2s();
+    if (inputMethodV2s.empty()) {
         return nullptr;
     }
 
-    auto *wlrInputMethod = inputMethod->input_method_;
-    if (wlrInputMethod->keyboard_grab == nullptr) {
+    wlr_input_method_v2 *wlrInputMethod = nullptr;
+    for (auto &[_, inputMethod] : inputMethodV2s) {
+        wlrInputMethod = inputMethod->input_method_;
+        if (wlrInputMethod->keyboard_grab == nullptr) {
+            continue;
+        }
+    }
+    if (wlrInputMethod == nullptr) {
         return nullptr;
     }
 

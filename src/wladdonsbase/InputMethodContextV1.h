@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef INPUTMETHODV1_H
-#define INPUTMETHODV1_H
+#ifndef INPUTMETHODCONTEXTV1_H
+#define INPUTMETHODCONTEXTV1_H
 
 #include "Listener.h"
 #include "inputmethodv1/ZwpInputMethodV1.h"
@@ -15,13 +15,13 @@ WL_ADDONS_BASE_BEGIN_NAMESPACE
 
 class Server;
 
-class InputMethodV1
+class InputMethodContextV1
 {
     friend class Keyboard;
 
 public:
-    InputMethodV1(Server *server, ZwpInputMethodV1 *input_method);
-    ~InputMethodV1();
+    InputMethodContextV1(Server *server, ZwpInputMethodV1 *input_method);
+    ~InputMethodContextV1();
 
     void setCommitCallback(const std::function<void()> &callback) { commitCallback_ = callback; }
     void setPanelCreateCallback(const std::function<void()> &callback) { panelCreateCallback_ = callback; }
@@ -46,4 +46,4 @@ private:
 
 WL_ADDONS_BASE_END_NAMESPACE
 
-#endif // !INPUTMETHODV1_H
+#endif // !INPUTMETHODCONTEXTV1_H
