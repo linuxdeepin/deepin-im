@@ -7,7 +7,6 @@
 #include "../InputMethodV1.h"
 #include "../Output.h"
 #include "../Server.h"
-#include "ZwpInputPanelSurfaceV1.h"
 
 extern "C" {
 #include <wlr/types/wlr_compositor.h>

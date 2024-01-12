@@ -8,6 +8,7 @@
 #include "../Listener.h"
 #include "Type.h"
 #include "wayland-input-method-unstable-v1-server-protocol.h"
+#include "ZwpInputPanelSurfaceV1.h"
 
 extern "C" {
 struct wlr_surface;
@@ -15,7 +16,6 @@ struct wlr_surface;
 
 WL_ADDONS_BASE_BEGIN_NAMESPACE
 
-class ZwpInputPanelSurfaceV1;
 class InputMethodV1;
 
 class ZwpInputPanelV1 : public Type<ZwpInputPanelV1, zwp_input_panel_v1>

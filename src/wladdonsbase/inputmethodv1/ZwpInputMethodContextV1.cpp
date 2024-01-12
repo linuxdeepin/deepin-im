@@ -5,7 +5,6 @@
 #include "ZwpInputMethodContextV1.h"
 
 #include "../InputMethodV1.h"
-#include "InputMethodGrabV1.h"
 
 WL_ADDONS_BASE_USE_NAMESPACE
 
