@@ -6,7 +6,6 @@
 
 #include "InputMethodContextV1.h"
 #include "Server.h"
-#include "inputmethodv1/ZwpInputPanelV1.h"
 
 WL_ADDONS_BASE_USE_NAMESPACE
 

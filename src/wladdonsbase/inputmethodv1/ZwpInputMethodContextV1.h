@@ -7,10 +7,10 @@
 
 #include "Type.h"
 #include "wayland-input-method-unstable-v1-server-protocol.h"
+#include "InputMethodGrabV1.h"
 
 WL_ADDONS_BASE_BEGIN_NAMESPACE
 
-class InputMethodGrabV1;
 class InputMethodV1;
 
 class ZwpInputMethodContextV1 : public Type<ZwpInputMethodContextV1, zwp_input_method_context_v1>

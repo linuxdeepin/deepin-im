@@ -7,13 +7,13 @@
 
 #include "Listener.h"
 #include "inputmethodv1/ZwpInputMethodV1.h"
+#include "inputmethodv1/ZwpInputPanelV1.h"
 
 #include <functional>
 
 WL_ADDONS_BASE_BEGIN_NAMESPACE
 
 class Server;
-class ZwpInputPanelV1;
 class InputMethodContextV1;
 
 typedef std::function<void()> Cb;
