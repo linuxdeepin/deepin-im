@@ -9,6 +9,10 @@
 #include "dimcore/InputContext.h"
 #include "dimcore/InputMethodEntry.h"
 
+#define XK_MISCELLANY
+#include <X11/keysymdef.h>
+#undef XK_MISCELLANY
+
 #include <common/common.h>
 #include <libintl.h>
 
@@ -87,37 +91,55 @@ static std::pair<std::string, std::string> splitLayout(const std::string &layout
     };
 }
 
+static bool keysymIsModifier(uint32_t keysym)
+{
+    return keysym == XK_Control_L || keysym == XK_Control_R || keysym == XK_Meta_L
+        || keysym == XK_Meta_R || keysym == XK_Alt_L || keysym == XK_Alt_R || keysym == XK_Super_L
+        || keysym == XK_Super_R || keysym == XK_Hyper_L || keysym == XK_Hyper_R
+        || keysym == XK_Shift_L || keysym == XK_Shift_R;
+}
+
 bool Keyboard::keyEvent(const InputMethodEntry &entry, InputContextKeyEvent &keyEvent)
 {
     auto *ic = keyEvent.ic();
 
-    // by pass all key release
-    if (!keyEvent.isRelease()) {
-        struct xkb_rule_names names;
-        const auto &layout = entry.name();
-        const auto [layoutName, variantName] = splitLayout(layout);
+    if (keyEvent.isRelease()) {
+        return false;
+    }
 
-        names.layout = layoutName.c_str();
-        names.variant = variantName.c_str();
-        names.rules = DEFAULT_XKB_RULES;
-        names.model = "";
-        names.options = "";
-        keymap_.reset(xkb_keymap_new_from_names(ctx_.get(), &names, XKB_KEYMAP_COMPILE_NO_FLAGS));
+    if (keysymIsModifier(keyEvent.keySym())) {
+        return false;
+    }
 
-        keymap_ ? state_.reset(xkb_state_new(keymap_.get())) : state_.reset();
+    struct xkb_rule_names names;
+    const auto &layout = entry.name();
+    if (layout == "us") {
+        return false;
+    }
 
-        if (state_) {
-            char buf[BUFF_SIZE] = {};
-            xkb_keysym_to_utf8(keyEvent.keySym(), buf, BUFF_SIZE);
-            if (buf[0] == '\n' || buf[0] == '\r' || buf[0] == '\b' || buf[0] == '\033'
-                || buf[0] == '\x7f') {
-                return false;
-            }
+    const auto [layoutName, variantName] = splitLayout(layout);
 
-            ic->commitString(buf);
-            ic->commit();
-            return true;
+    names.layout = layoutName.c_str();
+    names.variant = variantName.c_str();
+    names.rules = DEFAULT_XKB_RULES;
+    names.model = "";
+    names.options = "";
+    keymap_.reset(xkb_keymap_new_from_names(ctx_.get(), &names, XKB_KEYMAP_COMPILE_NO_FLAGS));
+
+    keymap_ ? state_.reset(xkb_state_new(keymap_.get())) : state_.reset();
+
+    if (state_) {
+        char buf[BUFF_SIZE] = {};
+        xkb_keysym_to_utf8(keyEvent.keySym(), buf, BUFF_SIZE);
+        if (buf[0] == '\n' || buf[0] == '\r' || buf[0] == '\b' || buf[0] == '\033'
+            || buf[0] == '\x7f') {
+            return false;
         }
+
+        ic->commitString(buf);
+        ic->commit();
+
+        return true;
     }
 
     return false;

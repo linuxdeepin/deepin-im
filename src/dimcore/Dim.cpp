@@ -19,6 +19,10 @@
 #include <QSettings>
 #include <QTimer>
 
+#define XK_MISCELLANY
+#include <X11/keysymdef.h>
+#undef XK_MISCELLANY
+
 #include <dlfcn.h>
 
 constexpr uint32_t DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE = SHIFT_MASK | CONTROL_MASK;
@@ -319,7 +323,7 @@ bool Dim::postInputContextKeyEvent(InputContextKeyEvent &event)
 {
     auto &inputState = event.ic()->inputState();
 
-    if (event.isRelease() && event.state() == DIM_INPUT_METHOD_SWITCH_KEYBINDING_CODE) {
+    if (!event.isRelease() && event.state() & CONTROL_MASK && event.keySym() == XK_Shift_L) {
         QTimer::singleShot(0, [ic = event.ic()]() {
             ic->inputState().switchIM();
         });
