@@ -1,3 +1,9 @@
+deepin-im (1.0.3) unstable; urgency=medium
+
+  * fix: treeland foreign toplevel manager protocols mismatch with dim
+
+ -- dengbo <dengbo@deepin.org>  Thu, 25 Jan 2024 10:26:57 +0800
+
 deepin-im (1.0.2) unstable; urgency=medium
 
   * feat(wayland): 支持同时使用多输入法
