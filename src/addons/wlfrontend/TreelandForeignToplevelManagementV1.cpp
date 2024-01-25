@@ -54,7 +54,7 @@ void TreelandForeignToplevelHandleV1::ztreeland_foreign_toplevel_handle_v1_app_i
 }
 
 void TreelandForeignToplevelHandleV1::ztreeland_foreign_toplevel_handle_v1_identifier(
-    const char *identifier)
+    uint identifier)
 {
 }
 
